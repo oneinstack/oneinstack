@@ -1,45 +1,11 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
-#
-# Version: 1.0-Alpha Jun 15,2015 lj2007331 AT gmail.com
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
-#
-# Project home page:
-#       http://oneinstack.com
-
-# Check if user is root
-[ $(id -u) != "0" ] && { echo -e "\033[31mError: You must be root to run this script\033[0m"; exit 1; } 
-
-export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
-clear
-printf "
-#######################################################################
-#       OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+      #
-#                    Upgrade Redis for OneinStack                     #
-#       For more information please visit http://oneinstack.com       #
-#######################################################################
-"
-
-cd src
-. ../options.conf
-
-[ ! -d "$redis_install_dir" ] && echo -e "\033[31mThe Redis is not installed on your system!\033[0m " && exit 1
-
-get_char()
-{
-SAVEDSTTY=`stty -g`
-stty -echo
-stty cbreak
-dd if=/dev/tty bs=1 count=1 2> /dev/null
-stty -raw
-stty echo
-stty $SAVEDSTTY
-}
-echo
+# Blog:  http://blog.linuxeye.com
 
 Upgrade_Redis()
 {
+cd $oneinstack_dir/src
+[ ! -d "$redis_install_dir" ] && echo -e "\033[31mThe Redis is not installed on your system!\033[0m " && exit 1
 Old_redis_version=`$redis_install_dir/bin/redis-cli --version | awk '{print $2}'`
 echo -e "Current Redis Version: \033[32m$Old_redis_version\033[0m"
 while :
@@ -85,5 +51,3 @@ if [ -e "redis-$redis_version.tar.gz" ];then
         cd ..
 fi
 }
-
-Upgrade_Redis
