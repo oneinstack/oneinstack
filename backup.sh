@@ -41,7 +41,7 @@ WEB_Remote_BK() {
         for W in `echo $website_name | tr ',' ' '`
         do
 		cd $oneinstack_dir/tools
-                echo "file:::$home_dir/$W $backup_dir push" >> $oneinstack_dir/tools/config.txt
+                echo "file:::$wwwroot_dir/$W $backup_dir push" >> $oneinstack_dir/tools/config.txt
         done
 }
 
