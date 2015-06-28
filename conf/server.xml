@@ -7,13 +7,13 @@
 <!--
   <Listener className="org.apache.catalina.mbeans.JmxRemoteLifecycleListener" rmiRegistryPortPlatform="8081" rmiServerPortPlatform="8082" />
 -->
-  <!--GlobalNamingResources>
+  <GlobalNamingResources>
     <Resource name="UserDatabase" auth="Container"
               type="org.apache.catalina.UserDatabase"
               description="User database that can be updated and saved"
               factory="org.apache.catalina.users.MemoryUserDatabaseFactory"
               pathname="conf/tomcat-users.xml" />
-  </GlobalNamingResources-->
+  </GlobalNamingResources>
 
   <Service name="Catalina">
     <Connector port="8080"
