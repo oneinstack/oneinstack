@@ -63,7 +63,6 @@ elif [ -e "$php_install_dir" -a -e "$tomcat_install_dir" -a ! -e "/usr/bin/hhvm"
 elif [ -e "$php_install_dir" -a ! -e "$tomcat_install_dir" -a ! -e "/usr/bin/hhvm" ];then
 	Number=100
 	NGX_FLAG=php
-	echo -e "\t\033[32m1\033[0m. Use php"
 elif [ -e "$php_install_dir" -a ! -e "$tomcat_install_dir" -a -e "/usr/bin/hhvm" ];then
 	Number=101
 	while :
