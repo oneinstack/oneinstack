@@ -28,6 +28,7 @@ Uninstall()
 [ -e "$db_install_dir" ] && service mysqld stop && rm -rf /etc/init.d/mysqld /etc/my.cnf
 [ -e "$apache_install_dir" ] && service httpd stop && rm -rf /etc/init.d/httpd
 [ -e "$tomcat_install_dir" ] && service tomcat stop && rm -rf /etc/init.d/tomcat
+[ -e "/usr/java" ] && rm -rf /usr/java
 [ -e "$php_install_dir" ] && service php-fpm stop && rm -rf /etc/init.d/php-fpm
 [ -e "$web_install_dir" ] && service nginx stop && rm -rf /etc/init.d/nginx /etc/logrotate.d/nginx
 [ -e "$pureftpd_install_dir" ] && service pureftpd stop && rm -rf /etc/init.d/pureftpd
@@ -81,6 +82,7 @@ done
 [ -e "$web_install_dir" ] && echo -e "/etc/init.d/nginx\n/etc/logrotate.d/nginx"
 [ -e "$apache_install_dir" ] && echo '/etc/init.d/httpd'
 [ -e "$tomcat_install_dir" ] && echo '/etc/init.d/tomcat'
+[ -e "/usr/java" ] && echo '/usr/java' 
 [ -e "$db_install_dir" ] && echo -e "/etc/init.d/mysqld\n/etc/my.cnf"
 [ -e "$php_install_dir" ] && echo '/etc/init.d/php-fpm'
 [ -e "$pureftpd_install_dir" ] && echo '/etc/init.d/pureftpd'
