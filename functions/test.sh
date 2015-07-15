@@ -32,7 +32,5 @@ echo '<?php phpinfo() ?>' > $wwwroot_dir/default/phpinfo.php
 [ "$PHP_cache" == '3' ] && sed -i 's@<a href="/xcache" target="_blank" class="links">xcache</a>@<a href="/apc.php" target="_blank" class="links">APC</a>@' $wwwroot_dir/default/index.html
 [ "$PHP_cache" == '4' ] && /bin/cp eaccelerator-*/control.php $wwwroot_dir/default && sed -i 's@<a href="/xcache" target="_blank" class="links">xcache</a>@<a href="/control.php" target="_blank" class="links">eAccelerator</a>@' $wwwroot_dir/default/index.html
 chown -R ${run_user}.$run_user $wwwroot_dir/default
-[ -e "$db_install_dir" -a -z "`ps -ef | grep -v grep | grep mysql`" ] && /etc/init.d/mysqld restart 
-[ -e "$apache_install_dir" -a -z "`ps -ef | grep -v grep | grep apache`" ] && /etc/init.d/httpd restart 
 cd ..
 }
