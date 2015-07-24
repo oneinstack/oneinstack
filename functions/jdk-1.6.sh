@@ -20,18 +20,17 @@ else
 	SYS_BIG_FLAG=i586
 fi
 
-JDK_VERSION="jdk-`echo $jdk_6_version | awk -F. '{print $2}'`u`echo $jdk_6_version | awk -F. '{print $3}'`"
+JDK_FILE="jdk-`echo $jdk_6_version | awk -F. '{print $2}'`u`echo $jdk_6_version | awk -F_ '{print $NF}'`-linux-$SYS_BIG_FLAG.bin"
 JAVA_dir=/usr/java
-JDK_NAME="jdk1.`echo $jdk_6_version | awk -F. '{print $2}'`.0_`echo $jdk_6_version | awk -F. '{print $3}'`"
+JDK_NAME="jdk$jdk_6_version"
 JDK_PATH=$JAVA_dir/$JDK_NAME
-src_url=http://mirrors.linuxeye.com/jdk/${JDK_VERSION}-linux-$SYS_BIG_FLAG.bin && Download_src
-
-chmod + ${JDK_VERSION}-linux-$SYS_BIG_FLAG.bin
+src_url=http://mirrors.linuxeye.com/jdk/$JDK_FILE && Download_src
 
 OS_CentOS='[ -n "`rpm -qa | grep jdk`" ] && rpm -e `rpm -qa | grep jdk`'
 OS_command
 
-./${JDK_VERSION}-linux-$SYS_BIG_FLAG.bin
+chmod +x $JDK_FILE
+./$JDK_FILE
 
 if [ -d "$JDK_NAME" ];then
         rm -rf $JAVA_dir; mkdir -p $JAVA_dir
@@ -41,6 +40,6 @@ if [ -d "$JDK_NAME" ];then
         [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep '$JAVA_HOME/bin' /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=\$JAVA_HOME/bin:\1@" /etc/profile
         [ -z "`grep ^'export PATH=' /etc/profile | grep '$JAVA_HOME/bin'`" ] && echo 'export PATH=$JAVA_HOME/bin:$PATH' >> /etc/profile
         . /etc/profile
-        echo -e "\033[32m$JDK_VERSION install successfully! \033[0m"
+        echo -e "\033[32m$JDK_NAME install successfully! \033[0m"
 fi
 }
