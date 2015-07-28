@@ -18,16 +18,15 @@
   <Service name="Catalina">
     <Connector port="8080"
               protocol="org.apache.coyote.http11.Http11AprProtocol"
-              maxThreads="30000"
-              minSpareThreads="512"
-              maxSpareThreads="2048"
-              enableLookups="false"
+              connectionTimeout="20000"
               redirectPort="8443"
-              acceptCount="35000"
+              maxThreads="1000"
+              minSpareThreads="20"
+              acceptCount="1000"
               debug="0"
-              connectionTimeout="40000"
               disableUploadTimeout="true"
 	      useBodyEncodingForURI="true"
+              enableLookups="false"
               URIEncoding="UTF-8" />
     <Engine name="Catalina" defaultHost="localhost">
       <Realm className="org.apache.catalina.realm.LockOutRealm">
