@@ -8,9 +8,6 @@
 # Project home page:
 #       http://oneinstack.com
 
-# Check if user is root
-[ $(id -u) != "0" ] && { echo -e "\033[31mError: You must be root to run this script\033[0m"; exit 1; } 
-
 export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 clear
 printf "
@@ -22,6 +19,11 @@ printf "
 "
 
 . ./options.conf
+. ./include/color.sh
+. ./include/get_char.sh
+
+# Check if user is root
+[ $(id -u) != "0" ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; } 
 
 Uninstall()
 {
@@ -45,7 +47,7 @@ id -u mysql >/dev/null 2>&1 ; [ $? -eq 0 ] && userdel mysql
 /bin/mv ${db_data_dir}{,_$(date +%F)}
 for D in `cat ./options.conf | grep dir= | grep -v oneinstack | grep -v backup_dir | awk -F'=' '{print $2}' | sort | uniq`
 do
-        [ -e "$D" ] && rm -rf $D
+    [ -e "$D" ] && rm -rf $D
 done
 
 sed -i 's@^oneinstack_dir=.*@oneinstack_dir=@' ./options.conf
@@ -56,27 +58,16 @@ sed -i 's@^dbrootpwd=.*@dbrootpwd=@' ./options.conf
 sed -i 's@^ftpmanagerpwd=.*@ftpmanagerpwd=@' ./options.conf
 sed -i 's@^conn_ftpusers_dbpwd=.*@conn_ftpusers_dbpwd=@' ./options.conf
 sed -i "s@^export.*$db_install_dir.*@@g" /etc/profile && . /etc/profile
-echo -e "\033[32mUninstall completed.\033[0m"
+echo "${CMSG}Uninstall completed${CEND}"
 }
 
-get_char() 
-{ 
-SAVEDSTTY=`stty -g` 
-stty -echo 
-stty cbreak 
-dd if=/dev/tty bs=1 count=1 2> /dev/null 
-stty -raw 
-stty echo 
-stty $SAVEDSTTY 
-} 
- 
 echo 
-echo -e "\033[31mYou will uninstall OneinStack, Please backup your configure files and DB data! \033[0m"
+echo "${CWARNING}You will uninstall OneinStack, Please backup your configure files and DB data! ${CEND}"
 echo 
-echo -e "\033[33mThe following directory or files will be remove: \033[0m"
+echo "${CWARNING}The following directory or files will be remove: ${CEND}"
 for D in `cat ./options.conf | grep dir= | grep -v oneinstack | grep -v backup_dir | awk -F'=' '{print $2}' | sort | uniq` 
 do
-	[ -e "$D" ] && echo $D
+    [ -e "$D" ] && echo $D
 done
 [ -e "$web_install_dir" ] && echo -e "/etc/init.d/nginx\n/etc/logrotate.d/nginx"
 [ -e "$apache_install_dir" ] && echo '/etc/init.d/httpd'
@@ -95,13 +86,13 @@ char=`get_char`
 
 while :
 do
-        echo
-        read -p "Do you want to uninstall OneinStack? [y/n]: " uninstall_yn
-        if [ "$uninstall_yn" != 'y' -a "$uninstall_yn" != 'n' ];then
-                echo -e "\033[31minput error! Please only input 'y' or 'n'\033[0m"
-        else
-                break
-        fi
+    echo
+    read -p "Do you want to uninstall OneinStack? [y/n]: " uninstall_yn
+    if [ "$uninstall_yn" != 'y' -a "$uninstall_yn" != 'n' ];then
+        echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
+    else
+        break
+    fi
 done
 
 [ "$uninstall_yn" == 'y' ] && Uninstall
