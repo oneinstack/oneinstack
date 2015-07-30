@@ -36,7 +36,7 @@ IPADDR=`./include/get_ipaddr.py`
 PUBLIC_IPADDR=`./include/get_public_ipaddr.py`
 [ "`./include/get_ipaddr_state.py $PUBLIC_IPADDR`" == '\u4e2d\u56fd' ] && IPADDR_STATE=CN
 
-mkdir -p $wwwroot_dir/default $wwwlogs_dir
+mkdir -p src $wwwroot_dir/default $wwwlogs_dir
 
 # choice upgrade OS
 while :
