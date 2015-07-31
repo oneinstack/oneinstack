@@ -18,7 +18,6 @@ src_url=http://downloads.sourceforge.net/project/mhash/mhash/$mhash_version/mhas
 src_url=http://downloads.sourceforge.net/project/mcrypt/MCrypt/$mcrypt_version/mcrypt-$mcrypt_version.tar.gz && Download_src
 src_url=http://mirrors.linuxeye.com/lnmp/src/fpm-race-condition.patch && Download_src
 src_url=http://www.php.net/distributions/php-$php_3_version.tar.gz && Download_src
-src_url=http://mirrors.linuxeye.com/lnmp/src/php5.3patch && Download_src
 
 tar xzf libiconv-$libiconv_version.tar.gz
 cd libiconv-$libiconv_version
@@ -34,7 +33,7 @@ cd libmcrypt-$libmcrypt_version
 ./configure
 make && make install
 ldconfig
-cd libltdl/
+cd libltdl
 ./configure --enable-ltdl-install
 make && make install
 cd ../../
