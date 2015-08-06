@@ -46,6 +46,13 @@ cd ~/oneinstack    // Must enter the directory execution under oneinstack
 ./vhost.sh    // Do not sh vhost.sh or bash vhost.sh such execution
 ```
 
+## How to delete a virtual host
+
+```bash
+cd ~/oneinstack
+./vhost.sh del
+```
+
 ## How to add FTP virtual user
 
 ```bash
