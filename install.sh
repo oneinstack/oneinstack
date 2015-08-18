@@ -47,7 +47,7 @@ do
     if [ "$upgrade_yn" != 'y' -a "$upgrade_yn" != 'n' ];then
         echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-        [ "$upgrade_yn" == 'y' ] && { echo "${CWARNING}Your system is already upgraded! ${CEND}" ; upgrade_yn=n ; }
+        #[ "$upgrade_status" == '0' ] && { echo "${CWARNING}Your system is already upgraded! ${CEND}" ; upgrade_yn=Other ; }
         break
     fi
 done
