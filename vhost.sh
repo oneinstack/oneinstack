@@ -156,7 +156,7 @@ fi
 
 while :
 do
-    echo ''
+    echo
     read -p "Do you want to add more domain name? [y/n]: " moredomainame_yn 
     if [ "$moredomainame_yn" != 'y' ] && [ "$moredomainame_yn" != 'n' ];then
         echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
@@ -200,7 +200,7 @@ Nginx_anti_hotlinking()
 {
 while :
 do
-    echo ''
+    echo
     read -p "Do you want to add hotlink protection? [y/n]: " anti_hotlinking_yn 
     if [ "$anti_hotlinking_yn" != 'y' ] && [ "$anti_hotlinking_yn" != 'n' ];then
         echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
@@ -294,9 +294,11 @@ root $vhostdir;
 $anti_hotlinking
 location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|ico)$ {
     expires 30d;
+    access_log off;
     }
 location ~ .*\.(js|css)?$ {
     expires 7d;
+    access_log off;
     }
 $NGX_CONF
 }
@@ -342,9 +344,11 @@ $anti_hotlinking
 $NGX_CONF
 location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|ico)$ {
     expires 30d;
+    access_log off;
     }
 location ~ .*\.(js|css)?$ {
     expires 7d;
+    access_log off;
     }
 }
 EOF
@@ -463,9 +467,11 @@ location ~ .*\.(php|php5)?$ {
     }
 location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|ico)$ {
     expires 30d;
+    access_log off;
     }
 location ~ .*\.(js|css)?$ {
     expires 7d;
+    access_log off;
     }
 }
 EOF
@@ -584,7 +590,7 @@ Del_NGX_Vhost() {
                         $web_install_dir/sbin/nginx -s reload
                         while :
                         do
-                            echo ''
+                            echo
                             read -p "Do you want to delete Virtul Host directory? [y/n]: " Del_NGX_wwwroot_yn 
                             if [ "$Del_NGX_wwwroot_yn" != 'y' ] && [ "$Del_NGX_wwwroot_yn" != 'n' ];then
                                 echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
@@ -635,7 +641,7 @@ Del_Apache_Vhost() {
                             /etc/init.d/httpd restart
                             while :
                             do
-                                echo ''
+                                echo
                                 read -p "Do you want to delete Virtul Host directory? [y/n]: " Del_Apache_wwwroot_yn
                                 if [ "$Del_Apache_wwwroot_yn" != 'y' ] && [ "$Del_Apache_wwwroot_yn" != 'n' ];then
                                     echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
