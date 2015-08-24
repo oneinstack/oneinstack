@@ -125,11 +125,11 @@ else
 fi
 
 if [ "$NGX_FLAG" == 'php' ];then
-    NGX_CONF="location ~ .*\.(php|php5)?$ {\n\t#fastcgi_pass remote_php_ip:9000;\n\tfastcgi_pass unix:/dev/shm/php-cgi.sock;\n\tfastcgi_index index.php;\n\tinclude fastcgi.conf;\n\t}"
+    NGX_CONF=$(echo -e "location ~ .*\.(php|php5)?$ {\n    #fastcgi_pass remote_php_ip:9000;\n    fastcgi_pass unix:/dev/shm/php-cgi.sock;\n    fastcgi_index index.php;\n    include fastcgi.conf;\n    }")
 elif [ "$NGX_FLAG" == 'java' ];then
-    NGX_CONF="location ~ {\n\tproxy_set_header Host \$host;\n\tproxy_set_header X-Real-IP \$remote_addr;\n\tproxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;\n\tproxy_pass http://127.0.0.1:8080;\n\t}"
+    NGX_CONF=$(echo -e "location ~ {\n    proxy_set_header Host \$host;\n    proxy_set_header X-Real-IP \$remote_addr;\n    proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;\n    proxy_pass http://127.0.0.1:8080;\n    }")
 elif [ "$NGX_FLAG" == 'hhvm' ];then
-    NGX_CONF="location ~ .*\.(php|php5)?$ {\n\tfastcgi_pass unix:/var/log/hhvm/sock;\n\tfastcgi_index index.php;\n\tfastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n\tinclude fastcgi_params;\n\t}"
+    NGX_CONF=$(echo -e "location ~ .*\.(php|php5)?$ {\n    fastcgi_pass unix:/var/log/hhvm/sock;\n    fastcgi_index index.php;\n    fastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;\n    include fastcgi_params;\n    }")
 fi
 }
 
@@ -221,7 +221,7 @@ if [ "$anti_hotlinking_yn" == 'y' ];then
     else
         domain_allow_all=$domain_allow
     fi
-    anti_hotlinking=$(echo -e "location ~ .*\.(wma|wmv|asf|mp3|mmf|zip|rar|jpg|gif|png|swf|flv)$ {\n\tvalid_referers none blocked $domain_allow_all;\n\tif (\$invalid_referer) {\n\t\t#rewrite ^/ http://www.linuxeye.com/403.html;\n\t\treturn 403;\n\t\t}\n\t}")
+    anti_hotlinking=$(echo -e "location ~ .*\.(wma|wmv|asf|mp3|mmf|zip|rar|jpg|gif|png|swf|flv)$ {\n    valid_referers none blocked $domain_allow_all;\n    if (\$invalid_referer) {\n        #rewrite ^/ http://www.linuxeye.com/403.html;\n        return 403;\n        }\n    }")
 else
     anti_hotlinking=
 fi
@@ -293,12 +293,12 @@ index index.html index.htm index.jsp index.php;
 root $vhostdir;
 $anti_hotlinking
 location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|ico)$ {
-        expires 30d;
-        }
+    expires 30d;
+    }
 location ~ .*\.(js|css)?$ {
-        expires 7d;
-        }
-`echo -e $NGX_CONF`
+    expires 7d;
+    }
+$NGX_CONF
 }
 EOF
 
@@ -339,13 +339,13 @@ index index.html index.htm index.jsp index.php;
 include $rewrite.conf;
 root $vhostdir;
 $anti_hotlinking
-`echo -e $NGX_CONF`
+$NGX_CONF
 location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|ico)$ {
-	expires 30d;
-	}
+    expires 30d;
+    }
 location ~ .*\.(js|css)?$ {
-	expires 7d;
-	}
+    expires 7d;
+    }
 }
 EOF
 
@@ -452,21 +452,21 @@ index index.html index.htm index.jsp index.php;
 root $vhostdir;
 $anti_hotlinking
 location / {
-	try_files \$uri @apache;
-	}
+    try_files \$uri @apache;
+    }
 location @apache {
-	internal;
-	proxy_pass http://127.0.0.1:9090;
-	}
+    internal;
+    proxy_pass http://127.0.0.1:9090;
+    }
 location ~ .*\.(php|php5)?$ {
-	proxy_pass http://127.0.0.1:9090;
-	}
+    proxy_pass http://127.0.0.1:9090;
+    }
 location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|ico)$ {
-	expires 30d;
-	}
+    expires 30d;
+    }
 location ~ .*\.(js|css)?$ {
-	expires 7d;
-	}
+    expires 7d;
+    }
 }
 EOF
 
