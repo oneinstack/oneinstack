@@ -571,10 +571,12 @@ fi
 # ImageMagick or GraphicsMagick
 if [ "$Magick" == '1' ];then
     . include/ImageMagick.sh
-    Install_ImageMagick 2>&1 | tee -a $oneinstack_dir/install.log
+    [ ! -d "/usr/local/imagemagick" ] && Install_ImageMagick 2>&1 | tee -a $oneinstack_dir/install.log
+    [ ! -e "`$php_install_dir/bin/php-config --extension-dir`/imagick.so" ] && Install_php-imagick 2>&1 | tee -a $oneinstack_dir/install.log
 elif [ "$Magick" == '2' ];then
     . include/GraphicsMagick.sh
-    Install_GraphicsMagick 2>&1 | tee -a $oneinstack_dir/install.log
+    [ ! -d "/usr/local/graphicsmagick" ] && Install_GraphicsMagick 2>&1 | tee -a $oneinstack_dir/install.log
+    [ ! -e "`$php_install_dir/bin/php-config --extension-dir`/gmagick.so" ] && Install_php-gmagick 2>&1 | tee -a $oneinstack_dir/install.log
 fi
 
 # ionCube
@@ -651,13 +653,16 @@ fi
 # redis
 if [ "$redis_yn" == 'y' ];then
     . include/redis.sh
-    Install_redis 2>&1 | tee -a $oneinstack_dir/install.log
+    [ ! -d "$redis_install_dir" ] && Install_redis-server 2>&1 | tee -a $oneinstack_dir/install.log
+    [ ! -e "`$php_install_dir/bin/php-config --extension-dir`/redis.so" ] && Install_php-redis 2>&1 | tee -a $oneinstack_dir/install.log
 fi
 
 # memcached
 if [ "$memcached_yn" == 'y' ];then
     . include/memcached.sh
-    Install_memcached 2>&1 | tee -a $oneinstack_dir/install.log
+    [ ! -d "$memcached_install_dir/include/memcached" ] && Install_memcached 2>&1 | tee -a $oneinstack_dir/install.log
+    [ ! -e "`$php_install_dir/bin/php-config --extension-dir`/memcache.so" ] && Install_php-memcache 2>&1 | tee -a $oneinstack_dir/install.log
+    [ ! -e "`$php_install_dir/bin/php-config --extension-dir`/memcached.so" ] && Install_php-memcached 2>&1 | tee -a $oneinstack_dir/install.log
 fi
 
 # index example
