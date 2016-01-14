@@ -533,7 +533,7 @@ if [ "$ionCube_yn" == 'y' ];then
 fi
 
 # PHP opcode cache
-if [ "$PHP_cache" == '1' ] && [ "$PHP_version" == '1' -o "$PHP_version" == '2' ];then
+if [ "$PHP_cache" == '1' ] && [[ "$PHP_version" =~ ^[1,2]$ ]];then
     . include/zendopcache.sh
     Install_ZendOPcache 2>&1 | tee -a $oneinstack_dir/install.log
 elif [ "$PHP_cache" == '2' ];then
@@ -636,7 +636,7 @@ echo "####################Congratulations########################"
 [ "$Web_yn" == 'y' -a "$Nginx_version" != '3' -a "$Apache_version" == '3' ] && echo -e "\n`printf "%-32s" "Nginx/Tengine install dir":`${CMSG}$web_install_dir${CEND}"
 [ "$Web_yn" == 'y' -a "$Nginx_version" != '3' -a "$Apache_version" != '3' ] && echo -e "\n`printf "%-32s" "Nginx/Tengine install dir":`${CMSG}$web_install_dir${CEND}\n`printf "%-32s" "Apache install  dir":`${CMSG}$apache_install_dir${CEND}" 
 [ "$Web_yn" == 'y' -a "$Nginx_version" == '3' -a "$Apache_version" != '3' ] && echo -e "\n`printf "%-32s" "Apache install dir":`${CMSG}$apache_install_dir${CEND}"
-[ "$Tomcat_version" == '1' -o "$Tomcat_version" == '2' ] && echo -e "\n`printf "%-32s" "Tomcat install dir":`${CMSG}$tomcat_install_dir${CEND}"
+[[ "$Tomcat_version" =~ ^[1,2]$ ]] && echo -e "\n`printf "%-32s" "Tomcat install dir":`${CMSG}$tomcat_install_dir${CEND}"
 [ "$DB_yn" == 'y' ] && echo -e "\n`printf "%-32s" "Database install dir:"`${CMSG}$db_install_dir${CEND}"
 [ "$DB_yn" == 'y' ] && echo "`printf "%-32s" "Database data dir:"`${CMSG}$db_data_dir${CEND}"
 [ "$DB_yn" == 'y' ] && echo "`printf "%-32s" "Database user:"`${CMSG}root${CEND}"

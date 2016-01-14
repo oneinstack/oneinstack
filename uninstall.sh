@@ -89,7 +89,7 @@ echo "${CMSG}Web uninstall completed${CEND}"
 }
 
 Print_DB() {
-[ -e "$db_install_dir" ] && echo "$db_install_dir" || { echo;echo "${CWARNING}The database is not installed${CEND}";echo;exit; } 
+[ -e "$db_install_dir" ] && echo "$db_install_dir"
 [ -e "/etc/init.d/mysqld" ] && echo "/etc/init.d/mysqld"
 [ -e "/etc/my.cnf" ] && echo "/etc/my.cnf"
 }
@@ -104,7 +104,7 @@ echo "${CMSG}DB uninstall completed${CEND}"
 }
 
 Print_PHP() {
-[ -e "$php_install_dir" ] && echo "$php_install_dir" || { echo;echo "${CWARNING}The PHP is not installed${CEND}";echo;exit; } 
+[ -e "$php_install_dir" ] && echo "$php_install_dir"
 [ -e "/etc/init.d/php-fpm" ] && echo "/etc/init.d/php-fpm"
 [ -e "/usr/local/imagemagick" ] && echo "/usr/local/imagemagick"
 [ -e "/usr/local/graphicsmagick" ] && echo '/usr/local/graphicsmagick'
@@ -120,7 +120,7 @@ echo "${CMSG}PHP uninstall completed${CEND}"
 }
 
 Print_HHVM() {
-[ -e "/usr/bin/hhvm" ] && echo "/usr/bin/hhvm" || { echo;echo "${CWARNING}The HHVM is not installed${CEND}";echo;exit; } 
+[ -e "/usr/bin/hhvm" ] && echo "/usr/bin/hhvm"
 [ -e "/etc/hhvm" ] && echo "/etc/hhvm"
 [ -e "/var/log/hhvm" ] && echo "/var/log/hhvm"
 [ -e "/etc/supervisord.conf" ] && echo "/etc/supervisord.conf"
@@ -134,7 +134,7 @@ echo "${CMSG}HHVM uninstall completed${CEND}"
 }
 
 Print_PureFtpd() {
-[ -e "$pureftpd_install_dir" ] && echo "$pureftpd_install_dir" || { echo;echo "${CWARNING}The PureFtpd is not installed${CEND}";echo;exit; } 
+[ -e "$pureftpd_install_dir" ] && echo "$pureftpd_install_dir"
 [ -e "/etc/init.d/pureftpd" ] && echo "/etc/init.d/pureftpd" 
 }
 
@@ -144,7 +144,7 @@ echo "${CMSG}Pureftpd uninstall completed${CEND}"
 }
 
 Print_Redis() {
-[ -e "$redis_install_dir" ] && echo "$redis_install_dir" || { echo;echo "${CWARNING}The Redis is not installed${CEND}";echo;exit; } 
+[ -e "$redis_install_dir" ] && echo "$redis_install_dir"
 [ -e "/etc/init.d/redis-server" ] && echo "/etc/init.d/redis-server"
 }
 
@@ -154,7 +154,7 @@ echo "${CMSG}Redis uninstall completed${CEND}"
 }
 
 Print_Memcached() {
-[ -e "$memcached_install_dir" ] && echo "$memcached_install_dir" || { echo;echo "${CWARNING}The Memcached is not installed${CEND}";echo;exit; } 
+[ -e "$memcached_install_dir" ] && echo "$memcached_install_dir"
 [ -e "/etc/init.d/memcached" ] && echo "/etc/init.d/memcached"
 [ -e "/usr/bin/memcached" ] && echo "/usr/bin/memcached"
 }
