@@ -11,12 +11,12 @@
 Install_MySQL-5-7() {
 cd $oneinstack_dir/src
 
-[ "$IPADDR_STATE"x == "CN"x ] && { DOWN_ADDR_MYSQL=http://mirrors.linuxeye.com/oneinstack/src; DOWN_ADDR_BOOST=$DOWN_ADDR_MYSQL; } || { DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.7; DOWN_ADDR_BOOST=http://downloads.sourceforge.net/project/boost/boost/1.59.0; }
+[ "$IPADDR_STATE"x == "CN"x ] && { DOWN_ADDR_MYSQL=http://mirrors.linuxeye.com/oneinstack/src; DOWN_ADDR_BOOST=$DOWN_ADDR_MYSQL; } || { DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.7; DOWN_ADDR_BOOST=http://downloads.sourceforge.net/project/boost/boost/1.60.0; }
 
 if [ ! -e "/usr/local/lib/libboost_system.so" ];then
-    src_url=$DOWN_ADDR_BOOST/boost_1_59_0.tar.gz && Download_src
-    tar xzf boost_1_59_0.tar.gz
-    cd boost_1_59_0
+    src_url=$DOWN_ADDR_BOOST/boost_1_60_0.tar.gz && Download_src
+    tar xzf boost_1_60_0.tar.gz
+    cd boost_1_60_0
     ./bootstrap.sh
     ./bjam --prefix=/usr/local
     ./b2 install
