@@ -1,14 +1,14 @@
-This script is written using the shell, in order to quickly deploy `LEMP`/`LAMP`/`LNMP`/`LNMPA`/`LTMP`(Linux, Nginx/Tengine, MySQL in a production environment/MariaDB/Percona, PHP, JAVA), applicable to CentOS 5~7(including redhat), Debian 6~8, Ubuntu 12~15 of 32 and 64.
+This script is written using the shell, in order to quickly deploy `LEMP`/`LAMP`/`LNMP`/`LNMPA`/`LTMP`(Linux, Nginx/Tengine/OpenResty, MySQL in a production environment/MariaDB/Percona, PHP, JAVA), applicable to CentOS 5~7(including redhat), Debian 6~8, Ubuntu 12~15 of 32 and 64.
 
 Script properties:
 - Continually updated
 - Source compiler installation, most stable source is the latest version, and download from the official site
 - Some security optimization
 - Providing a plurality of database versions (MySQL-5.7, MySQL-5.6, MySQL-5.5, MariaDB-10.1, MariaDB-10.0, MariaDB-5.5, Percona-5.7, Percona-5.6, Percona-5.5)
-- Providing multiple PHP versions (php-5.3, php-5.4, php-5.5, php-5.6, php-7)
-- Provide Nginx, Tengine
+- Providing multiple PHP versions (php-7, php-5.6, php-5.5, php-5.4, php-5.3)
+- Provide Nginx, Tengine, OpenResty
 - Providing a plurality of Tomcat version (Tomcat-8, Tomcat-7)
-- Providing a plurality of JDK version (JDK-1.6, JDK-1.7, JDK-1.8)
+- Providing a plurality of JDK version (JDK-1.8, JDK-1.7, JDK-1.6)
 - Providing a plurality of Apache version (Apache-2.4, Apache-2.2)
 - According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php encryption and decryption tool ionCube, ZendGuardLoader
 - Installation Pureftpd, phpMyAdmin according to their needs
@@ -22,16 +22,16 @@ Script properties:
 ## How to use 
 If your server system: CentOS/Redhat (Do not enter "//" and "// subsequent sentence)
 ```bash
-yum -y install wget screen   // for CentOS / Redhat
+yum -y install wget screen python   // for CentOS / Redhat
 wget http://mirrors.linuxeye.com/oneinstack-full.tar.gz   // Contains the source code
 tar xzf oneinstack-full.tar.gz
-cd oneinstack    // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
+cd oneinstack   // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
 screen -S oneinstack    // If network interruption, you can execute the command `screen -r oneinstack` reconnect install window
 ./install.sh   // Do not sh install.sh or bash install.sh such execution
 ```
 If your server system: Debian/Ubuntu (Do not enter "//" and "// subsequent sentence)
 ```bash
-apt-get -y install wget screen    // for Debian / Ubuntu
+apt-get -y install wget screen python    // for Debian / Ubuntu
 wget http://mirrors.linuxeye.com/oneinstack-full.tar.gz   // Contains the source code
 tar xzf oneinstack-full.tar.gz
 cd oneinstack    // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
@@ -71,7 +71,7 @@ crontab -l    // Can be added to scheduled tasks, such as automatic backups ever
 ```
 
 ## How to manage service
-Nginx/Tengine:
+Nginx/Tengine/OpenResty:
 ```bash
 service nginx {start|stop|status|restart|reload|configtest}
 ```
