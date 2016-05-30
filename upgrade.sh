@@ -24,7 +24,7 @@ sed -i "s@^oneinstack_dir.*@oneinstack_dir=`pwd`@" ./options.conf
 . ./options.conf
 . ./include/color.sh
 . ./include/check_os.sh
-. ./include/check_db.sh
+. ./include/check_dir.sh
 . ./include/download.sh
 . ./include/get_char.sh
 . ./include/upgrade_web.sh

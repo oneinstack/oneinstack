@@ -18,8 +18,9 @@ printf "
 #######################################################################
 "
 
+. ./options.conf
 . ./include/color.sh
-. ./include/check_db.sh
+. ./include/check_dir.sh
 
 # Check if user is root
 [ $(id -u) != "0" ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
@@ -63,9 +64,6 @@ done
 [ "$CONTENT_BK" == '1' ] && sed -i 's@^backup_content=.*@backup_content=db@' ./options.conf
 [ "$CONTENT_BK" == '2' ] && sed -i 's@^backup_content=.*@backup_content=web@' ./options.conf
 [ "$CONTENT_BK" == '3' ] && sed -i 's@^backup_content=.*@backup_content=db,web@' ./options.conf
-
-. ./options.conf
-. ./include/check_db.sh
 
 while :
 do

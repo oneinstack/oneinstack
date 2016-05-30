@@ -24,8 +24,7 @@ sed -i "s@^oneinstack_dir.*@oneinstack_dir=`pwd`@" ./options.conf
 . ./options.conf
 . ./include/color.sh
 . ./include/check_os.sh
-. ./include/check_db.sh
-. ./include/check_web.sh
+. ./include/check_dir.sh
 . ./include/download.sh
 . ./include/get_char.sh
 
@@ -628,8 +627,7 @@ if [ ! -e "$wwwroot_dir/default/index.html" -a "$Web_yn" == 'y' ];then
 fi
 
 # get web_install_dir and db_install_dir
-. include/check_db.sh
-. include/check_web.sh
+. include/check_dir.sh
 
 # HHVM
 if [ "$HHVM_yn" == 'y' ];then

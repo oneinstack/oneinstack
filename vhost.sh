@@ -19,7 +19,7 @@ printf "
 
 . ./options.conf
 . ./include/color.sh
-. ./include/check_web.sh
+. ./include/check_dir.sh
 . ./include/get_char.sh
 
 # Check if user is root

@@ -9,7 +9,7 @@
 #       https://github.com/lj2007331/oneinstack
 
 . ../options.conf
-. ../include/check_db.sh
+. ../include/check_dir.sh
 
 DBname=$1
 LogFile=$backup_dir/db.log
