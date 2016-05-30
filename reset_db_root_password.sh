@@ -23,7 +23,7 @@ printf "
 . ./include/check_db.sh
 
 # Check if user is root
-[ $(id -u) != "0" ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; } 
+[ $(id -u) != "0" ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
 
 Reset_db_root_password()
 {
@@ -47,7 +47,7 @@ if [ $status_Localhost == '0' -a $status_127 == '0' ]; then
     echo "The new password: ${CMSG}${New_dbrootpwd}${CEND}"
     echo
 else
-	echo "${CFAILURE}Reset Database root password failed! ${CEND}"
+    echo "${CFAILURE}Reset Database root password failed! ${CEND}"
 fi
 }
 Reset_db_root_password
