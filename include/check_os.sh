@@ -39,3 +39,6 @@ else
     SYS_BIG_FLAG=i586
     SYS_BIT_a=x86;SYS_BIT_b=i686;
 fi
+
+CPU=$(grep 'processor' /proc/cpuinfo | sort -u | wc -l)
+let THREAD=${CPU}*2
