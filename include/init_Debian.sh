@@ -34,15 +34,16 @@ done
 
 # /etc/security/limits.conf
 [ -e /etc/security/limits.d/*nproc.conf ] && rename nproc.conf nproc.conf_bk /etc/security/limits.d/*nproc.conf
-sed -i '/^# End of file/,$d' /etc/security/limits.conf
-cat >> /etc/security/limits.conf <<EOF
+[ -z "`grep 'session required pam_limits.so' /etc/pam.d/common-session`" ] && echo 'session required pam_limits.so' >> /etc/pam.d/common-session
+[ -z "`grep '* soft nproc 65535' /etc/security/limits.conf`" ] && cat >> /etc/security/limits.conf <<EOF
 # End of file
 * soft nproc 65535
 * hard nproc 65535
 * soft nofile 65535
 * hard nofile 65535
 EOF
-[ -z "`grep 'ulimit -SH 65535' /etc/rc.local`" ] && echo "ulimit -SH 65535" >> /etc/rc.local
+sed -i '/exit 0/d' /etc/rc.local
+[ -z "`grep 'ulimit -SHn 65535' /etc/rc.local`" ] && echo "ulimit -SHn 65535" >> /etc/rc.local
 
 # /etc/hosts
 [ "$(hostname -i | awk '{print $1}')" != "127.0.0.1" ] && sed -i "s@^127.0.0.1\(.*\)@127.0.0.1   `hostname` \1@" /etc/hosts
