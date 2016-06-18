@@ -75,7 +75,6 @@ cat >> /etc/security/limits.conf <<EOF
 * soft nofile 65535
 * hard nofile 65535
 EOF
-[ -z "`grep 'ulimit -SH 65535' /etc/rc.local`" ] && echo "ulimit -SH 65535" >> /etc/rc.local
 
 # /etc/hosts
 [ "$(hostname -i | awk '{print $1}')" != "127.0.0.1" ] && sed -i "s@^127.0.0.1\(.*\)@127.0.0.1   `hostname` \1@" /etc/hosts
