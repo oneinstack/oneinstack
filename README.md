@@ -128,4 +128,4 @@ service memcached {start|stop|status|restart|reload}
 
 ## Installation
 For feedback, questions, and to follow the progress of the project (Chinese): <br />
-[OneinStack](http://oneinstack.com)<br />
+[OneinStack](https://oneinstack.com)<br />
