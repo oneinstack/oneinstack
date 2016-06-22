@@ -162,7 +162,7 @@ openssl x509 -req -days 36500 -sha256 -in $PATH_SSL/${domain}.csr -signkey $PATH
 }
 
 Create_SSL() {
-if [ -e "/usr/local/bin/certbot-auto" ];then
+if [ -e "/usr/local/bin/certbot-auto" -a -e "~/.local/share/letsencrypt/bin/letsencrypt" ];then
     while :; do echo
         read -p "Do you want to use a Let's Encrypt certificate? [y/n]: " letsencrypt_yn 
         if [[ ! $letsencrypt_yn =~ ^[y,n]$ ]];then
@@ -193,7 +193,7 @@ if [ -e "/usr/local/bin/certbot-auto" ];then
         [ "$moredomainame_yn" == 'y' ] && moredomainame_D="`for D in $moredomainame; do echo -d $D; done`"
         [ "$nginx_ssl_yn" == 'y' ] && S=nginx
         [ "$apache_ssl_yn" == 'y' ] && S=httpd
-        [ ! -d "$vhostdir/.well-known" ] && mkdir -p $vhostdir/.well-known;chown -R $run_user.$run_user $vhostdir/.well-known 
+        [ ! -d "$wwwroot_dir/$domain/.well-known" ] && mkdir -p $wwwroot_dir/$domain/.well-known;chown -R $run_user.$run_user $wwwroot_dir/$domain/.well-known 
         certbot-auto certonly --standalone --agree-tos --email $Admin_Email -d $domain $moredomainame_D --pre-hook "service $S stop" --post-hook "service $S start"
         if [ -s "/etc/letsencrypt/live/$domain/cert.pem" ];then
             [ -e "$PATH_SSL/$domain.crt" ] && rm -rf $PATH_SSL/$domain.{crt,key}
@@ -207,7 +207,7 @@ if [ -e "/usr/local/bin/certbot-auto" ];then
                 Cron_Command='/etc/init.d/httpd graceful'
             fi
             [ "$OS" == 'CentOS' ] && Cron_file=/var/spool/cron/root || Cron_file=/var/spool/cron/crontabs/root
-            [ -z "`grep \'$domain $moredomainame_D\' $Cron_file`" ] && echo "0 10 * * 1 /usr/local/bin/certbot-auto certonly -a webroot --agree-tos --renew-by-default --webroot-path=$wwwroot_dir/$domain -d $domain $moredomainame_D;$Cron_Command" >> $Cron_file
+            [ -z "`grep "$domain $moredomainame_D" $Cron_file`" ] && echo "0 10 * * 1 /usr/local/bin/certbot-auto certonly -a webroot --agree-tos --renew-by-default --webroot-path=$wwwroot_dir/$domain -d $domain $moredomainame_D;$Cron_Command" >> $Cron_file
         else
             echo "${CFAILURE}Error: Let's Encrypt SSL certificate installation failed${CEND}"
             exit 1
