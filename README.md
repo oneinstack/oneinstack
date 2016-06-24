@@ -24,6 +24,7 @@ Script properties:
 - Provided under HHVM install CentOS 6,7
 
 ## How to use 
+
 If your server system: CentOS/Redhat (Do not enter "//" and "// subsequent sentence)
 ```bash
 yum -y install wget screen python   // for CentOS / Redhat
@@ -44,6 +45,7 @@ screen -S oneinstack    // If network interruption, you can execute the command 
 ```
 
 ## How to add Extensions 
+
 ```bash
 cd ~/oneinstack    // Must enter the directory execution under oneinstack
 ./addons.sh    // Do not sh addons.sh or bash addons.sh such execution
@@ -82,6 +84,7 @@ crontab -l    // Can be added to scheduled tasks, such as automatic backups ever
 ```
 
 ## How to manage service
+
 Nginx/Tengine/OpenResty:
 ```bash
 service nginx {start|stop|status|restart|reload|configtest}
@@ -120,6 +123,7 @@ service memcached {start|stop|status|restart|reload}
 ```
 
 ## How to upgrade 
+
 ```bash
 ./upgrade.sh
 ```
@@ -131,5 +135,6 @@ service memcached {start|stop|status|restart|reload}
 ```
 
 ## Installation
+
 For feedback, questions, and to follow the progress of the project (Chinese): <br />
 [OneinStack](https://oneinstack.com)<br />
