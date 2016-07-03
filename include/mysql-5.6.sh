@@ -23,7 +23,7 @@ src_url=$DOWN_ADDR_MYSQL/$FILE_NAME.md5 && Download_src
 MYSQL_TAR_MD5=`awk '{print $1}' $FILE_NAME.md5`
 while [ "`md5sum $FILE_NAME | awk '{print $1}'`" != "$MYSQL_TAR_MD5" ];
 do
-    wget -c --no-check-certificate $DOWN_ADDR_MYSQL/$FILE_NAME
+    wget -c --no-check-certificate $DOWN_ADDR_MYSQL/$FILE_NAME;sleep 1
     [ "`md5sum $FILE_NAME | awk '{print $1}'`" == "$MYSQL_TAR_MD5" ] && break || continue
 done
 
