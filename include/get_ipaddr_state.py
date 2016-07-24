@@ -12,4 +12,4 @@ try:
     else:
         print data
 except:
-    print "Usage:%s {country_id|isp} IP" % sys.argv[0]
+    print "Usage:%s {country_id|isp_id} IP" % sys.argv[0]
