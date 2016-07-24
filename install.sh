@@ -31,12 +31,6 @@ sed -i "s@^oneinstack_dir.*@oneinstack_dir=`pwd`@" ./options.conf
 # Check if user is root
 [ $(id -u) != "0" ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
 
-# get the IP information
-IPADDR=`./include/get_ipaddr.py`
-PUBLIC_IPADDR=`./include/get_public_ipaddr.py`
-IPADDR_COUNTRY=`./include/get_ipaddr_state.py country_id $PUBLIC_IPADDR`
-[ "`./include/get_ipaddr_state.py isp $PUBLIC_IPADDR`" == '\u963f\u91cc\u4e91' ] && IPADDR_ISP=aliyun
-
 mkdir -p $wwwroot_dir/default $wwwlogs_dir
 [ -d /data ] && chmod 755 /data
 
@@ -453,6 +447,12 @@ while :; do echo
         break
     fi
 done
+
+# get the IP information
+PUBLIC_IPADDR=`./include/get_public_ipaddr.py`
+IPADDR_COUNTRY=`./include/get_ipaddr_state.py country_id $PUBLIC_IPADDR`
+IPADDR=`./include/get_ipaddr.py`
+[ "`./include/get_ipaddr_state.py isp_id $PUBLIC_IPADDR`"x == '1000323'x ] && IPADDR_ISP=aliyun
 
 # init
 . ./include/memory.sh
