@@ -449,10 +449,11 @@ while :; do echo
 done
 
 # get the IP information
-PUBLIC_IPADDR=`./include/get_public_ipaddr.py`
-IPADDR_COUNTRY=`./include/get_ipaddr_state.py country_id $PUBLIC_IPADDR`
 IPADDR=`./include/get_ipaddr.py`
-[ "`./include/get_ipaddr_state.py isp_id $PUBLIC_IPADDR`"x == '1000323'x ] && IPADDR_ISP=aliyun
+PUBLIC_IPADDR=`./include/get_public_ipaddr.py`
+IPADDR_COUNTRY_ISP=`./include/get_ipaddr_state.py $PUBLIC_IPADDR`
+IPADDR_COUNTRY=`echo $IPADDR_COUNTRY_ISP | awk '{print $1}'`
+[ "`echo $IPADDR_COUNTRY_ISP | awk '{print $2}'`"x == '1000323'x ] && IPADDR_ISP=aliyun
 
 # init
 . ./include/memory.sh
