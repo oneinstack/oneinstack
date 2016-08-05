@@ -56,7 +56,7 @@ mhash_version=0.9.9.9
 pureftpd_version=1.0.42
 
 # Redis
-redis_version=3.2.2
+redis_version=3.2.3
 redis_pecl_version=2.2.8
 
 # Memcached
