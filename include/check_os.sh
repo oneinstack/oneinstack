@@ -13,6 +13,9 @@ if [ -n "`grep 'Aliyun Linux release' /etc/issue`" -o -e /etc/redhat-release ];t
     [ -n "`grep ' 7\.' /etc/redhat-release`" ] && CentOS_RHEL_version=7
     [ -n "`grep ' 6\.' /etc/redhat-release`" -o -n "`grep 'Aliyun Linux release6 15' /etc/issue`" ] && CentOS_RHEL_version=6
     [ -n "`grep ' 5\.' /etc/redhat-release`" -o -n "`grep 'Aliyun Linux release5' /etc/issue`" ] && CentOS_RHEL_version=5
+elif [-n "`grep 'Amazon Linux AMI release' /etc/issue`" -o -e /etc/system-release ];then
+    OS=CentOS
+    CentOS_RHEL_version=6
 elif [ -n "`grep bian /etc/issue`" -o "`lsb_release -is 2>/dev/null`" == 'Debian' ];then
     OS=Debian
     [ ! -e "`which lsb_release`" ] && { apt-get -y update; apt-get -y install lsb-release; clear; }
