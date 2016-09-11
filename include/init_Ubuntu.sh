@@ -30,13 +30,12 @@ if [[ "$Ubuntu_version" =~ ^14$|^15$ ]];then
     apt-get -y install libcloog-ppl1
     apt-get -y remove bison
     cd src
-    src_url=http://ftp.gnu.org/gnu/bison/bison-2.7.1.tar.gz && Download_src
-    tar xzf bison-2.7.1.tar.gz
-    cd bison-2.7.1
+    tar xzf bison-${bison_version}.tar.gz
+    cd bison-${bison_version}
     ./configure
     make -j ${THREAD} && make install
     cd ..
-    rm -rf bison-2.7.1
+    rm -rf bison-${bison_version}
     cd ..
     ln -sf /usr/include/freetype2 /usr/include/freetype2/freetype
 elif [ "$Ubuntu_version" == '13' ];then
