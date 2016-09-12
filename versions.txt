@@ -86,3 +86,4 @@ boost_version=1.60.0
 libevent_version=2.0.22-stable
 tmux_version=2.2
 htop_version=2.0.2
+bison_version=2.7.1
