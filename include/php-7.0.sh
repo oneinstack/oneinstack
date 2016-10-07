@@ -8,7 +8,7 @@
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
 
-Install_PHP-7() {
+Install_PHP-7-0() {
 cd $oneinstack_dir/src
 
 tar xzf libiconv-$libiconv_version.tar.gz
