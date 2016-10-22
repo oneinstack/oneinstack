@@ -129,7 +129,11 @@ EOF
   /bin/mv certbot-auto /usr/local/bin/
   chmod +x /usr/local/bin/certbot-auto
   certbot-auto -n
-  certbot-auto -h | grep '\-\-standalone' > /dev/null && echo; echo "${CSUCCESS}Let's Encrypt client installed successfully! ${CEND}"
+  if [ -e "/root/.local/share/letsencrypt/bin/letsencrypt" ] && certbot-auto -h | grep '\-\-standalone' > /dev/null ; then
+    echo; echo "${CSUCCESS}Let's Encrypt client installed successfully! ${CEND}"
+  else
+    echo; echo "${CSUCCESS}Let's Encrypt client install failed, Please install again! ${CEND}"
+  fi
 }
 
 Uninstall_letsencrypt() {
