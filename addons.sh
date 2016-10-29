@@ -132,7 +132,7 @@ EOF
   if [ -e "/root/.local/share/letsencrypt/bin/letsencrypt" ] && certbot-auto -h | grep '\-\-standalone' > /dev/null ; then
     echo; echo "${CSUCCESS}Let's Encrypt client installed successfully! ${CEND}"
   else
-    echo; echo "${CSUCCESS}Let's Encrypt client install failed, Please install again! ${CEND}"
+    echo; echo "${CFAILURE}Let's Encrypt client install failed, Please install again! ${CEND}"
   fi
 }
 

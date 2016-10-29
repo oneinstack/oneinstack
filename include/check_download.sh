@@ -152,7 +152,7 @@ checkDownload() {
         echo "Download  MySQL 5.6 binary package..."
         FILE_NAME=mysql-${mysql_5_6_version}-linux-glibc2.5-${SYS_BIT_b}.tar.gz
       elif [ "${dbInstallMethods}" == "2" ]; then
-        echo "Download MySQL 5.5 source package..."
+        echo "Download MySQL 5.6 source package..."
         FILE_NAME=mysql-${mysql_5_6_version}.tar.gz
       fi
       wget --tries=6 -c --no-check-certificate ${DOWN_ADDR_MYSQL}/${FILE_NAME}
@@ -422,6 +422,20 @@ checkDownload() {
       else
         echo "[${CMSG}${FILE_NAME}${CEND}] found."
       fi
+    fi
+
+    if [ "${DB_version}" == "10" ]; then
+      # alisql 5.6
+      DOWN_ADDR_ALISQL=$mirrorLink
+      echo "Download AliSQL 5.6 source package..."
+      FILE_NAME=alisql-${alisql_5_6_version}.tar.gz
+      wget --tries=6 -c --no-check-certificate ${DOWN_ADDR_ALISQL}/${FILE_NAME}
+      wget --tries=6 -c --no-check-certificate ${DOWN_ADDR_ALISQL}/${FILE_NAME}.md5
+      ALISQL_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
+      while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${ALISQL_TAR_MD5}" ];do
+        wget -4c --no-check-certificate ${DOWN_ADDR_ALISQL}/${FILE_NAME};sleep 1
+        [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${ALISQL_TAR_MD5}" ] && break || continue
+      done
     fi
   fi
   # PHP
