@@ -175,10 +175,11 @@ while :; do echo
         echo -e "\t${CMSG}7${CEND}. Install Percona-5.7"
         echo -e "\t${CMSG}8${CEND}. Install Percona-5.6"
         echo -e "\t${CMSG}9${CEND}. Install Percona-5.5"
+        echo -e "\t${CMSG}0${CEND}. Install AliSQL-5.6"
         read -p "Please input a number:(Default 2 press Enter) " DB_version
         [ -z "$DB_version" ] && DB_version=2
-        if [[ ! $DB_version =~ ^[1-9]$ ]]; then
-          echo "${CWARNING}input error! Please only input number 1,2,3,4,5,6,7,8,9${CEND}"
+        if [[ ! $DB_version =~ ^[0-9]$ ]]; then
+          echo "${CWARNING}input error! Please only input number 1,2,3,4,5,6,7,8,9,0${CEND}"
         else
           while :; do
             read -p "Please input the root password of database: " dbrootpwd
@@ -186,18 +187,20 @@ while :; do echo
             (( ${#dbrootpwd} >= 5 )) && sed -i "s+^dbrootpwd.*+dbrootpwd='$dbrootpwd'+" ./options.conf && break || echo "${CWARNING}database root password least 5 characters! ${CEND}"
           done
           # choose install methods
-          while :; do echo
-            echo "Please choose installation of the database:"
-            echo -e "\t${CMSG}1${CEND}. Install database from binary package."
-            echo -e "\t${CMSG}2${CEND}. Install database from source package."
-            read -p "Please input a number:(Default 1 press Enter) " dbInstallMethods
-            [ -z "$dbInstallMethods" ] && dbInstallMethods=1
-            if [[ ! $dbInstallMethods =~ ^[1-2]$ ]]; then
-              echo "${CWARNING}input error! Please only input number 1,2${CEND}"
-            else
-              break
-            fi
-          done
+          if [[ $DB_version =~ ^[1-9]$ ]]; then
+            while :; do echo
+              echo "Please choose installation of the database:"
+              echo -e "\t${CMSG}1${CEND}. Install database from binary package."
+              echo -e "\t${CMSG}2${CEND}. Install database from source package."
+              read -p "Please input a number:(Default 1 press Enter) " dbInstallMethods
+              [ -z "$dbInstallMethods" ] && dbInstallMethods=1
+              if [[ ! $dbInstallMethods =~ ^[1-2]$ ]]; then
+                echo "${CWARNING}input error! Please only input number 1,2${CEND}"
+              else
+                break
+              fi
+            done
+          fi
           break
         fi
       done
@@ -418,7 +421,7 @@ while :; do echo
 done
 
 # check jemalloc or tcmalloc
-if [[ $Nginx_version =~ ^[1-3]$ ]] || [ "$DB_yn" == 'y' ]; then
+if [[ $Nginx_version =~ ^[1-3]$ ]] || [ "$DB_yn" == 'y' -a "$DB_version" != '0' ]; then
   while :; do echo
     read -p "Do you want to use jemalloc or tcmalloc optimize Database and Web server? [y/n]: " je_tc_malloc_yn
     if [[ ! $je_tc_malloc_yn =~ ^[y,n]$ ]]; then
@@ -540,6 +543,9 @@ elif [ "$DB_version" == '8' ]; then
 elif [ "$DB_version" == '9' ]; then
   . include/percona-5.5.sh
   Install_Percona-5-5 2>&1 | tee -a $oneinstack_dir/install.log
+elif [ "$DB_version" == '0' ]; then
+  . include/alisql-5.6.sh
+  Install_AliSQL-5-6 2>&1 | tee -a $oneinstack_dir/install.log
 fi
 
 # Apache
