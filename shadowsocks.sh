@@ -101,7 +101,7 @@ Def_parameter() {
     done
     AddUser_shadowsocks
     Iptables_set
-    for Package in wget unzip openssl-devel gcc swig python python-devel python-setuptools autoconf libtool libevent automake make curl curl-devel zlib-devel perl perl-devel cpio expat-devel gettext-devel git asciidoc xmlto
+    for Package in wget unzip openssl-devel gcc swig python python-devel python-setuptools autoconf libtool libevent automake make curl curl-devel zlib-devel perl perl-devel cpio expat-devel gettext-devel git asciidoc xmlto pcre-devel
     do
       yum -y install $Package
     done
