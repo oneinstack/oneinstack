@@ -16,14 +16,13 @@ Install_XCache() {
   ${php_install_dir}/bin/phpize
   ./configure --enable-xcache --enable-xcache-coverager --enable-xcache-optimizer --with-php-config=${php_install_dir}/bin/php-config
   make -j ${THREAD} && make install
-  popd
   if [ -f "${phpExtensionDir}/xcache.so" ]; then
     /bin/cp -R htdocs ${wwwroot_dir}/default/xcache
+    popd
     chown -R ${run_user}.${run_user} ${wwwroot_dir}/default/xcache
     touch /tmp/xcache;chown ${run_user}.${run_user} /tmp/xcache
     let xcacheCount="${CPU}+1"
     let xcacheSize="${Memory_limit}/2"
-
     cat > ${php_install_dir}/etc/php.d/ext-xcache.ini << EOF
 [xcache-common]
 extension=xcache.so

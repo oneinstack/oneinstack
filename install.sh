@@ -421,7 +421,7 @@ while :; do echo
 done
 
 # check jemalloc or tcmalloc
-if [[ $Nginx_version =~ ^[1-3]$ ]] || [ "$DB_yn" == 'y' -a "$DB_version" != '0' ]; then
+if [[ $Nginx_version =~ ^[1-3]$ ]] || [ "$DB_yn" == 'y' -a "$DB_version" != '10' ]; then
   while :; do echo
     read -p "Do you want to use jemalloc or tcmalloc optimize Database and Web server? [y/n]: " je_tc_malloc_yn
     if [[ ! $je_tc_malloc_yn =~ ^[y,n]$ ]]; then
