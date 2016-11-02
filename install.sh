@@ -420,32 +420,6 @@ while :; do echo
   fi
 done
 
-# check jemalloc or tcmalloc
-if [[ $Nginx_version =~ ^[1-3]$ ]] || [ "$DB_yn" == 'y' -a "$DB_version" != '10' ]; then
-  while :; do echo
-    read -p "Do you want to use jemalloc or tcmalloc optimize Database and Web server? [y/n]: " je_tc_malloc_yn
-    if [[ ! $je_tc_malloc_yn =~ ^[y,n]$ ]]; then
-      echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
-    else
-      if [ "$je_tc_malloc_yn" == 'y' ]; then
-        echo 'Please select jemalloc or tcmalloc:'
-        echo -e "\t${CMSG}1${CEND}. jemalloc"
-        echo -e "\t${CMSG}2${CEND}. tcmalloc"
-        while :; do
-          read -p "Please input a number:(Default 1 press Enter) " je_tc_malloc
-          [ -z "$je_tc_malloc" ] && je_tc_malloc=1
-          if [[ ! $je_tc_malloc =~ ^[1-2]$ ]]; then
-            echo "${CWARNING}input error! Please only input number 1,2${CEND}"
-          else
-            break
-          fi
-        done
-      fi
-      break
-    fi
-  done
-fi
-
 while :; do echo
   read -p "Do you want to install HHVM? [y/n]: " HHVM_yn
   if [[ ! $HHVM_yn =~ ^[y,n]$ ]]; then
@@ -511,18 +485,12 @@ checkDownload 2>&1 | tee -a ${oneinstack_dir}/install.log
 # Install dependencies from source package
 installDepsBySrc 2>&1 | tee -a ${oneinstack_dir}/install.log
 
-# jemalloc or tcmalloc
-if [ "$je_tc_malloc_yn" == 'y' -a "$je_tc_malloc" == '1' -a ! -e "/usr/local/lib/libjemalloc.so" ]; then
-  . include/jemalloc.sh
-  Install_jemalloc | tee -a $oneinstack_dir/install.log
-fi
-if [ "$DB_version" == '4' -a ! -e "/usr/local/lib/libjemalloc.so" ]; then
-  . include/jemalloc.sh
-  Install_jemalloc | tee -a $oneinstack_dir/install.log
-fi
-if [ "$je_tc_malloc_yn" == 'y' -a "$je_tc_malloc" == '2' -a ! -e "/usr/local/lib/libtcmalloc.so" ]; then
-  . include/tcmalloc.sh
-  Install_tcmalloc | tee -a $oneinstack_dir/install.log
+# jemalloc
+if [[ $Nginx_version =~ ^[1-3]$ ]] || [ "$DB_yn" == 'y' -a "$DB_version" != '10' ]; then
+  if [ ! -e "/usr/local/lib/libjemalloc.so" ]; then
+    . include/jemalloc.sh
+    Install_jemalloc | tee -a $oneinstack_dir/install.log
+  fi
 fi
 
 # Database
