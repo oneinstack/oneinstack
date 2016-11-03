@@ -68,7 +68,7 @@ redis_pecl_for_php7_version=3.0.0
 redis_pecl_version=2.2.8
 
 # Memcached
-memcached_version=1.4.32
+memcached_version=1.4.33
 libmemcached_version=1.0.18
 memcached_pecl_version=2.2.0
 memcache_pecl_version=3.0.8
