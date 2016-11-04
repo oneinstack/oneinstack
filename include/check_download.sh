@@ -107,7 +107,7 @@ checkDownload(){
             if [ "$(../include/check_port.py mirrors.tuna.tsinghua.edu.cn 443)" == "True" ]; then
               DOWN_ADDR_MYSQL=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
             else
-              DOWN_ADDR_MYSQL=http://mirrors.sohu.com/mysql/MySQL-5.6
+              DOWN_ADDR_MYSQL=http://mirrors.sohu.com/mysql/MySQL-5.7
               DOWN_ADDR_MYSQL_BK=${DOWN_ADDR_MYSQL}
             fi
           else
