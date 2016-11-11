@@ -492,6 +492,7 @@ checkDownload(){
         if [ "${Debian_version}" == '8' -o "${Ubuntu_version}" == "16" ]; then
           if [ ! -e "/usr/local/openssl/lib/libcrypto.a" ]; then
             src_url=${mirrorLink}/openssl-1.0.0s.tar.gz && Download_src
+            src_url=${mirrorLink}/curl-7.35.0.tar.gz && Download_src
           fi
         fi
         src_url=http://www.php.net/distributions/php-${php_3_version}.tar.gz && Download_src
