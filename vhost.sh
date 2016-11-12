@@ -205,8 +205,7 @@ Create_SSL() {
       [ "${moredomainame_yn}" == 'y' ] && moredomainame_D="$(for D in ${moredomainame}; do echo -d ${D}; done)"
       [ "${nginx_ssl_yn}" == 'y' ] && S=nginx
       [ "${apache_ssl_yn}" == 'y' ] && S=httpd
-      [ ! -d "${wwwroot_dir}/${domain}/.well-known" ] && mkdir -p ${wwwroot_dir}/${domain}/.well-known;chown -R ${run_user}.${run_user} ${wwwroot_dir}/${domain}/.well-known
-      certbot-auto certonly --standalone --agree-tos --email ${Admin_Email} -d ${domain} ${moredomainame_D} --pre-hook "service ${S} stop" --post-hook "service ${S} start"
+      certbot-auto certonly --standalone --agree-tos --email ${Admin_Email} -w ${vhostdir} -d ${domain} ${moredomainame_D} --pre-hook "service ${S} stop" --post-hook "service ${S} start"
       if [ -s "/etc/letsencrypt/live/${domain}/cert.pem" ]; then
         [ -e "${PATH_SSL}/${domain}.crt" ] && rm -rf ${PATH_SSL}/${domain}.{crt,key}
         ln -s /etc/letsencrypt/live/${domain}/fullchain.pem ${PATH_SSL}/${domain}.crt
@@ -219,7 +218,7 @@ Create_SSL() {
           Cron_Command="/etc/init.d/httpd graceful"
         fi
         [ "${OS}" == "CentOS" ] && Cron_file=/var/spool/cron/root || Cron_file=/var/spool/cron/crontabs/root
-        [ -z "$(grep "${domain} ${moredomainame_D}" ${Cron_file})" ] && echo "0 10 * * 1 /usr/local/bin/certbot-auto certonly --agree-tos --renew-by-default --webroot -w ${wwwroot_dir}/${domain} -d ${domain} ${moredomainame_D};${Cron_Command}" >> $Cron_file
+        [ -z "$(grep 'certbot-auto renew' ${Cron_file})" ] && echo "0 0 1 * * /usr/local/bin/certbot-auto renew;${Cron_Command}" >> $Cron_file
       else
         echo "${CFAILURE}Error: Let's Encrypt SSL certificate installation failed! ${CEND}"
         exit 1
@@ -297,7 +296,7 @@ Input_Add_domain() {
 
   if [ "${moredomainame_yn}" == 'y' ]; then
     while :; do echo
-      read -p "Type domainname or IP(example: example.com or 121.43.8.8): " moredomain
+      read -p "Type domainname or IP(example: example.com other.example.com): " moredomain
       if [ -z "$(echo ${moredomain} | grep '.*\..*')" ]; then
         echo "${CWARNING}input error! ${CEND}"
       else
@@ -333,23 +332,6 @@ Input_Add_domain() {
       fi
     done
 
-    if [[ "$(${web_install_dir}/sbin/nginx -V 2>&1 | grep -Eo 'with-http_v2_module')" = 'with-http_v2_module' ]]; then
-      LISTENOPT="443 ssl http2"
-    else
-      LISTENOPT="443 ssl spdy"
-    fi
-    Create_SSL
-    Nginx_conf=$(echo -e "listen 80;\n  listen ${LISTENOPT};\n  ssl_certificate ${PATH_SSL}/${domain}.crt;\n  ssl_certificate_key ${PATH_SSL}/${domain}.key;\n  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;\n  ssl_ciphers EECDH+CHACHA20:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;\n  ssl_prefer_server_ciphers on;\n  ssl_session_timeout 10m;\n  ssl_session_cache builtin:1000 shared:SSL:10m;\n  ssl_buffer_size 1400;\n  add_header Strict-Transport-Security max-age=15768000;\n  ssl_stapling on;\n  ssl_stapling_verify on;\n")
-    Apache_SSL=$(echo -e "SSLEngine on\n  SSLCertificateFile \"${PATH_SSL}/${domain}.crt\"\n  SSLCertificateKeyFile \"${PATH_SSL}/${domain}.key\"")
-  elif [ "$apache_ssl_yn" == 'y' ]; then
-    Create_SSL
-    Apache_SSL=$(echo -e "SSLEngine on\n  SSLCertificateFile \"${PATH_SSL}/${domain}.crt\"\n  SSLCertificateKeyFile \"${PATH_SSL}/${domain}.key\"")
-    [ -z "$(grep 'Listen 443' ${apache_install_dir}/conf/httpd.conf)" ] && sed -i "s@Listen 80@&\nListen 443@" ${apache_install_dir}/conf/httpd.conf
-    [ -z "$(grep 'ServerName 0.0.0.0:443' ${apache_install_dir}/conf/httpd.conf)" ] && sed -i "s@ServerName 0.0.0.0:80@&\nServerName 0.0.0.0:443@" ${apache_install_dir}/conf/httpd.conf
-  else
-    Nginx_conf="listen 80;"
-  fi
-
   while :; do echo
     echo "Please input the directory for the domain:${domain} :"
     read -p "(Default directory: ${wwwroot_dir}/${domain}): " vhostdir
@@ -368,6 +350,23 @@ Input_Add_domain() {
       break
     fi
   done
+
+    if [[ "$(${web_install_dir}/sbin/nginx -V 2>&1 | grep -Eo 'with-http_v2_module')" = 'with-http_v2_module' ]]; then
+      LISTENOPT="443 ssl http2"
+    else
+      LISTENOPT="443 ssl spdy"
+    fi
+    Create_SSL
+    Nginx_conf=$(echo -e "listen 80;\n  listen ${LISTENOPT};\n  ssl_certificate ${PATH_SSL}/${domain}.crt;\n  ssl_certificate_key ${PATH_SSL}/${domain}.key;\n  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;\n  ssl_ciphers EECDH+CHACHA20:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:!MD5;\n  ssl_prefer_server_ciphers on;\n  ssl_session_timeout 10m;\n  ssl_session_cache builtin:1000 shared:SSL:10m;\n  ssl_buffer_size 1400;\n  add_header Strict-Transport-Security max-age=15768000;\n  ssl_stapling on;\n  ssl_stapling_verify on;\n")
+    Apache_SSL=$(echo -e "SSLEngine on\n  SSLCertificateFile \"${PATH_SSL}/${domain}.crt\"\n  SSLCertificateKeyFile \"${PATH_SSL}/${domain}.key\"")
+  elif [ "$apache_ssl_yn" == 'y' ]; then
+    Create_SSL
+    Apache_SSL=$(echo -e "SSLEngine on\n  SSLCertificateFile \"${PATH_SSL}/${domain}.crt\"\n  SSLCertificateKeyFile \"${PATH_SSL}/${domain}.key\"")
+    [ -z "$(grep 'Listen 443' ${apache_install_dir}/conf/httpd.conf)" ] && sed -i "s@Listen 80@&\nListen 443@" ${apache_install_dir}/conf/httpd.conf
+    [ -z "$(grep 'ServerName 0.0.0.0:443' ${apache_install_dir}/conf/httpd.conf)" ] && sed -i "s@ServerName 0.0.0.0:80@&\nServerName 0.0.0.0:443@" ${apache_install_dir}/conf/httpd.conf
+  else
+    Nginx_conf="listen 80;"
+  fi
 }
 
 Nginx_anti_hotlinking() {
@@ -415,7 +414,7 @@ Nginx_rewrite() {
     echo
     echo "Please input the rewrite of programme :"
     echo "${CMSG}wordpress${CEND},${CMSG}discuz${CEND},${CMSG}opencart${CEND},${CMSG}thinkphp${CEND},${CMSG}laravel${CEND},${CMSG}typecho${CEND},${CMSG}ecshop${CEND},${CMSG}drupal${CEND},${CMSG}joomla${CEND} rewrite was exist."
-    read -p "(Default rewrite: other):" rewrite
+    read -p "(Default rewrite: other): " rewrite
     if [ "${rewrite}" == "" ]; then
       rewrite="other"
     fi
@@ -566,7 +565,7 @@ server {
 }
 EOF
 
-  [ "${https_yn}" == 'y' ] && sed -i "s@^root.*;@&\nif (\$ssl_protocol = \"\") { return 301 https://\$host\$request_uri; }@" ${web_install_dir}/conf/vhost/${domain}.conf
+  [ "${https_yn}" == 'y' ] && sed -i "s@^  root.*;@&\n  if (\$ssl_protocol = \"\") { return 301 https://\$host\$request_uri; }@" ${web_install_dir}/conf/vhost/${domain}.conf
 
   echo
   ${web_install_dir}/sbin/nginx -t
