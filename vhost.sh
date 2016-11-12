@@ -174,7 +174,7 @@ If you enter '.', the field will be left blank.
 }
 
 Create_SSL() {
-  if [ -e "/usr/local/bin/certbot-auto" -a -e "/root/.local/share/letsencrypt/bin/letsencrypt" ]; then
+  if [ -e "/usr/bin/certbot" ]; then
     while :; do echo
       read -p "Do you want to use a Let's Encrypt certificate? [y/n]: " letsencrypt_yn
       if [[ ! ${letsencrypt_yn} =~ ^[y,n]$ ]]; then
@@ -202,10 +202,30 @@ Create_SSL() {
           break
         fi
       done
+
       [ "${moredomainame_yn}" == 'y' ] && moredomainame_D="$(for D in ${moredomainame}; do echo -d ${D}; done)"
-      [ "${nginx_ssl_yn}" == 'y' ] && S=nginx
-      [ "${apache_ssl_yn}" == 'y' ] && S=httpd
-      certbot-auto certonly --standalone --agree-tos --email ${Admin_Email} -w ${vhostdir} -d ${domain} ${moredomainame_D} --pre-hook "service ${S} stop" --post-hook "service ${S} start"
+      if [ "${nginx_ssl_yn}" == 'y' ]; then 
+        [ ! -d ${web_install_dir}/conf/vhost ] && mkdir ${web_install_dir}/conf/vhost
+        echo "server {  server_name ${domain}${moredomainame};  root ${vhostdir};  access_log off; }" > ${web_install_dir}/conf/vhost/${domain}.conf
+        /etc/init.d/nginx reload > /dev/null
+      fi
+
+      if [ "${apache_ssl_yn}" == 'y' ]; then
+        [ ! -d ${apache_install_dir}/conf/vhost ] && mkdir ${apache_install_dir}/conf/vhost
+        cat > ${apache_install_dir}/conf/vhost/${domain}.conf << EOF
+<VirtualHost *:80>
+  ServerAdmin admin@example.com
+  DocumentRoot "${vhostdir}"
+  ServerName ${domain}
+  ${Apache_Domain_alias}
+  ErrorLog "/dev/null" common
+  CustomLog "/dev/null" common
+</VirtualHost>
+EOF
+        /etc/init.d/httpd restart > /dev/null
+      fi
+
+      certbot certonly --webroot --agree-tos --quiet --email ${Admin_Email} -w ${vhostdir} -d ${domain} ${moredomainame_D}
       if [ -s "/etc/letsencrypt/live/${domain}/cert.pem" ]; then
         [ -e "${PATH_SSL}/${domain}.crt" ] && rm -rf ${PATH_SSL}/${domain}.{crt,key}
         ln -s /etc/letsencrypt/live/${domain}/fullchain.pem ${PATH_SSL}/${domain}.crt
@@ -218,7 +238,7 @@ Create_SSL() {
           Cron_Command="/etc/init.d/httpd graceful"
         fi
         [ "${OS}" == "CentOS" ] && Cron_file=/var/spool/cron/root || Cron_file=/var/spool/cron/crontabs/root
-        [ -z "$(grep 'certbot-auto renew' ${Cron_file})" ] && echo "0 0 1 * * /usr/local/bin/certbot-auto renew;${Cron_Command}" >> $Cron_file
+        [ -z "$(grep 'certbot renew' ${Cron_file})" ] && echo "0 0 1 * * certbot renew;${Cron_Command}" >> $Cron_file
       else
         echo "${CFAILURE}Error: Let's Encrypt SSL certificate installation failed! ${CEND}"
         exit 1
@@ -272,6 +292,25 @@ Input_Add_domain() {
     if [ -z "$(echo ${domain} | grep '.*\..*')" ]; then
       echo "${CWARNING}input error! ${CEND}"
     else
+      break
+    fi
+  done
+
+  while :; do echo
+    echo "Please input the directory for the domain:${domain} :"
+    read -p "(Default directory: ${wwwroot_dir}/${domain}): " vhostdir
+    if [ -n "${vhostdir}" -a -z "$(echo ${vhostdir} | grep '^/')" ]; then
+      echo "${CWARNING}input error! Press Enter to continue...${CEND}"
+    else
+      if [ -z "${vhostdir}" ]; then
+        vhostdir="${wwwroot_dir}/${domain}"
+        echo "Virtual Host Directory=${CMSG}${vhostdir}${CEND}"
+      fi
+      echo
+      echo "Create Virtul Host directory......"
+      mkdir -p ${vhostdir}
+      echo "set permissions of Virtual Host directory......"
+      chown -R ${run_user}.${run_user} ${vhostdir}
       break
     fi
   done
@@ -331,25 +370,6 @@ Input_Add_domain() {
         break
       fi
     done
-
-  while :; do echo
-    echo "Please input the directory for the domain:${domain} :"
-    read -p "(Default directory: ${wwwroot_dir}/${domain}): " vhostdir
-    if [ -n "${vhostdir}" -a -z "$(echo ${vhostdir} | grep '^/')" ]; then
-      echo "${CWARNING}input error! Press Enter to continue...${CEND}"
-    else
-      if [ -z "${vhostdir}" ]; then
-        vhostdir="${wwwroot_dir}/${domain}"
-        echo "Virtual Host Directory=${CMSG}${vhostdir}${CEND}"
-      fi
-      echo
-      echo "Create Virtul Host directory......"
-      mkdir -p ${vhostdir}
-      echo "set permissions of Virtual Host directory......"
-      chown -R ${run_user}.${run_user} ${vhostdir}
-      break
-    fi
-  done
 
     if [[ "$(${web_install_dir}/sbin/nginx -V 2>&1 | grep -Eo 'with-http_v2_module')" = 'with-http_v2_module' ]]; then
       LISTENOPT="443 ssl http2"
