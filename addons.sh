@@ -13,7 +13,7 @@ clear
 printf "
 #######################################################################
 #       OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+      #
-#                  Install/Uninstall PHP Extensions                   #
+#                    Install/Uninstall Extensions                     #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
@@ -75,9 +75,6 @@ if [ -e "${php_install_dir}/bin/phpize" ]; then
       kill -9 $$
       ;;
   esac
-else
-  echo "${CFAILURE}Couldn't find phpize! ${CEND}"
-  kill -9 $$
 fi
 
 # Check PHP Extensions
@@ -124,13 +121,16 @@ EOF
   fi
 
   pushd ${oneinstack_dir}/src
-  if [ ! -e "/usr/bin/pip" ]; then
-    src_url=http://mirrors.linuxeye.com/oneinstack/src/pip-9.0.1.tar.gz && Download_src
-    tar xzf pip-9.0.1.tar.gz
-    pushd pip-9.0.1
-    python setup.py install
-    popd
-    rm -rf pip-9.0.1
+  if [ "${OS}" == "CentOS" ]; then
+    pkgList="gcc dialog augeas-libs openssl openssl-devel libffi-devel redhat-rpm-config ca-certificates python python-devel python-virtualenv python-tools python-pip"
+    for Package in ${pkgList}; do
+      yum -y install ${Package}
+    done
+  elif [[ "${OS}" =~ ^Ubuntu$|^Debian$ ]]; then
+    pkgList="python python-dev virtualenv python-virtualenv gcc dialog libaugeas0 augeas-lenses libssl-dev libffi-dev ca-certificates"
+    for Package in ${pkgList}; do
+      apt-get -y install $Package
+    done
   fi
   if [ ! -e "~/.pip/pip.conf" ] ;then
     # get the IP information
