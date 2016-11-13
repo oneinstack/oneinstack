@@ -238,7 +238,7 @@ EOF
           Cron_Command="/etc/init.d/httpd graceful"
         fi
         [ "${OS}" == "CentOS" ] && Cron_file=/var/spool/cron/root || Cron_file=/var/spool/cron/crontabs/root
-        [ -z "$(grep 'certbot renew' ${Cron_file})" ] && echo "0 0 1 * * certbot renew;${Cron_Command}" >> $Cron_file
+        [ -z "$(grep 'certbot renew' ${Cron_file})" ] && echo "0 0 1 * * /usr/bin/certbot renew --renew-hook \"${Cron_Command}\"" >> $Cron_file
       else
         echo "${CFAILURE}Error: Let's Encrypt SSL certificate installation failed! ${CEND}"
         exit 1
