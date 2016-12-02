@@ -7,7 +7,7 @@
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
 
-checkDownload(){
+checkDownload() {
   mirrorLink=http://mirrors.linuxeye.com/oneinstack/src
   pushd ${oneinstack_dir}/src
 
@@ -512,6 +512,9 @@ checkDownload(){
       5)
         src_url=http://www.php.net/distributions/php-${php70_version}.tar.gz && Download_src
         ;;
+      6)
+        src_url=http://www.php.net/distributions/php-${php71_version}.tar.gz && Download_src
+        ;;
     esac
   fi
 
@@ -532,9 +535,9 @@ checkDownload(){
       fi
       ;;
     3)
-      # php 5.3 5.4 5.5 5.6 7.0
+      # php 5.3 5.4 5.5 5.6 7.0 7.1
       echo "Download apcu..."
-      if [ "${PHP_version}" != '5' ]; then
+      if [[ "$PHP_version" =~ ^[1-4]$ ]]; then
         src_url=http://pecl.php.net/get/apcu-${apcu_version}.tgz && Download_src
       else
         src_url=http://pecl.php.net/get/apcu-${apcu_for_php7_version}.tgz && Download_src
@@ -629,7 +632,7 @@ checkDownload(){
     else
       echo "Download graphicsmagick..."
       src_url=http://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/${GraphicsMagick_version}/GraphicsMagick-${GraphicsMagick_version}.tar.gz && Download_src
-      if [ "${PHP_version}" == '5' ]; then
+      if [[ "$PHP_version" =~ ^[5-6]$ ]]; then
         echo "Download gmagick for php 7.x..."
         src_url=https://pecl.php.net/get/gmagick-${gmagick_for_php7_version}.tgz && Download_src
       else
@@ -657,7 +660,7 @@ checkDownload(){
       src_url=${mirrorLink}/start-stop-daemon.c && Download_src
     fi
     # redis addon
-    if [ "${PHP_version}" == '5' ]; then
+    if [[ "$PHP_version" =~ ^[5-6]$ ]]; then
       echo "Download redis pecl for php 7.x..."
       src_url=http://pecl.php.net/get/redis-${redis_pecl_for_php7_version}.tgz && Download_src
     else
@@ -669,7 +672,7 @@ checkDownload(){
   if [ "${memcached_yn}" == 'y' ]; then
     echo "Download memcached..."
     src_url=http://www.memcached.org/files/memcached-${memcached_version}.tar.gz && Download_src
-    if [ "${PHP_version}" == '5' ]; then
+    if [[ "$PHP_version" =~ ^[5-6]$ ]]; then
       echo "Download pecl memcache for php 7.x..."
       # src_url=https://codeload.github.com/websupport-sk/pecl-memcache/zip/php7 && Download_src
       src_url=${mirrorLink}/pecl-memcache-php7.tgz && Download_src
