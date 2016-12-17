@@ -168,8 +168,6 @@ If you enter '.', the field will be left blank.
   [ -z "${SELFSIGNEDSSL_O}U" ] && SELFSIGNEDSSL_OU="IT Dept."
 
   openssl req -new -newkey rsa:2048 -sha256 -nodes -out ${PATH_SSL}/${domain}.csr -keyout ${PATH_SSL}/${domain}.key -subj "/C=${SELFSIGNEDSSL_C}/ST=${SELFSIGNEDSSL_ST}/L=${SELFSIGNEDSSL_L}/O=${SELFSIGNEDSSL_O}/OU=${SELFSIGNEDSSL_OU}/CN=${domain}" > /dev/null 2>&1
-  /bin/cp ${PATH_SSL}/${domain}.csr{,_bk.$(date +%Y-%m-%d_%H%M)}
-  /bin/cp ${PATH_SSL}/${domain}.key{,_bk.$(date +%Y-%m-%d_%H%M)}
   openssl x509 -req -days 36500 -sha256 -in ${PATH_SSL}/${domain}.csr -signkey ${PATH_SSL}/${domain}.key -out ${PATH_SSL}/${domain}.crt > /dev/null 2>&1
 }
 
@@ -364,7 +362,7 @@ Input_Add_domain() {
           break
         fi
       done
-      [ "${redirect_yn}" == 'y' ] && Nginx_redirect=$(echo -e "if (\$host != $domain) {\n    rewrite ^/(.*)\$ \$scheme://$domain/\$1 permanent;\n  }")
+      [ "${redirect_yn}" == 'y' ] && Nginx_redirect="if (\$host != $domain) {  return 301 \$scheme://${domain}\$request_uri;  }"
     fi
   fi
 
@@ -481,9 +479,9 @@ server {
   ${N_log}
   index index.html index.htm index.jsp;
   root ${vhostdir};
+  ${Nginx_redirect}
   #error_page 404 = /404.html;
   #error_page 502 = /502.html;
-  ${Nginx_redirect}
   ${anti_hotlinking}
   location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|mp4|ico)$ {
     expires 30d;
@@ -500,7 +498,7 @@ server {
 }
 EOF
 
-  [ "${https_yn}" == 'y' ] && sed -i "s@^root.*;@&\nif (\$ssl_protocol = \"\") { return 301 https://\$host\$request_uri; }@" ${web_install_dir}/conf/vhost/${domain}.conf
+  [ "${https_yn}" == 'y' ] && sed -i "s@^root.*;@&\nif (\$ssl_protocol = \"\") { return 301 https://\$server_name\$request_uri; }@" ${web_install_dir}/conf/vhost/${domain}.conf
 
   cat > ${tomcat_install_dir}/conf/vhost/${domain}.xml << EOF
 <Host name="${domain}" appBase="${vhostdir}" unpackWARs="true" autoDeploy="true"> ${Tomcat_Domain_alias}
@@ -573,9 +571,9 @@ server {
   index index.html index.htm index.php;
   include ${web_install_dir}/conf/rewrite/${rewrite}.conf;
   root ${vhostdir};
+  ${Nginx_redirect}
   #error_page 404 = /404.html;
   #error_page 502 = /502.html;
-  ${Nginx_redirect}
   ${anti_hotlinking}
   ${NGX_CONF}
   location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|mp4|ico)$ {
@@ -592,7 +590,7 @@ server {
 }
 EOF
 
-  [ "${https_yn}" == 'y' ] && sed -i "s@^  root.*;@&\n  if (\$ssl_protocol = \"\") { return 301 https://\$host\$request_uri; }@" ${web_install_dir}/conf/vhost/${domain}.conf
+  [ "${https_yn}" == 'y' ] && sed -i "s@^  root.*;@&\n  if (\$ssl_protocol = \"\") { return 301 https://\$server_name\$request_uri; }@" ${web_install_dir}/conf/vhost/${domain}.conf
 
   echo
   ${web_install_dir}/sbin/nginx -t
@@ -739,7 +737,7 @@ server {
 }
 EOF
 
-  [ "${https_yn}" == 'y' ] && sed -i "s@^root.*;@&\nif (\$ssl_protocol = \"\") { return 301 https://\$host\$request_uri; }@" ${web_install_dir}/conf/vhost/${domain}.conf
+  [ "${https_yn}" == 'y' ] && sed -i "s@^  root.*;@&\n  if (\$ssl_protocol = \"\") { return 301 https://\$server_name\$request_uri; }@" ${web_install_dir}/conf/vhost/${domain}.conf
 
   echo
   ${web_install_dir}/sbin/nginx -t
@@ -872,7 +870,9 @@ Del_NGX_Vhost() {
                 char=$(get_char)
                 rm -rf ${Directory}
               fi
-              echo "${CSUCCESS}Domain: ${domain} has been deleted.${CEND}"
+              echo
+              echo "${CMSG}Domain: ${domain} has been deleted.${CEND}"
+              echo
             else
               echo "${CWARNING}Virtualhost: ${domain} was not exist! ${CEND}"
             fi

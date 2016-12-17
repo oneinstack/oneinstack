@@ -396,6 +396,7 @@ What Are You Doing?
           ./configure --with-php-config=${php_install_dir}/bin/php-config
           make -j ${THREAD} && make install
           popd;popd
+          rm -rf php-${PHP_detail_version}
           echo "extension=fileinfo.so" > ${php_install_dir}/etc/php.d/ext-fileinfo.ini
           Check_succ
         else

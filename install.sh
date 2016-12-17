@@ -389,7 +389,7 @@ while :; do echo
 done
 
 # check phpMyAdmin
-if [[ $PHP_version =~ ^[1-5]$ ]] || [ -e "$php_install_dir/bin/phpize" ]; then
+if [[ $PHP_version =~ ^[1-6]$ ]] || [ -e "$php_install_dir/bin/phpize" ]; then
   while :; do echo
     read -p "Do you want to install phpMyAdmin? [y/n]: " phpMyAdmin_yn
     if [[ ! $phpMyAdmin_yn =~ ^[y,n]$ ]]; then
