@@ -63,8 +63,9 @@ ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 #EOF
 
 # ip_conntrack table full dropping packets
-[ ! -e "/etc/sysconfig/modules/iptables.modules" ] && { echo modprobe ip_conntrack > /etc/sysconfig/modules/iptables.modules; chmod +x /etc/sysconfig/modules/iptables.modules; }
-modprobe ip_conntrack
+[ ! -e "/etc/sysconfig/modules/iptables.modules" ] && { echo -e "modprobe nf_conntrack\nmodprobe nf_conntrack_ipv4" > /etc/sysconfig/modules/iptables.modules; chmod +x /etc/sysconfig/modules/iptables.modules; }
+modprobe nf_conntrack
+modprobe nf_conntrack_ipv4
 echo options nf_conntrack hashsize=131072 > /etc/modprobe.d/nf_conntrack.conf
 
 # /etc/sysctl.conf

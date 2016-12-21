@@ -9,7 +9,7 @@ tomcat8_version=8.0.30
 tomcat7_version=7.0.69
 tomcat6_version=6.0.45
 
-apache24_version=2.4.23
+apache24_version=2.4.25
 apache22_version=2.2.31
 pcre_version=8.39
 apr_version=1.5.2
@@ -78,7 +78,7 @@ memcache_pecl_version=3.0.8
 phpMyAdmin_version=4.4.15.9
 
 # jemalloc
-jemalloc_version=4.3.1
+jemalloc_version=4.4.0
 
 # boost
 boost_version=1.59.0
@@ -88,6 +88,6 @@ libevent_version=2.0.22-stable
 tmux_version=2.2
 htop_version=2.0.2
 bison_version=2.7.1
-python_version=2.7.12
+python_version=2.7.13
 setuptools_version=32.0.0
 pip_version=9.0.1
