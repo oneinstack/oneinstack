@@ -416,7 +416,7 @@ Nginx_anti_hotlinking() {
     else
       domain_allow_all=${domain_allow}
     fi
-    anti_hotlinking=$(echo -e "location ~ .*\.(wma|wmv|asf|mp3|mmf|zip|rar|jpg|gif|png|swf|flv|mp4)$ {\n  valid_referers none blocked ${domain_allow_all};\n  if (\$invalid_referer) {\n      #rewrite ^/ http://www.example.com/403.html;\n      return 403;\n    }\n  }")
+    anti_hotlinking=$(echo -e "location ~ .*\.(wma|wmv|asf|mp3|mmf|zip|rar|jpg|gif|png|swf|flv|mp4)$ {\n    valid_referers none blocked ${domain_allow_all};\n    if (\$invalid_referer) {\n        rewrite ^/ http://www.linuxeye.com/403.html;\n        return 403;\n    }\n  }")
   else
     anti_hotlinking=
   fi
@@ -438,17 +438,19 @@ Nginx_rewrite() {
   else
     echo
     echo "Please input the rewrite of programme :"
-    echo "${CMSG}wordpress${CEND},${CMSG}discuz${CEND},${CMSG}opencart${CEND},${CMSG}thinkphp${CEND},${CMSG}laravel${CEND},${CMSG}typecho${CEND},${CMSG}ecshop${CEND},${CMSG}drupal${CEND},${CMSG}joomla${CEND} rewrite was exist."
+    echo "${CMSG}wordpress${CEND},${CMSG}opencart${CEND},${CMSG}magento2${CEND},${CMSG}drupal${CEND},${CMSG}joomla${CEND},${CMSG}laravel${CEND},${CMSG}thinkphp${CEND},${CMSG}discuz${CEND},${CMSG}typecho${CEND},${CMSG}ecshop${CEND} rewrite was exist."
     read -p "(Default rewrite: other): " rewrite
     if [ "${rewrite}" == "" ]; then
       rewrite="other"
     fi
     echo "You choose rewrite=${CMSG}$rewrite${CEND}"
     [ "${NGX_FLAG}" == 'php' -a "${rewrite}" == "thinkphp" ] && NGX_CONF=$(echo -e "location ~ \.php {\n    #fastcgi_pass remote_php_ip:9000;\n    fastcgi_pass unix:/dev/shm/php-cgi.sock;\n    fastcgi_index index.php;\n    include fastcgi_params;\n    set \$real_script_name \$fastcgi_script_name;\n    if (\$fastcgi_script_name ~ \"^(.+?\.php)(/.+)\$\") {\n      set \$real_script_name \$1;\n      #set \$path_info \$2;\n    }\n    fastcgi_param SCRIPT_FILENAME \$document_root\$real_script_name;\n    fastcgi_param SCRIPT_NAME \$real_script_name;\n    #fastcgi_param PATH_INFO \$path_info;\n  }")
-    if [ -e "config/${rewrite}.conf" ]; then
-      /bin/cp config/${rewrite}.conf ${web_install_dir}/conf/rewrite/${rewrite}.conf
-    else
-      touch "${web_install_dir}/conf/rewrite/${rewrite}.conf"
+    if [ "${rewrite}" != 'magento2' ]; then
+      if [ -e "config/${rewrite}.conf" ]; then
+        /bin/cp config/${rewrite}.conf ${web_install_dir}/conf/rewrite/${rewrite}.conf
+      else
+        touch "${web_install_dir}/conf/rewrite/${rewrite}.conf"
+      fi
     fi
   fi
 }
@@ -590,6 +592,40 @@ server {
 }
 EOF
 
+  if [ "${rewrite}" == 'magento2' -a -e "config/${rewrite}.conf" ]; then
+    /bin/cp config/${rewrite}.conf ${web_install_dir}/conf/vhost/${domain}.conf
+    sed -i "s@^  set \$MAGE_ROOT.*;@  set \$MAGE_ROOT ${vhostdir};@" ${web_install_dir}/conf/vhost/${domain}.conf
+    sed -i "s@^  server_name.*;@  server_name ${domain}${moredomainame};@" ${web_install_dir}/conf/vhost/${domain}.conf
+    sed -i "s@^  server_name.*;@&\n  ${N_log}@" ${web_install_dir}/conf/vhost/${domain}.conf
+    [ "${NGX_FLAG}" == 'hhvm' ] && sed -i 's@fastcgi_pass unix:.*;@fastcgi_pass unix:/var/log/hhvm/sock;@g' ${web_install_dir}/conf/vhost/${domain}.conf
+    if [ "${anti_hotlinking_yn}" == 'y' ]; then
+      sed -i "s@^  root.*;@&\n  }@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  root.*;@&\n    }@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  root.*;@&\n      return 403;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  root.*;@&\n      rewrite ^/ http://www.linuxeye.com/403.html;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  root.*;@&\n    if (\$invalid_referer) {@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  root.*;@&\n    valid_referers none blocked ${domain_allow_all};@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  root.*;@&\n  location ~ .*\.(wma|wmv|asf|mp3|mmf|zip|rar|jpg|gif|png|swf|flv|mp4)\$ {@" ${web_install_dir}/conf/vhost/${domain}.conf
+    fi
+
+    [ "${redirect_yn}" == 'y' ] && sed -i "s@^  root.*;@&\n  if (\$host != $domain) {  return 301 \$scheme://${domain}\$request_uri;  }@" ${web_install_dir}/conf/vhost/${domain}.conf
+    
+    if [ "${nginx_ssl_yn}" == 'y' ]; then
+      sed -i "s@^  listen 80;@&\n  listen ${LISTENOPT};@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  server_name.*;@&\n  ssl_stapling_verify on;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  server_name.*;@&\n  ssl_stapling on;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  server_name.*;@&\n  add_header Strict-Transport-Security max-age=15768000;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  server_name.*;@&\n  ssl_buffer_size 1400;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  server_name.*;@&\n  ssl_session_cache builtin:1000 shared:SSL:10m;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  server_name.*;@&\n  ssl_session_timeout 10m;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  server_name.*;@&\n  ssl_prefer_server_ciphers on;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  server_name.*;@&\n  ssl_ciphers EECDH+CHACHA20:EECDH+AES128:RSA+AES128:EECDH+AES256:RSA+AES256:EECDH+3DES:RSA+3DES:\!MD5;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  server_name.*;@&\n  ssl_protocols TLSv1 TLSv1.1 TLSv1.2;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  server_name.*;@&\n  ssl_certificate_key ${PATH_SSL}/${domain}.key;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  server_name.*;@&\n  ssl_certificate ${PATH_SSL}/${domain}.crt;@" ${web_install_dir}/conf/vhost/${domain}.conf
+    fi
+  fi
+
   [ "${https_yn}" == 'y' ] && sed -i "s@^  root.*;@&\n  if (\$ssl_protocol = \"\") { return 301 https://\$server_name\$request_uri; }@" ${web_install_dir}/conf/vhost/${domain}.conf
 
   echo
@@ -612,7 +648,7 @@ EOF
   echo "$(printf "%-30s" "Your domain:")${CMSG}${domain}${CEND}"
   echo "$(printf "%-30s" "Virtualhost conf:")${CMSG}${web_install_dir}/conf/vhost/${domain}.conf${CEND}"
   echo "$(printf "%-30s" "Directory of:")${CMSG}${vhostdir}${CEND}"
-  [ "${rewrite_yn}" == 'y' ] && echo "$(printf "%-30s" "Rewrite rule:")${CMSG}${web_install_dir}/conf/rewrite/${rewrite}.conf${CEND}"
+  [ "${rewrite_yn}" == 'y' -a "${rewrite}" != 'magento2' ] && echo "$(printf "%-30s" "Rewrite rule:")${CMSG}${web_install_dir}/conf/rewrite/${rewrite}.conf${CEND}"
   [ "${nginx_ssl_yn}" == 'y' ] && Print_ssl
 }
 
@@ -793,7 +829,6 @@ EOF
   echo "$(printf "%-30s" "Nginx Virtualhost conf:")${CMSG}${web_install_dir}/conf/vhost/${domain}.conf${CEND}"
   echo "$(printf "%-30s" "Apache Virtualhost conf:")${CMSG}${apache_install_dir}/conf/vhost/${domain}.conf${CEND}"
   echo "$(printf "%-30s" "Directory of:")${CMSG}${vhostdir}${CEND}"
-  [ "${rewrite_yn}" == 'y' ] && echo "$(printf "%-28s" "Rewrite rule:")${CMSG}${web_install_dir}/conf/rewrite/${rewrite}.conf${CEND}"
   [ "${nginx_ssl_yn}" == 'y' ] && Print_ssl
 }
 
