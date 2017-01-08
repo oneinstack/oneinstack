@@ -84,6 +84,8 @@ checkDownload() {
           JDK_FILE="jdk-$(echo ${jdk16_version} | awk -F. '{print $2}')u$(echo ${jdk16_version} | awk -F_ '{print $NF}')-linux-${SYS_BIG_FLAG}.bin"
           ;;
       esac
+      echo "Download apr..."
+      src_url=http://archive.apache.org/dist/apr/apr-${apr_version}.tar.gz && Download_src
       # start download...
       src_url=http://mirrors.linuxeye.com/jdk/${JDK_FILE} && Download_src
     fi
