@@ -17,22 +17,22 @@ Install_Tomcat6() {
 
   # install openssl-1.0.2
   if [ ! -e "${openssl_install_dir}/lib/libcrypto.a" ]; then
-    tar xzf ${openssl_version}.tar.gz
-    pushd ${openssl_version}
+    tar xzf openssl-${openssl_version}.tar.gz
+    pushd openssl-${openssl_version}
     ./config --prefix=${openssl_install_dir} -fPIC shared zlib
     make -j ${THREAD} && make install
     popd
-    rm -rf ${openssl_version}
+    rm -rf openssl-${openssl_version}
   fi
 
   # install apr
   if [ ! -e "/usr/local/apr/bin/apr-1-config" ]; then
-    tar xzf ${apr_version}.tar.gz
-    pushd ${apr_version}
+    tar xzf apr-${apr_version}.tar.gz
+    pushd apr-${apr_version}
     ./configure
     make -j ${THREAD} && make install
     popd
-    rm -rf ${openssl_version}
+    rm -rf apr-${apr_version} 
   fi
 
   tar xzf apache-tomcat-${tomcat6_version}.tar.gz
