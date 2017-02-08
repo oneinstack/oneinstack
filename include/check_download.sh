@@ -647,7 +647,7 @@ checkDownload() {
 
   if [ "${FTP_yn}" == 'y' ]; then
     echo "Download pureftpd..."
-    src_url=http://download.pureftpd.org/pub/pure-ftpd/releases/pure-ftpd-${pureftpd_version}.tar.gz && Download_src
+    src_url=https://download.pureftpd.org/pub/pure-ftpd/releases/pure-ftpd-${pureftpd_version}.tar.gz && Download_src
   fi
 
   if [ "${phpMyAdmin_yn}" == 'y' ]; then
