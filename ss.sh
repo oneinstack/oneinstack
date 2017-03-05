@@ -19,8 +19,12 @@ printf "
 #######################################################################
 "
 
+# get pwd
+sed -i "s@^oneinstack_dir.*@oneinstack_dir=$(pwd)@" ./options.conf
+
 pushd src > /dev/null
 . ../options.conf
+. ../versions.txt
 . ../include/color.sh
 . ../include/check_os.sh
 . ../include/download.sh
