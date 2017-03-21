@@ -186,7 +186,7 @@ Create_SSL() {
       for D in ${domain} ${moredomainame}
       do
         Domain_IPADDR=$(ping ${D} -c1 | sed '1{s/[^(]*(//;s/).*//;q}')
-        [ "${PUBLIC_IPADDR}" != "${Domain_IPADDR}" ] && { echo; echo "${CFAILURE}DNS problem: NXDOMAIN looking up A for ${D}${CEND}"; echo; exit 1; }
+        [ "${PUBLIC_IPADDR%.*}" != "${Domain_IPADDR%.*}" ] && { echo; echo "${CFAILURE}DNS problem: NXDOMAIN looking up A for ${D}${CEND}"; echo; exit 1; }
       done
 
       #add Email
