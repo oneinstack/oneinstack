@@ -5,8 +5,8 @@ tengine_version=2.1.2
 openresty_version=1.11.2.2
 openssl_version=1.0.2k
 
-tomcat8_version=8.0.42
-tomcat7_version=7.0.76
+tomcat8_version=8.0.43
+tomcat7_version=7.0.77
 tomcat6_version=6.0.51
 
 apache24_version=2.4.25
