@@ -91,7 +91,7 @@ EOF
 <Host name="localhost" appBase="${wwwroot_dir}/default" unpackWARs="true" autoDeploy="true">
   <Context path="" docBase="${wwwroot_dir}/default" debug="0" reloadable="false" crossContext="true"/>
   <Valve className="org.apache.catalina.valves.AccessLogValve" directory="logs"
-    prefix="localhost_access_log." suffix=".txt" pattern="%h %l %u %t &quot;%r&quot; %s %b" />
+    prefix="localhost_access_log" suffix=".txt" pattern="%h %l %u %t &quot;%r&quot; %s %b" />
 </Host>
 EOF
     # logrotate tomcat catalina.out
