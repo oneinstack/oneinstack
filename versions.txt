@@ -1,31 +1,31 @@
 # newest software version
 # Web
-nginx_version=1.10.3
+nginx_version=1.12.0
 tengine_version=2.1.2
 openresty_version=1.11.2.2
 openssl_version=1.0.2k
 
-tomcat8_version=8.0.43
+tomcat8_version=8.5.14
 tomcat7_version=7.0.77
-tomcat6_version=6.0.51
+tomcat6_version=6.0.53
 
 apache24_version=2.4.25
 apache22_version=2.2.32
 pcre_version=8.40
 apr_version=1.5.2
 apr_util_version=1.5.4
-nghttp2_version=1.21.0
+nghttp2_version=1.21.1
 
 # DB
-mysql57_version=5.7.17
-mysql56_version=5.6.35
-mysql55_version=5.5.54
+mysql57_version=5.7.18
+mysql56_version=5.6.36
+mysql55_version=5.5.55
 
 mariadb101_version=10.1.22
 mariadb100_version=10.0.30
 mariadb55_version=5.5.54
 
-percona57_version=5.7.17-12
+percona57_version=5.7.17-13
 percona56_version=5.6.35-81.0
 percona55_version=5.5.54-38.7
 
@@ -37,8 +37,8 @@ jdk17_version=1.7.0_80
 jdk16_version=1.6.0_45
 
 # PHP
-php71_version=7.1.3
-php70_version=7.0.17
+php71_version=7.1.4
+php70_version=7.0.18
 php56_version=5.6.30
 php55_version=5.5.38
 php54_version=5.4.45
@@ -86,7 +86,7 @@ jemalloc_version=4.5.0
 boost_version=1.59.0
 
 # Others
-libevent_version=2.1.8-stable
+libevent_version=2.0.22-stable
 tmux_version=2.3
 htop_version=2.0.2
 bison_version=2.7.1
