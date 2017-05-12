@@ -216,7 +216,7 @@ checkDownload() {
         fi
         if [ "${dbInstallMethods}" == '1' ]; then
           echo "Download MySQL 5.5 binary package..."
-          FILE_NAME=mysql-${mysql55_version}-linux2.6-${SYS_BIT_b}.tar.gz
+          FILE_NAME=mysql-${mysql55_version}-linux-glibc2.5-${SYS_BIT_b}.tar.gz
         elif [ "${dbInstallMethods}" == '2' ]; then
           echo "Download MySQL 5.5 source package..."
           FILE_NAME=mysql-${mysql55_version}.tar.gz
