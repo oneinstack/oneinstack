@@ -33,7 +33,7 @@ percona55_version=5.5.55-38.8
 alisql56_version=5.6.32-5
 
 # JDK
-jdk18_version=1.8.0_131
+jdk18_version=1.8.0_141
 jdk17_version=1.7.0_80
 jdk16_version=1.6.0_45
 
@@ -49,7 +49,7 @@ zendopcache_version=7.0.5
 xcache_version=3.2.0
 apcu_version=4.0.11
 apcu_for_php7_version=5.1.8
-ImageMagick_version=6.9.9-0
+ImageMagick_version=6.9.9-3
 imagick_version=3.4.3
 imagick_for_php53_version=3.3.0
 GraphicsMagick_version=1.3.26
@@ -66,12 +66,12 @@ eaccelerator_version=0.9.6.1
 pureftpd_version=1.0.46
 
 # Redis
-redis_version=4.0.0
+redis_version=4.0.1
 redis_pecl_for_php7_version=3.1.3
 redis_pecl_version=2.2.8
 
 # Memcached
-memcached_version=1.4.39
+memcached_version=1.5.0
 libmemcached_version=1.0.18
 memcached_pecl_version=2.2.0
 memcached_pecl_php7_version=3.0.3
