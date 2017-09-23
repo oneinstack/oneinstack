@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.com
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #        Install SS Server
 #
 # Project home page:
@@ -74,19 +74,17 @@ Iptables_set() {
   done
 
   if [ "${OS}" == 'CentOS' ]; then
-    if [ -z "$(grep -E ${SS_port} /etc/sysconfig/iptables)" ]; then
+    if [ -n "`grep 'dport 80 ' /etc/sysconfig/iptables`" -a -z "$(grep -E ${SS_port} /etc/sysconfig/iptables)" ]; then
       iptables -I INPUT 4 -p udp -m state --state NEW -m udp --dport ${SS_port} -j ACCEPT
       iptables -I INPUT 4 -p tcp -m state --state NEW -m tcp --dport ${SS_port} -j ACCEPT
       service iptables save
     fi
   elif [[ ${OS} =~ ^Ubuntu$|^Debian$ ]]; then
-    if [ -z "$(grep -E ${SS_port} /etc/iptables.up.rules)" ]; then
+    if [ -n "`grep 'dport 80 ' /etc/iptables.up.rules`" -a -z "$(grep -E ${SS_port} /etc/iptables.up.rules)" ]; then
       iptables -I INPUT 4 -p udp -m state --state NEW -m udp --dport ${SS_port} -j ACCEPT
       iptables -I INPUT 4 -p tcp -m state --state NEW -m tcp --dport ${SS_port} -j ACCEPT
       iptables-save > /etc/iptables.up.rules
     fi
-  else
-      echo "${CWARNING}This port is already in iptables! ${CEND}"
   fi
 
 }
@@ -107,7 +105,7 @@ Def_parameter() {
     done
     AddUser_SS
     Iptables_set
-    pkgList="wget unzip openssl-devel gcc swig autoconf libtool libevent automake make curl curl-devel zlib-devel perl perl-devel cpio expat-devel gettext-devel git asciidoc xmlto pcre-devel mbedtls-devel udns-devel libev-devel"
+    pkgList="wget unzip openssl-devel gcc swig autoconf libtool libevent automake make curl curl-devel zlib-devel perl perl-devel cpio expat-devel gettext-devel git asciidoc xmlto pcre-devel mbedtls-devel udns-devel libev-devel libsodium"
     for Package in ${pkgList}; do
       yum -y install ${Package}
     done

@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.com
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -12,7 +12,7 @@ export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 clear
 printf "
 #######################################################################
-#       OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+      #
+#       OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+      #
 #                     Setup the backup parameters                     #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
@@ -168,23 +168,27 @@ fi
 
 if [[ "$DESC_BK" =~ ^[3,5,6]$ ]]; then
   [ ! -e "${python_install_dir}/bin/python" ] && Install_Python
-  [ ! -e "${python_install_dir}/lib/python2.7/site-packages/requests" ] && ${python_install_dir}/bin/pip install requests
+  [ ! -e "${python_install_dir}/lib/coscmd" ] && ${python_install_dir}/bin/pip install coscmd==1.7.4 >/dev/null 2>&1 
+  sed -i "/if query_yes_no/{ n; s/^.*/#&/; }" ${python_install_dir}/lib/python2.7/site-packages/coscmd/cos_client.py
+  sed -i "s/if query_yes_no/#if query_yes_no/" ${python_install_dir}/lib/python2.7/site-packages/coscmd/cos_client.py
   while :; do echo
     echo 'Please select your backup datacenter:'
     echo -e "\t ${CMSG}1${CEND}. 华南(广州)  ${CMSG}2${CEND}. 华北(天津)"
-    echo -e "\t ${CMSG}3${CEND}. 华东(上海)  ${CMSG}4${CEND}. 新加坡"
+    echo -e "\t ${CMSG}3${CEND}. 华东(上海)  ${CMSG}4${CEND}. 西南(成都)"
+    echo -e "\t ${CMSG}5${CEND}. 新加坡"
     read -p "Please input a number:(Default 1 press Enter) " Location
     [ -z "$Location" ] && Location=1
-    if [ ${Location} -ge 1 >/dev/null 2>&1 -a ${Location} -le 4 >/dev/null 2>&1 ]; then
+    if [ ${Location} -ge 1 >/dev/null 2>&1 -a ${Location} -le 5 >/dev/null 2>&1 ]; then
       break
     else
-      echo "${CWARNING}input error! Please only input number 1,2,3,4${CEND}"
+      echo "${CWARNING}input error! Please only input number 1~5${CEND}"
     fi
   done
-  [ "$Location" == '1' ] && region=gz
-  [ "$Location" == '2' ] && region=tj
-  [ "$Location" == '3' ] && region=sh
-  [ "$Location" == '4' ] && region=sgp
+  [ "$Location" == '1' ] && region='cn-south'
+  [ "$Location" == '2' ] && region='cn-north'
+  [ "$Location" == '3' ] && region='cn-east'
+  [ "$Location" == '4' ] && region='cn-southwest'
+  [ "$Location" == '5' ] && region='sg'
   while :; do echo
     read -p "Please enter the Qcloud COS appid: " appid 
     [ -z "$appid" ] && continue
@@ -198,8 +202,9 @@ if [[ "$DESC_BK" =~ ^[3,5,6]$ ]]; then
     read -p "Please enter the Qcloud COS bucket: " bucket 
     [ -z "$bucket" ] && continue
     echo
-    $python_install_dir/bin/python ./tools/coscmd config --appid=$appid --id=$secret_id --key=$secret_key --region=$region --bucket=$bucket >/dev/null 2>&1
-    if [ "`$python_install_dir/bin/python ./tools/coscmd ls /`" == 'True' ];then
+    $python_install_dir/bin/coscmd config -u $appid -a $secret_id -s $secret_key -r $region -b $bucket >/dev/null 2>&1
+    $python_install_dir/bin/coscmd delete oneinstack.test >/dev/null 2>&1
+    if [ $? = 0 ];then
       echo "${CMSG}appid/secret_id/secret_key/region/bucket OK${CEND}"
       echo
       break

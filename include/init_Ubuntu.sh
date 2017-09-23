@@ -84,7 +84,12 @@ sysctl -p
 
 sed -i 's@^ACTIVE_CONSOLES.*@ACTIVE_CONSOLES="/dev/tty[1-2]"@' /etc/default/console-setup
 sed -i 's@^@#@g' /etc/init/tty[3-6].conf
+locale-gen en_US.UTF-8
 echo "en_US.UTF-8 UTF-8" > /var/lib/locales/supported.d/local
+cat > /etc/default/locale << EOF
+LANG="en_US.UTF-8"
+LANGUAGE="en_US:en"
+EOF
 sed -i 's@^@#@g' /etc/init/control-alt-delete.conf
 
 # Update time
@@ -92,15 +97,16 @@ ntpdate pool.ntp.org
 [ ! -e "/var/spool/cron/crontabs/root" -o -z "$(grep ntpdate /var/spool/cron/crontabs/root 2>/dev/null)" ] && { echo "*/20 * * * * $(which ntpdate) pool.ntp.org > /dev/null 2>&1" >> /var/spool/cron/crontabs/root;chmod 600 /var/spool/cron/crontabs/root; }
 
 # iptables
-if [ -e "/etc/iptables.up.rules" ] && [ -n "$(grep '^:INPUT DROP' /etc/iptables.up.rules)" -a -n "$(grep 'NEW -m tcp --dport 22 -j ACCEPT' /etc/iptables.up.rules)" -a -n "$(grep 'NEW -m tcp --dport 80 -j ACCEPT' /etc/iptables.up.rules)" ]; then
-  IPTABLES_STATUS=yes
-else
-  IPTABLES_STATUS=no
-fi
-
-if [ "${IPTABLES_STATUS}" == "no" ]; then
-  [ -e "/etc/iptables.up.rules" ] && /bin/mv /etc/iptables.up.rules{,_bk}
-  cat > /etc/iptables.up.rules << EOF
+if [ "$iptables_yn" == 'y' ]; then
+  if [ -e "/etc/iptables.up.rules" ] && [ -n "$(grep '^:INPUT DROP' /etc/iptables.up.rules)" -a -n "$(grep 'NEW -m tcp --dport 22 -j ACCEPT' /etc/iptables.up.rules)" -a -n "$(grep 'NEW -m tcp --dport 80 -j ACCEPT' /etc/iptables.up.rules)" ]; then
+    IPTABLES_STATUS=yes
+  else
+    IPTABLES_STATUS=no
+  fi
+  
+  if [ "${IPTABLES_STATUS}" == "no" ]; then
+    [ -e "/etc/iptables.up.rules" ] && /bin/mv /etc/iptables.up.rules{,_bk}
+    cat > /etc/iptables.up.rules << EOF
 # Firewall configuration written by system-config-securitylevel
 # Manual customization of this file is not recommended.
 *filter
@@ -121,16 +127,17 @@ if [ "${IPTABLES_STATUS}" == "no" ]; then
 -A syn-flood -j REJECT --reject-with icmp-port-unreachable
 COMMIT
 EOF
-fi
+  fi
 
-FW_PORT_FLAG=$(grep -ow "dport ${SSH_PORT}" /etc/iptables.up.rules)
-[ -z "${FW_PORT_FLAG}" -a "${SSH_PORT}" != "22" ] && sed -i "s@dport 22 -j ACCEPT@&\n-A INPUT -p tcp -m state --state NEW -m tcp --dport ${SSH_PORT} -j ACCEPT@" /etc/iptables.up.rules
-iptables-restore < /etc/iptables.up.rules
-cat > /etc/network/if-pre-up.d/iptables << EOF
+  FW_PORT_FLAG=$(grep -ow "dport ${SSH_PORT}" /etc/iptables.up.rules)
+  [ -z "${FW_PORT_FLAG}" -a "${SSH_PORT}" != "22" ] && sed -i "s@dport 22 -j ACCEPT@&\n-A INPUT -p tcp -m state --state NEW -m tcp --dport ${SSH_PORT} -j ACCEPT@" /etc/iptables.up.rules
+  iptables-restore < /etc/iptables.up.rules
+  cat > /etc/network/if-pre-up.d/iptables << EOF
 #!/bin/bash
 /sbin/iptables-restore < /etc/iptables.up.rules
 EOF
-chmod +x /etc/network/if-pre-up.d/iptables
+  chmod +x /etc/network/if-pre-up.d/iptables
+fi
 service rsyslog restart
 service ssh restart
 

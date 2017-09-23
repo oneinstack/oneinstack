@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.com
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -12,7 +12,7 @@ export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 clear
 printf "
 #######################################################################
-#       OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+      #
+#       OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+      #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
@@ -53,6 +53,16 @@ if [ -e "/etc/ssh/sshd_config" ]; then
     sed -i "s@^Port.*@Port $SSH_PORT@" /etc/ssh/sshd_config
   fi
 fi
+
+# check iptables
+while :; do echo
+  read -p "Do you want to enable iptables? [y/n]: " iptables_yn
+  if [[ ! $iptables_yn =~ ^[y,n]$ ]]; then
+    echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
+  else
+    break
+  fi
+done
 
 # check Web server
 while :; do echo
@@ -335,7 +345,7 @@ while :; do echo
           fi
 
           # ionCube
-          if [ "${TARGET_ARCH}" != "arm64" -a "$PHP_version" != '6' ]; then
+          if [ "${TARGET_ARCH}" != "arm64" ]; then
             while :; do echo
               read -p "Do you want to install ionCube? [y/n]: " ionCube_yn
               if [[ ! $ionCube_yn =~ ^[y,n]$ ]]; then
@@ -500,11 +510,7 @@ fi
 
 # openSSL 
 . ./include/openssl.sh
-if [ "$Debian_version" == '8' -o "$Ubuntu_version" == '16' ] && [ "$PHP_version" == '1' ]; then
-  # Problem building php-5.3 with openssl
-  Install_openSSL100 | tee -a $oneinstack_dir/install.log
-fi
-if [[ $Tomcat_version =~ ^[1-3]$ ]] || [ "$DB_yn" == 'y' -a "$Apache_version" == '1' ]; then
+if [[ $Tomcat_version =~ ^[1-3]$ ]] || [[ $Apache_version =~ ^[1-2]$ ]] || [[ $PHP_version =~ ^[1-6]$ ]]; then
   Install_openSSL102 | tee -a $oneinstack_dir/install.log
 fi
 

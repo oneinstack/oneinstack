@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.com
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -12,7 +12,7 @@ export PATH=/usr/local/sbin:/usr/local/bin:/sbin:/bin:/usr/sbin:/usr/bin
 clear
 printf "
 #######################################################################
-#       OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+      #
+#       OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+      #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
@@ -243,7 +243,7 @@ EOF
           Cron_Command="/etc/init.d/httpd graceful"
         fi
         [ "${OS}" == "CentOS" ] && Cron_file=/var/spool/cron/root || Cron_file=/var/spool/cron/crontabs/root
-        [ -z "$(grep 'certbot renew' ${Cron_file})" ] && echo "30 2 * * 1 ${python_install_dir}/bin/certbot renew --renew-hook \"${Cron_Command}\"" >> $Cron_file
+        [ -z "$(grep 'certbot renew' ${Cron_file})" ] && echo "30 2 * * 1 ${python_install_dir}/bin/certbot renew --force-renew --renew-hook \"${Cron_Command}\"" >> $Cron_file
       else
         echo "${CFAILURE}Error: Let's Encrypt SSL certificate installation failed! ${CEND}"
         exit 1
@@ -438,14 +438,15 @@ Nginx_rewrite() {
   else
     echo
     echo "Please input the rewrite of programme :"
-    echo "${CMSG}wordpress${CEND},${CMSG}opencart${CEND},${CMSG}magento2${CEND},${CMSG}drupal${CEND},${CMSG}joomla${CEND},${CMSG}laravel${CEND},${CMSG}thinkphp${CEND},${CMSG}discuz${CEND},${CMSG}typecho${CEND},${CMSG}ecshop${CEND} rewrite was exist."
+    echo "${CMSG}wordpress${CEND},${CMSG}opencart${CEND},${CMSG}magento2${CEND},${CMSG}drupal${CEND},${CMSG}joomla${CEND},${CMSG}laravel${CEND},${CMSG}thinkphp${CEND},${CMSG}pathinfo${CEND},${CMSG}discuz${CEND},${CMSG}typecho${CEND},${CMSG}ecshop${CEND} rewrite was exist."
     read -p "(Default rewrite: other): " rewrite
     if [ "${rewrite}" == "" ]; then
       rewrite="other"
     fi
     echo "You choose rewrite=${CMSG}$rewrite${CEND}"
     [ "${NGX_FLAG}" == 'php' -a "${rewrite}" == "thinkphp" ] && NGX_CONF=$(echo -e "location ~ \.php {\n    #fastcgi_pass remote_php_ip:9000;\n    fastcgi_pass unix:/dev/shm/php-cgi.sock;\n    fastcgi_index index.php;\n    include fastcgi_params;\n    set \$real_script_name \$fastcgi_script_name;\n    if (\$fastcgi_script_name ~ \"^(.+?\.php)(/.+)\$\") {\n      set \$real_script_name \$1;\n      #set \$path_info \$2;\n    }\n    fastcgi_param SCRIPT_FILENAME \$document_root\$real_script_name;\n    fastcgi_param SCRIPT_NAME \$real_script_name;\n    #fastcgi_param PATH_INFO \$path_info;\n  }")
-    if [ "${rewrite}" != 'magento2' ]; then
+    [ "${NGX_FLAG}" == 'php' -a "${rewrite}" == "pathinfo" ] && NGX_CONF=$(echo -e "location / {\n    if (!-e \$request_filename) {\n      rewrite ^(.*)\$ /index.php?s=\$1 last;\n      break;\n    }\n  }\n\n  location ~ [^/]\.php(/|$) {\n    #fastcgi_pass remote_php_ip:9000;\n    fastcgi_pass unix:/dev/shm/php-cgi.sock;\n    fastcgi_index index.php;\n    include fastcgi.conf;\n    fastcgi_split_path_info ^(.+?\.php)(/.*)\$;\n    set \$path_info \$fastcgi_path_info;\n    fastcgi_param PATH_INFO \$path_info;\n    try_files \$fastcgi_script_name =404;\n  }")
+    if [ "${rewrite}" != 'magento2' -a "${rewrite}" != 'pathinfo' ]; then
       if [ -e "config/${rewrite}.conf" ]; then
         /bin/cp config/${rewrite}.conf ${web_install_dir}/conf/rewrite/${rewrite}.conf
       else
@@ -526,7 +527,7 @@ EOF
 
   printf "
 #######################################################################
-#       OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+      #
+#       OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+      #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
@@ -553,7 +554,7 @@ EOF
 
   printf "
 #######################################################################
-#       OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+      #
+#       OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+      #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
@@ -578,6 +579,7 @@ server {
   #error_page 502 /502.html;
   ${anti_hotlinking}
   ${NGX_CONF}
+
   location ~ .*\.(gif|jpg|jpeg|png|bmp|swf|flv|mp4|ico)$ {
     expires 30d;
     access_log off;
@@ -592,6 +594,7 @@ server {
 }
 EOF
 
+  [ "${rewrite}" == 'pathinfo' ] && sed -i '/pathinfo.conf;$/d' ${web_install_dir}/conf/vhost/${domain}.conf
   if [ "${rewrite}" == 'magento2' -a -e "config/${rewrite}.conf" ]; then
     /bin/cp config/${rewrite}.conf ${web_install_dir}/conf/vhost/${domain}.conf
     sed -i "s@^  set \$MAGE_ROOT.*;@  set \$MAGE_ROOT ${vhostdir};@" ${web_install_dir}/conf/vhost/${domain}.conf
@@ -602,7 +605,7 @@ EOF
       sed -i "s@^  root.*;@&\n  }@" ${web_install_dir}/conf/vhost/${domain}.conf
       sed -i "s@^  root.*;@&\n    }@" ${web_install_dir}/conf/vhost/${domain}.conf
       sed -i "s@^  root.*;@&\n      return 403;@" ${web_install_dir}/conf/vhost/${domain}.conf
-      sed -i "s@^  root.*;@&\n      rewrite ^/ http://www.linuxeye.com/403.html;@" ${web_install_dir}/conf/vhost/${domain}.conf
+      sed -i "s@^  root.*;@&\n      rewrite ^/ http://www.example.com/403.html;@" ${web_install_dir}/conf/vhost/${domain}.conf
       sed -i "s@^  root.*;@&\n    if (\$invalid_referer) {@" ${web_install_dir}/conf/vhost/${domain}.conf
       sed -i "s@^  root.*;@&\n    valid_referers none blocked ${domain_allow_all};@" ${web_install_dir}/conf/vhost/${domain}.conf
       sed -i "s@^  root.*;@&\n  location ~ .*\.(wma|wmv|asf|mp3|mmf|zip|rar|jpg|gif|png|swf|flv|mp4)\$ {@" ${web_install_dir}/conf/vhost/${domain}.conf
@@ -641,14 +644,14 @@ EOF
 
   printf "
 #######################################################################
-#       OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+      #
+#       OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+      #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
   echo "$(printf "%-30s" "Your domain:")${CMSG}${domain}${CEND}"
   echo "$(printf "%-30s" "Virtualhost conf:")${CMSG}${web_install_dir}/conf/vhost/${domain}.conf${CEND}"
   echo "$(printf "%-30s" "Directory of:")${CMSG}${vhostdir}${CEND}"
-  [ "${rewrite_yn}" == 'y' -a "${rewrite}" != 'magento2' ] && echo "$(printf "%-30s" "Rewrite rule:")${CMSG}${web_install_dir}/conf/rewrite/${rewrite}.conf${CEND}"
+  [ "${rewrite_yn}" == 'y' -a "${rewrite}" != 'magento2' -a "${rewrite}" != 'pathinfo' ] && echo "$(printf "%-30s" "Rewrite rule:")${CMSG}${web_install_dir}/conf/rewrite/${rewrite}.conf${CEND}"
   [ "${nginx_ssl_yn}" == 'y' ] && Print_ssl
 }
 
@@ -726,7 +729,7 @@ EOF
 
   printf "
 #######################################################################
-#       OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+      #
+#       OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+      #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
@@ -821,7 +824,7 @@ EOF
 
   printf "
 #######################################################################
-#       OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+      #
+#       OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+      #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
@@ -973,7 +976,7 @@ Del_Apache_Vhost() {
 Del_Tomcat_Vhost() {
   if [ -e "${tomcat_install_dir}/conf/server.xml" ]; then
     if [ -e "${web_install_dir}/sbin/nginx" ]; then
-      if [ -n "$(grep vhost-${domain} ${tomcat_install_dir}/conf/server.xml)" ]; then
+      if [ -n "$(echo ${domain} | grep '.*\..*')" ] && [ -n "$(grep vhost-${domain} ${tomcat_install_dir}/conf/server.xml)" ]; then
         sed -i /vhost-${domain}/d ${tomcat_install_dir}/conf/server.xml
         rm -rf ${tomcat_install_dir}/conf/vhost/${domain}.xml
         /etc/init.d/tomcat restart

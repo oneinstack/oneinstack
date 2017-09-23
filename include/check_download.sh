@@ -15,6 +15,7 @@ checkDownload() {
   if [ "${Web_yn}" == 'y' ]; then
     echo "Download openSSL..."
     src_url=https://www.openssl.org/source/openssl-${openssl_version}.tar.gz && Download_src
+    src_url=http://curl.haxx.se/ca/cacert.pem && Download_src
     case "${Nginx_version}" in
       1)
         echo "Download nginx..."
@@ -126,7 +127,7 @@ checkDownload() {
         fi
         if [ "${dbInstallMethods}" == '1' ]; then
           echo "Download MySQL 5.7 binary package..."
-          FILE_NAME=mysql-${mysql57_version}-linux-glibc2.5-${SYS_BIT_b}.tar.gz
+          FILE_NAME=mysql-${mysql57_version}-linux-glibc2.12-${SYS_BIT_b}.tar.gz
         elif [ "${dbInstallMethods}" == '2' ]; then
           echo "Download MySQL 5.7 source package..."
           FILE_NAME=mysql-${mysql57_version}.tar.gz
@@ -175,7 +176,7 @@ checkDownload() {
         fi
         if [ "${dbInstallMethods}" == '1' ]; then
           echo "Download MySQL 5.6 binary package..."
-          FILE_NAME=mysql-${mysql56_version}-linux-glibc2.5-${SYS_BIT_b}.tar.gz
+          FILE_NAME=mysql-${mysql56_version}-linux-glibc2.12-${SYS_BIT_b}.tar.gz
         elif [ "${dbInstallMethods}" == '2' ]; then
           echo "Download MySQL 5.6 source package..."
           FILE_NAME=mysql-${mysql56_version}.tar.gz
@@ -223,7 +224,7 @@ checkDownload() {
         fi
         if [ "${dbInstallMethods}" == '1' ]; then
           echo "Download MySQL 5.5 binary package..."
-          FILE_NAME=mysql-${mysql55_version}-linux-glibc2.5-${SYS_BIT_b}.tar.gz
+          FILE_NAME=mysql-${mysql55_version}-linux-glibc2.12-${SYS_BIT_b}.tar.gz
         elif [ "${dbInstallMethods}" == '2' ]; then
           echo "Download MySQL 5.5 source package..."
           FILE_NAME=mysql-${mysql55_version}.tar.gz
@@ -538,13 +539,6 @@ checkDownload() {
         # php 5.3
         src_url=${mirrorLink}/debian_patches_disable_SSLv2_for_openssl_1_0_0.patch && Download_src
         src_url=${mirrorLink}/php5.3patch && Download_src
-        # Use the special ssl for php5.3
-        if [ "${Debian_version}" == '8' -o "${Ubuntu_version}" == "16" ]; then
-          if [ ! -e "/usr/local/openssl100s/lib/libcrypto.a" ]; then
-            src_url=${mirrorLink}/openssl-1.0.0s.tar.gz && Download_src
-            src_url=${mirrorLink}/curl-7.35.0.tar.gz && Download_src
-          fi
-        fi
         src_url=http://www.php.net/distributions/php-${php53_version}.tar.gz && Download_src
         src_url=${mirrorLink}/fpm-race-condition.patch && Download_src
         ;;
@@ -672,13 +666,8 @@ checkDownload() {
     if [ "${Magick}" == '1' ]; then
       echo "Download ImageMagick..."
       src_url=${mirrorLink}/ImageMagick-${ImageMagick_version}.tar.gz && Download_src
-      if [ "${PHP_version}" == '1' ]; then
-        echo "Download image for php 5.3..."
-        src_url=https://pecl.php.net/get/imagick-${imagick_for_php53_version}.tgz && Download_src
-      else
-        echo "Download imagick..."
-        src_url=http://pecl.php.net/get/imagick-${imagick_version}.tgz && Download_src
-      fi
+      echo "Download imagick..."
+      src_url=http://pecl.php.net/get/imagick-${imagick_version}.tgz && Download_src
     else
       echo "Download graphicsmagick..."
       src_url=http://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/${GraphicsMagick_version}/GraphicsMagick-${GraphicsMagick_version}.tar.gz && Download_src
@@ -705,17 +694,11 @@ checkDownload() {
   if [ "${redis_yn}" == 'y' ]; then
     echo "Download redis..."
     src_url=http://download.redis.io/releases/redis-${redis_version}.tar.gz && Download_src
+    echo "Download redis pecl..."
+    src_url=http://pecl.php.net/get/redis-${redis_pecl_version}.tgz && Download_src
     if [ "${OS}" == "CentOS" ]; then
       echo "Download start-stop-daemon.c for CentOS..."
       src_url=${mirrorLink}/start-stop-daemon.c && Download_src
-    fi
-    # redis addon
-    if [[ "$PHP_version" =~ ^[5-6]$ ]]; then
-      echo "Download redis pecl for php 7.x..."
-      src_url=http://pecl.php.net/get/redis-${redis_pecl_for_php7_version}.tgz && Download_src
-    else
-      echo "Download redis pecl..."
-      src_url=http://pecl.php.net/get/redis-${redis_pecl_version}.tgz && Download_src
     fi
   fi
 
