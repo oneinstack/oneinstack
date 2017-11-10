@@ -3,7 +3,7 @@
 nginx_version=1.12.2
 tengine_version=2.2.1
 openresty_version=1.11.2.5
-openssl_version=1.0.2l
+openssl_version=1.0.2m
 
 tomcat8_version=8.5.23
 tomcat7_version=7.0.82
@@ -12,9 +12,9 @@ tomcat6_version=6.0.53
 apache24_version=2.4.29
 apache22_version=2.2.34
 pcre_version=8.41
-apr_version=1.6.2
-apr_util_version=1.6.0
-nghttp2_version=1.24.0
+apr_version=1.6.3
+apr_util_version=1.6.1
+nghttp2_version=1.27.0
 
 # DB
 mysql57_version=5.7.20
@@ -30,10 +30,10 @@ percona57_version=5.7.19-17
 percona56_version=5.6.37-82.2
 percona55_version=5.5.57-38.9
 
-alisql56_version=5.6.32-6
+alisql56_version=5.6.32-7
 
 # JDK
-jdk18_version=1.8.0_144
+jdk18_version=1.8.0_152
 jdk17_version=1.7.0_80
 jdk16_version=1.6.0_45
 
@@ -50,7 +50,7 @@ curl_version=7.56.1
 libmcrypt_version=2.5.8
 mcrypt_version=2.6.8
 mhash_version=0.9.9.9
-ImageMagick_version=6.9.9-19
+ImageMagick_version=6.9.9-22
 imagick_version=3.4.3
 GraphicsMagick_version=1.3.26
 gmagick_for_php7_version=2.0.4RC1
@@ -60,7 +60,7 @@ xcache_version=3.2.0
 apcu_version=4.0.11
 apcu_for_php7_version=5.1.8
 eaccelerator_version=0.9.6.1
-swoole_version=1.9.20
+swoole_version=1.9.22
 
 # Ftp
 pureftpd_version=1.0.46
@@ -70,7 +70,7 @@ redis_version=4.0.2
 redis_pecl_version=3.1.4
 
 # Memcached
-memcached_version=1.5.1
+memcached_version=1.5.3
 libmemcached_version=1.0.18
 memcached_pecl_version=2.2.0
 memcached_pecl_php7_version=3.0.3
@@ -87,10 +87,10 @@ boost_version=1.59.0
 
 # Others
 libevent_version=2.0.22-stable
-tmux_version=2.5
+tmux_version=2.6
 htop_version=2.0.2
 bison_version=2.7.1
 python_version=2.7.14
 setuptools_version=32.0.0
 pip_version=9.0.1
-fail2ban_version=0.10
+fail2ban_version=0.10.1
