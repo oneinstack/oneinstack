@@ -21,10 +21,14 @@ printf "
 # Check if user is root
 [ $(id -u) != '0' ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
 
+# copy default config
+test -e "./options.conf" || { rm -rf ./options.conf;cp -f ./options.default.conf ./options.conf; }
+
 # get pwd
 sed -i "s@^oneinstack_dir.*@oneinstack_dir=$(pwd)@" ./options.conf
 
 . ./versions.txt
+test -e "./options.default.conf" && { . ./options.default.conf; }
 . ./options.conf
 . ./include/color.sh
 . ./include/memory.sh
