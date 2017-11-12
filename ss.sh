@@ -25,7 +25,7 @@ test -e "./options.conf" || { rm -rf ./options.conf;cp -f ./options.default.conf
 sed -i "s@^oneinstack_dir.*@oneinstack_dir=$(pwd)@" ./options.conf
 
 pushd src > /dev/null
-. ../options.default.conf
+test -e "./options.default.conf" && { . ./options.default.conf; }
 . ../options.conf
 . ../versions.txt
 . ../include/color.sh

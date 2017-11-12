@@ -22,7 +22,7 @@ test -e "./options.conf" || { rm -rf ./options.conf;cp -f ./options.default.conf
 
 OIS_FOLDER=$(dirname "`readlink -f $0`")
 pushd ${OIS_FOLDER} > /dev/null
-. ./options.default.conf
+test -e "./options.default.conf" && { . ./options.default.conf; }
 . ./options.conf
 . ./include/color.sh
 . ./include/check_dir.sh

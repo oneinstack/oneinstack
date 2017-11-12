@@ -19,7 +19,7 @@ printf "
 # copy default config
 test -e "./options.conf" || { rm -rf ./options.conf;cp -f ./options.default.conf ./options.conf; }
 
-. ./options.default.conf
+test -e "./options.default.conf" && { . ./options.default.conf; }
 . ./options.conf
 . ./include/color.sh
 . ./include/check_dir.sh
