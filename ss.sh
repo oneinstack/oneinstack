@@ -18,11 +18,14 @@ printf "
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
+# copy default config
+test -e "./options.conf" || { rm -rf ./options.conf;cp -f ./options.default.conf ./options.conf; }
 
 # get pwd
 sed -i "s@^oneinstack_dir.*@oneinstack_dir=$(pwd)@" ./options.conf
 
 pushd src > /dev/null
+. ../options.default.conf
 . ../options.conf
 . ../versions.txt
 . ../include/color.sh

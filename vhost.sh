@@ -16,7 +16,10 @@ printf "
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
+# copy default config
+test -e "./options.conf" || { rm -rf ./options.conf;cp -f ./options.default.conf ./options.conf; }
 
+. ./options.default.conf
 . ./options.conf
 . ./include/color.sh
 . ./include/check_dir.sh

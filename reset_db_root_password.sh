@@ -17,29 +17,32 @@ printf "
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
+# copy default config
+test -e "./options.conf" || { rm -rf ./options.conf;cp -f ./options.default.conf ./options.conf; }
 
 OIS_FOLDER=$(dirname "`readlink -f $0`")
-pushd $OIS_FOLDER > /dev/null
+pushd ${OIS_FOLDER} > /dev/null
+. ./options.default.conf
 . ./options.conf
 . ./include/color.sh
 . ./include/check_dir.sh
 
 Input_db_root_password() {
-  [ ! -d "$db_install_dir" ] && { echo "${CFAILURE}Database is not installed on your system! ${CEND}"; exit 1; }
+  [ ! -d "${db_install_dir}" ] && { echo "${CFAILURE}Database is not installed on your system! ${CEND}"; exit 1; }
   while :; do echo
     read -p "Please input the root password of database: " New_dbrootpwd
-    [ -n "`echo $New_dbrootpwd | grep '[+|&]'`" ] && { echo "${CWARNING}input error,not contain a plus sign (+) and &${CEND}"; continue; }
+    [ -n "`echo ${New_dbrootpwd} | grep '[+|&]'`" ] && { echo "${CWARNING}input error,not contain a plus sign (+) and &${CEND}"; continue; }
     (( ${#New_dbrootpwd} >= 5 )) && break || echo "${CWARNING}database root password least 5 characters! ${CEND}"
   done
 }
   
 Reset_db_root_password() {
-  $db_install_dir/bin/mysqladmin -uroot -p"$dbrootpwd" password "$New_dbrootpwd" -h localhost > /dev/null 2>&1
+  ${db_install_dir}/bin/mysqladmin -uroot -p"${dbrootpwd}" password "${New_dbrootpwd}" -h localhost > /dev/null 2>&1
   status_Localhost=`echo $?`
-  $db_install_dir/bin/mysqladmin -uroot -p"$dbrootpwd" password "$New_dbrootpwd" -h 127.0.0.1 > /dev/null 2>&1
+  ${db_install_dir}/bin/mysqladmin -uroot -p"${dbrootpwd}" password "${New_dbrootpwd}" -h 127.0.0.1 > /dev/null 2>&1
   status_127=`echo $?`
-  if [ $status_Localhost == '0' -a $status_127 == '0' ]; then
-    sed -i "s+^dbrootpwd.*+dbrootpwd='$New_dbrootpwd'+" ./options.conf
+  if [ ${status_Localhost} == '0' -a ${status_127} == '0' ]; then
+    sed -i "s+^dbrootpwd.*+dbrootpwd='${New_dbrootpwd}'+" ./options.conf
     echo
     echo "Password reset succesfully! "
     echo "The new password: ${CMSG}${New_dbrootpwd}${CEND}"
