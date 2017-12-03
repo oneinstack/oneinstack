@@ -5,7 +5,7 @@ tengine_version=2.2.1
 openresty_version=1.13.6.1
 openssl_version=1.0.2m
 
-tomcat8_version=8.5.23
+tomcat8_version=8.5.24
 tomcat7_version=7.0.82
 tomcat6_version=6.0.53
 
@@ -47,7 +47,7 @@ php54_version=5.4.45
 php53_version=5.3.29
 
 libiconv_version=1.15
-curl_version=7.56.1
+curl_version=7.57.0
 libmcrypt_version=2.5.8
 mcrypt_version=2.6.8
 mhash_version=0.9.9.9
