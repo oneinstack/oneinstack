@@ -82,7 +82,7 @@ $wwwlogs_dir/*nginx.log {
   rotate 5
   missingok
   dateext
-  compress
+  #compress
   notifempty
   sharedscripts
   postrotate
