@@ -512,7 +512,7 @@ fi
 
 # openSSL 
 . ./include/openssl.sh
-if [[ $Tomcat_version =~ ^[1-3]$ ]] || [[ $Apache_version =~ ^[1-2]$ ]] || [[ $PHP_version =~ ^[1-7]$ ]]; then
+if [[ $OS != 'Ubuntu' ]] && [[ $Tomcat_version =~ ^[1-3]$ ]] || [[ $Apache_version =~ ^[1-2]$ ]] || [[ $PHP_version =~ ^[1-7]$ ]]; then
   Install_openSSL102 | tee -a $oneinstack_dir/install.log
 fi
 
