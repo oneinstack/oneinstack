@@ -513,7 +513,9 @@ fi
 # openSSL 
 . ./include/openssl.sh
 if [[ $Tomcat_version =~ ^[1-3]$ ]] || [[ $Apache_version =~ ^[1-2]$ ]] || [[ $PHP_version =~ ^[1-7]$ ]]; then
-  Install_openSSL102 | tee -a $oneinstack_dir/install.log
+  [[ $OS != Ubuntu ]] && Install_openSSL102 | tee -a $oneinstack_dir/install.log
+# [[ $OS == Ubuntu ]] && [[ $Wsl == true ]] && [ -e "/usr/local/openssl/lib/libcrypto.so.1.0.0" ] && mv /usr/local/openssl/lib/libcrypto.so.1.0.0 /usr/local/openssl/lib/libcrypto.so.1.0.0.bak
+# [[ $OS == Ubuntu ]] && [[ $Wsl == true ]] && [ -e "/usr/local/openssl/lib/libssl.so.1.0.0" ] && mv /usr/local/openssl/lib/libssl.so.1.0.0 /usr/local/openssl/lib/libssl.so.1.0.0.bak
 fi
 
 # Database
