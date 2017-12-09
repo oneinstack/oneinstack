@@ -28,7 +28,7 @@ mariadb55_version=5.5.58
 
 percona57_version=5.7.19-17
 percona56_version=5.6.37-82.2
-percona55_version=5.5.57-38.9
+percona55_version=5.5.58-38.10
 
 alisql56_version=5.6.32-7
 
@@ -67,7 +67,7 @@ swoole_version=1.9.23
 pureftpd_version=1.0.47
 
 # Redis
-redis_version=4.0.4
+redis_version=4.0.6
 redis_pecl_version=3.1.4
 
 # Memcached
