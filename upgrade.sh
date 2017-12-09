@@ -44,7 +44,7 @@ IPADDR_COUNTRY=`./include/get_ipaddr_state.py $PUBLIC_IPADDR | awk '{print $1}'`
 Usage(){
   printf "
 Usage: $0 [ ${CMSG}web${CEND} | ${CMSG}db${CEND} | ${CMSG}php${CEND} | ${CMSG}redis${CEND} | ${CMSG}memcached${CEND} | ${CMSG}phpmyadmin${CEND} ]
-${CMSG}web${CEND}            --->Upgrade Nginx/Tengine/OpenResty
+${CMSG}web${CEND}            --->Upgrade Nginx/Tengine/OpenResty/Apache
 ${CMSG}db${CEND}             --->Upgrade MySQL/MariaDB/Percona
 ${CMSG}php${CEND}            --->Upgrade PHP
 ${CMSG}redis${CEND}          --->Upgrade Redis
@@ -58,7 +58,7 @@ Menu(){
   while :; do
     printf "
 What Are You Doing?
-\t${CMSG}1${CEND}. Upgrade Nginx/Tengine/OpenResty
+\t${CMSG}1${CEND}. Upgrade Nginx/Tengine/OpenResty/Apache
 \t${CMSG}2${CEND}. Upgrade MySQL/MariaDB/Percona
 \t${CMSG}3${CEND}. Upgrade PHP
 \t${CMSG}4${CEND}. Upgrade Redis
@@ -69,7 +69,7 @@ What Are You Doing?
     echo
     read -p "Please input the correct option: " Number
     if [[ ! $Number =~ ^[1-6,q]$ ]]; then
-      echo "${CWARNING}input error! Please only input 1,2,3,4,5,6 and q${CEND}"
+      echo "${CWARNING}input error! Please only input 1~6 and q${CEND}"
     else
       case "$Number" in
       1)
@@ -79,6 +79,8 @@ What Are You Doing?
           Upgrade_Tengine
         elif [ -e "$openresty_install_dir/nginx/sbin/nginx" ]; then
           Upgrade_OpenResty
+        elif [ -e "${apache_install_dir}/conf/httpd.conf" ]; then
+          Upgrade_Apache 
         fi
         ;;
       2)
@@ -115,6 +117,8 @@ elif [ $# == 1 ]; then
       Upgrade_Tengine
     elif [ -e "$openresty_install_dir/nginx/sbin/nginx" ]; then
       Upgrade_OpenResty
+    elif [ -e "${apache_install_dir}/conf/httpd.conf" ]; then
+      Upgrade_Apache 
     fi
     ;;
   db)
