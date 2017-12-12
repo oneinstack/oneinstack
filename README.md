@@ -135,4 +135,5 @@ service memcached {start|stop|status|restart|reload}
 ## Installation
 
 For feedback, questions, and to follow the progress of the project (Chinese): <br />
+[Telegram Group](https://t.me/oneinstack)<br />
 [OneinStack](https://oneinstack.com)<br />
