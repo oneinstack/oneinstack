@@ -13,8 +13,8 @@ Upgrade_PHP() {
   [ ! -e "${php_install_dir}" ] && echo "${CWARNING}PHP is not installed on your system! ${CEND}" && exit 1
   OLD_PHP_version=`${php_install_dir}/bin/php -r 'echo PHP_VERSION;'`
   Latest_PHP_version=`curl -s http://php.net/downloads.php | awk '/Changelog/{print $2}' | grep "${OLD_PHP_version%.*}"`
-  echo
   [ -z "$Latest_PHP_version" ] && Latest_PHP_version=5.5.38
+  echo
   echo "Current PHP Version: ${CMSG}$OLD_PHP_version${CEND}"
   while :; do echo
     read -p "Please input upgrade PHP Version(Default: $Latest_PHP_version): " NEW_PHP_version

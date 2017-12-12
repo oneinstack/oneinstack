@@ -521,6 +521,33 @@ checkDownload() {
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${ALISQL_TAR_MD5}" ] && break || continue
         done
         ;;
+
+      12) 
+        # PostgreSQL 
+        echo "Download PostgreSQL source package..."
+        FILE_NAME=postgresql-${pgsql_version}.tar.gz
+        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+          DOWN_ADDR_PGSQL=https://mirrors.tuna.tsinghua.edu.cn/postgresql/source/v${pgsql_version}
+          PGSQL_TAR_MD5=$(curl -Lk ${DOWN_ADDR_PGSQL}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
+          [ -z "${PGSQL_TAR_MD5}" ] && { DOWN_ADDR_PGSQL=https://mirrors.ustc.edu.cn/postgresql/source/vv${pgsql_version}; PGSQL_TAR_MD5=$(curl -Lk ${DOWN_ADDR_PGSQL}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}'); }
+        else
+          DOWN_ADDR_PGSQL=https://ftp.postgresql.org/pub/source/v${pgsql_version}
+          PGSQL_TAR_MD5=$(curl -Lk ${DOWN_ADDR_PGSQL}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
+        fi
+
+        tryDlCount=0
+        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PGSQL_TAR_MD5}" ]; do
+          wget -c --no-check-certificate ${DOWN_ADDR_PGSQL}/${FILE_NAME};sleep 1
+          let "tryDlCount++"
+          [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${PGSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
+        done
+        if [ "${tryDlCount}" == '6' ]; then
+          echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
+          kill -9 $$
+        else
+          echo "[${CMSG}${FILE_NAME}${CEND}] found."
+        fi
+        ;;
     esac
   fi
   # PHP
