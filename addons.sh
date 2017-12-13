@@ -99,6 +99,29 @@ Uninstall_succ() {
   [ -e "${php_install_dir}/etc/php.d/ext-${PHP_extension}.ini" ] && { rm -rf ${php_install_dir}/etc/php.d/ext-${PHP_extension}.ini; Restart_PHP; echo; echo "${CMSG}PHP ${PHP_extension} module uninstall completed${CEND}"; } || { echo; echo "${CWARNING}${PHP_extension} module does not exist! ${CEND}"; }
 }
 
+Install_composer(){
+[ ! -d "${composer_install_dir}" ]&&mkdir ${composer_install_dir}
+if ping -c 1 www.gooel.com >/dev/null 2>&1 ; then
+    wget https://getcomposer.org/composer.phar -O ${composer_install_dir}/composer > /dev/null 2>&1
+ else
+    wget https://dl.laravel-china.org/composer.phar -O ${composer_install_dir}/composer > /dev/null 2>&1
+fi
+chmod a+x ${composer_install_dir}/composer
+[ -z "`grep ^'export PATH=' /etc/profile`" ] && echo "export PATH=${composer_install_dir}:\$PATH" >> /etc/profile
+[ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep ${composer_install_dir} /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${composer_install_dir}:\1@" /etc/profile
+. /etc/profile
+if [ -e "${composer_install_dir}/composer" ]; then
+    echo; echo "${CSUCCESS}Composer installed successfully! ${CEND}"
+  else
+    echo; echo "${CFAILURE}Composer install failed, Please try again! ${CEND}"
+fi
+}
+
+Uninstall_composer(){
+    rm  -rf ${composer_install_dir}/composer
+    echo; echo "${CMSG}composer uninstall completed${CEND}";
+}
+
 Install_letsencrypt() {
   [ ! -e "${python_install_dir}/bin/python" ] && Install_Python
   ${python_install_dir}/bin/pip install requests 
@@ -211,10 +234,11 @@ What Are You Doing?
 \t${CMSG}7${CEND}. Install/Uninstall Let's Encrypt client
 \t${CMSG}8${CEND}. Install/Uninstall swoole PHP Extension 
 \t${CMSG}9${CEND}. Install/Uninstall fail2ban
+\t${CMSG}10${CEND}.Install/Uninstall composer
 \t${CMSG}q${CEND}. Exit
 "
   read -p "Please input the correct option: " Number
-  if [[ ! "${Number}" =~ ^[1-9,q]$ ]]; then
+  if ![ ${Number} -ge 1 >/dev/null 2>&1 -a ${Number} -le 10 >/dev/null 2>&1 -o ${Number}='q']; then
     echo "${CFAILURE}input error! Please only input 1 ~ 9 and q${CEND}"
   else
     case "${Number}" in
@@ -495,6 +519,14 @@ What Are You Doing?
           Install_fail2ban
         else
           Uninstall_fail2ban
+        fi
+        ;;
+      10)
+        ACTION_FUN
+        if [ "${ACTION}" = '1' ]; then
+          Install_composer
+        else
+          Uninstall_composer
         fi
         ;;
       q)
