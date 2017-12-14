@@ -167,13 +167,6 @@ If you enter '.', the field will be left blank.
     openssl req -new -newkey rsa:2048 -sha256 -nodes -out ${PATH_SSL}/${domain}.csr -keyout ${PATH_SSL}/${domain}.key -subj "/C=${SELFSIGNEDSSL_C}/ST=${SELFSIGNEDSSL_ST}/L=${SELFSIGNEDSSL_L}/O=${SELFSIGNEDSSL_O}/OU=${SELFSIGNEDSSL_OU}/CN=${domain}" > /dev/null 2>&1
     openssl x509 -req -days 36500 -sha256 -in ${PATH_SSL}/${domain}.csr -signkey ${PATH_SSL}/${domain}.key -out ${PATH_SSL}/${domain}.crt > /dev/null 2>&1   
   elif [ "${Domian_Mode}" == '3' ]; then
-    PUBLIC_IPADDR=$(./include/get_public_ipaddr.py)
-    for D in ${domain} ${moredomainame}
-    do
-      Domain_IPADDR=$(ping ${D} -c1 | sed '1{s/[^(]*(//;s/).*//;q}')
-      [ "${PUBLIC_IPADDR%.*}" != "${Domain_IPADDR%.*}" ] && { echo; echo "${CFAILURE}DNS problem: NXDOMAIN looking up A for ${D}${CEND}"; echo; exit 1; }
-    done
-
     while :; do echo
       read -p "Please enter Administrator Email(example: admin@example.com): " Admin_Email
       if [ -z "$(echo ${Admin_Email} | grep '.*@.*\..*')" ]; then
@@ -334,6 +327,15 @@ What Are You Doing?
     done
     Apache_Domain_alias=ServerAlias${moredomainame}
     Tomcat_Domain_alias=$(for D in $(echo ${moredomainame}); do echo "<Alias>${D}</Alias>"; done)
+
+    if [ "${Domian_Mode}" == '3' ]; then
+      PUBLIC_IPADDR=$(./include/get_public_ipaddr.py)
+      for D in ${domain} ${moredomainame}
+      do
+        Domain_IPADDR=$(ping ${D} -c1 2> /dev/null | sed '1{s/[^(]*(//;s/).*//;q}')
+        [ "${PUBLIC_IPADDR%.*}" != "${Domain_IPADDR%.*}" ] && { echo; echo "${CFAILURE}DNS problem: NXDOMAIN looking up A for ${D}${CEND}"; echo; exit 1; }
+      done
+    fi
 
     if [ -e "${web_install_dir}/sbin/nginx" ]; then
       while :; do echo
