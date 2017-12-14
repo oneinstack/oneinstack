@@ -99,6 +99,26 @@ Uninstall_succ() {
   [ -e "${php_install_dir}/etc/php.d/ext-${PHP_extension}.ini" ] && { rm -rf ${php_install_dir}/etc/php.d/ext-${PHP_extension}.ini; Restart_PHP; echo; echo "${CMSG}PHP ${PHP_extension} module uninstall completed${CEND}"; } || { echo; echo "${CWARNING}${PHP_extension} module does not exist! ${CEND}"; }
 }
 
+Install_composer(){
+if ping -c 1 www.gooel.com >/dev/null 2>&1 ; then
+    wget https://getcomposer.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
+ else
+    wget https://dl.laravel-china.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
+    composer config -g repo.packagist composer https://packagist.phpcomposer.com
+fi
+chmod a+x /usr/local/bin/composer
+if [ -e "/usr/local/bin/composer" ]; then
+    echo; echo "${CSUCCESS}Composer installed successfully! ${CEND}"
+  else
+    echo; echo "${CFAILURE}Composer install failed, Please try again! ${CEND}"
+fi
+}
+
+Uninstall_composer(){
+    rm  -rf ${composer_install_dir}/composer
+    echo; echo "${CMSG}composer uninstall completed${CEND}";
+}
+
 Install_letsencrypt() {
   [ ! -e "${python_install_dir}/bin/python" ] && Install_Python
   ${python_install_dir}/bin/pip install requests 
@@ -212,10 +232,11 @@ What Are You Doing?
 \t${CMSG} 8${CEND}. Install/Uninstall swoole PHP Extension 
 \t${CMSG} 9${CEND}. Install/Uninstall xdebug PHP Extension 
 \t${CMSG}10${CEND}. Install/Uninstall fail2ban
+\t${CMSG}11${CEND}. Install/Uninstall comeposer
 \t${CMSG} q${CEND}. Exit
 "
   read -p "Please input the correct option: " Number
-  if [[ ! "${Number}" =~ ^[1-9,q]$|^10$ ]]; then
+  if [[ ! "${Number}" =~ ^[1-9,q]$|^10$|^11$ ]]; then
     echo "${CFAILURE}input error! Please only input 1~10 and q${CEND}"
   else
     case "${Number}" in
@@ -536,6 +557,14 @@ EOF
           Install_fail2ban
         else
           Uninstall_fail2ban
+        fi
+        ;;
+      11)
+        ACTION_FUN
+        if [ "${ACTION}" = '1' ]; then
+          Install_composer
+        else
+          Uninstall_composer
         fi
         ;;
       q)
