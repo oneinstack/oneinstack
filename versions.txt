@@ -64,6 +64,7 @@ apcu_version=4.0.11
 apcu_for_php7_version=5.1.8
 eaccelerator_version=0.9.6.1
 swoole_version=1.9.23
+xdebug_version=2.5.5
 
 # Ftp
 pureftpd_version=1.0.47
