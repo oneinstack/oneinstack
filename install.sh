@@ -190,7 +190,7 @@ while :; do echo
         echo -e "\t${CMSG}12${CEND}. Install PostgreSQL"
         read -p "Please input a number:(Default 2 press Enter) " DB_version
         [ -z "$DB_version" ] && DB_version=2
-        if [ ${DB_version} -ge 1 >/dev/null 2>&1 -a ${DB_version} -le 12 >/dev/null 2>&1 ]; then
+        if [[ "${DB_version}" =~ ^[1-9]$|^1[0-2]$ ]]; then 
           while :; do
             if [ "$DB_version" == '12' ]; then
               read -p "Please input the postgres password of database: " dbrootpwd
@@ -207,7 +207,7 @@ while :; do echo
 
           done
           # choose install methods
-          if [ ${DB_version} -ge 1 >/dev/null 2>&1 -a ${DB_version} -le 10 >/dev/null 2>&1 ]; then
+          if [[ "${DB_version}" =~ ^[1-9]$|^10$ ]]; then 
             while :; do echo
               echo "Please choose installation of the database:"
               echo -e "\t${CMSG}1${CEND}. Install database from binary package."
@@ -798,21 +798,21 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${DB_version}" == '12' ] && echo "$(printf "%-32s" "PostgreSQL user:")${CMSG}postgres${CEND}"
 [ "${DB_version}" == '12' ] && echo "$(printf "%-32s" "postgres password:")${CMSG}${dbpostgrespwd}${CEND}"
 [ "${PHP_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "PHP install dir:")${CMSG}${php_install_dir}${CEND}"
-[ "${PHP_cache}" == '1' ] && echo "$(printf "%-32s" "Opcache Control Panel url:")${CMSG}http://${IPADDR}/ocp.php${CEND}"
-[ "${PHP_cache}" == '2' ] && echo "$(printf "%-32s" "xcache Control Panel url:")${CMSG}http://${IPADDR}/xcache${CEND}"
+[ "${PHP_cache}" == '1' ] && echo "$(printf "%-32s" "Opcache Control Panel URL:")${CMSG}http://${IPADDR}/ocp.php${CEND}"
+[ "${PHP_cache}" == '2' ] && echo "$(printf "%-32s" "xcache Control Panel URL:")${CMSG}http://${IPADDR}/xcache${CEND}"
 [ "${PHP_cache}" == '2' ] && echo "$(printf "%-32s" "xcache user:")${CMSG}admin${CEND}"
 [ "${PHP_cache}" == '2' ] && echo "$(printf "%-32s" "xcache password:")${CMSG}${xcache_admin_pass}${CEND}"
-[ "${PHP_cache}" == '3' ] && echo "$(printf "%-32s" "APC Control Panel url:")${CMSG}http://${IPADDR}/apc.php${CEND}"
-[ "${PHP_cache}" == '4' ] && echo "$(printf "%-32s" "eAccelerator Control Panel url:")${CMSG}http://${IPADDR}/control.php${CEND}"
+[ "${PHP_cache}" == '3' ] && echo "$(printf "%-32s" "APC Control Panel URL:")${CMSG}http://${IPADDR}/apc.php${CEND}"
+[ "${PHP_cache}" == '4' ] && echo "$(printf "%-32s" "eAccelerator Control Panel URL:")${CMSG}http://${IPADDR}/control.php${CEND}"
 [ "${PHP_cache}" == '4' ] && echo "$(printf "%-32s" "eAccelerator user:")${CMSG}admin${CEND}"
 [ "${PHP_cache}" == '4' ] && echo "$(printf "%-32s" "eAccelerator password:")${CMSG}eAccelerator${CEND}"
 [ "${FTP_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "Pure-FTPd install dir:")${CMSG}${pureftpd_install_dir}${CEND}"
 [ "${FTP_yn}" == 'y' ] && echo "$(printf "%-32s" "Create FTP virtual script:")${CMSG}./pureftpd_vhost.sh${CEND}"
 [ "${phpMyAdmin_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "phpMyAdmin dir:")${CMSG}${wwwroot_dir}/default/phpMyAdmin${CEND}"
-[ "${phpMyAdmin_yn}" == 'y' ] && echo "$(printf "%-32s" "phpMyAdmin Control Panel url:")${CMSG}http://${IPADDR}/phpMyAdmin${CEND}"
+[ "${phpMyAdmin_yn}" == 'y' ] && echo "$(printf "%-32s" "phpMyAdmin Control Panel URL:")${CMSG}http://${IPADDR}/phpMyAdmin${CEND}"
 [ "${redis_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "redis install dir:")${CMSG}${redis_install_dir}${CEND}"
 [ "${memcached_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "memcached install dir:")${CMSG}${memcached_install_dir}${CEND}"
-[ "${Web_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "index url:")${CMSG}http://${IPADDR}/${CEND}"
+[ "${Web_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "Index URL:")${CMSG}http://${IPADDR}/${CEND}"
 while :; do echo
   echo "${CMSG}Please restart the server and see if the services start up fine.${CEND}"
   read -p "Do you want to restart OS ? [y/n]: " restart_yn
