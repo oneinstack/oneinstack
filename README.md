@@ -6,18 +6,18 @@ Script properties:
 - Continually updated
 - Source compiler installation, most stable source is the latest version, and download from the official site
 - Some security optimization
-- Providing a plurality of database versions (MySQL-5.7, MySQL-5.6, MySQL-5.5, MariaDB-10.1, MariaDB-10.0, MariaDB-5.5, Percona-5.7, Percona-5.6, Percona-5.5, AliSQL-5.6)
+- Providing a plurality of database versions (MySQL-5.7, MySQL-5.6, MySQL-5.5, MariaDB-10.1, MariaDB-10.0, MariaDB-5.5, Percona-5.7, Percona-5.6, Percona-5.5, AliSQL-5.6, PostgreSQL)
 - Providing multiple PHP versions (PHP-7.2, PHP-7.1, PHP-7.0, PHP-5.6, PHP-5.5, PHP-5.4, PHP-5.3)
 - Provide Nginx, Tengine, OpenResty
 - Providing a plurality of Tomcat version (Tomcat-8, Tomcat-7, Tomcat-6)
 - Providing a plurality of JDK version (JDK-1.8, JDK-1.7, JDK-1.6)
 - Providing a plurality of Apache version (Apache-2.4, Apache-2.2)
-- According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php encryption and decryption tool ionCube, ZendGuardLoader
+- According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php encryption and decryption tool ionCube, ZendGuardLoader, swoole, xdebug
 - Installation Pureftpd, phpMyAdmin according to their needs
 - Install memcached, redis according to their needs
 - Jemalloc optimize MySQL, Nginx
 - Providing add a virtual host script, include Let's Encrypt SSL certificate
-- Provide Nginx/Tengine/OpenResty, MySQL/MariaDB/Percona, PHP, Redis, Memcached, phpMyAdmin upgrade script
+- Provide Nginx/Tengine/OpenResty/Apache, MySQL/MariaDB/Percona, PHP, Redis, Memcached, phpMyAdmin upgrade script
 - Provide local backup and remote backup (rsync between servers) script
 - Provided under HHVM install CentOS 6,7
 

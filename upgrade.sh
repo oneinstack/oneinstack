@@ -33,6 +33,7 @@ sed -i "s@^oneinstack_dir.*@oneinstack_dir=`pwd`@" ./options.conf
 . ./include/upgrade_redis.sh
 . ./include/upgrade_memcached.sh
 . ./include/upgrade_phpmyadmin.sh
+. ./include/upgrade_oneinstack.sh
 
 # Check if user is root
 [ $(id -u) != "0" ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
@@ -43,13 +44,14 @@ IPADDR_COUNTRY=`./include/get_ipaddr_state.py $PUBLIC_IPADDR | awk '{print $1}'`
 
 Usage(){
   printf "
-Usage: $0 [ ${CMSG}web${CEND} | ${CMSG}db${CEND} | ${CMSG}php${CEND} | ${CMSG}redis${CEND} | ${CMSG}memcached${CEND} | ${CMSG}phpmyadmin${CEND} ]
+Usage: $0 [ ${CMSG}web${CEND} | ${CMSG}db${CEND} | ${CMSG}php${CEND} | ${CMSG}redis${CEND} | ${CMSG}memcached${CEND} | ${CMSG}phpmyadmin${CEND} | ${CMSG}oneinstack${CEND} ]
 ${CMSG}web${CEND}            --->Upgrade Nginx/Tengine/OpenResty/Apache
 ${CMSG}db${CEND}             --->Upgrade MySQL/MariaDB/Percona
 ${CMSG}php${CEND}            --->Upgrade PHP
 ${CMSG}redis${CEND}          --->Upgrade Redis
 ${CMSG}memcached${CEND}      --->Upgrade Memcached 
 ${CMSG}phpmyadmin${CEND}     --->Upgrade phpMyAdmin
+${CMSG}oneinstack${CEND}     --->Upgrade OneinStack 
 
 "
 }
@@ -64,12 +66,13 @@ What Are You Doing?
 \t${CMSG}4${CEND}. Upgrade Redis
 \t${CMSG}5${CEND}. Upgrade Memcached 
 \t${CMSG}6${CEND}. Upgrade phpMyAdmin
+\t${CMSG}7${CEND}. Upgrade OneinStack
 \t${CMSG}q${CEND}. Exit
 "
     echo
     read -p "Please input the correct option: " Number
-    if [[ ! $Number =~ ^[1-6,q]$ ]]; then
-      echo "${CWARNING}input error! Please only input 1~6 and q${CEND}"
+    if [[ ! $Number =~ ^[1-7,q]$ ]]; then
+      echo "${CWARNING}input error! Please only input 1~7 and q${CEND}"
     else
       case "$Number" in
       1)
@@ -97,6 +100,9 @@ What Are You Doing?
         ;;
       6)
         Upgrade_phpMyAdmin
+        ;;
+      7)
+        Upgrade_OneinStack 
         ;;
       q)
         exit
@@ -135,6 +141,9 @@ elif [ $# == 1 ]; then
     ;;
   phpmyadmin)
     Upgrade_phpMyAdmin
+    ;;
+  oneinstack)
+    Upgrade_OneinStack 
     ;;
   *)
     Usage
