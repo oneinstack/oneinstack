@@ -190,7 +190,7 @@ while :; do echo
         echo -e "\t${CMSG}12${CEND}. Install PostgreSQL"
         read -p "Please input a number:(Default 2 press Enter) " DB_version
         [ -z "$DB_version" ] && DB_version=2
-        if [ ${DB_version} -ge 1 >/dev/null 2>&1 -a ${DB_version} -le 12 >/dev/null 2>&1 ]; then
+        if [[ "${DB_version}" =~ ^[1-9]$|^1[0-2]$ ]]; then 
           while :; do
             if [ "$DB_version" == '12' ]; then
               read -p "Please input the postgres password of database: " dbrootpwd
@@ -207,7 +207,7 @@ while :; do echo
 
           done
           # choose install methods
-          if [ ${DB_version} -ge 1 >/dev/null 2>&1 -a ${DB_version} -le 10 >/dev/null 2>&1 ]; then
+          if [[ "${DB_version}" =~ ^[1-9]$|^10$ ]]; then 
             while :; do echo
               echo "Please choose installation of the database:"
               echo -e "\t${CMSG}1${CEND}. Install database from binary package."
