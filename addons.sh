@@ -202,23 +202,25 @@ ACTION_FUN() {
 while :;do
   printf "
 What Are You Doing?
-\t${CMSG}1${CEND}. Install/Uninstall PHP opcode cache
-\t${CMSG}2${CEND}. Install/Uninstall ZendGuardLoader/ionCube PHP Extension
-\t${CMSG}3${CEND}. Install/Uninstall ImageMagick/GraphicsMagick PHP Extension
-\t${CMSG}4${CEND}. Install/Uninstall fileinfo PHP Extension
-\t${CMSG}5${CEND}. Install/Uninstall memcached/memcache
-\t${CMSG}6${CEND}. Install/Uninstall Redis
-\t${CMSG}7${CEND}. Install/Uninstall Let's Encrypt client
-\t${CMSG}8${CEND}. Install/Uninstall swoole PHP Extension 
-\t${CMSG}9${CEND}. Install/Uninstall fail2ban
-\t${CMSG}q${CEND}. Exit
+\t${CMSG} 1${CEND}. Install/Uninstall PHP opcode cache
+\t${CMSG} 2${CEND}. Install/Uninstall ZendGuardLoader/ionCube PHP Extension
+\t${CMSG} 3${CEND}. Install/Uninstall ImageMagick/GraphicsMagick PHP Extension
+\t${CMSG} 4${CEND}. Install/Uninstall fileinfo PHP Extension
+\t${CMSG} 5${CEND}. Install/Uninstall memcached/memcache
+\t${CMSG} 6${CEND}. Install/Uninstall Redis
+\t${CMSG} 7${CEND}. Install/Uninstall Let's Encrypt client
+\t${CMSG} 8${CEND}. Install/Uninstall swoole PHP Extension 
+\t${CMSG} 9${CEND}. Install/Uninstall xdebug PHP Extension 
+\t${CMSG}10${CEND}. Install/Uninstall fail2ban
+\t${CMSG} q${CEND}. Exit
 "
   read -p "Please input the correct option: " Number
-  if [[ ! "${Number}" =~ ^[1-9,q]$ ]]; then
-    echo "${CFAILURE}input error! Please only input 1 ~ 9 and q${CEND}"
+  if [[ ! "${Number}" =~ ^[1-9,q]$|^10$ ]]; then
+    echo "${CFAILURE}input error! Please only input 1~10 and q${CEND}"
   else
     case "${Number}" in
       1)
+        [ "$"]
         ACTION_FUN
         while :; do echo
           echo "Please select a opcode cache of the PHP:"
@@ -490,6 +492,45 @@ What Are You Doing?
         fi
         ;;
       9)
+        [[ ! "${PHP_main_version}" =~ ^5\.[5-6]$|^7\.[0-1]$ ]] && { echo "${CWARNING}Need a PHP version >= 5.5.0 and < 7.2.0${CEND}"; exit 1; }
+        ACTION_FUN
+        PHP_extension=xdebug
+        if [ "${ACTION}" = '1' ]; then
+          Check_PHP_Extension
+          pushd ${oneinstack_dir}/src
+          src_url=http://mirrors.linuxeye.com/oneinstack/src/xdebug-${xdebug_version}.tgz && Download_src
+          src_url=http://mirrors.linuxeye.com/oneinstack/src/webgrind-master.zip && Download_src
+          tar xzf xdebug-${xdebug_version}.tgz
+          unzip -q webgrind-master.zip 
+          /bin/mv webgrind-master ${wwwroot_dir}/default/webgrind 
+          pushd xdebug-${xdebug_version}
+          ${php_install_dir}/bin/phpize
+          ./configure --with-php-config=${php_install_dir}/bin/php-config
+          make -j ${THREAD} && make install
+          popd
+          rm -rf xdebug-${xdebug_version} 
+          popd
+          [ ! -e /tmp/xdebug ] && { mkdir /tmp/xdebug; chown ${run_user}.${run_user} /tmp/xdebug; }
+          [ ! -e /tmp/webgrind ] && { mkdir /tmp/webgrind; chown ${run_user}.${run_user} /tmp/webgrind; }
+          chown -R ${run_user}.${run_user} ${wwwroot_dir}/default/webgrind
+          sed -i 's@static $storageDir.*@static $storageDir = "/tmp/webgrind";@' ${wwwroot_dir}/default/webgrind/config.php
+          sed -i 's@static $profilerDir.*@static $profilerDir = "/tmp/xdebug";@' ${wwwroot_dir}/default/webgrind/config.php
+          cat > ${php_install_dir}/etc/php.d/ext-xdebug.ini << EOF
+[xdebug]
+zend_extension=xdebug.so
+xdebug.trace_output_dir=/tmp/xdebug
+xdebug.profiler_output_dir = /tmp/xdebug
+xdebug.profiler_enable = On
+xdebug.profiler_enable_trigger = 1
+EOF
+          Check_succ
+          echo; echo "Webgrind URL: ${CMSG}http://{Public IP}/webgrind ${CEND}"
+        else
+          rm -rf /tmp/{xdebug,webgrind} ${wwwroot_dir}/default/webgrind
+          Uninstall_succ
+        fi
+        ;;
+      10)
         ACTION_FUN
         if [ "${ACTION}" = '1' ]; then
           Install_fail2ban
