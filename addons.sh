@@ -24,6 +24,10 @@ printf "
 # get pwd
 sed -i "s@^oneinstack_dir.*@oneinstack_dir=$(pwd)@" ./options.conf
 
+# get the IP information
+PUBLIC_IPADDR=`./include/get_public_ipaddr.py`
+IPADDR_COUNTRY=`./include/get_ipaddr_state.py $PUBLIC_IPADDR | awk '{print $1}'`
+
 . ./versions.txt
 . ./options.conf
 . ./include/color.sh
@@ -211,12 +215,13 @@ What Are You Doing?
 \t${CMSG} 7${CEND}. Install/Uninstall Let's Encrypt client
 \t${CMSG} 8${CEND}. Install/Uninstall swoole PHP Extension 
 \t${CMSG} 9${CEND}. Install/Uninstall xdebug PHP Extension 
-\t${CMSG}10${CEND}. Install/Uninstall fail2ban
+\t${CMSG}10${CEND}. Install/Uninstall comeposer
+\t${CMSG}11${CEND}. Install/Uninstall fail2ban
 \t${CMSG} q${CEND}. Exit
 "
   read -p "Please input the correct option: " Number
-  if [[ ! "${Number}" =~ ^[1-9,q]$|^10$ ]]; then
-    echo "${CFAILURE}input error! Please only input 1~10 and q${CEND}"
+  if [[ ! "${Number}" =~ ^[1-9,q]$|^1[0-1]$ ]]; then
+    echo "${CFAILURE}input error! Please only input 1~11 and q${CEND}"
   else
     case "${Number}" in
       1)
@@ -531,6 +536,26 @@ EOF
         fi
         ;;
       10)
+        ACTION_FUN
+        if [ "${ACTION}" = '1' ]; then
+          if [ "$IPADDR_COUNTRY"x == "CN"x ]; then
+            wget -c https://dl.laravel-china.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
+            composer config -g repo.packagist composer https://packagist.phpcomposer.com
+          else
+            wget -c https://getcomposer.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
+          fi
+          chmod +x /usr/local/bin/composer
+          if [ -e "/usr/local/bin/composer" ]; then
+            echo; echo "${CSUCCESS}Composer installed successfully! ${CEND}"
+          else
+            echo; echo "${CFAILURE}Composer install failed, Please try again! ${CEND}"
+          fi
+        else
+          rm -rf /usr/local/bin/composer
+          echo; echo "${CMSG}composer uninstall completed${CEND}";
+        fi
+        ;;
+      11)
         ACTION_FUN
         if [ "${ACTION}" = '1' ]; then
           Install_fail2ban
