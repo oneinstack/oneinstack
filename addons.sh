@@ -215,7 +215,7 @@ What Are You Doing?
 \t${CMSG} 7${CEND}. Install/Uninstall Let's Encrypt client
 \t${CMSG} 8${CEND}. Install/Uninstall swoole PHP Extension 
 \t${CMSG} 9${CEND}. Install/Uninstall xdebug PHP Extension 
-\t${CMSG}10${CEND}. Install/Uninstall comeposer
+\t${CMSG}10${CEND}. Install/Uninstall PHP Comeposer
 \t${CMSG}11${CEND}. Install/Uninstall fail2ban
 \t${CMSG} q${CEND}. Exit
 "
