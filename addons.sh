@@ -538,14 +538,14 @@ EOF
       10)
         ACTION_FUN
         if [ "${ACTION}" = '1' ]; then
+          [ -e "/usr/local/bin/composer" ] && { echo "${CWARNING}PHP Composer already installed! ${CEND}"; exit 1; }
           if [ "$IPADDR_COUNTRY"x == "CN"x ]; then
             wget -c https://dl.laravel-china.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
-            chmod +x /usr/local/bin/composer
-            composer config -g repo.packagist composer https://packagist.phpcomposer.com
+            ${php_install_dir}/bin/php /usr/local/bin/composer config -g repo.packagist composer https://packagist.phpcomposer.com
           else
             wget -c https://getcomposer.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
-            chmod +x /usr/local/bin/composer
           fi
+          chmod +x /usr/local/bin/composer
           if [ -e "/usr/local/bin/composer" ]; then
             echo; echo "${CSUCCESS}Composer installed successfully! ${CEND}"
           else
