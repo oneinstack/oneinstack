@@ -24,6 +24,10 @@ printf "
 # get pwd
 sed -i "s@^oneinstack_dir.*@oneinstack_dir=$(pwd)@" ./options.conf
 
+# get the IP information
+PUBLIC_IPADDR=`./include/get_public_ipaddr.py`
+IPADDR_COUNTRY=`./include/get_ipaddr_state.py $PUBLIC_IPADDR | awk '{print $1}'`
+
 . ./versions.txt
 . ./options.conf
 . ./include/color.sh
@@ -97,26 +101,6 @@ Check_succ() {
 # Uninstall succ
 Uninstall_succ() {
   [ -e "${php_install_dir}/etc/php.d/ext-${PHP_extension}.ini" ] && { rm -rf ${php_install_dir}/etc/php.d/ext-${PHP_extension}.ini; Restart_PHP; echo; echo "${CMSG}PHP ${PHP_extension} module uninstall completed${CEND}"; } || { echo; echo "${CWARNING}${PHP_extension} module does not exist! ${CEND}"; }
-}
-
-Install_composer(){
-if ping -c 1 www.gooel.com >/dev/null 2>&1 ; then
-    wget https://getcomposer.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
- else
-    wget https://dl.laravel-china.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
-    composer config -g repo.packagist composer https://packagist.phpcomposer.com
-fi
-chmod a+x /usr/local/bin/composer
-if [ -e "/usr/local/bin/composer" ]; then
-    echo; echo "${CSUCCESS}Composer installed successfully! ${CEND}"
-  else
-    echo; echo "${CFAILURE}Composer install failed, Please try again! ${CEND}"
-fi
-}
-
-Uninstall_composer(){
-    rm  -rf ${composer_install_dir}/composer
-    echo; echo "${CMSG}composer uninstall completed${CEND}";
 }
 
 Install_letsencrypt() {
@@ -231,13 +215,13 @@ What Are You Doing?
 \t${CMSG} 7${CEND}. Install/Uninstall Let's Encrypt client
 \t${CMSG} 8${CEND}. Install/Uninstall swoole PHP Extension 
 \t${CMSG} 9${CEND}. Install/Uninstall xdebug PHP Extension 
-\t${CMSG}10${CEND}. Install/Uninstall fail2ban
-\t${CMSG}11${CEND}. Install/Uninstall comeposer
+\t${CMSG}10${CEND}. Install/Uninstall comeposer
+\t${CMSG}11${CEND}. Install/Uninstall fail2ban
 \t${CMSG} q${CEND}. Exit
 "
   read -p "Please input the correct option: " Number
-  if [[ ! "${Number}" =~ ^[1-9,q]$|^10$|^11$ ]]; then
-    echo "${CFAILURE}input error! Please only input 1~10 and q${CEND}"
+  if [[ ! "${Number}" =~ ^[1-9,q]$|^1[0-1]$ ]]; then
+    echo "${CFAILURE}input error! Please only input 1~11 and q${CEND}"
   else
     case "${Number}" in
       1)
@@ -554,17 +538,29 @@ EOF
       10)
         ACTION_FUN
         if [ "${ACTION}" = '1' ]; then
-          Install_fail2ban
+          if [ "$IPADDR_COUNTRY"x == "CN"x ]; then
+            wget -c https://dl.laravel-china.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
+            composer config -g repo.packagist composer https://packagist.phpcomposer.com
+          else
+            wget -c https://getcomposer.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
+          fi
+          chmod +x /usr/local/bin/composer
+          if [ -e "/usr/local/bin/composer" ]; then
+            echo; echo "${CSUCCESS}Composer installed successfully! ${CEND}"
+          else
+            echo; echo "${CFAILURE}Composer install failed, Please try again! ${CEND}"
+          fi
         else
-          Uninstall_fail2ban
+          rm -rf /usr/local/bin/composer
+          echo; echo "${CMSG}composer uninstall completed${CEND}";
         fi
         ;;
       11)
         ACTION_FUN
         if [ "${ACTION}" = '1' ]; then
-          Install_composer
+          Install_fail2ban
         else
-          Uninstall_composer
+          Uninstall_fail2ban
         fi
         ;;
       q)
