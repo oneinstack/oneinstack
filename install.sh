@@ -368,7 +368,7 @@ while :; do echo
           fi
 
           # ionCube
-          if [ "${TARGET_ARCH}" != "arm64" ] && [[ $PHP_version =~ ^[1-6]$ ]]; then
+          if [ "${TARGET_ARCH}" != "arm64" ]; then
             while :; do echo
               read -p "Do you want to install ionCube? [y/n]: " ionCube_yn
               if [[ ! $ionCube_yn =~ ^[y,n]$ ]]; then
