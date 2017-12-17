@@ -341,7 +341,7 @@ What Are You Doing?
               echo; echo "${CWARNING}Your php ${PHP_detail_version} or platform ${TARGET_ARCH} does not support ${PHP_extension}! ${CEND}";
             fi
           elif [ "${Loader}" = '2' ]; then
-            if [[ "${PHP_main_version}" =~ ^5.[3-6]$|^7.[0-1]$ ]] || [ "${TARGET_ARCH}" != "arm64" ]; then
+            if [[ "${PHP_main_version}" =~ ^5.[3-6]$|^7.[0-2]$ ]] || [ "${TARGET_ARCH}" != "arm64" ]; then
               ionCube_yn='y' && checkDownload
               Install_ionCube
               Restart_PHP; echo "${CSUCCESS}PHP ioncube module installed successfully! ${CEND}";
