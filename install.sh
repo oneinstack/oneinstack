@@ -188,9 +188,11 @@ while :; do echo
         echo -e "\t${CMSG}10${CEND}. Install Percona-5.5"
         echo -e "\t${CMSG}11${CEND}. Install AliSQL-5.6"
         echo -e "\t${CMSG}12${CEND}. Install PostgreSQL"
+        echo -e "\t${CMSG}13${CEND}. Install MongoDB"
         read -p "Please input a number:(Default 2 press Enter) " DB_version
         [ -z "$DB_version" ] && DB_version=2
-        if [[ "${DB_version}" =~ ^[1-9]$|^1[0-2]$ ]]; then 
+        [ "$DB_version" == '13' -a "$OS_BIT" == '32' ] && { echo "${CWARNING}By not supporting 32-bit! ${CEND}"; continue; }
+        if [[ "${DB_version}" =~ ^[1-9]$|^1[0-3]$ ]]; then
           while :; do
             if [ "$DB_version" == '12' ]; then
               read -p "Please input the postgres password of database: " dbrootpwd
@@ -199,7 +201,15 @@ while :; do echo
             fi
             [ -n "`echo $dbrootpwd | grep '[+|&]'`" ] && { echo "${CWARNING}input error,not contain a plus sign (+) and & ${CEND}"; continue; }
             if (( ${#dbrootpwd} >= 5 )); then
-              [ "$DB_version" == '12' ] && { sed -i "s+^dbpostgrespwd.*+dbpostgrespwd='$dbrootpwd'+" ./options.conf; dbpostgrespwd="$dbrootpwd"; } || sed -i "s+^dbrootpwd.*+dbrootpwd='$dbrootpwd'+" ./options.conf
+              if [ "$DB_version" == '12' ]; then
+                sed -i "s+^dbpostgrespwd.*+dbpostgrespwd='$dbrootpwd'+" ./options.conf
+                dbpostgrespwd="$dbrootpwd"
+              elif [ "$DB_version" == '13' ]; then
+                sed -i "s+^dbmongopwd.*+dbmongopwd='$dbrootpwd'+" ./options.conf
+                dbmongopwd="$dbrootpwd"
+              else
+                sed -i "s+^dbrootpwd.*+dbrootpwd='$dbrootpwd'+" ./options.conf
+              fi
               break
             else
               echo "${CWARNING}password least 5 characters! ${CEND}"
@@ -223,7 +233,7 @@ while :; do echo
           fi
           break
         else
-          echo "${CWARNING}input error! Please only input number 1~12${CEND}"
+          echo "${CWARNING}input error! Please only input number 1~13${CEND}"
         fi
       done
     fi
@@ -593,6 +603,10 @@ case "${DB_version}" in
     . include/postgresql.sh
     Install_PostgreSQL 2>&1 | tee -a $oneinstack_dir/install.log
     ;;
+  13)
+    . include/mongodb.sh
+    Install_MongoDB 2>&1 | tee -a $oneinstack_dir/install.log
+    ;;
 esac
 
 # Apache
@@ -635,6 +649,18 @@ case "${PHP_version}" in
     Install_PHP72 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
 esac
+
+# pecl_pgsql
+if [ "${DB_version}" == '12' -a -e "${php_install_dir}/bin/phpize" ]; then
+  . include/pecl_pgsql.sh
+  Install_pecl-pgsql 2>&1 | tee -a $oneinstack_dir/install.log
+fi
+
+# pecl_mongodb
+if [ "${DB_version}" == '13' -a -e "${php_install_dir}/bin/phpize" ]; then
+  . include/pecl_mongodb.sh
+  Install_pecl-mongodb 2>&1 | tee -a $oneinstack_dir/install.log
+fi
 
 # ImageMagick or GraphicsMagick
 if [ "$Magick" == '1' ]; then
@@ -681,12 +707,6 @@ esac
 if [ "$ZendGuardLoader_yn" == 'y' ]; then
   . include/ZendGuardLoader.sh
   Install_ZendGuardLoader 2>&1 | tee -a $oneinstack_dir/install.log
-fi
-
-# pecl_pgsql
-if [ "$DB_version" == '12' ] && [ -e "${php_install_dir}/bin/phpize" ]; then
-  . include/pecl_pgsql.sh
-  Install_pecl-pgsql 2>&1 | tee -a $oneinstack_dir/install.log
 fi
 
 # Web server
@@ -797,6 +817,10 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${DB_version}" == '12' ] && echo "$(printf "%-32s" "PostgreSQL data dir:")${CMSG}${pgsql_data_dir}${CEND}"
 [ "${DB_version}" == '12' ] && echo "$(printf "%-32s" "PostgreSQL user:")${CMSG}postgres${CEND}"
 [ "${DB_version}" == '12' ] && echo "$(printf "%-32s" "postgres password:")${CMSG}${dbpostgrespwd}${CEND}"
+[ "${DB_version}" == '13' ] && echo -e "\n$(printf "%-32s" "MongoDB install dir:")${CMSG}${mongo_install_dir}${CEND}"
+[ "${DB_version}" == '13' ] && echo "$(printf "%-32s" "MongoDB data dir:")${CMSG}${mongo_data_dir}${CEND}"
+[ "${DB_version}" == '13' ] && echo "$(printf "%-32s" "MongoDB user:")${CMSG}root${CEND}"
+[ "${DB_version}" == '13' ] && echo "$(printf "%-32s" "MongoDB password:")${CMSG}${dbmongopwd}${CEND}"
 [ "${PHP_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "PHP install dir:")${CMSG}${php_install_dir}${CEND}"
 [ "${PHP_cache}" == '1' ] && echo "$(printf "%-32s" "Opcache Control Panel URL:")${CMSG}http://${IPADDR}/ocp.php${CEND}"
 [ "${PHP_cache}" == '2' ] && echo "$(printf "%-32s" "xcache Control Panel URL:")${CMSG}http://${IPADDR}/xcache${CEND}"

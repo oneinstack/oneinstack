@@ -32,7 +32,7 @@ Usage(){
 Usage: $0 [  ${CMSG}all${CEND} | ${CMSG}web${CEND} | ${CMSG}db${CEND} | ${CMSG}php${CEND} | ${CMSG}hhvm${CEND} | ${CMSG}pureftpd${CEND} | ${CMSG}redis${CEND} | ${CMSG}memcached${CEND} ]
 ${CMSG}all${CEND}            --->Uninstall All
 ${CMSG}web${CEND}            --->Uninstall Nginx/Tengine/Apache/Tomcat
-${CMSG}db${CEND}             --->Uninstall MySQL/MariaDB/Percona/AliSQL/PostgreSQL
+${CMSG}db${CEND}             --->Uninstall MySQL/MariaDB/Percona/AliSQL/PostgreSQL/MongoDB
 ${CMSG}php${CEND}            --->Uninstall PHP
 ${CMSG}hhvm${CEND}           --->Uninstall HHVM
 ${CMSG}pureftpd${CEND}       --->Uninstall PureFtpd
@@ -97,6 +97,8 @@ Print_DB() {
   [ -e "/etc/my.cnf" ] && echo "/etc/my.cnf"
   [ -e "${pgsql_install_dir}" ] && echo "${pgsql_install_dir}"
   [ -e "/etc/init.d/postgresql" ] && echo "/etc/init.d/postgresql"
+  [ -e "${mongo_install_dir}" ] && echo "${mongo_install_dir}"
+  [ -e "/etc/init.d/mongod" ] && echo "/etc/init.d/mongod"
 }
 
 Uninstall_DB() {
@@ -112,12 +114,22 @@ Uninstall_DB() {
   # uninstall postgresql
   if [ -e "${pgsql_install_dir}/bin/psql" ]; then
     service postgresql stop > /dev/null 2>&1
-    rm -rf ${pgsql_install_dir} /etc/init.d/postgresql
+    rm -rf ${pgsql_install_dir} /etc/init.d/postgresql ${php_install_dir}/etc/php.d/ext-pgsql.ini
     id -u postgres >/dev/null 2>&1 ; [ $? -eq 0 ] && userdel postgres 
     [ -e "${pgsql_data_dir}" ] && /bin/mv ${pgsql_data_dir}{,$(date +%Y%m%d%H)}
     sed -i 's@^dbpostgrespwd=.*@dbpostgrespwd=@' ./options.conf
     sed -i "s@${pgsql_install_dir}/bin:@@" /etc/profile
     echo "${CMSG}PostgreSQL uninstall completed${CEND}"
+  fi
+  # uninstall mongodb 
+  if [ -e "${mongo_install_dir}/bin/mongo" ]; then
+    service mongod stop > /dev/null 2>&1
+    rm -rf ${mongo_install_dir} /etc/mongod.conf /etc/init.d/mongod /var/log/mongodb /tmp/mongo*.sock
+    id -u mongod > /dev/null 2>&1 ; [ $? -eq 0 ] && userdel mongod 
+    [ -e "${mongo_data_dir}" ] && /bin/mv ${mongo_data_dir}{,$(date +%Y%m%d%H)}
+    sed -i 's@^dbmongopwd=.*@dbmongopwd=@' ./options.conf
+    sed -i "s@${mongo_install_dir}/bin:@@" /etc/profile
+    echo "${CMSG}MongoDB uninstall completed${CEND}"
   fi
 }
 
@@ -201,7 +213,7 @@ while :; do
 What Are You Doing?
 \t${CMSG}0${CEND}. Uninstall All
 \t${CMSG}1${CEND}. Uninstall Nginx/Tengine/Apache/Tomcat
-\t${CMSG}2${CEND}. Uninstall MySQL/MariaDB/Percona/AliSQL/PostgreSQL
+\t${CMSG}2${CEND}. Uninstall MySQL/MariaDB/Percona/AliSQL/PostgreSQL/MongoDB
 \t${CMSG}3${CEND}. Uninstall PHP
 \t${CMSG}4${CEND}. Uninstall HHVM
 \t${CMSG}5${CEND}. Uninstall PureFtpd
