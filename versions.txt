@@ -3,7 +3,7 @@
 nginx_version=1.12.2
 tengine_version=2.2.1
 openresty_version=1.13.6.1
-openssl_version=1.0.2m
+openssl_version=1.0.2n
 
 tomcat8_version=8.5.24
 tomcat7_version=7.0.82
@@ -14,7 +14,7 @@ apache22_version=2.2.34
 pcre_version=8.41
 apr_version=1.6.3
 apr_util_version=1.6.1
-nghttp2_version=1.28.0
+nghttp2_version=1.29.0
 
 # DB
 mysql57_version=5.7.20
@@ -73,10 +73,10 @@ pureftpd_version=1.0.47
 
 # Redis
 redis_version=4.0.6
-redis_pecl_version=3.1.4
+redis_pecl_version=3.1.5
 
 # Memcached
-memcached_version=1.5.3
+memcached_version=1.5.4
 libmemcached_version=1.0.18
 memcached_pecl_version=2.2.0
 memcached_pecl_php7_version=3.0.4
