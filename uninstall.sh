@@ -99,7 +99,7 @@ Print_MySQL() {
   [ -e "/etc/my.cnf" ] && echo "/etc/my.cnf"
 }
 
-Print_PosgreSQL() {
+Print_PostgreSQL() {
   [ -e "${pgsql_install_dir}" ] && echo "${pgsql_install_dir}"
   [ -e "/etc/init.d/postgresql" ] && echo "/etc/init.d/postgresql"
 }
