@@ -5,8 +5,8 @@ tengine_version=2.2.1
 openresty_version=1.13.6.1
 openssl_version=1.0.2n
 
-tomcat8_version=8.5.24
-tomcat7_version=7.0.82
+tomcat8_version=8.5.27
+tomcat7_version=7.0.84
 tomcat6_version=6.0.53
 
 apache24_version=2.4.29
@@ -103,4 +103,4 @@ bison_version=2.7.1
 python_version=2.7.14
 setuptools_version=32.0.0
 pip_version=9.0.1
-fail2ban_version=0.10.1
+fail2ban_version=0.10.2
