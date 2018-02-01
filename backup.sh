@@ -50,7 +50,7 @@ DB_UPYUN_BK() {
     DB_GREP="DB_${D}_`date +%Y`"
     DB_FILE=`ls -lrt $backup_dir | grep ${DB_GREP} | tail -1 | awk '{print $NF}'`
     /usr/local/bin/upx put $backup_dir/$DB_FILE /`date +%F`/$DB_FILE
-    [ $? -eq 0 ] && /usr/local/bin/upx rm -d `date +%F --date="$expired_days days ago"` > /dev/null 2>&1
+    [ $? -eq 0 ] && /usr/local/bin/upx rm -a `date +%F --date="$expired_days days ago"` > /dev/null 2>&1
   done
 }
 
@@ -98,6 +98,7 @@ WEB_UPYUN_BK() {
   for W in `echo $website_name | tr ',' ' '`
   do
     [ ! -e "$wwwroot_dir/$WebSite" ] && { echo "[$wwwroot_dir/$WebSite] not exist"; break; }
+    [ ! -e "$backup_dir" ] && mkdir -p $backup_dir
     PUSH_FILE="$backup_dir/Web_${W}_$(date +%Y%m%d_%H).tgz"
     if [ ! -e "$PUSH_FILE" ]; then
       pushd $wwwroot_dir
@@ -106,7 +107,7 @@ WEB_UPYUN_BK() {
     fi
     /usr/local/bin/upx put $PUSH_FILE /`date +%F`/Web_${W}_$(date +%Y%m%d_%H).tgz
     if [ $? -eq 0 ]; then
-      /usr/local/bin/upx rm -d `date +%F --date="$expired_days days ago"` > /dev/null 2>&1 
+      /usr/local/bin/upx rm -a `date +%F --date="$expired_days days ago"` > /dev/null 2>&1 
       [ -e "$PUSH_FILE" -a -z "`echo $backup_destination | grep -ow 'local'`" ] && rm -rf $PUSH_FILE
     fi
   done

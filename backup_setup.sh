@@ -52,6 +52,7 @@ sed -i 's@^backup_destination=.*@backup_destination=@' ./options.conf
 [ `echo $DESC_BK | grep -e 2` ] && sed -i 's@^backup_destination=.*@&,remote@' ./options.conf
 [ `echo $DESC_BK | grep -e 3` ] && sed -i 's@^backup_destination=.*@&,cos@' ./options.conf
 [ `echo $DESC_BK | grep -e 4` ] && sed -i 's@^backup_destination=.*@&,upyun@' ./options.conf
+sed -i 's@^backup_destination=,@backup_destination=@' ./options.conf
 
 while :; do echo
   echo 'Please select your backup content:'
