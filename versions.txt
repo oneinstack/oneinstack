@@ -32,7 +32,7 @@ percona55_version=5.5.59-38.11
 
 alisql56_version=5.6.32-8
 
-pgsql_version=10.2
+pgsql_version=10.3
 
 mongodb_version=3.6.3
 
@@ -76,7 +76,7 @@ redis_version=4.0.8
 redis_pecl_version=3.1.6
 
 # Memcached
-memcached_version=1.5.5
+memcached_version=1.5.6
 libmemcached_version=1.0.18
 memcached_pecl_version=2.2.0
 memcached_pecl_php7_version=3.0.4
