@@ -63,7 +63,7 @@ gmagick_version=1.1.7RC3
 zendopcache_version=7.0.5
 xcache_version=3.2.0
 apcu_version=4.0.11
-apcu_for_php7_version=5.1.9
+apcu_for_php7_version=5.1.10
 eaccelerator_version=0.9.6.1
 swoole_version=2.1.0
 xdebug_version=2.5.5
@@ -98,7 +98,7 @@ boost_version=1.59.0
 # Others
 libevent_version=2.0.22-stable
 tmux_version=2.6
-htop_version=2.0.2
+htop_version=2.1.0
 bison_version=2.7.1
 python_version=2.7.14
 setuptools_version=32.0.0
