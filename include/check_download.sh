@@ -106,27 +106,24 @@ checkDownload() {
     case "${DB_version}" in
       1)
         # MySQL 5.7
-        if [ "${IPADDR_COUNTRY}"x == "CN"x -a "${IPADDR_ISP}" == "aliyun" -a "$(../include/check_port.py aliyun-oss.linuxeye.com 80)" == "True" ]; then
-          DOWN_ADDR_MYSQL=http://aliyun-oss.linuxeye.com/mysql/MySQL-5.7
-        else
-          if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            if [ "$(../include/check_port.py mirrors.tuna.tsinghua.edu.cn 443)" == "True" ]; then
-              DOWN_ADDR_MYSQL=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
-              DOWN_ADDR_MYSQL_BK=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.7
-            else
-              DOWN_ADDR_MYSQL=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.7
-              DOWN_ADDR_MYSQL_BK=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
-            fi
+        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+          if [ "$(../include/check_port.py mirrors.tuna.tsinghua.edu.cn 443)" == "True" ]; then
+            DOWN_ADDR_MYSQL=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
+            DOWN_ADDR_MYSQL_BK=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.7
           else
-            if [ "$(../include/check_port.py cdn.mysql.com 80)" == "True" ]; then
-              DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.7
-              DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.7
-            else
-              DOWN_ADDR_MYSQL=http://mysql.he.net/Downloads/MySQL-5.7
-              DOWN_ADDR_MYSQL_BK=http://cdn.mysql.com/Downloads/MySQL-5.7
-            fi
+            DOWN_ADDR_MYSQL=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.7
+            DOWN_ADDR_MYSQL_BK=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
+          fi
+        else
+          if [ "$(../include/check_port.py cdn.mysql.com 80)" == "True" ]; then
+            DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.7
+            DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.7
+          else
+            DOWN_ADDR_MYSQL=http://mysql.he.net/Downloads/MySQL-5.7
+            DOWN_ADDR_MYSQL_BK=http://cdn.mysql.com/Downloads/MySQL-5.7
           fi
         fi
+
         if [ "${dbInstallMethods}" == '1' ]; then
           echo "Download MySQL 5.7 binary package..."
           FILE_NAME=mysql-${mysql57_version}-linux-glibc2.12-${SYS_BIT_b}.tar.gz
@@ -155,27 +152,24 @@ checkDownload() {
 
       2)
         # MySQL 5.6
-        if [ "${IPADDR_COUNTRY}"x == "CN"x -a "${IPADDR_ISP}" == "aliyun" -a "$(../include/check_port.py aliyun-oss.linuxeye.com 80)" == "True" ]; then
-          DOWN_ADDR_MYSQL=http://aliyun-oss.linuxeye.com/mysql/MySQL-5.6
-        else
-          if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            if [ "$(../include/check_port.py mirrors.tuna.tsinghua.edu.cn 443)" == "True" ]; then
-              DOWN_ADDR_MYSQL=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.6
-              DOWN_ADDR_MYSQL_BK=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.6
-            else
-              DOWN_ADDR_MYSQL=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.6
-              DOWN_ADDR_MYSQL_BK=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.6
-            fi
+        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+          if [ "$(../include/check_port.py mirrors.tuna.tsinghua.edu.cn 443)" == "True" ]; then
+            DOWN_ADDR_MYSQL=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.6
+            DOWN_ADDR_MYSQL_BK=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.6
           else
-            if [ "$(../include/check_port.py cdn.mysql.com 80)" == "True" ]; then
-              DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.6
-              DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.6
-            else
-              DOWN_ADDR_MYSQL=http://mysql.he.net/Downloads/MySQL-5.6
-              DOWN_ADDR_MYSQL_BK=http://cdn.mysql.com/Downloads/MySQL-5.6
-            fi
+            DOWN_ADDR_MYSQL=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.6
+            DOWN_ADDR_MYSQL_BK=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.6
+          fi
+        else
+          if [ "$(../include/check_port.py cdn.mysql.com 80)" == "True" ]; then
+            DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.6
+            DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.6
+          else
+            DOWN_ADDR_MYSQL=http://mysql.he.net/Downloads/MySQL-5.6
+            DOWN_ADDR_MYSQL_BK=http://cdn.mysql.com/Downloads/MySQL-5.6
           fi
         fi
+
         if [ "${dbInstallMethods}" == '1' ]; then
           echo "Download MySQL 5.6 binary package..."
           FILE_NAME=mysql-${mysql56_version}-linux-glibc2.12-${SYS_BIT_b}.tar.gz
@@ -203,27 +197,24 @@ checkDownload() {
 
       3)
         # MySQL 5.5
-        if [ "${IPADDR_COUNTRY}"x == "CN"x -a "${IPADDR_ISP}" == "aliyun" -a "$(../include/check_port.py aliyun-oss.linuxeye.com 80)" == "True" ]; then
-          DOWN_ADDR_MYSQL=http://aliyun-oss.linuxeye.com/mysql/MySQL-5.5
-        else
-          if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            if [ "$(../include/check_port.py mirrors.tuna.tsinghua.edu.cn 443)" == "True" ]; then
-              DOWN_ADDR_MYSQL=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.5
-              DOWN_ADDR_MYSQL_BK=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.5
-            else
-              DOWN_ADDR_MYSQL=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.5
-              DOWN_ADDR_MYSQL_BK=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.5
-            fi
+        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+          if [ "$(../include/check_port.py mirrors.tuna.tsinghua.edu.cn 443)" == "True" ]; then
+            DOWN_ADDR_MYSQL=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.5
+            DOWN_ADDR_MYSQL_BK=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.5
           else
-            if [ "$(../include/check_port.py cdn.mysql.com 80)" == "True" ]; then
-              DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.5
-              DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.5
-            else
-              DOWN_ADDR_MYSQL=http://mysql.he.net/Downloads/MySQL-5.5
-              DOWN_ADDR_MYSQL_BK=http://cdn.mysql.com/Downloads/MySQL-5.5
-            fi
+            DOWN_ADDR_MYSQL=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads/MySQL-5.5
+            DOWN_ADDR_MYSQL_BK=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.5
+          fi
+        else
+          if [ "$(../include/check_port.py cdn.mysql.com 80)" == "True" ]; then
+            DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.5
+            DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.5
+          else
+            DOWN_ADDR_MYSQL=http://mysql.he.net/Downloads/MySQL-5.5
+            DOWN_ADDR_MYSQL_BK=http://cdn.mysql.com/Downloads/MySQL-5.5
           fi
         fi
+
         if [ "${dbInstallMethods}" == '1' ]; then
           echo "Download MySQL 5.5 binary package..."
           FILE_NAME=mysql-${mysql55_version}-linux-glibc2.12-${SYS_BIT_b}.tar.gz
