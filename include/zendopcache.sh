@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -14,8 +14,8 @@ Install_ZendOPcache() {
   PHP_detail_version=$(${php_install_dir}/bin/php -r 'echo PHP_VERSION;')
   PHP_main_version=${PHP_detail_version%.*}
   if [[ "${PHP_main_version}" =~ ^5.[3-4]$ ]]; then
-    tar xvf zendopcache-${zendopcache_version}.tgz
-    pushd zendopcache-${zendopcache_version}
+    tar xvf zendopcache-${zendopcache_ver}.tgz
+    pushd zendopcache-${zendopcache_ver}
   else
     tar xvf php-${PHP_detail_version}.tar.gz
     pushd php-${PHP_detail_version}/ext/opcache
@@ -64,7 +64,7 @@ EOF
     fi
 
     echo "${CSUCCESS}PHP OPcache module installed successfully! ${CEND}"
-    rm -rf zendopcache-${zendopcache_version} php-${PHP_detail_version}
+    rm -rf zendopcache-${zendopcache_ver} php-${PHP_detail_version}
   else
     echo "${CFAILURE}PHP OPcache module install failed, Please contact the author! ${CEND}"
   fi

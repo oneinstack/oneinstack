@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -17,15 +17,15 @@ Install_Percona56() {
   [ ! -d "${percona_install_dir}" ] && mkdir -p ${percona_install_dir}
   mkdir -p ${percona_data_dir};chown mysql.mysql -R ${percona_data_dir}
 
-  if [ "${dbInstallMethods}" == "1" ]; then
-    perconaVerStr1=$(echo ${percona56_version} | sed "s@-@-rel@")
+  if [ "${dbinstallmethod}" == "1" ]; then
+    perconaVerStr1=$(echo ${percona56_ver} | sed "s@-@-rel@")
     tar xvf Percona-Server-${perconaVerStr1}-Linux.${SYS_BIT_b}.${sslLibVer}.tar.gz
     mv Percona-Server-${perconaVerStr1}-Linux.${SYS_BIT_b}.${sslLibVer}/* ${percona_install_dir}
     sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${percona_install_dir}/bin/mysqld_safe
     sed -i "s@/usr/local/Percona-Server-${perconaVerStr1}-Linux.${SYS_BIT_b}.${sslLibVer}@${percona_install_dir}@g" ${percona_install_dir}/bin/mysqld_safe 
-  elif [ "${dbInstallMethods}" == "2" ]; then
-    tar xvf percona-server-${percona56_version}.tar.gz
-    pushd percona-server-${percona56_version}
+  elif [ "${dbinstallmethod}" == "2" ]; then
+    tar xvf percona-server-${percona56_ver}.tar.gz
+    pushd percona-server-${percona56_ver}
     cmake . -DCMAKE_INSTALL_PREFIX=${percona_install_dir} \
     -DMYSQL_DATADIR=${percona_data_dir} \
     -DSYSCONFDIR=/etc \
@@ -49,14 +49,14 @@ Install_Percona56() {
 
   if [ -d "${percona_install_dir}/support-files" ]; then
     echo "${CSUCCESS}Percona installed successfully! ${CEND}"
-    if [ "${dbInstallMethods}" == "1" ]; then
+    if [ "${dbinstallmethod}" == "1" ]; then
       rm -rf Percona-Server-${perconaVerStr1}-Linux.${SYS_BIT_b}.${sslLibVer}
-    elif [ "${dbInstallMethods}" == "2" ]; then
-      rm -rf percona-server-${percona56_version}
+    elif [ "${dbinstallmethod}" == "2" ]; then
+      rm -rf percona-server-${percona56_ver}
     fi
   else
     rm -rf ${percona_install_dir}
-    rm -rf percona-server-${percona56_version}
+    rm -rf percona-server-${percona56_ver}
     echo "${CFAILURE}Percona install failed, Please contact the author! ${CEND}"
     kill -9 $$
   fi

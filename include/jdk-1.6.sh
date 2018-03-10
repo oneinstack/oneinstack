@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -11,9 +11,9 @@
 Install-JDK16() {
   pushd ${oneinstack_dir}/src
   
-  JDK_FILE="jdk-`echo $jdk16_version | awk -F. '{print $2}'`u`echo $jdk16_version | awk -F_ '{print $NF}'`-linux-$SYS_BIG_FLAG.bin"
+  JDK_FILE="jdk-`echo $jdk16_ver | awk -F. '{print $2}'`u`echo $jdk16_ver | awk -F_ '{print $NF}'`-linux-$SYS_BIG_FLAG.bin"
   JAVA_dir=/usr/java
-  JDK_NAME="jdk$jdk16_version"
+  JDK_NAME="jdk$jdk16_ver"
   JDK_PATH=$JAVA_dir/$JDK_NAME
   
   [ "$OS" == 'CentOS' ] && [ -n "`rpm -qa | grep jdk`" ] && rpm -e `rpm -qa | grep jdk`

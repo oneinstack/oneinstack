@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -10,39 +10,39 @@
 
 Install_Apache24() {
   pushd ${oneinstack_dir}/src
-  tar xzf pcre-${pcre_version}.tar.gz
-  pushd pcre-${pcre_version}
+  tar xzf pcre-${pcre_ver}.tar.gz
+  pushd pcre-${pcre_ver}
   ./configure
   make -j ${THREAD} && make install
   popd
   id -u ${run_user} >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin $run_user
-  tar xzf httpd-${apache24_version}.tar.gz
-  tar xzf nghttp2-${nghttp2_version}.tar.gz
-  tar xzf apr-${apr_version}.tar.gz
-  tar xzf apr-util-${apr_util_version}.tar.gz
+  tar xzf httpd-${apache24_ver}.tar.gz
+  tar xzf nghttp2-${nghttp2_ver}.tar.gz
+  tar xzf apr-${apr_ver}.tar.gz
+  tar xzf apr-util-${apr_util_ver}.tar.gz
 
   # install nghttp2
   if [ ! -e "/usr/local/lib/libnghttp2.so" ]; then
-    pushd nghttp2-${nghttp2_version}
+    pushd nghttp2-${nghttp2_ver}
     ./configure
     make -j ${THREAD} && make install
     popd
     echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf; ldconfig
-    rm -rf nghttp2-${nghttp2_version}
+    rm -rf nghttp2-${nghttp2_ver}
   fi
 
-  pushd httpd-${apache24_version}
+  pushd httpd-${apache24_ver}
   [ ! -d "${apache_install_dir}" ] && mkdir -p ${apache_install_dir}
-  /bin/cp -R ../apr-${apr_version} ./srclib/apr
-  /bin/cp -R ../apr-util-${apr_util_version} ./srclib/apr-util
+  /bin/cp -R ../apr-${apr_ver} ./srclib/apr
+  /bin/cp -R ../apr-util-${apr_util_ver} ./srclib/apr-util
   LDFLAGS=-ldl LD_LIBRARY_PATH=${openssl_install_dir}/lib ./configure --prefix=${apache_install_dir} --enable-mpms-shared=all --with-included-apr --enable-headers --enable-deflate --enable-so --enable-dav --enable-rewrite --enable-ssl --with-ssl=${openssl_install_dir} --enable-http2 --with-nghttp2=/usr/local --enable-expires --enable-static-support --enable-suexec --enable-modules=all --enable-mods-shared=all
   make -j ${THREAD} && make install
   unset LDFLAGS
   if [ -e "${apache_install_dir}/conf/httpd.conf" ]; then
     echo "${CSUCCESS}Apache installed successfully! ${CEND}"
     popd 
-    rm -rf httpd-${apache24_version}
+    rm -rf httpd-${apache24_ver}
   else
     rm -rf ${apache_install_dir}
     echo "${CFAILURE}Apache install failed, Please contact the author! ${CEND}"
@@ -63,10 +63,10 @@ Install_Apache24() {
   
   sed -i "s@^User daemon@User $run_user@" ${apache_install_dir}/conf/httpd.conf
   sed -i "s@^Group daemon@Group $run_user@" ${apache_install_dir}/conf/httpd.conf
-  if [ "${Nginx_version}" == '4' -a ! -e "${web_install_dir}/sbin/nginx" ]; then
+  if [ "${nginx_ver}" == '4' -a ! -e "${web_install_dir}/sbin/nginx" ]; then
     sed -i 's/^#ServerName www.example.com:80/ServerName 0.0.0.0:80/' ${apache_install_dir}/conf/httpd.conf
     TMP_PORT=80
-  elif [[ ${Nginx_version} =~ ^[1-3]$ ]] || [ -e "${web_install_dir}/sbin/nginx" ]; then
+  elif [[ ${nginx_ver} =~ ^[1-3]$ ]] || [ -e "${web_install_dir}/sbin/nginx" ]; then
     sed -i 's/^#ServerName www.example.com:80/ServerName 127.0.0.1:88/' ${apache_install_dir}/conf/httpd.conf
     sed -i 's@^Listen.*@Listen 127.0.0.1:88@' ${apache_install_dir}/conf/httpd.conf
     TMP_PORT=88
@@ -144,8 +144,8 @@ ServerTokens ProductOnly
 ServerSignature Off
 Include conf/vhost/*.conf
 EOF
-  [ "${Nginx_version}" == '4' -a ! -e "${web_install_dir}/sbin/nginx" ] && echo 'Protocols h2 http/1.1' >> ${apache_install_dir}/conf/httpd.conf
-  if [ "${Nginx_version}" != '4' -o -e "${web_install_dir}/sbin/nginx" ]; then
+  [ "${nginx_ver}" == '4' -a ! -e "${web_install_dir}/sbin/nginx" ] && echo 'Protocols h2 http/1.1' >> ${apache_install_dir}/conf/httpd.conf
+  if [ "${nginx_ver}" != '4' -o -e "${web_install_dir}/sbin/nginx" ]; then
     cat > ${apache_install_dir}/conf/extra/httpd-remoteip.conf << EOF
 LoadModule remoteip_module modules/mod_remoteip.so
 RemoteIPHeader X-Forwarded-For

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -37,10 +37,10 @@ while :; do echo
   echo -e "\t${CMSG}2${CEND}. Remote host"
   echo -e "\t${CMSG}3${CEND}. Qcloud COS"
   echo -e "\t${CMSG}4${CEND}. UPYUN(又拍云)" 
-  read -p "Please input a number:(Default 1 press Enter) " DESC_BK
-  [ -z "$DESC_BK" ] && DESC_BK=1
+  read -p "Please input a number:(Default 1 press Enter) " desc_bk
+  [ -z "$desc_bk" ] && desc_bk=1
   ary=(1 2 3 4 12 13 14 23 24 34 123 124 234 1234)
-  if [[ "${ary[@]}" =~ "$DESC_BK" ]]; then
+  if [[ "${ary[@]}" =~ "$desc_bk" ]]; then
     break
   else
     echo "${CWARNING}input error! Please only input number 1,2,12,23,234 and so on${CEND}"
@@ -48,10 +48,10 @@ while :; do echo
 done
 
 sed -i 's@^backup_destination=.*@backup_destination=@' ./options.conf
-[ `echo $DESC_BK | grep -e 1` ] && sed -i 's@^backup_destination=.*@backup_destination=local@' ./options.conf
-[ `echo $DESC_BK | grep -e 2` ] && sed -i 's@^backup_destination=.*@&,remote@' ./options.conf
-[ `echo $DESC_BK | grep -e 3` ] && sed -i 's@^backup_destination=.*@&,cos@' ./options.conf
-[ `echo $DESC_BK | grep -e 4` ] && sed -i 's@^backup_destination=.*@&,upyun@' ./options.conf
+[ `echo $desc_bk | grep -e 1` ] && sed -i 's@^backup_destination=.*@backup_destination=local@' ./options.conf
+[ `echo $desc_bk | grep -e 2` ] && sed -i 's@^backup_destination=.*@&,remote@' ./options.conf
+[ `echo $desc_bk | grep -e 3` ] && sed -i 's@^backup_destination=.*@&,cos@' ./options.conf
+[ `echo $desc_bk | grep -e 4` ] && sed -i 's@^backup_destination=.*@&,upyun@' ./options.conf
 sed -i 's@^backup_destination=,@backup_destination=@' ./options.conf
 
 while :; do echo
@@ -59,31 +59,31 @@ while :; do echo
   echo -e "\t${CMSG}1${CEND}. Only Database"
   echo -e "\t${CMSG}2${CEND}. Only Website"
   echo -e "\t${CMSG}3${CEND}. Database and Website"
-  read -p "Please input a number:(Default 1 press Enter) " CONTENT_BK
-  [ -z "$CONTENT_BK" ] && CONTENT_BK=1
-  if [[ ! $CONTENT_BK =~ ^[1-3]$ ]]; then
+  read -p "Please input a number:(Default 1 press Enter) " content_bk
+  [ -z "$content_bk" ] && content_bk=1
+  if [[ ! $content_bk =~ ^[1-3]$ ]]; then
     echo "${CWARNING}input error! Please only input number 1~3${CEND}"
   else
     break
   fi
 done
 
-[ "$CONTENT_BK" == '1' ] && sed -i 's@^backup_content=.*@backup_content=db@' ./options.conf
-[ "$CONTENT_BK" == '2' ] && sed -i 's@^backup_content=.*@backup_content=web@' ./options.conf
-[ "$CONTENT_BK" == '3' ] && sed -i 's@^backup_content=.*@backup_content=db,web@' ./options.conf
+[ "$content_bk" == '1' ] && sed -i 's@^backup_content=.*@backup_content=db@' ./options.conf
+[ "$content_bk" == '2' ] && sed -i 's@^backup_content=.*@backup_content=web@' ./options.conf
+[ "$content_bk" == '3' ] && sed -i 's@^backup_content=.*@backup_content=db,web@' ./options.conf
 
-if [[ $DESC_BK =~ ^[1,2]$ ]]; then
+if [[ $desc_bk =~ ^[1,2]$ ]]; then
   while :; do echo
     echo "Please enter the directory for save the backup file: "
-    read -p "(Default directory: $backup_dir): " NEW_backup_dir
-    [ -z "$NEW_backup_dir" ] && NEW_backup_dir="$backup_dir"
-    if [ -z "`echo $NEW_backup_dir| grep '^/'`" ]; then
+    read -p "(Default directory: $backup_dir): " new_backup_dir
+    [ -z "$new_backup_dir" ] && new_backup_dir="$backup_dir"
+    if [ -z "`echo $new_backup_dir| grep '^/'`" ]; then
       echo "${CWARNING}input error! ${CEND}"
     else
       break
     fi
   done
-  sed -i "s@^backup_dir=.*@backup_dir=$NEW_backup_dir@" ./options.conf
+  sed -i "s@^backup_dir=.*@backup_dir=$new_backup_dir@" ./options.conf
 fi
 
 while :; do echo
@@ -94,7 +94,7 @@ while :; do echo
 done
 sed -i "s@^expired_days=.*@expired_days=$expired_days@" ./options.conf
 
-if [ "$CONTENT_BK" != '2' ]; then
+if [ "$content_bk" != '2' ]; then
   databases=`$db_install_dir/bin/mysql -uroot -p$dbrootpwd -e "show databases\G" | grep Database | awk '{print $2}' | grep -Evw "(performance_schema|information_schema|mysql|sys)"`
   while :; do echo
     echo "Please enter one or more name for database, separate multiple database names with commas: "
@@ -111,7 +111,7 @@ if [ "$CONTENT_BK" != '2' ]; then
   sed -i "s@^db_name=.*@db_name=$db_name@" ./options.conf
 fi
 
-if [ "$CONTENT_BK" != '1' ]; then
+if [ "$content_bk" != '1' ]; then
   websites=`ls $wwwroot_dir | grep -vw default`
   while :; do echo
     echo "Please enter one or more name for website, separate multiple website names with commas: "
@@ -130,10 +130,10 @@ fi
 
 echo
 echo "You have to backup the content:"
-[ "$CONTENT_BK" != '2' ] && echo "Database: ${CMSG}$db_name${CEND}"
-[ "$CONTENT_BK" != '1' ] && echo "Website: ${CMSG}$website_name${CEND}"
+[ "$content_bk" != '2' ] && echo "Database: ${CMSG}$db_name${CEND}"
+[ "$content_bk" != '1' ] && echo "Website: ${CMSG}$website_name${CEND}"
 
-if [ `echo $DESC_BK | grep -e 2` ]; then
+if [ `echo $desc_bk | grep -e 2` ]; then
   > tools/iplist.txt
   while :; do echo
     read -p "Please enter the remote host ip: " remote_ip
@@ -166,7 +166,7 @@ if [ `echo $DESC_BK | grep -e 2` ]; then
   done
 fi
 
-if [ `echo $DESC_BK | grep -e 3` ]; then
+if [ `echo $desc_bk | grep -e 3` ]; then
   [ ! -e "${python_install_dir}/bin/python" ] && Install_Python
   [ ! -e "${python_install_dir}/lib/coscmd" ] && ${python_install_dir}/bin/pip install coscmd >/dev/null 2>&1 
   while :; do echo
@@ -208,7 +208,7 @@ if [ `echo $DESC_BK | grep -e 3` ]; then
     echo
     $python_install_dir/bin/coscmd config -u $appid -a $SecretId -s $SecretKey -r $region -b $bucket >/dev/null 2>&1
     $python_install_dir/bin/coscmd list >/dev/null 2>&1
-    if [ $? = 0 ];then
+    if [ $? = 0 ]; then
       echo "${CMSG}appid/SecretId/SecretKey/region/bucket OK${CEND}"
       echo
       break
@@ -218,7 +218,7 @@ if [ `echo $DESC_BK | grep -e 3` ]; then
   done
 fi
 
-if [ `echo $DESC_BK | grep -e 4` ]; then
+if [ `echo $desc_bk | grep -e 4` ]; then
   if [ ! -e "/usr/local/bin/upx" ] ;then
     if [ "$OS_BIT" == '64' ]; then
       wget -qc http://collection.b0.upaiyun.com/softwares/upx/upx-linux-amd64-v0.2.3 -O /usr/local/bin/upx
@@ -239,7 +239,7 @@ if [ `echo $DESC_BK | grep -e 4` ]; then
     echo
     /usr/local/bin/upx login $ServiceName $Operator $Password >/dev/null 2>&1
     /usr/local/bin/upx ls >/dev/null 2>&1
-    if [ $? = 0 ];then
+    if [ $? = 0 ]; then
       echo "${CMSG}ServiceName/Operator/Password OK${CEND}"
       echo
       break

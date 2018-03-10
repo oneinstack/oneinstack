@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -14,8 +14,8 @@ Install_PureFTPd() {
   id -u ${run_user} >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin ${run_user}
 
-  tar xzf pure-ftpd-${pureftpd_version}.tar.gz
-  pushd pure-ftpd-${pureftpd_version}
+  tar xzf pure-ftpd-${pureftpd_ver}.tar.gz
+  pushd pure-ftpd-${pureftpd_ver}
   [ ! -d "${pureftpd_install_dir}" ] && mkdir -p ${pureftpd_install_dir}
   ./configure --prefix=${pureftpd_install_dir} CFLAGS=-O2 --with-puredb --with-quotas --with-cookie --with-virtualhosts --with-virtualchroot --with-diraliases --with-sysquotas --with-ratios --with-altlog --with-paranoidmsg --with-shadow --with-welcomemsg  --with-throttling --with-uploadscript --with-language=english --with-rfc2640
   make -j ${THREAD} && make install
@@ -53,7 +53,7 @@ Install_PureFTPd() {
     fi
 
     echo "${CSUCCESS}Pure-Ftp installed successfully! ${CEND}"
-    rm -rf pure-ftpd-${pureftpd_version}
+    rm -rf pure-ftpd-${pureftpd_ver}
   else
     rm -rf ${pureftpd_install_dir}
     echo "${CFAILURE}Pure-Ftpd install failed, Please contact the author! ${CEND}"

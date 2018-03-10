@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -10,8 +10,8 @@
 
 Install_phpMyAdmin() {
   pushd ${oneinstack_dir}/src
-  tar xzf phpMyAdmin-${phpMyAdmin_version}-all-languages.tar.gz
-  /bin/mv phpMyAdmin-${phpMyAdmin_version}-all-languages ${wwwroot_dir}/default/phpMyAdmin
+  tar xzf phpMyAdmin-${phpmyadmin_ver}-all-languages.tar.gz
+  /bin/mv phpMyAdmin-${phpmyadmin_ver}-all-languages ${wwwroot_dir}/default/phpMyAdmin
   /bin/cp ${wwwroot_dir}/default/phpMyAdmin/{config.sample.inc.php,config.inc.php}
   mkdir ${wwwroot_dir}/default/phpMyAdmin/{upload,save}
   sed -i "s@UploadDir.*@UploadDir'\] = 'upload';@" ${wwwroot_dir}/default/phpMyAdmin/config.inc.php

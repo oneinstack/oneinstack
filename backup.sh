@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -64,7 +64,7 @@ WEB_Local_BK() {
 WEB_Remote_BK() {
   for W in `echo $website_name | tr ',' ' '`
   do
-    if [ `du -sm "$wwwroot_dir/$WebSite" | awk '{print $1}'` -lt 1024 ];then
+    if [ `du -sm "$wwwroot_dir/$WebSite" | awk '{print $1}'` -lt 1024 ]; then
       ./website_bk.sh $W
       Web_GREP="Web_${W}_`date +%Y`"
       Web_FILE=`ls -lrt $backup_dir | grep ${Web_GREP} | tail -1 | awk '{print $NF}'`

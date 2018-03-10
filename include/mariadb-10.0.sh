@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -17,14 +17,14 @@ Install_MariaDB100() {
   [ ! -d "${mariadb_install_dir}" ] && mkdir -p ${mariadb_install_dir}
   mkdir -p ${mariadb_data_dir};chown mysql.mysql -R ${mariadb_data_dir}
 
-  if [ "${dbInstallMethods}" == "1" ]; then
-    tar zxf mariadb-${mariadb100_version}-${GLIBC_FLAG}-${SYS_BIT_b}.tar.gz
-    mv mariadb-${mariadb100_version}-*-${SYS_BIT_b}/* ${mariadb_install_dir}
+  if [ "${dbinstallmethod}" == "1" ]; then
+    tar zxf mariadb-${mariadb100_ver}-${GLIBC_FLAG}-${SYS_BIT_b}.tar.gz
+    mv mariadb-${mariadb100_ver}-*-${SYS_BIT_b}/* ${mariadb_install_dir}
     sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${mariadb_install_dir}/bin/mysqld_safe
     sed -i "s@/usr/local/mysql@${mariadb_install_dir}@g" ${mariadb_install_dir}/bin/mysqld_safe
-  elif [ "${dbInstallMethods}" == "2" ]; then
-    tar xvf mariadb-${mariadb100_version}.tar.gz
-    pushd mariadb-${mariadb100_version}
+  elif [ "${dbinstallmethod}" == "2" ]; then
+    tar xvf mariadb-${mariadb100_ver}.tar.gz
+    pushd mariadb-${mariadb100_ver}
     cmake . -DCMAKE_INSTALL_PREFIX=${mariadb_install_dir} \
     -DMYSQL_DATADIR=${mariadb_data_dir} \
     -DSYSCONFDIR=/etc \
@@ -47,14 +47,14 @@ Install_MariaDB100() {
 
   if [ -d "${mariadb_install_dir}/support-files" ]; then
     echo "${CSUCCESS}MariaDB installed successfully! ${CEND}"
-    if [ "${dbInstallMethods}" == "1" ]; then
-      rm -rf mariadb-${mariadb100_version}-*-${SYS_BIT_b}
-    elif [ "${dbInstallMethods}" == "2" ]; then
-      rm -rf mariadb-${mariadb100_version}
+    if [ "${dbinstallmethod}" == "1" ]; then
+      rm -rf mariadb-${mariadb100_ver}-*-${SYS_BIT_b}
+    elif [ "${dbinstallmethod}" == "2" ]; then
+      rm -rf mariadb-${mariadb100_ver}
     fi
   else
     rm -rf ${mariadb_install_dir}
-    rm -rf mariadb-${mariadb100_version}
+    rm -rf mariadb-${mariadb100_ver}
     echo "${CFAILURE}MariaDB install failed, Please contact the author! ${CEND}"
     kill -9 $$
   fi
