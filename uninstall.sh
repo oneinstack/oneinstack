@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -112,7 +112,7 @@ Print_MongoDB() {
 
 Uninstall_MySQL() {
   # uninstall mysql,mariadb,percona,alisql 
-  if [ -d "${db_install_dir}/support-files" ];then
+  if [ -d "${db_install_dir}/support-files" ]; then
     service mysqld stop > /dev/null 2>&1
     rm -rf ${db_install_dir} /etc/init.d/mysqld /etc/my.cnf /etc/ld.so.conf.d/{mysql,mariadb,percona,alisql}*.conf
     id -u mysql >/dev/null 2>&1 ; [ $? -eq 0 ] && userdel mysql

@@ -124,31 +124,31 @@ installDepsBySrc() {
   if [ "${OS}" == "Ubuntu" ]; then
     if [[ "${Ubuntu_version}" =~ ^14$|^15$ ]]; then
       # Install bison on ubt 14.x 15.x
-      tar xzf bison-${bison_version}.tar.gz
-      pushd bison-${bison_version}
+      tar xzf bison-${bison_ver}.tar.gz
+      pushd bison-${bison_ver}
       ./configure
       make -j ${THREAD} && make install
       popd
-      rm -rf bison-${bison_version}
+      rm -rf bison-${bison_ver}
     fi
   elif [ "${OS}" == "CentOS" ]; then
     # Install tmux
     if [ ! -e "$(which tmux)" ]; then
       # Install libevent first
-      tar xzf libevent-${libevent_version}.tar.gz
-      pushd libevent-${libevent_version}
+      tar xzf libevent-${libevent_ver}.tar.gz
+      pushd libevent-${libevent_ver}
       ./configure
       make -j ${THREAD} && make install
       popd
-      rm -rf libevent-${libevent_version}
+      rm -rf libevent-${libevent_ver}
 
-      tar xzf tmux-${tmux_version}.tar.gz
-      pushd tmux-${tmux_version}
+      tar xzf tmux-${tmux_ver}.tar.gz
+      pushd tmux-${tmux_ver}
       CFLAGS="-I/usr/local/include" LDFLAGS="-L/usr/local/lib" ./configure
       make -j ${THREAD} && make install
       unset LDFLAGS
       popd
-      rm -rf tmux-${tmux_version}
+      rm -rf tmux-${tmux_ver}
 
       if [ "${OS_BIT}" == "64" ]; then
         ln -s /usr/local/lib/libevent-2.0.so.5 /usr/lib64/libevent-2.0.so.5
@@ -159,12 +159,12 @@ installDepsBySrc() {
 
     # install htop
     if [ ! -e "$(which htop)" ]; then
-      tar xzf htop-${htop_version}.tar.gz
-      pushd htop-${htop_version}
+      tar xzf htop-${htop_ver}.tar.gz
+      pushd htop-${htop_ver}
       ./configure
       make -j ${THREAD} && make install
       popd
-      rm -rf htop-${htop_version}
+      rm -rf htop-${htop_ver}
     fi
   else
     echo "No need to install software from source packages."

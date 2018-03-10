@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #
@@ -36,21 +36,21 @@ mkdir -p $wwwroot_dir/default $wwwlogs_dir
 
 # Use default SSH port 22. If you use another SSH port on your server
 if [ -e "/etc/ssh/sshd_config" ]; then
-  [ -z "`grep ^Port /etc/ssh/sshd_config`" ] && ssh_port=22 || ssh_port=`grep ^Port /etc/ssh/sshd_config | awk '{print $2}'`
+  [ -z "`grep ^Port /etc/ssh/sshd_config`" ] && now_ssh_port=22 || now_ssh_port=`grep ^Port /etc/ssh/sshd_config | awk '{print $2}'`
   while :; do echo
-    read -p "Please input SSH port(Default: $ssh_port): " SSH_PORT
-    [ -z "$SSH_PORT" ] && SSH_PORT=$ssh_port
-    if [ $SSH_PORT -eq 22 >/dev/null 2>&1 -o $SSH_PORT -gt 1024 >/dev/null 2>&1 -a $SSH_PORT -lt 65535 >/dev/null 2>&1 ]; then
+    read -p "Please input SSH port(Default: $now_ssh_port): " ssh_port
+    [ -z "$ssh_port" ] && ssh_port=$now_ssh_port
+    if [ $ssh_port -eq 22 >/dev/null 2>&1 -o $ssh_port -gt 1024 >/dev/null 2>&1 -a $ssh_port -lt 65535 >/dev/null 2>&1 ]; then
       break
     else
       echo "${CWARNING}input error! Input range: 22,1025~65534${CEND}"
     fi
   done
 
-  if [ -z "`grep ^Port /etc/ssh/sshd_config`" -a "$SSH_PORT" != '22' ]; then
-    sed -i "s@^#Port.*@&\nPort $SSH_PORT@" /etc/ssh/sshd_config
+  if [ -z "`grep ^Port /etc/ssh/sshd_config`" -a "$ssh_port" != '22' ]; then
+    sed -i "s@^#Port.*@&\nPort $ssh_port@" /etc/ssh/sshd_config
   elif [ -n "`grep ^Port /etc/ssh/sshd_config`" ]; then
-    sed -i "s@^Port.*@Port $SSH_PORT@" /etc/ssh/sshd_config
+    sed -i "s@^Port.*@Port $ssh_port@" /etc/ssh/sshd_config
   fi
 fi
 
@@ -66,11 +66,11 @@ done
 
 # check Web server
 while :; do echo
-  read -p "Do you want to install Web server? [y/n]: " Web_yn
-  if [[ ! $Web_yn =~ ^[y,n]$ ]]; then
+  read -p "Do you want to install Web server? [y/n]: " web_yn
+  if [[ ! $web_yn =~ ^[y,n]$ ]]; then
     echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
   else
-    if [ "$Web_yn" == 'y' ]; then
+    if [ "$web_yn" == 'y' ]; then
       # Nginx/Tegine/OpenResty
       while :; do echo
         echo 'Please select Nginx server:'
@@ -78,14 +78,14 @@ while :; do echo
         echo -e "\t${CMSG}2${CEND}. Install Tengine"
         echo -e "\t${CMSG}3${CEND}. Install OpenResty"
         echo -e "\t${CMSG}4${CEND}. Do not install"
-        read -p "Please input a number:(Default 1 press Enter) " Nginx_version
-        [ -z "$Nginx_version" ] && Nginx_version=1
-        if [[ ! $Nginx_version =~ ^[1-4]$ ]]; then
+        read -p "Please input a number:(Default 1 press Enter) " nginx_ver
+        [ -z "$nginx_ver" ] && nginx_ver=1
+        if [[ ! $nginx_ver =~ ^[1-4]$ ]]; then
           echo "${CWARNING}input error! Please only input number 1~4${CEND}"
         else
-          [ "$Nginx_version" != '4' -a -e "$nginx_install_dir/sbin/nginx" ] && { echo "${CWARNING}Nginx already installed! ${CEND}"; Nginx_version=Other; }
-          [ "$Nginx_version" != '4' -a -e "$tengine_install_dir/sbin/nginx" ] && { echo "${CWARNING}Tengine already installed! ${CEND}"; Nginx_version=Other; }
-          [ "$Nginx_version" != '4' -a -e "$openresty_install_dir/nginx/sbin/nginx" ] && { echo "${CWARNING}OpenResty already installed! ${CEND}"; Nginx_version=Other; }
+          [ "$nginx_ver" != '4' -a -e "$nginx_install_dir/sbin/nginx" ] && { echo "${CWARNING}Nginx already installed! ${CEND}"; nginx_ver=Other; }
+          [ "$nginx_ver" != '4' -a -e "$tengine_install_dir/sbin/nginx" ] && { echo "${CWARNING}Tengine already installed! ${CEND}"; nginx_ver=Other; }
+          [ "$nginx_ver" != '4' -a -e "$openresty_install_dir/nginx/sbin/nginx" ] && { echo "${CWARNING}OpenResty already installed! ${CEND}"; nginx_ver=Other; }
           break
         fi
       done
@@ -95,12 +95,12 @@ while :; do echo
         echo -e "\t${CMSG}1${CEND}. Install Apache-2.4"
         echo -e "\t${CMSG}2${CEND}. Install Apache-2.2"
         echo -e "\t${CMSG}3${CEND}. Do not install"
-        read -p "Please input a number:(Default 3 press Enter) " Apache_version
-        [ -z "$Apache_version" ] && Apache_version=3
-        if [[ ! $Apache_version =~ ^[1-3]$ ]]; then
+        read -p "Please input a number:(Default 3 press Enter) " apache_ver
+        [ -z "$apache_ver" ] && apache_ver=3
+        if [[ ! $apache_ver =~ ^[1-3]$ ]]; then
           echo "${CWARNING}input error! Please only input number 1~3${CEND}"
         else
-          [ "$Apache_version" != '3' -a -e "$apache_install_dir/conf/httpd.conf" ] && { echo "${CWARNING}Aapche already installed! ${CEND}"; Apache_version=Other; }
+          [ "$apache_ver" != '3' -a -e "$apache_install_dir/conf/httpd.conf" ] && { echo "${CWARNING}Aapche already installed! ${CEND}"; apache_ver=Other; }
           break
         fi
       done
@@ -111,47 +111,47 @@ while :; do echo
         echo -e "\t${CMSG}2${CEND}. Install Tomcat-7"
         echo -e "\t${CMSG}3${CEND}. Install Tomcat-6"
         echo -e "\t${CMSG}4${CEND}. Do not install"
-        read -p "Please input a number:(Default 4 press Enter) " Tomcat_version
-        [ -z "$Tomcat_version" ] && Tomcat_version=4
-        if [[ ! $Tomcat_version =~ ^[1-4]$ ]]; then
+        read -p "Please input a number:(Default 4 press Enter) " tomcat_ver
+        [ -z "$tomcat_ver" ] && tomcat_ver=4
+        if [[ ! $tomcat_ver =~ ^[1-4]$ ]]; then
           echo "${CWARNING}input error! Please only input number 1~4${CEND}"
         else
-          [ "$Tomcat_version" != '4' -a -e "$tomcat_install_dir/conf/server.xml" ] && { echo "${CWARNING}Tomcat already installed! ${CEND}" ; Tomcat_version=Other; }
-          if [ "$Tomcat_version" == '1' ]; then
+          [ "$tomcat_ver" != '4' -a -e "$tomcat_install_dir/conf/server.xml" ] && { echo "${CWARNING}Tomcat already installed! ${CEND}" ; tomcat_ver=Other; }
+          if [ "$tomcat_ver" == '1' ]; then
             while :; do echo
               echo 'Please select JDK version:'
               echo -e "\t${CMSG}1${CEND}. Install JDK-1.8"
               echo -e "\t${CMSG}2${CEND}. Install JDK-1.7"
-              read -p "Please input a number:(Default 2 press Enter) " JDK_version
-              [ -z "$JDK_version" ] && JDK_version=2
-              if [[ ! $JDK_version =~ ^[1-2]$ ]]; then
+              read -p "Please input a number:(Default 2 press Enter) " jdk_version
+              [ -z "$jdk_version" ] && jdk_version=2
+              if [[ ! $jdk_version =~ ^[1-2]$ ]]; then
                 echo "${CWARNING}input error! Please only input number 1~2${CEND}"
               else
                 break
               fi
             done
-          elif [ "$Tomcat_version" == '2' ]; then
+          elif [ "$tomcat_ver" == '2' ]; then
             while :; do echo
               echo 'Please select JDK version:'
               echo -e "\t${CMSG}1${CEND}. Install JDK-1.8"
               echo -e "\t${CMSG}2${CEND}. Install JDK-1.7"
               echo -e "\t${CMSG}3${CEND}. Install JDK-1.6"
-              read -p "Please input a number:(Default 2 press Enter) " JDK_version
-              [ -z "$JDK_version" ] && JDK_version=2
-              if [[ ! $JDK_version =~ ^[1-3]$ ]]; then
+              read -p "Please input a number:(Default 2 press Enter) " jdk_version
+              [ -z "$jdk_version" ] && jdk_version=2
+              if [[ ! $jdk_version =~ ^[1-3]$ ]]; then
                 echo "${CWARNING}input error! Please only input number 1~3${CEND}"
               else
                 break
               fi
             done
-          elif [ "$Tomcat_version" == '3' ]; then
+          elif [ "$tomcat_ver" == '3' ]; then
             while :; do echo
               echo 'Please select JDK version:'
               echo -e "\t${CMSG}2${CEND}. Install JDK-1.7"
               echo -e "\t${CMSG}3${CEND}. Install JDK-1.6"
-              read -p "Please input a number:(Default 2 press Enter) " JDK_version
-              [ -z "$JDK_version" ] && JDK_version=2
-              if [[ ! $JDK_version =~ ^[2-3]$ ]]; then
+              read -p "Please input a number:(Default 2 press Enter) " jdk_version
+              [ -z "$jdk_version" ] && jdk_version=2
+              if [[ ! $jdk_version =~ ^[2-3]$ ]]; then
                 echo "${CWARNING}input error! Please only input number 2~3${CEND}"
               else
                 break
@@ -168,12 +168,12 @@ done
 
 # choice database
 while :; do echo
-  read -p "Do you want to install Database? [y/n]: " DB_yn
-  if [[ ! $DB_yn =~ ^[y,n]$ ]]; then
+  read -p "Do you want to install Database? [y/n]: " db_yn
+  if [[ ! $db_yn =~ ^[y,n]$ ]]; then
     echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
   else
-    if [ "$DB_yn" == 'y' ]; then
-      [ -d "$db_install_dir/support-files" -a -e "${pgsql_install_dir}/bin/psql" -a -e "${mongo_install_dir}/bin/mongo" ] && { echo "${CWARNING}Database already installed! ${CEND}"; DB_yn=Other; break; }
+    if [ "$db_yn" == 'y' ]; then
+      [ -d "$db_install_dir/support-files" -a -e "${pgsql_install_dir}/bin/psql" -a -e "${mongo_install_dir}/bin/mongo" ] && { echo "${CWARNING}Database already installed! ${CEND}"; db_yn=Other; break; }
       while :; do echo
         echo 'Please select a version of the Database:'
         echo -e "\t${CMSG} 1${CEND}. Install MySQL-5.7"
@@ -189,22 +189,22 @@ while :; do echo
         echo -e "\t${CMSG}11${CEND}. Install AliSQL-5.6"
         echo -e "\t${CMSG}12${CEND}. Install PostgreSQL"
         echo -e "\t${CMSG}13${CEND}. Install MongoDB"
-        read -p "Please input a number:(Default 2 press Enter) " DB_version
-        [ -z "$DB_version" ] && DB_version=2
-        [ "$DB_version" == '13' -a "$OS_BIT" == '32' ] && { echo "${CWARNING}By not supporting 32-bit! ${CEND}"; continue; }
-        if [[ "${DB_version}" =~ ^[1-9]$|^1[0-3]$ ]]; then
+        read -p "Please input a number:(Default 2 press Enter) " db_ver
+        [ -z "$db_ver" ] && db_ver=2
+        [ "$db_ver" == '13' -a "$OS_BIT" == '32' ] && { echo "${CWARNING}By not supporting 32-bit! ${CEND}"; continue; }
+        if [[ "${db_ver}" =~ ^[1-9]$|^1[0-3]$ ]]; then
           while :; do
-            if [ "$DB_version" == '12' ]; then
+            if [ "$db_ver" == '12' ]; then
               read -p "Please input the postgres password of database: " dbrootpwd
             else
               read -p "Please input the root password of database: " dbrootpwd
             fi
             [ -n "`echo $dbrootpwd | grep '[+|&]'`" ] && { echo "${CWARNING}input error,not contain a plus sign (+) and & ${CEND}"; continue; }
             if (( ${#dbrootpwd} >= 5 )); then
-              if [ "$DB_version" == '12' ]; then
+              if [ "$db_ver" == '12' ]; then
                 sed -i "s+^dbpostgrespwd.*+dbpostgrespwd='$dbrootpwd'+" ./options.conf
                 dbpostgrespwd="$dbrootpwd"
-              elif [ "$DB_version" == '13' ]; then
+              elif [ "$db_ver" == '13' ]; then
                 sed -i "s+^dbmongopwd.*+dbmongopwd='$dbrootpwd'+" ./options.conf
                 dbmongopwd="$dbrootpwd"
               else
@@ -217,14 +217,14 @@ while :; do echo
 
           done
           # choose install methods
-          if [[ "${DB_version}" =~ ^[1-9]$|^10$ ]]; then 
+          if [[ "${db_ver}" =~ ^[1-9]$|^10$ ]]; then 
             while :; do echo
               echo "Please choose installation of the database:"
               echo -e "\t${CMSG}1${CEND}. Install database from binary package."
               echo -e "\t${CMSG}2${CEND}. Install database from source package."
-              read -p "Please input a number:(Default 1 press Enter) " dbInstallMethods
-              [ -z "$dbInstallMethods" ] && dbInstallMethods=1
-              if [[ ! $dbInstallMethods =~ ^[1-2]$ ]]; then
+              read -p "Please input a number:(Default 1 press Enter) " dbinstallmethod
+              [ -z "$dbinstallmethod" ] && dbinstallmethod=1
+              if [[ ! $dbinstallmethod =~ ^[1-2]$ ]]; then
                 echo "${CWARNING}input error! Please only input number 1~2${CEND}"
               else
                 break
@@ -243,12 +243,12 @@ done
 
 # check PHP
 while :; do echo
-  read -p "Do you want to install PHP? [y/n]: " PHP_yn
-  if [[ ! $PHP_yn =~ ^[y,n]$ ]]; then
+  read -p "Do you want to install PHP? [y/n]: " php_yn
+  if [[ ! $php_yn =~ ^[y,n]$ ]]; then
     echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
   else
-    if [ "$PHP_yn" == 'y' ]; then
-      [ -e "$php_install_dir/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; PHP_yn=Other; break; }
+    if [ "$php_yn" == 'y' ]; then
+      [ -e "$php_install_dir/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; php_yn=Other; break; }
       while :; do echo
         echo 'Please select a version of the PHP:'
         echo -e "\t${CMSG}1${CEND}. Install php-5.3"
@@ -258,108 +258,108 @@ while :; do echo
         echo -e "\t${CMSG}5${CEND}. Install php-7.0"
         echo -e "\t${CMSG}6${CEND}. Install php-7.1"
         echo -e "\t${CMSG}7${CEND}. Install php-7.2"
-        read -p "Please input a number:(Default 5 press Enter) " PHP_version
-        [ -z "$PHP_version" ] && PHP_version=5
-        if [[ ! $PHP_version =~ ^[1-7]$ ]]; then
+        read -p "Please input a number:(Default 5 press Enter) " php_ver
+        [ -z "$php_ver" ] && php_ver=5
+        if [[ ! $php_ver =~ ^[1-7]$ ]]; then
           echo "${CWARNING}input error! Please only input number 1~7${CEND}"
         else
           while :; do echo
-            read -p "Do you want to install opcode cache of the PHP? [y/n]: " PHP_cache_yn
-            if [[ ! $PHP_cache_yn =~ ^[y,n]$ ]]; then
+            read -p "Do you want to install opcode cache of the PHP? [y/n]: " php_cache_yn
+            if [[ ! $php_cache_yn =~ ^[y,n]$ ]]; then
                 echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
             else
-              if [ "$PHP_cache_yn" == 'y' ]; then
-                if [ $PHP_version == 1 ]; then
+              if [ "$php_cache_yn" == 'y' ]; then
+                if [ $php_ver == 1 ]; then
                   while :; do
                     echo 'Please select a opcode cache of the PHP:'
                     echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
                     echo -e "\t${CMSG}2${CEND}. Install XCache"
                     echo -e "\t${CMSG}3${CEND}. Install APCU"
                     echo -e "\t${CMSG}4${CEND}. Install eAccelerator-0.9"
-                    read -p "Please input a number:(Default 1 press Enter) " PHP_cache
-                    [ -z "$PHP_cache" ] && PHP_cache=1
-                    if [[ ! $PHP_cache =~ ^[1-4]$ ]]; then
+                    read -p "Please input a number:(Default 1 press Enter) " php_cache
+                    [ -z "$php_cache" ] && php_cache=1
+                    if [[ ! $php_cache =~ ^[1-4]$ ]]; then
                       echo "${CWARNING}input error! Please only input number 1~4${CEND}"
                     else
                       break
                     fi
                   done
                 fi
-                if [ $PHP_version == 2 ]; then
+                if [ $php_ver == 2 ]; then
                   while :; do
                     echo 'Please select a opcode cache of the PHP:'
                     echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
                     echo -e "\t${CMSG}2${CEND}. Install XCache"
                     echo -e "\t${CMSG}3${CEND}. Install APCU"
                     echo -e "\t${CMSG}4${CEND}. Install eAccelerator-1.0-dev"
-                    read -p "Please input a number:(Default 1 press Enter) " PHP_cache
-                    [ -z "$PHP_cache" ] && PHP_cache=1
-                    if [[ ! $PHP_cache =~ ^[1-4]$ ]]; then
+                    read -p "Please input a number:(Default 1 press Enter) " php_cache
+                    [ -z "$php_cache" ] && php_cache=1
+                    if [[ ! $php_cache =~ ^[1-4]$ ]]; then
                       echo "${CWARNING}input error! Please only input number 1~4${CEND}"
                     else
                       break
                     fi
                   done
                 fi
-                if [ $PHP_version == 3 ]; then
+                if [ $php_ver == 3 ]; then
                   while :; do
                     echo 'Please select a opcode cache of the PHP:'
                     echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
                     echo -e "\t${CMSG}2${CEND}. Install XCache"
                     echo -e "\t${CMSG}3${CEND}. Install APCU"
-                    read -p "Please input a number:(Default 1 press Enter) " PHP_cache
-                    [ -z "$PHP_cache" ] && PHP_cache=1
-                    if [[ ! $PHP_cache =~ ^[1-3]$ ]]; then
+                    read -p "Please input a number:(Default 1 press Enter) " php_cache
+                    [ -z "$php_cache" ] && php_cache=1
+                    if [[ ! $php_cache =~ ^[1-3]$ ]]; then
                       echo "${CWARNING}input error! Please only input number 1~3${CEND}"
                     else
                       break
                     fi
                   done
                 fi
-                if [ $PHP_version == 4 ]; then
+                if [ $php_ver == 4 ]; then
                   while :; do
                     echo 'Please select a opcode cache of the PHP:'
                     echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
                     echo -e "\t${CMSG}2${CEND}. Install XCache"
                     echo -e "\t${CMSG}3${CEND}. Install APCU"
-                    read -p "Please input a number:(Default 1 press Enter) " PHP_cache
-                    [ -z "$PHP_cache" ] && PHP_cache=1
-                    if [[ ! $PHP_cache =~ ^[1-3]$ ]]; then
+                    read -p "Please input a number:(Default 1 press Enter) " php_cache
+                    [ -z "$php_cache" ] && php_cache=1
+                    if [[ ! $php_cache =~ ^[1-3]$ ]]; then
                       echo "${CWARNING}input error! Please only input number 1~3${CEND}"
                     else
                       break
                     fi
                   done
                 fi
-                if [[ $PHP_version =~ ^[5-6]$ ]]; then 
+                if [[ $php_ver =~ ^[5-6]$ ]]; then 
                   while :; do
                     echo 'Please select a opcode cache of the PHP:'
                     echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
                     echo -e "\t${CMSG}3${CEND}. Install APCU"
-                    read -p "Please input a number:(Default 1 press Enter) " PHP_cache
-                    [ -z "$PHP_cache" ] && PHP_cache=1
-                    if [[ ! $PHP_cache =~ ^[1,3]$ ]]; then
+                    read -p "Please input a number:(Default 1 press Enter) " php_cache
+                    [ -z "$php_cache" ] && php_cache=1
+                    if [[ ! $php_cache =~ ^[1,3]$ ]]; then
                       echo "${CWARNING}input error! Please only input number 1,3${CEND}"
                     else
                       break
                     fi
                   done
                 fi
-                [ $PHP_version == 7 ] && PHP_cache=1
+                [ $php_ver == 7 ] && php_cache=1
               fi
               break
             fi
           done
-          if [ "$PHP_cache" == '2' ]; then
+          if [ "$php_cache" == '2' ]; then
             while :; do
               read -p "Please input xcache admin password: " xcache_admin_pass
               (( ${#xcache_admin_pass} >= 5 )) && { xcache_admin_md5_pass=`echo -n "$xcache_admin_pass" | md5sum | awk '{print $1}'` ; break ; } || echo "${CFAILURE}xcache admin password least 5 characters! ${CEND}"
             done
           fi
-          if [[ $PHP_version =~ ^[1-4]$ ]] && [ "$PHP_cache" != '1' -a "${armPlatform}" != "y" ]; then
+          if [[ $php_ver =~ ^[1-4]$ ]] && [ "$php_cache" != '1' -a "${armplatform}" != "y" ]; then
             while :; do echo
-              read -p "Do you want to install ZendGuardLoader? [y/n]: " ZendGuardLoader_yn
-              if [[ ! $ZendGuardLoader_yn =~ ^[y,n]$ ]]; then
+              read -p "Do you want to install ZendGuardLoader? [y/n]: " zendguardloader_yn
+              if [[ ! $zendguardloader_yn =~ ^[y,n]$ ]]; then
                 echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
               else
                 break
@@ -370,8 +370,8 @@ while :; do echo
           # ionCube
           if [ "${TARGET_ARCH}" != "arm64" ]; then
             while :; do echo
-              read -p "Do you want to install ionCube? [y/n]: " ionCube_yn
-              if [[ ! $ionCube_yn =~ ^[y,n]$ ]]; then
+              read -p "Do you want to install ionCube? [y/n]: " ioncube_yn
+              if [[ ! $ioncube_yn =~ ^[y,n]$ ]]; then
                 echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
               else
                 break
@@ -381,22 +381,22 @@ while :; do echo
 
           # ImageMagick or GraphicsMagick
           while :; do echo
-            read -p "Do you want to install ImageMagick or GraphicsMagick? [y/n]: " Magick_yn
-            if [[ ! $Magick_yn =~ ^[y,n]$ ]]; then
+            read -p "Do you want to install ImageMagick or GraphicsMagick? [y/n]: " magick_yn
+            if [[ ! $magick_yn =~ ^[y,n]$ ]]; then
               echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
             else
               break
             fi
           done
 
-          if [ "$Magick_yn" == 'y' ]; then
+          if [ "$magick_yn" == 'y' ]; then
             while :; do
               echo 'Please select ImageMagick or GraphicsMagick:'
               echo -e "\t${CMSG}1${CEND}. Install ImageMagick"
               echo -e "\t${CMSG}2${CEND}. Install GraphicsMagick"
-              read -p "Please input a number:(Default 1 press Enter) " Magick
-              [ -z "$Magick" ] && Magick=1
-              if [[ ! $Magick =~ ^[1-2]$ ]]; then
+              read -p "Please input a number:(Default 1 press Enter) " magick
+              [ -z "$magick" ] && magick=1
+              if [[ ! $magick =~ ^[1-2]$ ]]; then
                 echo "${CWARNING}input error! Please only input number 1~2${CEND}"
               else
                 break
@@ -413,23 +413,23 @@ done
 
 # check Pureftpd
 while :; do echo
-  read -p "Do you want to install Pure-FTPd? [y/n]: " FTP_yn
-  if [[ ! $FTP_yn =~ ^[y,n]$ ]]; then
+  read -p "Do you want to install Pure-FTPd? [y/n]: " ftp_yn
+  if [[ ! $ftp_yn =~ ^[y,n]$ ]]; then
     echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
   else
-    [ "$FTP_yn" == 'y' -a -e "$pureftpd_install_dir/sbin/pure-ftpwho" ] && { echo "${CWARNING}Pure-FTPd already installed! ${CEND}"; FTP_yn=Other; }
+    [ "$ftp_yn" == 'y' -a -e "$pureftpd_install_dir/sbin/pure-ftpwho" ] && { echo "${CWARNING}Pure-FTPd already installed! ${CEND}"; ftp_yn=Other; }
     break
   fi
 done
 
 # check phpMyAdmin
-if [[ $PHP_version =~ ^[1-7]$ ]] || [ -e "$php_install_dir/bin/phpize" ]; then
+if [[ $php_ver =~ ^[1-7]$ ]] || [ -e "$php_install_dir/bin/phpize" ]; then
   while :; do echo
-    read -p "Do you want to install phpMyAdmin? [y/n]: " phpMyAdmin_yn
-    if [[ ! $phpMyAdmin_yn =~ ^[y,n]$ ]]; then
+    read -p "Do you want to install phpMyAdmin? [y/n]: " phpmyadmin_yn
+    if [[ ! $phpmyadmin_yn =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-      [ "$phpMyAdmin_yn" == 'y' -a -d "$wwwroot_dir/default/phpMyAdmin" ] && { echo "${CWARNING}phpMyAdmin already installed! ${CEND}"; phpMyAdmin_yn=Other; }
+      [ "$phpmyadmin_yn" == 'y' -a -d "$wwwroot_dir/default/phpMyAdmin" ] && { echo "${CWARNING}phpMyAdmin already installed! ${CEND}"; phpmyadmin_yn=Other; }
       break
     fi
   done
@@ -456,12 +456,12 @@ while :; do echo
 done
 
 while :; do echo
-  read -p "Do you want to install HHVM? [y/n]: " HHVM_yn
-  if [[ ! $HHVM_yn =~ ^[y,n]$ ]]; then
+  read -p "Do you want to install HHVM? [y/n]: " hhvm_yn
+  if [[ ! $hhvm_yn =~ ^[y,n]$ ]]; then
     echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
   else
-    if [ "$HHVM_yn" == 'y' ]; then
-      [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; HHVM_yn=Other; break; }
+    if [ "$hhvm_yn" == 'y' ]; then
+      [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; hhvm_yn=Other; break; }
       if [ "$OS" == 'CentOS' -a "$OS_BIT" == '64' ] && [ -n "`grep -E ' 7\.| 6\.[5-9]' /etc/redhat-release`" ]; then
         break
       else
@@ -469,7 +469,7 @@ while :; do echo
         echo "${CWARNING}HHVM only support CentOS6.5+ 64bit, CentOS7 64bit! ${CEND}"
         echo "Press Ctrl+c to cancel or Press any key to continue..."
         char=`get_char`
-        HHVM_yn=Other
+        hhvm_yn=Other
       fi
     fi
     break
@@ -481,7 +481,6 @@ IPADDR=`./include/get_ipaddr.py`
 PUBLIC_IPADDR=`./include/get_public_ipaddr.py`
 IPADDR_COUNTRY_ISP=`./include/get_ipaddr_state.py $PUBLIC_IPADDR`
 IPADDR_COUNTRY=`echo $IPADDR_COUNTRY_ISP | awk '{print $1}'`
-[ "`echo $IPADDR_COUNTRY_ISP | awk '{print $2}'`"x == '1000323'x ] && IPADDR_ISP=aliyun
 
 # del openssl for jcloud
 [ -e "/usr/local/bin/openssl" ] && rm -rf /usr/local/bin/openssl
@@ -526,21 +525,21 @@ checkDownload 2>&1 | tee -a ${oneinstack_dir}/install.log
 installDepsBySrc 2>&1 | tee -a ${oneinstack_dir}/install.log
 
 # Jemalloc
-if [[ $Nginx_version =~ ^[1-3]$ ]] || [ "$DB_yn" == 'y' ]; then
+if [[ $nginx_ver =~ ^[1-3]$ ]] || [ "$db_yn" == 'y' ]; then
   . include/jemalloc.sh
   Install_Jemalloc | tee -a $oneinstack_dir/install.log
 fi
 
 # openSSL 
 . ./include/openssl.sh
-if [[ $Tomcat_version =~ ^[1-3]$ ]] || [[ $Apache_version =~ ^[1-2]$ ]] || [[ $PHP_version =~ ^[1-7]$ ]]; then
+if [[ $tomcat_ver =~ ^[1-3]$ ]] || [[ $apache_ver =~ ^[1-2]$ ]] || [[ $php_ver =~ ^[1-7]$ ]]; then
   Install_openSSL102 | tee -a $oneinstack_dir/install.log
 fi
 
 # Database
-case "${DB_version}" in
+case "${db_ver}" in
   1)
-    if [ "${dbInstallMethods}" == "2" ]; then
+    if [ "${dbinstallmethod}" == "2" ]; then
       . include/boost.sh
       installBoost 2>&1 | tee -a ${oneinstack_dir}/install.log
     fi
@@ -556,7 +555,7 @@ case "${DB_version}" in
     Install_MySQL55 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   4)
-    if [ "${dbInstallMethods}" == "2" ]; then
+    if [ "${dbinstallmethod}" == "2" ]; then
       . include/boost.sh
       installBoost 2>&1 | tee -a ${oneinstack_dir}/install.log
     fi
@@ -564,7 +563,7 @@ case "${DB_version}" in
     Install_MariaDB102 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   5)
-    if [ "${dbInstallMethods}" == "2" ]; then
+    if [ "${dbinstallmethod}" == "2" ]; then
       . include/boost.sh
       installBoost 2>&1 | tee -a ${oneinstack_dir}/install.log
     fi
@@ -580,7 +579,7 @@ case "${DB_version}" in
     Install_MariaDB55 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   8)
-    if [ "${dbInstallMethods}" == "2" ]; then
+    if [ "${dbinstallmethod}" == "2" ]; then
       . include/boost.sh
       installBoost 2>&1 | tee -a ${oneinstack_dir}/install.log
     fi
@@ -610,16 +609,16 @@ case "${DB_version}" in
 esac
 
 # Apache
-if [ "$Apache_version" == '1' ]; then
+if [ "$apache_ver" == '1' ]; then
   . include/apache-2.4.sh
   Install_Apache24 2>&1 | tee -a $oneinstack_dir/install.log
-elif [ "$Apache_version" == '2' ]; then
+elif [ "$apache_ver" == '2' ]; then
   . include/apache-2.2.sh
   Install_Apache22 2>&1 | tee -a $oneinstack_dir/install.log
 fi
 
 # PHP
-case "${PHP_version}" in
+case "${php_ver}" in
   1)
     . include/php-5.3.sh
     Install_PHP53 2>&1 | tee -a ${oneinstack_dir}/install.log
@@ -651,38 +650,38 @@ case "${PHP_version}" in
 esac
 
 # pecl_pgsql
-if [ "${DB_version}" == '12' -a -e "${php_install_dir}/bin/phpize" ]; then
+if [ "${db_ver}" == '12' -a -e "${php_install_dir}/bin/phpize" ]; then
   . include/pecl_pgsql.sh
   Install_pecl-pgsql 2>&1 | tee -a $oneinstack_dir/install.log
 fi
 
 # pecl_mongodb
-if [ "${DB_version}" == '13' -a -e "${php_install_dir}/bin/phpize" ]; then
+if [ "${db_ver}" == '13' -a -e "${php_install_dir}/bin/phpize" ]; then
   . include/pecl_mongodb.sh
   Install_pecl-mongodb 2>&1 | tee -a $oneinstack_dir/install.log
 fi
 
 # ImageMagick or GraphicsMagick
-if [ "$Magick" == '1' ]; then
+if [ "$magick" == '1' ]; then
   . include/ImageMagick.sh
   [ ! -d "/usr/local/imagemagick" ] && Install_ImageMagick 2>&1 | tee -a $oneinstack_dir/install.log
   [ ! -e "`$php_install_dir/bin/php-config --extension-dir`/imagick.so" ] && Install_php-imagick 2>&1 | tee -a $oneinstack_dir/install.log
-elif [ "$Magick" == '2' ]; then
+elif [ "$magick" == '2' ]; then
   . include/GraphicsMagick.sh
   [ ! -d "/usr/local/graphicsmagick" ] && Install_GraphicsMagick 2>&1 | tee -a $oneinstack_dir/install.log
   [ ! -e "`$php_install_dir/bin/php-config --extension-dir`/gmagick.so" ] && Install_php-gmagick 2>&1 | tee -a $oneinstack_dir/install.log
 fi
 
 # ionCube
-if [ "$ionCube_yn" == 'y' ]; then
+if [ "$ioncube_yn" == 'y' ]; then
   . include/ioncube.sh
   Install_ionCube 2>&1 | tee -a $oneinstack_dir/install.log
 fi
 
 # PHP opcode cache
-case "${PHP_cache}" in
+case "${php_cache}" in
   1)
-    if [[ "${PHP_version}" =~ ^[1,2]$ ]]; then
+    if [[ "${php_ver}" =~ ^[1,2]$ ]]; then
       . include/zendopcache.sh
       Install_ZendOPcache 2>&1 | tee -a ${oneinstack_dir}/install.log
     fi
@@ -696,7 +695,7 @@ case "${PHP_cache}" in
     Install_APCU 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   4)
-    if [[ "${PHP_version}" =~ ^[1,2]$ ]]; then
+    if [[ "${php_ver}" =~ ^[1,2]$ ]]; then
       . include/eaccelerator.sh
       Install_eAccelerator 2>&1 | tee -a ${oneinstack_dir}/install.log
     fi
@@ -704,13 +703,13 @@ case "${PHP_cache}" in
 esac
 
 # ZendGuardLoader (php <= 5.6)
-if [ "$ZendGuardLoader_yn" == 'y' ]; then
+if [ "$zendguardloader_yn" == 'y' ]; then
   . include/ZendGuardLoader.sh
   Install_ZendGuardLoader 2>&1 | tee -a $oneinstack_dir/install.log
 fi
 
 # Web server
-case "${Nginx_version}" in
+case "${nginx_ver}" in
   1)
     . include/nginx.sh
     Install_Nginx 2>&1 | tee -a ${oneinstack_dir}/install.log
@@ -726,7 +725,7 @@ case "${Nginx_version}" in
 esac
 
 # JDK
-case "${JDK_version}" in
+case "${jdk_version}" in
   1)
     . include/jdk-1.8.sh
     Install-JDK18 2>&1 | tee -a ${oneinstack_dir}/install.log
@@ -741,7 +740,7 @@ case "${JDK_version}" in
     ;;
 esac
 
-case "${Tomcat_version}" in
+case "${tomcat_ver}" in
   1)
     . include/tomcat-8.sh
     Install_Tomcat8 2>&1 | tee -a ${oneinstack_dir}/install.log
@@ -757,13 +756,13 @@ case "${Tomcat_version}" in
 esac
 
 # Pure-FTPd
-if [ "${FTP_yn}" == 'y' ]; then
+if [ "${ftp_yn}" == 'y' ]; then
   . include/pureftpd.sh
   Install_PureFTPd 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
 # phpMyAdmin
-if [ "${phpMyAdmin_yn}" == 'y' ]; then
+if [ "${phpmyadmin_yn}" == 'y' ]; then
   . include/phpmyadmin.sh
   Install_phpMyAdmin 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
@@ -784,7 +783,7 @@ if [ "${memcached_yn}" == 'y' ]; then
 fi
 
 # index example
-if [ ! -e "${wwwroot_dir}/default/index.html" -a "${Web_yn}" == 'y' ]; then
+if [ ! -e "${wwwroot_dir}/default/index.html" -a "${web_yn}" == 'y' ]; then
   . include/demo.sh
   DEMO 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
@@ -793,7 +792,7 @@ fi
 . include/check_dir.sh
 
 # HHVM
-if [ "${HHVM_yn}" == 'y' ]; then
+if [ "${hhvm_yn}" == 'y' ]; then
   . include/hhvm_CentOS.sh
   Install_hhvm_CentOS 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
@@ -805,38 +804,38 @@ endTime=`date +%s`
 ((installTime=($endTime-$startTime)/60))
 echo "####################Congratulations########################"
 echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
-[ "${Web_yn}" == 'y' -a "${Nginx_version}" != '4' -a "${Apache_version}" == '3' ] && echo -e "\n$(printf "%-32s" "Nginx install dir":)${CMSG}${web_install_dir}${CEND}"
-[ "${Web_yn}" == 'y' -a "${Nginx_version}" != '4' -a "${Apache_version}" != '3' ] && echo -e "\n$(printf "%-32s" "Nginx install dir":)${CMSG}${web_install_dir}${CEND}\n$(printf "%-32s" "Apache install  dir":)${CMSG}${apache_install_dir}${CEND}"
-[ "${Web_yn}" == 'y' -a "${Nginx_version}" == '4' -a "${Apache_version}" != '3' ] && echo -e "\n$(printf "%-32s" "Apache install dir":)${CMSG}${apache_install_dir}${CEND}"
-[[ "${Tomcat_version}" =~ ^[1,2]$ ]] && echo -e "\n$(printf "%-32s" "Tomcat install dir":)${CMSG}${tomcat_install_dir}${CEND}"
-[[ "${DB_version}" =~ ^[1-9]$|^1[0-1]$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
-[[ "${DB_version}" =~ ^[1-9]$|^1[0-1]$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
-[[ "${DB_version}" =~ ^[1-9]$|^1[0-1]$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
-[[ "${DB_version}" =~ ^[1-9]$|^1[0-1]$ ]] && echo "$(printf "%-32s" "Database password:")${CMSG}${dbrootpwd}${CEND}"
-[ "${DB_version}" == '12' ] && echo -e "\n$(printf "%-32s" "PostgreSQL install dir:")${CMSG}${pgsql_install_dir}${CEND}"
-[ "${DB_version}" == '12' ] && echo "$(printf "%-32s" "PostgreSQL data dir:")${CMSG}${pgsql_data_dir}${CEND}"
-[ "${DB_version}" == '12' ] && echo "$(printf "%-32s" "PostgreSQL user:")${CMSG}postgres${CEND}"
-[ "${DB_version}" == '12' ] && echo "$(printf "%-32s" "postgres password:")${CMSG}${dbpostgrespwd}${CEND}"
-[ "${DB_version}" == '13' ] && echo -e "\n$(printf "%-32s" "MongoDB install dir:")${CMSG}${mongo_install_dir}${CEND}"
-[ "${DB_version}" == '13' ] && echo "$(printf "%-32s" "MongoDB data dir:")${CMSG}${mongo_data_dir}${CEND}"
-[ "${DB_version}" == '13' ] && echo "$(printf "%-32s" "MongoDB user:")${CMSG}root${CEND}"
-[ "${DB_version}" == '13' ] && echo "$(printf "%-32s" "MongoDB password:")${CMSG}${dbmongopwd}${CEND}"
-[ "${PHP_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "PHP install dir:")${CMSG}${php_install_dir}${CEND}"
-[ "${PHP_cache}" == '1' ] && echo "$(printf "%-32s" "Opcache Control Panel URL:")${CMSG}http://${IPADDR}/ocp.php${CEND}"
-[ "${PHP_cache}" == '2' ] && echo "$(printf "%-32s" "xcache Control Panel URL:")${CMSG}http://${IPADDR}/xcache${CEND}"
-[ "${PHP_cache}" == '2' ] && echo "$(printf "%-32s" "xcache user:")${CMSG}admin${CEND}"
-[ "${PHP_cache}" == '2' ] && echo "$(printf "%-32s" "xcache password:")${CMSG}${xcache_admin_pass}${CEND}"
-[ "${PHP_cache}" == '3' ] && echo "$(printf "%-32s" "APC Control Panel URL:")${CMSG}http://${IPADDR}/apc.php${CEND}"
-[ "${PHP_cache}" == '4' ] && echo "$(printf "%-32s" "eAccelerator Control Panel URL:")${CMSG}http://${IPADDR}/control.php${CEND}"
-[ "${PHP_cache}" == '4' ] && echo "$(printf "%-32s" "eAccelerator user:")${CMSG}admin${CEND}"
-[ "${PHP_cache}" == '4' ] && echo "$(printf "%-32s" "eAccelerator password:")${CMSG}eAccelerator${CEND}"
-[ "${FTP_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "Pure-FTPd install dir:")${CMSG}${pureftpd_install_dir}${CEND}"
-[ "${FTP_yn}" == 'y' ] && echo "$(printf "%-32s" "Create FTP virtual script:")${CMSG}./pureftpd_vhost.sh${CEND}"
-[ "${phpMyAdmin_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "phpMyAdmin dir:")${CMSG}${wwwroot_dir}/default/phpMyAdmin${CEND}"
-[ "${phpMyAdmin_yn}" == 'y' ] && echo "$(printf "%-32s" "phpMyAdmin Control Panel URL:")${CMSG}http://${IPADDR}/phpMyAdmin${CEND}"
+[ "${web_yn}" == 'y' -a "${nginx_ver}" != '4' -a "${apache_ver}" == '3' ] && echo -e "\n$(printf "%-32s" "Nginx install dir":)${CMSG}${web_install_dir}${CEND}"
+[ "${web_yn}" == 'y' -a "${nginx_ver}" != '4' -a "${apache_ver}" != '3' ] && echo -e "\n$(printf "%-32s" "Nginx install dir":)${CMSG}${web_install_dir}${CEND}\n$(printf "%-32s" "Apache install  dir":)${CMSG}${apache_install_dir}${CEND}"
+[ "${web_yn}" == 'y' -a "${nginx_ver}" == '4' -a "${apache_ver}" != '3' ] && echo -e "\n$(printf "%-32s" "Apache install dir":)${CMSG}${apache_install_dir}${CEND}"
+[[ "${tomcat_ver}" =~ ^[1,2]$ ]] && echo -e "\n$(printf "%-32s" "Tomcat install dir":)${CMSG}${tomcat_install_dir}${CEND}"
+[[ "${db_ver}" =~ ^[1-9]$|^1[0-1]$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
+[[ "${db_ver}" =~ ^[1-9]$|^1[0-1]$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
+[[ "${db_ver}" =~ ^[1-9]$|^1[0-1]$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
+[[ "${db_ver}" =~ ^[1-9]$|^1[0-1]$ ]] && echo "$(printf "%-32s" "Database password:")${CMSG}${dbrootpwd}${CEND}"
+[ "${db_ver}" == '12' ] && echo -e "\n$(printf "%-32s" "PostgreSQL install dir:")${CMSG}${pgsql_install_dir}${CEND}"
+[ "${db_ver}" == '12' ] && echo "$(printf "%-32s" "PostgreSQL data dir:")${CMSG}${pgsql_data_dir}${CEND}"
+[ "${db_ver}" == '12' ] && echo "$(printf "%-32s" "PostgreSQL user:")${CMSG}postgres${CEND}"
+[ "${db_ver}" == '12' ] && echo "$(printf "%-32s" "postgres password:")${CMSG}${dbpostgrespwd}${CEND}"
+[ "${db_ver}" == '13' ] && echo -e "\n$(printf "%-32s" "MongoDB install dir:")${CMSG}${mongo_install_dir}${CEND}"
+[ "${db_ver}" == '13' ] && echo "$(printf "%-32s" "MongoDB data dir:")${CMSG}${mongo_data_dir}${CEND}"
+[ "${db_ver}" == '13' ] && echo "$(printf "%-32s" "MongoDB user:")${CMSG}root${CEND}"
+[ "${db_ver}" == '13' ] && echo "$(printf "%-32s" "MongoDB password:")${CMSG}${dbmongopwd}${CEND}"
+[ "${php_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "PHP install dir:")${CMSG}${php_install_dir}${CEND}"
+[ "${php_cache}" == '1' ] && echo "$(printf "%-32s" "Opcache Control Panel URL:")${CMSG}http://${IPADDR}/ocp.php${CEND}"
+[ "${php_cache}" == '2' ] && echo "$(printf "%-32s" "xcache Control Panel URL:")${CMSG}http://${IPADDR}/xcache${CEND}"
+[ "${php_cache}" == '2' ] && echo "$(printf "%-32s" "xcache user:")${CMSG}admin${CEND}"
+[ "${php_cache}" == '2' ] && echo "$(printf "%-32s" "xcache password:")${CMSG}${xcache_admin_pass}${CEND}"
+[ "${php_cache}" == '3' ] && echo "$(printf "%-32s" "APC Control Panel URL:")${CMSG}http://${IPADDR}/apc.php${CEND}"
+[ "${php_cache}" == '4' ] && echo "$(printf "%-32s" "eAccelerator Control Panel URL:")${CMSG}http://${IPADDR}/control.php${CEND}"
+[ "${php_cache}" == '4' ] && echo "$(printf "%-32s" "eAccelerator user:")${CMSG}admin${CEND}"
+[ "${php_cache}" == '4' ] && echo "$(printf "%-32s" "eAccelerator password:")${CMSG}eAccelerator${CEND}"
+[ "${ftp_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "Pure-FTPd install dir:")${CMSG}${pureftpd_install_dir}${CEND}"
+[ "${ftp_yn}" == 'y' ] && echo "$(printf "%-32s" "Create FTP virtual script:")${CMSG}./pureftpd_vhost.sh${CEND}"
+[ "${phpmyadmin_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "phpMyAdmin dir:")${CMSG}${wwwroot_dir}/default/phpMyAdmin${CEND}"
+[ "${phpmyadmin_yn}" == 'y' ] && echo "$(printf "%-32s" "phpMyAdmin Control Panel URL:")${CMSG}http://${IPADDR}/phpMyAdmin${CEND}"
 [ "${redis_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "redis install dir:")${CMSG}${redis_install_dir}${CEND}"
 [ "${memcached_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "memcached install dir:")${CMSG}${memcached_install_dir}${CEND}"
-[ "${Web_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "Index URL:")${CMSG}http://${IPADDR}/${CEND}"
+[ "${web_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "Index URL:")${CMSG}http://${IPADDR}/${CEND}"
 while :; do echo
   echo "${CMSG}Please restart the server and see if the services start up fine.${CEND}"
   read -p "Do you want to restart OS ? [y/n]: " restart_yn

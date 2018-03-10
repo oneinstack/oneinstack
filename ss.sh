@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 6+ Debian 7+ and Ubuntu 12+
 #        Install SS Server
@@ -163,7 +163,7 @@ Install_SS-libev() {
       /bin/cp ../init.d/SS-libev-init-CentOS /etc/init.d/shadowsocks
       chkconfig --add shadowsocks
       chkconfig shadowsocks on
-    elif [[ "${OS}" =~ ^Ubuntu$|^Debian$ ]];then
+    elif [[ "${OS}" =~ ^Ubuntu$|^Debian$ ]]; then
       /bin/cp ../init.d/SS-libev-init-Ubuntu /etc/init.d/shadowsocks
       update-rc.d shadowsocks defaults
     fi

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -11,23 +11,23 @@
 Install_PHP53() {
   pushd ${oneinstack_dir}/src
   
-  tar xzf libiconv-$libiconv_version.tar.gz
-  patch -d libiconv-$libiconv_version -p0 < libiconv-glibc-2.16.patch
-  pushd libiconv-$libiconv_version
+  tar xzf libiconv-$libiconv_ver.tar.gz
+  patch -d libiconv-$libiconv_ver -p0 < libiconv-glibc-2.16.patch
+  pushd libiconv-$libiconv_ver
   ./configure --prefix=/usr/local
   make -j ${THREAD} && make install
   popd
-  rm -rf libiconv-$libiconv_version
+  rm -rf libiconv-$libiconv_ver
   
-  tar xzf curl-$curl_version.tar.gz
-  pushd curl-$curl_version
+  tar xzf curl-$curl_ver.tar.gz
+  pushd curl-$curl_ver
   ./configure --prefix=/usr/local --with-ssl=${openssl_install_dir}
   make -j ${THREAD} && make install
   popd
-  rm -rf curl-$curl_version
+  rm -rf curl-$curl_ver
 
-  tar xzf libmcrypt-$libmcrypt_version.tar.gz
-  pushd libmcrypt-$libmcrypt_version
+  tar xzf libmcrypt-$libmcrypt_ver.tar.gz
+  pushd libmcrypt-$libmcrypt_ver
   ./configure
   make -j ${THREAD} && make install
   ldconfig
@@ -35,14 +35,14 @@ Install_PHP53() {
   ./configure --enable-ltdl-install
   make -j ${THREAD} && make install
   popd;popd 
-  rm -rf libmcrypt-$libmcrypt_version
+  rm -rf libmcrypt-$libmcrypt_ver
   
-  tar xzf mhash-$mhash_version.tar.gz
-  pushd mhash-$mhash_version
+  tar xzf mhash-$mhash_ver.tar.gz
+  pushd mhash-$mhash_ver
   ./configure
   make -j ${THREAD} && make install
   popd 
-  rm -rf mhash-$mhash_version
+  rm -rf mhash-$mhash_ver
   
   echo '/usr/local/lib' > /etc/ld.so.conf.d/local.conf
   ldconfig
@@ -50,25 +50,25 @@ Install_PHP53() {
   
   [ ! -e '/usr/include/freetype2/freetype' ] &&  ln -s /usr/include/freetype2 /usr/include/freetype2/freetype
   
-  tar xzf mcrypt-$mcrypt_version.tar.gz
-  pushd mcrypt-$mcrypt_version
+  tar xzf mcrypt-$mcrypt_ver.tar.gz
+  pushd mcrypt-$mcrypt_ver
   ldconfig
   ./configure
   make -j ${THREAD} && make install
   popd 
-  rm -rf mcrypt-$mcrypt_version
+  rm -rf mcrypt-$mcrypt_ver
   
   id -u $run_user >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin $run_user
   
-  tar xzf php-$php53_version.tar.gz
-  patch -d php-$php53_version -p0 < fpm-race-condition.patch
-  pushd php-$php53_version
+  tar xzf php-$php53_ver.tar.gz
+  patch -d php-$php53_ver -p0 < fpm-race-condition.patch
+  pushd php-$php53_ver
   patch -p1 < ../php5.3patch
   patch -p1 < ../debian_patches_disable_SSLv2_for_openssl_1_0_0.patch
   make clean
   [ ! -d "$php_install_dir" ] && mkdir -p $php_install_dir
-  if [[ $Apache_version =~ ^[1-2]$ ]] || [ -e "$apache_install_dir/bin/apxs" ]; then
+  if [[ $apache_ver =~ ^[1-2]$ ]] || [ -e "$apache_install_dir/bin/apxs" ]; then
     ./configure --prefix=$php_install_dir --with-config-file-path=$php_install_dir/etc \
     --with-config-file-scan-dir=$php_install_dir/etc/php.d \
     --with-apxs2=$apache_install_dir/bin/apxs --disable-fileinfo \
@@ -126,7 +126,7 @@ Install_PHP53() {
   sed -i 's@^disable_functions.*@disable_functions = passthru,exec,system,chroot,chgrp,chown,shell_exec,proc_open,proc_get_status,ini_alter,ini_restore,dl,openlog,syslog,readlink,symlink,popepassthru,stream_socket_server,fsocket,popen@' $php_install_dir/etc/php.ini
   [ -e /usr/sbin/sendmail ] && sed -i 's@^;sendmail_path.*@sendmail_path = /usr/sbin/sendmail -t -i@' $php_install_dir/etc/php.ini
   
-  if [[ ! $Apache_version =~ ^[1-2]$ ]] && [ ! -e "$apache_install_dir/bin/apxs" ]; then
+  if [[ ! $apache_ver =~ ^[1-2]$ ]] && [ ! -e "$apache_install_dir/bin/apxs" ]; then
     # php-fpm Init Script
     /bin/cp sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
     chmod +x /etc/init.d/php-fpm
@@ -218,13 +218,13 @@ EOF
       sed -i "s@^pm.max_spare_servers.*@pm.max_spare_servers = 80@" $php_install_dir/etc/php-fpm.conf
     fi
 
-    #[ "$Web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $IPADDR:9000@" $php_install_dir/etc/php-fpm.conf
+    #[ "$web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $IPADDR:9000@" $php_install_dir/etc/php-fpm.conf
     service php-fpm start
 
-  elif [[ $Apache_version =~ ^[1-2]$ ]] || [ -e "$apache_install_dir/bin/apxs" ]; then
+  elif [[ $apache_ver =~ ^[1-2]$ ]] || [ -e "$apache_install_dir/bin/apxs" ]; then
     service httpd restart
   fi
   popd
-  [ -e "$php_install_dir/bin/phpize" ] && rm -rf php-$php53_version
+  [ -e "$php_install_dir/bin/phpize" ] && rm -rf php-$php53_ver
   popd
 }

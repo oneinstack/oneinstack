@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -12,8 +12,8 @@ Install_Apache22() {
   pushd ${oneinstack_dir}/src
   id -u ${run_user} >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin ${run_user}
-  tar xzf httpd-${apache22_version}.tar.gz
-  pushd httpd-${apache22_version}
+  tar xzf httpd-${apache22_ver}.tar.gz
+  pushd httpd-${apache22_ver}
   [ ! -d "${apache_install_dir}" ] && mkdir -p ${apache_install_dir}
   [ "${Ubuntu_version}" == "12" ] && sed -i '@SSL_PROTOCOL_SSLV2@d' modules/ssl/ssl_engine_io.c
   LDFLAGS=-ldl ./configure --prefix=${apache_install_dir} --with-mpm=prefork --with-included-apr --enable-headers --enable-deflate --enable-so --enable-rewrite --enable-ssl--with-ssl=${openssl_install_dir} --enable-expires --enable-static-support --enable-suexec --enable-modules=all --enable-mods-shared=all
@@ -22,7 +22,7 @@ Install_Apache22() {
   if [ -e "${apache_install_dir}/conf/httpd.conf" ]; then
     echo "${CSUCCESS}Apache installed successfully! ${CEND}"
     popd
-    rm -rf httpd-${apache22_version}
+    rm -rf httpd-${apache22_ver}
   else
     rm -rf ${apache_install_dir}
     echo "${CFAILURE}Apache install failed, Please contact the author! ${CEND}"
@@ -42,10 +42,10 @@ Install_Apache22() {
   
   sed -i "s@^User daemon@User ${run_user}@" ${apache_install_dir}/conf/httpd.conf
   sed -i "s@^Group daemon@Group ${run_user}@" ${apache_install_dir}/conf/httpd.conf
-  if [ "${Nginx_version}" == '4' -a ! -e "${web_install_dir}/sbin/nginx" ]; then
+  if [ "${nginx_ver}" == '4' -a ! -e "${web_install_dir}/sbin/nginx" ]; then
     sed -i 's/^#ServerName www.example.com:80/ServerName 0.0.0.0:80/' ${apache_install_dir}/conf/httpd.conf
     TMP_PORT=80
-  elif [[ ${Nginx_version} =~ ^[1-3]$ ]] || [ -e "${web_install_dir}/sbin/nginx" ]; then
+  elif [[ ${nginx_ver} =~ ^[1-3]$ ]] || [ -e "${web_install_dir}/sbin/nginx" ]; then
     sed -i 's/^#ServerName www.example.com:80/ServerName 127.0.0.1:88/' ${apache_install_dir}/conf/httpd.conf
     sed -i 's@^Listen.*@Listen 127.0.0.1:88@' ${apache_install_dir}/conf/httpd.conf
     TMP_PORT=88
@@ -116,7 +116,7 @@ ServerSignature Off
 Include conf/vhost/*.conf
 EOF
 
-  if [ "${Nginx_version}" != '4' -o -e "${web_install_dir}/sbin/nginx" ]; then
+  if [ "${nginx_ver}" != '4' -o -e "${web_install_dir}/sbin/nginx" ]; then
     ${apache_install_dir}/bin/apxs -i -c -n mod_remoteip.so mod_remoteip.c
     cat > ${apache_install_dir}/conf/extra/httpd-remoteip.conf << EOF
 LoadModule remoteip_module modules/mod_remoteip.so

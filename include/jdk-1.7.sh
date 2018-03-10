@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -11,9 +11,9 @@
 Install-JDK17() {
   pushd ${oneinstack_dir}/src
 
-  JDK_FILE="jdk-`echo $jdk17_version | awk -F. '{print $2}'`u`echo $jdk17_version | awk -F_ '{print $NF}'`-linux-$SYS_BIG_FLAG.tar.gz"
+  JDK_FILE="jdk-`echo $jdk17_ver | awk -F. '{print $2}'`u`echo $jdk17_ver | awk -F_ '{print $NF}'`-linux-$SYS_BIG_FLAG.tar.gz"
   JAVA_dir=/usr/java
-  JDK_NAME="jdk$jdk17_version"
+  JDK_NAME="jdk$jdk17_ver"
   JDK_PATH=$JAVA_dir/$JDK_NAME
   
   [ "$OS" == 'CentOS' ] && [ -n "`rpm -qa | grep jdk`" ] && rpm -e `rpm -qa | grep jdk`

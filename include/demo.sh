@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -23,7 +23,7 @@ DEMO() {
     fi
 
     echo "<?php phpinfo() ?>" > ${wwwroot_dir}/default/phpinfo.php
-    case "${PHP_cache}" in
+    case "${php_cache}" in
       1)
         src_url=http://mirrors.linuxeye.com/oneinstack/src/ocp.php && Download_src
         /bin/cp ocp.php ${wwwroot_dir}/default

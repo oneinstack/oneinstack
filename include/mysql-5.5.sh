@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -17,15 +17,15 @@ Install_MySQL55() {
   [ ! -d "${mysql_install_dir}" ] && mkdir -p ${mysql_install_dir}
   mkdir -p ${mysql_data_dir};chown mysql.mysql -R ${mysql_data_dir}
 
-  if [ "${dbInstallMethods}" == "1" ]; then
-    tar xvf mysql-${mysql55_version}-linux-glibc2.12-${SYS_BIT_b}.tar.gz
-    mv mysql-${mysql55_version}-linux-glibc2.12-${SYS_BIT_b}/* ${mysql_install_dir}
+  if [ "${dbinstallmethod}" == "1" ]; then
+    tar xvf mysql-${mysql55_ver}-linux-glibc2.12-${SYS_BIT_b}.tar.gz
+    mv mysql-${mysql55_ver}-linux-glibc2.12-${SYS_BIT_b}/* ${mysql_install_dir}
     sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${mysql_install_dir}/bin/mysqld_safe
     sed -i "s@/usr/local/mysql@${mysql_install_dir}@g" ${mysql_install_dir}/bin/mysqld_safe
-  elif [ "${dbInstallMethods}" == "2" ]; then
-    tar xvf mysql-${mysql55_version}.tar.gz
-    pushd mysql-${mysql55_version}
-    [ "${armPlatform}" == "y" ] && patch -p1 < ../mysql-5.5-fix-arm-client_plugin.patch
+  elif [ "${dbinstallmethod}" == "2" ]; then
+    tar xvf mysql-${mysql55_ver}.tar.gz
+    pushd mysql-${mysql55_ver}
+    [ "${armplatform}" == "y" ] && patch -p1 < ../mysql-5.5-fix-arm-client_plugin.patch
     cmake . -DCMAKE_INSTALL_PREFIX=${mysql_install_dir} \
     -DMYSQL_DATADIR=${mysql_data_dir} \
     -DSYSCONFDIR=/etc \
@@ -49,14 +49,14 @@ Install_MySQL55() {
 
   if [ -d "${mysql_install_dir}/support-files" ]; then
     echo "${CSUCCESS}MySQL installed successfully! ${CEND}"
-    if [ "${dbInstallMethods}" == "1" ]; then
-      rm -rf mysql-${mysql55_version}-*-${SYS_BIT_b}
-    elif [ "${dbInstallMethods}" == "2" ]; then
-      rm -rf mysql-${mysql55_version}
+    if [ "${dbinstallmethod}" == "1" ]; then
+      rm -rf mysql-${mysql55_ver}-*-${SYS_BIT_b}
+    elif [ "${dbinstallmethod}" == "2" ]; then
+      rm -rf mysql-${mysql55_ver}
     fi
   else
     rm -rf ${mysql_install_dir}
-    rm -rf mysql-${mysql55_version}
+    rm -rf mysql-${mysql55_ver}
     echo "${CFAILURE}MySQL install failed, Please contact the author! ${CEND}"
     kill -9 $$
   fi

@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -10,12 +10,12 @@
 
 Install_GraphicsMagick() {
   pushd ${oneinstack_dir}/src
-  tar xzf GraphicsMagick-${GraphicsMagick_version}.tar.gz
-  pushd GraphicsMagick-${GraphicsMagick_version}
+  tar xzf GraphicsMagick-${graphicsmagick_ver}.tar.gz
+  pushd GraphicsMagick-${graphicsmagick_ver}
   ./configure --prefix=/usr/local/graphicsmagick --enable-shared --enable-static
   make -j ${THREAD} && make install
   popd
-  rm -rf GraphicsMagick-${GraphicsMagick_version}
+  rm -rf GraphicsMagick-${graphicsmagick_ver}
   popd
 }
 

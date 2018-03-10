@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -17,8 +17,8 @@ Install_AliSQL56() {
   [ ! -d "${alisql_install_dir}" ] && mkdir -p ${alisql_install_dir}
   mkdir -p ${alisql_data_dir};chown mysql.mysql -R ${alisql_data_dir}
 
-  tar xvf alisql-${alisql56_version}.tar.gz
-  pushd alisql-${alisql56_version}
+  tar xvf alisql-${alisql_ver}.tar.gz
+  pushd alisql-${alisql_ver}
   cmake . -DCMAKE_INSTALL_PREFIX=${alisql_install_dir} \
   -DCMAKE_BUILD_TYPE="Release" \
   -DWITH_EMBEDDED_SERVER=0 \
@@ -39,10 +39,10 @@ Install_AliSQL56() {
   if [ -d "${alisql_install_dir}/support-files" ]; then
     echo never > /sys/kernel/mm/transparent_hugepage/enabled
     echo "${CSUCCESS}AliSQL installed successfully! ${CEND}"
-    rm -rf alisql-${alisql56_version}
+    rm -rf alisql-${alisql_ver}
   else
     rm -rf ${alisql_install_dir}
-    rm -rf alisql-${alisql56_version}
+    rm -rf alisql-${alisql_ver}
     echo "${CFAILURE}AliSQL install failed, Please contact the author! ${CEND}"
     kill -9 $$
   fi

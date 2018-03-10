@@ -1,6 +1,6 @@
 #!/bin/bash
 # Author:  yeho <lj2007331 AT gmail.com>
-# BLOG:  https://blog.linuxeye.com
+# BLOG:  https://blog.linuxeye.cn
 #
 # Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
 #
@@ -17,17 +17,17 @@ Install_Tomcat6() {
 
   # install apr
   if [ ! -e "/usr/local/apr/bin/apr-1-config" ]; then
-    tar xzf apr-${apr_version}.tar.gz
-    pushd apr-${apr_version}
+    tar xzf apr-${apr_ver}.tar.gz
+    pushd apr-${apr_ver}
     ./configure
     make -j ${THREAD} && make install
     popd
-    rm -rf apr-${apr_version} 
+    rm -rf apr-${apr_ver} 
   fi
 
-  tar xzf apache-tomcat-${tomcat6_version}.tar.gz
+  tar xzf apache-tomcat-${tomcat6_ver}.tar.gz
   [ ! -d "${tomcat_install_dir}" ] && mkdir -p ${tomcat_install_dir}
-  /bin/cp -R apache-tomcat-${tomcat6_version}/* ${tomcat_install_dir}
+  /bin/cp -R apache-tomcat-${tomcat6_ver}/* ${tomcat_install_dir}
   rm -rf ${tomcat_install_dir}/webapps/{docs,examples,host-manager,manager,ROOT/*}
 
   if [ ! -e "${tomcat_install_dir}/conf/server.xml" ]; then
@@ -129,7 +129,7 @@ EOF
     [ "${OS}" == "CentOS" ] && { chkconfig --add tomcat; chkconfig tomcat on; }
     [[ "${OS}" =~ ^Ubuntu$|^Debian$ ]] && update-rc.d tomcat defaults
     echo "${CSUCCESS}Tomcat installed successfully! ${CEND}"
-    rm -rf apache-tomcat-${tomcat6_version}
+    rm -rf apache-tomcat-${tomcat6_ver}
   else
     popd
     echo "${CFAILURE}Tomcat install failed, Please contact the author! ${CEND}"
