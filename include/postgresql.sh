@@ -2,14 +2,14 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
 
 Install_PostgreSQL() {
-  pushd ${oneinstack_dir}/src
+  pushd ${oneinstack_dir}/src > /dev/null
   id -u postgres >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -d ${pgsql_install_dir} -s /bin/bash postgres 
   mkdir -p ${pgsql_data_dir};chown postgres.postgres -R ${pgsql_data_dir}

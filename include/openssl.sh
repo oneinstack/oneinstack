@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -11,7 +11,7 @@
 Install_openSSL102() {
   if [ ! -e "${openssl_install_dir}/lib/libcrypto.a" ]; then
     # install openssl-1.0.2
-    pushd ${oneinstack_dir}/src
+    pushd ${oneinstack_dir}/src > /dev/null
     tar xzf openssl-${openssl_ver}.tar.gz
     pushd openssl-${openssl_ver}
     make clean

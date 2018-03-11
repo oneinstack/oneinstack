@@ -17,12 +17,11 @@ printf "
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
-
 # Check if user is root
 [ $(id -u) != '0' ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
 
-# get pwd
-sed -i "s@^oneinstack_dir.*@oneinstack_dir=$(pwd)@" ./options.conf
+oneinstack_dir=$(dirname "`readlink -f $0`")
+pushd ${oneinstack_dir} > /dev/null
 
 # get the IP information
 PUBLIC_IPADDR=`./include/get_public_ipaddr.py`
@@ -57,34 +56,13 @@ IPADDR_COUNTRY=`./include/get_ipaddr_state.py $PUBLIC_IPADDR | awk '{print $1}'`
 # Check PHP
 if [ -e "${php_install_dir}/bin/phpize" ]; then
   phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
-  PHP_detail_version=$(${php_install_dir}/bin/php -r 'echo PHP_VERSION;')
-  PHP_main_version=${PHP_detail_version%.*}
-
-  case "${PHP_main_version}" in
-    "5.3")
-      php_ver=1
-      ;;
-    "5.4")
-      php_ver=2
-      ;;
-    "5.5")
-      php_ver=3
-      ;;
-    "5.6")
-      php_ver=4
-      ;;
-    "7.0" | "7.1" | "7.2" )
-      php_ver=5
-      ;;
-    *)
-      echo "${CFAILURE}Your PHP version ${PHP_main_version} is not supported! ${CEND}"
-      kill -9 $$
-      ;;
-  esac
+  PHP_detail_ver=$(${php_install_dir}/bin/php -r 'echo PHP_VERSION;')
+  PHP_main_ver=${PHP_detail_ver%.*}
 fi
 
 # Check PHP Extensions
 Check_PHP_Extension() {
+  [ ! -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP was not exist! ${CEND}"; exit 1; } 
   [ -e "${php_install_dir}/etc/php.d/ext-${PHP_extension}.ini" ] && { echo "${CWARNING}PHP ${PHP_extension} module already installed! ${CEND}"; exit 1; }
 }
 
@@ -124,7 +102,7 @@ Uninstall_letsencrypt() {
 
 Install_fail2ban() {
   [ ! -e "${python_install_dir}/bin/python" ] && Install_Python
-  pushd ${oneinstack_dir}/src
+  pushd ${oneinstack_dir}/src > /dev/null
   src_url=http://mirrors.linuxeye.com/oneinstack/src/fail2ban-${fail2ban_ver}.tar.gz && Download_src
   tar xzf fail2ban-${fail2ban_ver}.tar.gz
   pushd fail2ban-${fail2ban_ver}
@@ -232,12 +210,12 @@ What Are You Doing?
           echo -e "\t${CMSG}2${CEND}. XCache"
           echo -e "\t${CMSG}3${CEND}. APCU"
           echo -e "\t${CMSG}4${CEND}. eAccelerator"
-          read -p "Please input a number:(Default 1 press Enter) " php_cache
-          [ -z "${php_cache}" ] && php_cache=1
-          if [[ ! "${php_cache}" =~ ^[1-4]$ ]]; then
+          read -p "Please input a number:(Default 1 press Enter) " phpcache_option
+          [ -z "${phpcache_option}" ] && phpcache_option=1
+          if [[ ! "${phpcache_option}" =~ ^[1-4]$ ]]; then
             echo "${CWARNING}input error! Please only input number 1~4${CEND}"
           else
-            case "${php_cache}" in
+            case "${phpcache_option}" in
               1)
                 PHP_extension=opcache
                 ;;
@@ -259,21 +237,21 @@ What Are You Doing?
           if [ -e ${php_install_dir}/etc/php.d/ext-ZendGuardLoader.ini ]; then
             echo; echo "${CWARNING}You have to install ZendGuardLoader, You need to uninstall it before install ${PHP_extension}! ${CEND}"; echo; exit 1
           else
-            case "${php_cache}" in
+            case "${phpcache_option}" in
               1)
-                pushd ${oneinstack_dir}/src
-                if [[ "${PHP_main_version}" =~ ^5.[3-4]$ ]]; then
+                pushd ${oneinstack_dir}/src > /dev/null
+                if [[ "${PHP_main_ver}" =~ ^5.[3-4]$ ]]; then
                   src_url=https://pecl.php.net/get/zendopcache-${zendopcache_ver}.tgz && Download_src
                   Install_ZendOPcache
                 else
-                  src_url=http://www.php.net/distributions/php-${PHP_detail_version}.tar.gz && Download_src
+                  src_url=http://www.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
                   Install_ZendOPcache
                 fi
                 popd
                 Check_succ
                 ;;
               2)
-                if [[ ${PHP_main_version} =~ ^5.[3-6]$ ]]; then
+                if [[ "${PHP_main_ver}" =~ ^5.[3-6]$ ]]; then
                   while :; do
                     read -p "Please input xcache admin password: " xcache_admin_pass
                     (( ${#xcache_admin_pass} >= 5 )) && { xcache_admin_md5_pass=$(echo -n "${xcache_admin_pass}" | md5sum | awk '{print $1}') ; break ; } || echo "${CFAILURE}xcache admin password least 5 characters! ${CEND}"
@@ -286,7 +264,7 @@ What Are You Doing?
                 fi
                 ;;
               3)
-                if [[ "${PHP_main_version}" =~ ^5.[3-6]$|^7.[0-1]$ ]]; then
+                if [[ "${PHP_main_ver}" =~ ^5.[3-6]$|^7.[0-2]$ ]]; then
                   checkDownload
                   Install_APCU
                   Check_succ
@@ -295,7 +273,7 @@ What Are You Doing?
                 fi
                 ;;
               4)
-                if [[ "${PHP_main_version}" =~ ^5.[3-4]$ ]]; then
+                if [[ "${PHP_main_ver}" =~ ^5.[3-4]$ ]]; then
                   checkDownload
                   Install_eAccelerator
                   Check_succ
@@ -328,7 +306,7 @@ What Are You Doing?
         if [ "${ACTION}" = '1' ]; then
           Check_PHP_Extension
           if [ "${Loader}" = '1' ]; then
-            if [[ "${PHP_main_version}" =~ ^5.[3-6]$ ]] || [ "${armplatform}" != 'y' ]; then
+            if [[ "${PHP_main_ver}" =~ ^5.[3-6]$ ]] || [ "${armplatform}" != 'y' ]; then
               if [ -e ${php_install_dir}/etc/php.d/ext-opcache.ini ]; then
                 echo; echo "${CWARNING}You have to install OpCache, You need to uninstall it before install ZendGuardLoader! ${CEND}"; echo; exit 1
               else
@@ -337,15 +315,15 @@ What Are You Doing?
                 Check_succ
               fi
             else
-              echo; echo "${CWARNING}Your php ${PHP_detail_version} or platform ${TARGET_ARCH} does not support ${PHP_extension}! ${CEND}";
+              echo; echo "${CWARNING}Your php ${PHP_detail_ver} or platform ${TARGET_ARCH} does not support ${PHP_extension}! ${CEND}";
             fi
           elif [ "${Loader}" = '2' ]; then
-            if [[ "${PHP_main_version}" =~ ^5.[3-6]$|^7.[0-2]$ ]] || [ "${TARGET_ARCH}" != "arm64" ]; then
+            if [[ "${PHP_main_ver}" =~ ^5.[3-6]$|^7.[0-2]$ ]] || [ "${TARGET_ARCH}" != "arm64" ]; then
               ioncube_yn='y' && checkDownload
               Install_ionCube
               Restart_PHP; echo "${CSUCCESS}PHP ioncube module installed successfully! ${CEND}";
             else
-              echo; echo "${CWARNING}Your php ${PHP_detail_version} or platform ${TARGET_ARCH} does not support ${PHP_extension}! ${CEND}";
+              echo; echo "${CWARNING}Your php ${PHP_detail_ver} or platform ${TARGET_ARCH} does not support ${PHP_extension}! ${CEND}";
             fi
           fi
         else
@@ -358,24 +336,24 @@ What Are You Doing?
           echo "Please select ImageMagick/GraphicsMagick:"
           echo -e "\t${CMSG}1${CEND}. ImageMagick"
           echo -e "\t${CMSG}2${CEND}. GraphicsMagick"
-          read -p "Please input a number:(Default 1 press Enter) " magick
-          [ -z "${magick}" ] && magick=1
-          if [[ ! "${magick}" =~ ^[1,2]$ ]]; then
+          read -p "Please input a number:(Default 1 press Enter) " magick_option
+          [ -z "${magick_option}" ] && magick_option=1
+          if [[ ! "${magick_option}" =~ ^[1,2]$ ]]; then
             echo "${CWARNING}input error! Please only input number 1~2${CEND}"
           else
-            [ "${magick}" = '1' ] && PHP_extension=imagick
-            [ "${magick}" = '2' ] && PHP_extension=gmagick
+            [ "${magick_option}" = '1' ] && PHP_extension=imagick
+            [ "${magick_option}" = '2' ] && PHP_extension=gmagick
             break
           fi
         done
         if [ "${ACTION}" = '1' ]; then
           Check_PHP_Extension
           magick_yn=y && checkDownload
-          if [ "${magick}" = '1' ]; then
+          if [ "${magick_option}" = '1' ]; then
             [ ! -d "/usr/local/imagemagick" ] && Install_ImageMagick
             Install_php-imagick
             Check_succ
-          elif [ "${magick}" = '2' ]; then
+          elif [ "${magick_option}" = '2' ]; then
             [ ! -d "/usr/local/graphicsmagick" ] && Install_GraphicsMagick
             Install_php-gmagick
             Check_succ
@@ -391,15 +369,15 @@ What Are You Doing?
         PHP_extension=fileinfo
         if [ "${ACTION}" = '1' ]; then
           Check_PHP_Extension
-          pushd ${oneinstack_dir}/src
-          src_url=http://www.php.net/distributions/php-${PHP_detail_version}.tar.gz && Download_src
-          tar xzf php-${PHP_detail_version}.tar.gz
-          pushd php-${PHP_detail_version}/ext/fileinfo
+          pushd ${oneinstack_dir}/src > /dev/null
+          src_url=http://www.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
+          tar xzf php-${PHP_detail_ver}.tar.gz
+          pushd php-${PHP_detail_ver}/ext/fileinfo
           ${php_install_dir}/bin/phpize
           ./configure --with-php-config=${php_install_dir}/bin/php-config
           make -j ${THREAD} && make install
           popd;popd
-          rm -rf php-${PHP_detail_version}
+          rm -rf php-${PHP_detail_ver}
           echo "extension=fileinfo.so" > ${php_install_dir}/etc/php.d/ext-fileinfo.ini
           Check_succ
         else
@@ -479,8 +457,8 @@ What Are You Doing?
         PHP_extension=swoole
         if [ "${ACTION}" = '1' ]; then
           Check_PHP_Extension
-          pushd ${oneinstack_dir}/src
-          if [[ "${PHP_main_version}" =~ ^7\.[0-1]$ ]]; then
+          pushd ${oneinstack_dir}/src > /dev/null
+          if [[ "${PHP_main_ver}" =~ ^7\.[0-2]$ ]]; then
             src_url=https://pecl.php.net/get/swoole-${swoole_ver}.tgz && Download_src
             tar xzf swoole-${swoole_ver}.tgz
             pushd swoole-${swoole_ver}
@@ -502,18 +480,29 @@ What Are You Doing?
         fi
         ;;
       9)
-        [[ ! "${PHP_main_version}" =~ ^5\.[5-6]$|^7\.[0-1]$ ]] && { echo "${CWARNING}Need a PHP version >= 5.5.0 and < 7.2.0${CEND}"; exit 1; }
         ACTION_FUN
         PHP_extension=xdebug
         if [ "${ACTION}" = '1' ]; then
           Check_PHP_Extension
-          pushd ${oneinstack_dir}/src
-          src_url=https://pecl.php.net/get/xdebug-${xdebug_ver}.tgz && Download_src
-          src_url=http://mirrors.linuxeye.com/oneinstack/src/webgrind-master.zip && Download_src
-          tar xzf xdebug-${xdebug_ver}.tgz
-          unzip -q webgrind-master.zip 
-          /bin/mv webgrind-master ${wwwroot_dir}/default/webgrind 
-          pushd xdebug-${xdebug_ver}
+          pushd ${oneinstack_dir}/src > /dev/null
+          if [[ "${PHP_main_ver}" =~ ^7\.[0-2]$ ]]; then
+            src_url=https://pecl.php.net/get/xdebug-${xdebug_ver}.tgz && Download_src
+            src_url=http://mirrors.linuxeye.com/oneinstack/src/webgrind-master.zip && Download_src
+            tar xzf xdebug-${xdebug_ver}.tgz 
+            unzip -q webgrind-master.zip
+            /bin/mv webgrind-master ${wwwroot_dir}/default/webgrind 
+            pushd xdebug-${xdebug_ver} 
+          elif [[ "${PHP_main_ver}" =~ ^5\.[5-6]$ ]]; then
+            src_url=https://pecl.php.net/get/xdebug-2.5.5.tgz && Download_src
+            src_url=http://mirrors.linuxeye.com/oneinstack/src/webgrind-master.zip && Download_src
+            tar xzf xdebug-2.5.5.tgz 
+            unzip -q webgrind-master.zip
+            /bin/mv webgrind-master ${wwwroot_dir}/default/webgrind 
+            pushd xdebug-2.5.5 
+          else
+            echo "${CWARNING}Need a PHP version >= 5.5.0 and <= 7.2.0${CEND}"
+            exit 1
+          fi
           ${php_install_dir}/bin/phpize
           ./configure --with-php-config=${php_install_dir}/bin/php-config
           make -j ${THREAD} && make install

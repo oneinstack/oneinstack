@@ -2,17 +2,17 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
 
 Install_redis-server() {
-  pushd ${oneinstack_dir}/src
+  pushd ${oneinstack_dir}/src > /dev/null
   tar xzf redis-${redis_ver}.tar.gz
   pushd redis-${redis_ver}
-  if [ "$OS_BIT" == '32' ]; then
+  if [ "${OS_BIT}" == '32' ]; then
     sed -i '1i\CFLAGS= -march=i686' src/Makefile
     sed -i 's@^OPT=.*@OPT=-O2 -march=i686@' src/.make-settings
   fi
@@ -56,7 +56,7 @@ Install_redis-server() {
 }
 
 Install_php-redis() {
-  pushd ${oneinstack_dir}/src
+  pushd ${oneinstack_dir}/src > /dev/null
   if [ -e "${php_install_dir}/bin/phpize" ]; then
     phpExtensionDir=`${php_install_dir}/bin/php-config --extension-dir`
     tar xzf redis-$redis_pecl_ver.tgz

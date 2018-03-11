@@ -2,14 +2,14 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
 
 Install_ImageMagick() {
-  pushd ${oneinstack_dir}/src
+  pushd ${oneinstack_dir}/src > /dev/null
   tar xzf ImageMagick-${imagemagick_ver}.tar.gz
   pushd ImageMagick-${imagemagick_ver}
   ./configure --prefix=/usr/local/imagemagick --enable-shared --enable-static
@@ -20,7 +20,7 @@ Install_ImageMagick() {
 }
 
 Install_php-imagick() {
-  pushd ${oneinstack_dir}/src
+  pushd ${oneinstack_dir}/src > /dev/null
   if [ -e "${php_install_dir}/bin/phpize" ]; then
     phpExtensionDir=`${php_install_dir}/bin/php-config --extension-dir`
     tar xzf imagick-${imagick_ver}.tgz

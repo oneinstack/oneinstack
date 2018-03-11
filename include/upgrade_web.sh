@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -69,22 +69,22 @@ Upgrade_Nginx() {
 Upgrade_Tengine() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "$tengine_install_dir/sbin/nginx" ] && echo "${CWARNING}Tengine is not installed on your system! ${CEND}" && exit 1
-  OLD_Tengine_version_tmp=`$tengine_install_dir/sbin/nginx -v 2>&1`
-  OLD_Tengine_version="`echo ${OLD_Tengine_version_tmp#*/} | awk '{print $1}'`"
-  Latest_Tengine_version=`curl -s http://tengine.taobao.org/changelog.html | grep -oE "[0-9]\.[0-9]\.[0-9]+" | head -1`
+  OLD_tengine_ver_tmp=`$tengine_install_dir/sbin/nginx -v 2>&1`
+  OLD_tengine_ver="`echo ${OLD_tengine_ver_tmp#*/} | awk '{print $1}'`"
+  Latest_tengine_ver=`curl -s http://tengine.taobao.org/changelog.html | grep -oE "[0-9]\.[0-9]\.[0-9]+" | head -1`
   echo
-  echo "Current Tengine Version: ${CMSG}$OLD_Tengine_version${CEND}"
+  echo "Current Tengine Version: ${CMSG}$OLD_tengine_ver${CEND}"
   while :; do echo
-    read -p "Please input upgrade Tengine Version(default: $Latest_Tengine_version): " NEW_Tengine_version
-    [ -z "$NEW_Tengine_version" ] && NEW_Tengine_version=$Latest_Tengine_version
-    if [ "$NEW_Tengine_version" != "$OLD_Tengine_version" ]; then
-      [ ! -e "tengine-$NEW_Tengine_version.tar.gz" ] && wget --no-check-certificate -c http://tengine.taobao.org/download/tengine-$NEW_Tengine_version.tar.gz > /dev/null 2>&1
-      if [ -e "tengine-$NEW_Tengine_version.tar.gz" ]; then
+    read -p "Please input upgrade Tengine Version(default: $Latest_tengine_ver): " NEW_tengine_ver
+    [ -z "$NEW_tengine_ver" ] && NEW_tengine_ver=$Latest_tengine_ver
+    if [ "$NEW_tengine_ver" != "$OLD_tengine_ver" ]; then
+      [ ! -e "tengine-$NEW_tengine_ver.tar.gz" ] && wget --no-check-certificate -c http://tengine.taobao.org/download/tengine-$NEW_tengine_ver.tar.gz > /dev/null 2>&1
+      if [ -e "tengine-$NEW_tengine_ver.tar.gz" ]; then
         src_url=https://www.openssl.org/source/openssl-$openssl_ver.tar.gz && Download_src
         src_url=http://mirrors.linuxeye.com/oneinstack/src/pcre-$pcre_ver.tar.gz && Download_src
         tar xzf openssl-$openssl_ver.tar.gz
         tar xzf pcre-$pcre_ver.tar.gz
-        echo "Download [${CMSG}tengine-$NEW_Tengine_version.tar.gz${CEND}] successfully! "
+        echo "Download [${CMSG}tengine-$NEW_tengine_ver.tar.gz${CEND}] successfully! "
         break
       else
         echo "${CWARNING}Tengine version does not exist! ${CEND}"
@@ -94,12 +94,12 @@ Upgrade_Tengine() {
     fi
   done
 
-  if [ -e "tengine-$NEW_Tengine_version.tar.gz" ]; then
-    echo "[${CMSG}tengine-$NEW_Tengine_version.tar.gz${CEND}] found"
+  if [ -e "tengine-$NEW_tengine_ver.tar.gz" ]; then
+    echo "[${CMSG}tengine-$NEW_tengine_ver.tar.gz${CEND}] found"
     echo "Press Ctrl+c to cancel or Press any key to continue..."
     char=`get_char`
-    tar xzf tengine-$NEW_Tengine_version.tar.gz
-    pushd tengine-$NEW_Tengine_version
+    tar xzf tengine-$NEW_tengine_ver.tar.gz
+    pushd tengine-$NEW_tengine_ver
     make clean
     sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc # close debug
     $tengine_install_dir/sbin/nginx -V &> $$
@@ -119,8 +119,8 @@ Upgrade_Tengine() {
       sleep 1
       kill -QUIT `cat /var/run/nginx.pid.oldbin`
       popd > /dev/null
-      echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}$OLD_Tengine_version${CEND} to ${CWARNING}$NEW_Tengine_version${CEND}"
-      rm -rf tengine-$NEW_Tengine_version
+      echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}$OLD_tengine_ver${CEND} to ${CWARNING}$NEW_tengine_ver${CEND}"
+      rm -rf tengine-$NEW_tengine_ver
     else
       echo "${CFAILURE}Upgrade Tengine failed! ${CEND}"
     fi
@@ -131,22 +131,22 @@ Upgrade_Tengine() {
 Upgrade_OpenResty() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "$openresty_install_dir/nginx/sbin/nginx" ] && echo "${CWARNING}OpenResty is not installed on your system! ${CEND}" && exit 1
-  OLD_OpenResty_version_tmp=`$openresty_install_dir/nginx/sbin/nginx -v 2>&1`
-  OLD_OpenResty_version="`echo ${OLD_OpenResty_version_tmp#*/} | awk '{print $1}'`"
-  Latest_OpenResty_version=`curl -s https://openresty.org/en/download.html | awk '/download\/openresty-/{print $0}' |  grep -oE "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -1`
+  OLD_openresy_ver_tmp=`$openresty_install_dir/nginx/sbin/nginx -v 2>&1`
+  OLD_openresy_ver="`echo ${OLD_openresy_ver_tmp#*/} | awk '{print $1}'`"
+  Latest_openresy_ver=`curl -s https://openresty.org/en/download.html | awk '/download\/openresty-/{print $0}' |  grep -oE "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -1`
   echo
-  echo "Current OpenResty Version: ${CMSG}$OLD_OpenResty_version${CEND}"
+  echo "Current OpenResty Version: ${CMSG}$OLD_openresy_ver${CEND}"
   while :; do echo
-    read -p "Please input upgrade OpenResty Version(default: $Latest_OpenResty_version): " NEW_OpenResty_version
-    [ -z "$NEW_OpenResty_version" ] && NEW_OpenResty_version=$Latest_OpenResty_version
-    if [ "$NEW_OpenResty_version" != "$OLD_OpenResty_version" ]; then
-      [ ! -e "openresty-$NEW_OpenResty_version.tar.gz" ] && wget --no-check-certificate -c https://openresty.org/download/openresty-$NEW_OpenResty_version.tar.gz > /dev/null 2>&1
-      if [ -e "openresty-$NEW_OpenResty_version.tar.gz" ]; then
+    read -p "Please input upgrade OpenResty Version(default: $Latest_openresy_ver): " NEW_openresy_ver
+    [ -z "$NEW_openresy_ver" ] && NEW_openresy_ver=$Latest_openresy_ver
+    if [ "$NEW_openresy_ver" != "$OLD_openresy_ver" ]; then
+      [ ! -e "openresty-$NEW_openresy_ver.tar.gz" ] && wget --no-check-certificate -c https://openresty.org/download/openresty-$NEW_openresy_ver.tar.gz > /dev/null 2>&1
+      if [ -e "openresty-$NEW_openresy_ver.tar.gz" ]; then
         src_url=https://www.openssl.org/source/openssl-$openssl_ver.tar.gz && Download_src
         src_url=http://mirrors.linuxeye.com/oneinstack/src/pcre-$pcre_ver.tar.gz && Download_src
         tar xzf openssl-$openssl_ver.tar.gz
         tar xzf pcre-$pcre_ver.tar.gz
-        echo "Download [${CMSG}openresty-$NEW_OpenResty_version.tar.gz${CEND}] successfully! "
+        echo "Download [${CMSG}openresty-$NEW_openresy_ver.tar.gz${CEND}] successfully! "
         break
       else
         echo "${CWARNING}OpenResty version does not exist! ${CEND}"
@@ -156,17 +156,17 @@ Upgrade_OpenResty() {
     fi
   done
 
-  if [ -e "openresty-$NEW_OpenResty_version.tar.gz" ]; then
-    echo "[${CMSG}openresty-$NEW_OpenResty_version.tar.gz${CEND}] found"
+  if [ -e "openresty-$NEW_openresy_ver.tar.gz" ]; then
+    echo "[${CMSG}openresty-$NEW_openresy_ver.tar.gz${CEND}] found"
     echo "Press Ctrl+c to cancel or Press any key to continue..."
     char=`get_char`
-    tar xzf openresty-$NEW_OpenResty_version.tar.gz
-    pushd openresty-$NEW_OpenResty_version
+    tar xzf openresty-$NEW_openresy_ver.tar.gz
+    pushd openresty-$NEW_openresy_ver
     make clean
-    openresty_ver_tmp=${NEW_OpenResty_version%.*}
+    openresty_ver_tmp=${NEW_openresy_ver%.*}
     sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' bundle/nginx-$openresty_ver_tmp/auto/cc/gcc # close debug
     $openresty_install_dir/nginx/sbin/nginx -V &> $$
-    ./configure --prefix=$openresty_install_dir --user=$run_user --group=$run_user --with-http_stub_status_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=../openssl-$openssl_ver --with-pcre=../pcre-$pcre_ver --with-pcre-jit --with-ld-opt='-ljemalloc' $nginx_modules_options 
+    ./configure --prefix=$openresty_install_dir --user=${run_user} --group=${run_user} --with-http_stub_status_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=../openssl-$openssl_ver --with-pcre=../pcre-$pcre_ver --with-pcre-jit --with-ld-opt='-ljemalloc' $nginx_modules_options 
     make -j ${THREAD}
     if [ -f "build/nginx-$openresty_ver_tmp/objs/nginx" ]; then
       /bin/mv $openresty_install_dir/nginx/sbin/nginx{,`date +%m%d`}
@@ -175,8 +175,8 @@ Upgrade_OpenResty() {
       sleep 1
       kill -QUIT `cat /var/run/nginx.pid.oldbin`
       popd > /dev/null
-      echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}$OLD_OpenResty_version${CEND} to ${CWARNING}$NEW_OpenResty_version${CEND}"
-      rm -rf openresty-$NEW_OpenResty_version
+      echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}$OLD_openresy_ver${CEND} to ${CWARNING}$NEW_openresy_ver${CEND}"
+      rm -rf openresty-$NEW_openresy_ver
     else
       echo "${CFAILURE}Upgrade OpenResty failed! ${CEND}"
     fi
@@ -186,7 +186,7 @@ Upgrade_OpenResty() {
 
 Upgrade_Apache() {
   pushd ${oneinstack_dir}/src > /dev/null
-  [ ! -e "$apache_install_dir/bin/httpd" ] && echo "${CWARNING}Apache is not installed on your system! ${CEND}" && exit 1
+  [ ! -e "${apache_install_dir}/bin/httpd" ] && echo "${CWARNING}Apache is not installed on your system! ${CEND}" && exit 1
   OLD_apache_ver="`/usr/local/apache/bin/httpd -v | grep version | awk -F'/| ' '{print $4}'`"
   Apache_flag="`echo $OLD_apache_ver | awk -F. '{print $1 $2}'`"
   Latest_apache_ver=`curl -s http://httpd.apache.org/download.cgi | awk "/#apache$Apache_flag/{print $2}" | head -1 | grep -oE "2\.[24]\.[0-9]+"`
@@ -226,7 +226,7 @@ Upgrade_Apache() {
       /bin/cp -R ../apr-util-${apr_util_ver} ./srclib/apr-util
       LDFLAGS=-ldl LD_LIBRARY_PATH=${openssl_install_dir}/lib ./configure --prefix=${apache_install_dir} --with-mpm=prefork --with-included-apr --enable-headers --enable-deflate --enable-so --enable-dav --enable-rewrite --enable-ssl --with-ssl=${openssl_install_dir} --enable-http2 --with-nghttp2=/usr/local --enable-expires --enable-static-support --enable-suexec --enable-modules=all --enable-mods-shared=all
     elif [ "$Apache_flag" == '22' ]; then
-      [ "${Ubuntu_version}" == "12" ] && sed -i '@SSL_PROTOCOL_SSLV2@d' modules/ssl/ssl_engine_io.c
+      [ "${Ubuntu_ver}" == "12" ] && sed -i '@SSL_PROTOCOL_SSLV2@d' modules/ssl/ssl_engine_io.c
       LDFLAGS=-ldl ./configure --prefix=${apache_install_dir} --with-mpm=prefork --with-included-apr --enable-headers --enable-deflate --enable-so --enable-rewrite --enable-ssl--with-ssl=${openssl_install_dir} --enable-expires --enable-static-support --enable-suexec --enable-modules=all --enable-mods-shared=all
     fi
     make -j ${THREAD}

@@ -1,7 +1,7 @@
 #!/bin/bash
 # Author:  Alpha Eva <kaneawk AT gmail.com>
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -9,8 +9,7 @@
 
 checkDownload() {
   mirrorLink=http://mirrors.linuxeye.com/oneinstack/src
-  pushd ${oneinstack_dir}/src
-
+  pushd ${oneinstack_dir}/src > /dev/null
   # General system utils
   echo "Download openSSL..."
   src_url=https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz && Download_src
@@ -18,7 +17,7 @@ checkDownload() {
 
   # Web
   if [ "${web_yn}" == 'y' ]; then
-    case "${nginx_ver}" in
+    case "${nginx_option}" in
       1)
         echo "Download nginx..."
         src_url=http://nginx.org/download/nginx-${nginx_ver}.tar.gz && Download_src
@@ -33,20 +32,20 @@ checkDownload() {
         ;;
     esac
 
-    if [[ "${nginx_ver}" =~ ^[1-3]$ || ${apache_ver} == '1' ]]; then
+    if [[ "${nginx_option}" =~ ^[1-3]$ || ${apache_option} == '1' ]]; then
       echo "Download pcre..."
       src_url=${mirrorLink}/pcre-${pcre_ver}.tar.gz && Download_src
     fi
 
     # apache
-    if [ "${apache_ver}" == '1' ]; then
+    if [ "${apache_option}" == '1' ]; then
       echo "Download apache 2.4..."
       src_url=http://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
       src_url=http://archive.apache.org/dist/apr/apr-util-${apr_util_ver}.tar.gz && Download_src
       src_url=http://mirrors.linuxeye.com/apache/httpd/nghttp2-${nghttp2_ver}.tar.gz && Download_src
       src_url=http://mirrors.linuxeye.com/apache/httpd/httpd-${apache24_ver}.tar.gz && Download_src
     fi
-    if [ "${apache_ver}" == '2' ]; then
+    if [ "${apache_option}" == '2' ]; then
       echo "Download apache 2.2..."
       src_url=http://mirrors.linuxeye.com/apache/httpd/httpd-${apache22_ver}.tar.gz && Download_src
 
@@ -55,7 +54,7 @@ checkDownload() {
     fi
 
     # tomcat
-    case "${tomcat_ver}" in
+    case "${tomcat_option}" in
       1)
         echo "Download tomcat 8..."
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat8_ver}/apache-tomcat-${tomcat8_ver}.tar.gz && Download_src
@@ -73,8 +72,8 @@ checkDownload() {
         ;;
     esac
 
-    if [[ "${jdk_version}"  =~ ^[1-3]$ ]]; then
-      case "${jdk_version}" in
+    if [[ "${jdk_option}"  =~ ^[1-3]$ ]]; then
+      case "${jdk_option}" in
         1)
           echo "Download JDK 1.8..."
           JDK_FILE="jdk-$(echo ${jdk18_ver} | awk -F. '{print $2}')u$(echo ${jdk18_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIG_FLAG}.tar.gz"
@@ -96,14 +95,14 @@ checkDownload() {
   fi
 
   if [ "${db_yn}" == 'y' ]; then
-    if [[ "${db_ver}" =~ ^[1,4,8]$ ]] && [ "${dbinstallmethod}" == "2" ]; then
+    if [[ "${db_option}" =~ ^[1,4,8]$ ]] && [ "${dbinstallmethod}" == "2" ]; then
       echo "Download boost..."
       [ "${IPADDR_COUNTRY}"x == "CN"x ] && DOWN_ADDR_BOOST=${mirrorLink} || DOWN_ADDR_BOOST=http://downloads.sourceforge.net/project/boost/boost/${boost_ver}
       boostVersion2=$(echo ${boost_ver} | awk -F. '{print $1}')_$(echo ${boost_ver} | awk -F. '{print $2}')_$(echo ${boost_ver} | awk -F. '{print $3}')
       src_url=${DOWN_ADDR_BOOST}/boost_${boostVersion2}.tar.gz && Download_src
     fi
 
-    case "${db_ver}" in
+    case "${db_option}" in
       1)
         # MySQL 5.7
         if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
@@ -578,7 +577,7 @@ checkDownload() {
     src_url=http://downloads.sourceforge.net/project/mcrypt/MCrypt/${mcrypt_ver}/mcrypt-${mcrypt_ver}.tar.gz && Download_src
     src_url=${mirrorLink}/libiconv-glibc-2.16.patch && Download_src
 
-    case "${php_ver}" in
+    case "${php_option}" in
       1)
         # php 5.3
         src_url=${mirrorLink}/debian_patches_disable_SSLv2_for_openssl_1_0_0.patch && Download_src
@@ -610,16 +609,16 @@ checkDownload() {
   fi
 
   # PHP OPCache
-  case "${php_cache}" in
+  case "${phpcache_option}" in
     1)
-      if [[ "$php_ver" =~ ^[1-2]$ ]]; then
+      if [[ "${php_option}" =~ ^[1-2]$ ]]; then
         # php 5.3 5.4
         echo "Download Zend OPCache..."
         src_url=https://pecl.php.net/get/zendopcache-${zendopcache_ver}.tgz && Download_src
       fi
       ;;
     2)
-      if [[ "$php_ver" =~ ^[1-4]$ ]]; then
+      if [[ "${php_option}" =~ ^[1-4]$ ]]; then
         # php 5.3 5.4 5.5 5.6
         echo "Download xcache..."
         src_url=http://xcache.lighttpd.net/pub/Releases/${xcache_ver}/xcache-${xcache_ver}.tar.gz && Download_src
@@ -628,7 +627,7 @@ checkDownload() {
     3)
       # php 5.3 5.4 5.5 5.6 7.0 7.1 7.2
       echo "Download apcu..."
-      if [[ "$php_ver" =~ ^[1-4]$ ]]; then
+      if [[ "${php_option}" =~ ^[1-4]$ ]]; then
         src_url=https://pecl.php.net/get/apcu-${apcu_ver}.tgz && Download_src
       else
         src_url=https://pecl.php.net/get/apcu-${apcu_for_php7_ver}.tgz && Download_src
@@ -636,10 +635,10 @@ checkDownload() {
       ;;
     4)
       # php 5.3 5.4
-      if [ "${php_ver}" == '1' ]; then
+      if [ "${php_option}" == '1' ]; then
         echo "Download eaccelerator 0.9..."
         src_url=https://github.com/downloads/eaccelerator/eaccelerator/eaccelerator-${eaccelerator_ver}.tar.bz2 && Download_src
-      elif [ "${php_ver}" == '2' ]; then
+      elif [ "${php_option}" == '2' ]; then
         echo "Download eaccelerator 1.0 dev..."
         src_url=https://github.com/eaccelerator/eaccelerator/tarball/master && Download_src
       fi
@@ -648,7 +647,7 @@ checkDownload() {
 
   # Zend Guard Loader
   if [ "${zendguardloader_yn}" == 'y' -a "${armplatform}" != 'y' ]; then
-    case "${php_ver}" in
+    case "${php_option}" in
       4)
         if [ "${OS_BIT}" == "64" ]; then
           # 64 bit
@@ -696,8 +695,8 @@ checkDownload() {
     esac
   fi
 
-  if [ "${db_ver}" == '13' ]; then
-    if [[ "$php_ver" =~ ^[1-2]$ ]]; then
+  if [ "${db_option}" == '13' ]; then
+    if [[ "${php_option}" =~ ^[1-2]$ ]]; then
       echo "Download pecl mongo for php..."
       src_url=https://pecl.php.net/get/mongo-${mongo_pecl_ver}.tgz && Download_src
     else
@@ -720,7 +719,7 @@ checkDownload() {
   fi
 
   if [ "${magick_yn}" == 'y' ]; then
-    if [ "${magick}" == '1' ]; then
+    if [ "${magick_option}" == '1' ]; then
       echo "Download ImageMagick..."
       src_url=${mirrorLink}/ImageMagick-${imagemagick_ver}.tar.gz && Download_src
       echo "Download imagick..."
@@ -728,12 +727,12 @@ checkDownload() {
     else
       echo "Download graphicsmagick..."
       src_url=http://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/${graphicsmagick_ver}/GraphicsMagick-${graphicsmagick_ver}.tar.gz && Download_src
-      if [[ "$php_ver" =~ ^[5-7]$ ]]; then
+      if [[ "${php_option}" =~ ^[5-7]$ ]]; then
         echo "Download gmagick for php 7.x..."
-        src_url=https://pecl.php.net/get/gmagick-${gmagick_for_php7_version}.tgz && Download_src
+        src_url=https://pecl.php.net/get/gmagick-${gmagick_for_php7_ver}.tgz && Download_src
       else
         echo "Download gmagick for php..."
-        src_url=https://pecl.php.net/get/gmagick-${gmagick_version}.tgz && Download_src
+        src_url=https://pecl.php.net/get/gmagick-${gmagick_ver}.tgz && Download_src
       fi
     fi
   fi
@@ -761,8 +760,9 @@ checkDownload() {
 
   if [ "${memcached_yn}" == 'y' ]; then
     echo "Download memcached..."
-    src_url=http://www.memcached.org/files/memcached-${memcached_ver}.tar.gz && Download_src
-    if [[ "$php_ver" =~ ^[5-7]$ ]]; then
+    [ "$IPADDR_COUNTRY"x == "CN"x ] && DOWN_ADDR=${mirrorLink} || DOWN_ADDR=http://www.memcached.org/files
+    src_url=${DOWN_ADDR}/memcached-${memcached_ver}.tar.gz && Download_src
+    if [[ "${php_option}" =~ ^[5-7]$ ]]; then
       echo "Download pecl memcache for php 7.x..."
       # src_url=https://codeload.github.com/websupport-sk/pecl-memcache/zip/php7 && Download_src
       src_url=${mirrorLink}/pecl-memcache-php7.tgz && Download_src
@@ -779,7 +779,7 @@ checkDownload() {
     src_url=https://launchpad.net/libmemcached/1.0/${libmemcached_ver}/+download/libmemcached-${libmemcached_ver}.tar.gz && Download_src
   fi
 
-  if [[ $nginx_ver =~ ^[1-3]$ ]] || [ "$db_yn" == 'y' -a "$db_ver" != '10' ]; then
+  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [ "$db_yn" == 'y' -a "${db_option}" != '10' ]; then
     echo "Download jemalloc..."
     src_url=${mirrorLink}/jemalloc-${jemalloc_ver}.tar.bz2 && Download_src
   fi
@@ -795,7 +795,7 @@ checkDownload() {
       src_url=http://hisham.hm/htop/releases/${htop_ver}/htop-${htop_ver}.tar.gz && Download_src
     fi
 
-    if [[ "${Ubuntu_version}" =~ ^14$|^15$ ]]; then
+    if [[ "${Ubuntu_ver}" =~ ^14$|^15$ ]]; then
       echo "Download bison for Ubuntu..."
       src_url=http://ftp.gnu.org/gnu/bison/bison-${bison_ver}.tar.gz && Download_src
     fi
