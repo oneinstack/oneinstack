@@ -1,7 +1,7 @@
 #!/bin/bash
 # Author:  Alpha Eva <kaneawk AT gmail.com>
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -24,7 +24,7 @@ installDepsDebian() {
   apt-get -y autoremove
 
   # Install needed packages
-  case "${Debian_version}" in
+  case "${Debian_ver}" in
     [6,7])
       pkgList="gcc g++ make cmake autoconf libjpeg8 libjpeg8-dev libjpeg-dev libpng12-0 libpng12-dev libpng3 libfreetype6 libfreetype6-dev libxml2 libxml2-dev zlib1g zlib1g-dev libc6 libc6-dev libglib2.0-0 libglib2.0-dev bzip2 libzip-dev libbz2-1.0 libncurses5 libncurses5-dev libaio1 libaio-dev numactl libreadline-dev curl libcurl3 libcurl4-openssl-dev libcurl4-gnutls-dev e2fsprogs libkrb5-3 libkrb5-dev libltdl-dev libidn11 libidn11-dev openssl libssl-dev libtool libevent-dev bison re2c libsasl2-dev libxslt1-dev libicu-dev locales libcloog-ppl0 patch vim zip unzip tmux htop bc dc expect libexpat1-dev rsync git lsof lrzsz iptables rsyslog cron logrotate ntpdate libsqlite3-dev psmisc wget sysv-rc"
       ;;
@@ -35,7 +35,7 @@ installDepsDebian() {
       pkgList="gcc g++ make cmake autoconf libjpeg62-turbo-dev libjpeg-dev libpng-dev libfreetype6 libfreetype6-dev libxml2 libxml2-dev zlib1g zlib1g-dev libc6 libc6-dev libglib2.0-0 libglib2.0-dev bzip2 libzip-dev libbz2-1.0 libncurses5 libncurses5-dev libaio1 libaio-dev numactl libreadline-dev curl libcurl3 libcurl4-openssl-dev libcurl4-gnutls-dev e2fsprogs libkrb5-3 libkrb5-dev libltdl-dev libidn11 libidn11-dev openssl libssl-dev libtool libevent-dev bison re2c libsasl2-dev libxslt1-dev libicu-dev locales libcloog-ppl1 patch vim zip unzip tmux htop bc dc expect libexpat1-dev rsync git lsof lrzsz iptables rsyslog cron logrotate ntpdate libsqlite3-dev psmisc wget sysv-rc"
       ;;
     *)
-      echo "${CFAILURE}Your system Debian ${Debian_version} are not supported!${CEND}"
+      echo "${CFAILURE}Your system Debian ${Debian_ver} are not supported!${CEND}"
       kill -9 $$
       ;;
   esac
@@ -52,16 +52,16 @@ installDepsCentOS() {
   yum makecache
   # Uninstall the conflicting packages
   echo "${CMSG}Removing the conflicting packages...${CEND}"
-  if [ "${CentOS_RHEL_version}" == '7' ]; then
+  if [ "${CentOS_RHEL_ver}" == '7' ]; then
     yum -y groupremove "Basic Web Server" "MySQL Database server" "MySQL Database client" "File and Print Server"
     systemctl mask firewalld.service
-    if [ "$iptables_yn" == 'y' ]; then
+    if [ "${iptables_yn}" == 'y' ]; then
       yum -y install iptables-services
       systemctl enable iptables.service
     fi
-  elif [ "${CentOS_RHEL_version}" == '6' ]; then
+  elif [ "${CentOS_RHEL_ver}" == '6' ]; then
     yum -y groupremove "FTP Server" "PostgreSQL Database client" "PostgreSQL Database server" "MySQL Database server" "MySQL Database client" "Web Server" "Office Suite and Productivity" "E-mail server" "Ruby Support" "Printing client"
-  elif [ "${CentOS_RHEL_version}" == '5' ]; then
+  elif [ "${CentOS_RHEL_ver}" == '5' ]; then
     yum -y groupremove "FTP Server" "Windows File Server" "PostgreSQL Database" "News Server" "MySQL Database" "DNS Name Server" "Web Server" "Dialup Networking Support" "Mail Server" "Ruby" "Office/Productivity" "Sound and Video" "Printing Support" "OpenFabrics Enterprise Distribution"
   fi
 
@@ -105,13 +105,13 @@ installDepsUbuntu() {
     apt-get -y install ${Package} --force-yes
   done
 
-  if [[ "${Ubuntu_version}" =~ ^14$|^15$ ]]; then
+  if [[ "${Ubuntu_ver}" =~ ^14$|^15$ ]]; then
     apt-get -y install libcloog-ppl1
     apt-get -y remove bison
     ln -sf /usr/include/freetype2 /usr/include/freetype2/freetype
-  elif [ "${Ubuntu_version}" == "13" ]; then
+  elif [ "${Ubuntu_ver}" == "13" ]; then
     apt-get -y install bison libcloog-ppl1
-  elif [ "${Ubuntu_version}" == "12" ]; then
+  elif [ "${Ubuntu_ver}" == "12" ]; then
     apt-get -y install bison libcloog-ppl0
   else
     apt-get -y install bison libcloog-ppl1
@@ -119,10 +119,9 @@ installDepsUbuntu() {
 }
 
 installDepsBySrc() {
-  pushd ${oneinstack_dir}/src
-
+  pushd ${oneinstack_dir}/src > /dev/null
   if [ "${OS}" == "Ubuntu" ]; then
-    if [[ "${Ubuntu_version}" =~ ^14$|^15$ ]]; then
+    if [[ "${Ubuntu_ver}" =~ ^14$|^15$ ]]; then
       # Install bison on ubt 14.x 15.x
       tar xzf bison-${bison_ver}.tar.gz
       pushd bison-${bison_ver}

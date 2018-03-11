@@ -2,17 +2,16 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
 
 Install_Nginx() {
-  pushd ${oneinstack_dir}/src
-  
-  id -u $run_user >/dev/null 2>&1
-  [ $? -ne 0 ] && useradd -M -s /sbin/nologin $run_user
+  pushd ${oneinstack_dir}/src > /dev/null
+  id -u ${run_user} >/dev/null 2>&1
+  [ $? -ne 0 ] && useradd -M -s /sbin/nologin ${run_user}
   
   tar xzf pcre-$pcre_ver.tar.gz
   tar xzf nginx-$nginx_ver.tar.gz
@@ -27,7 +26,7 @@ Install_Nginx() {
   sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc
   
   [ ! -d "$nginx_install_dir" ] && mkdir -p $nginx_install_dir
-  ./configure --prefix=$nginx_install_dir --user=$run_user --group=$run_user --with-http_stub_status_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=../openssl-$openssl_ver --with-pcre=../pcre-$pcre_ver --with-pcre-jit --with-ld-opt='-ljemalloc' $nginx_modules_options 
+  ./configure --prefix=$nginx_install_dir --user=${run_user} --group=${run_user} --with-http_stub_status_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=../openssl-$openssl_ver --with-pcre=../pcre-$pcre_ver --with-pcre-jit --with-ld-opt='-ljemalloc' $nginx_modules_options 
   make -j ${THREAD} && make install
   if [ -e "$nginx_install_dir/conf/nginx.conf" ]; then
     popd 
@@ -49,9 +48,9 @@ Install_Nginx() {
   sed -i "s@/usr/local/nginx@$nginx_install_dir@g" /etc/init.d/nginx
   
   mv $nginx_install_dir/conf/nginx.conf{,_bk}
-  if [[ $apache_ver =~ ^[1-2]$ ]]; then
+  if [[ ${apache_option} =~ ^[1-2]$ ]]; then
     /bin/cp ../config/nginx_apache.conf $nginx_install_dir/conf/nginx.conf
-  elif [[ $tomcat_ver =~ ^[1-2]$ ]] && [ ! -e "$php_install_dir/bin/php" ]; then
+  elif [[ ${tomcat_option} =~ ^[1-2]$ ]] && [ ! -e "${php_install_dir}/bin/php" ]; then
     /bin/cp ../config/nginx_tomcat.conf $nginx_install_dir/conf/nginx.conf
   else
     /bin/cp ../config/nginx.conf $nginx_install_dir/conf/nginx.conf
@@ -74,13 +73,13 @@ proxy_set_header X-Real-IP \$remote_addr;
 proxy_set_header X-Forwarded-For \$proxy_add_x_forwarded_for;
 proxy_set_header X-Forwarded-Proto \$scheme;
 EOF
-  sed -i "s@/data/wwwroot/default@$wwwroot_dir/default@" $nginx_install_dir/conf/nginx.conf
-  sed -i "s@/data/wwwlogs@$wwwlogs_dir@g" $nginx_install_dir/conf/nginx.conf
-  sed -i "s@^user www www@user $run_user $run_user@" $nginx_install_dir/conf/nginx.conf
+  sed -i "s@/data/wwwroot/default@${wwwroot_dir}/default@" $nginx_install_dir/conf/nginx.conf
+  sed -i "s@/data/wwwlogs@${wwwlogs_dir}@g" $nginx_install_dir/conf/nginx.conf
+  sed -i "s@^user www www@user ${run_user} ${run_user}@" $nginx_install_dir/conf/nginx.conf
   
   # logrotate nginx log
   cat > /etc/logrotate.d/nginx << EOF
-$wwwlogs_dir/*nginx.log {
+${wwwlogs_dir}/*nginx.log {
   daily
   rotate 5
   missingok

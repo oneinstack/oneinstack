@@ -2,16 +2,16 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
 
 Install_ionCube() {
-  pushd ${oneinstack_dir}/src
-  PHP_detail_version=`${php_install_dir}/bin/php -r 'echo PHP_VERSION;'`
-  PHP_main_version=${PHP_detail_version%.*}
+  pushd ${oneinstack_dir}/src > /dev/null
+  PHP_detail_ver=`${php_install_dir}/bin/php -r 'echo PHP_VERSION;'`
+  PHP_main_ver=${PHP_detail_ver%.*}
   phpExtensionDir=`${php_install_dir}/bin/php-config --extension-dir`
   if [ "${OS_BIT}" == '64' ]; then
       tar xzf ioncube_loaders_lin_x86-64.tar.gz
@@ -24,7 +24,7 @@ Install_ionCube() {
   fi
 
   [ ! -d "${phpExtensionDir}" ] && mkdir -p ${phpExtensionDir}
-  case "${PHP_main_version}" in
+  case "${PHP_main_ver}" in
     7.2)
       /bin/cp ioncube/ioncube_loader_lin_7.2.so ${phpExtensionDir}
       zend_extension="${phpExtensionDir}/ioncube_loader_lin_7.2.so"
@@ -54,7 +54,7 @@ Install_ionCube() {
       zend_extension="${phpExtensionDir}/ioncube_loader_lin_5.3.so"
       ;;
     *)
-      echo "Error! Your PHP ${PHP_detail_version} does not support ionCube!"
+      echo "Error! Your PHP ${PHP_detail_ver} does not support ionCube!"
       exit 1
       ;;
   esac

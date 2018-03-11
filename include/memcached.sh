@@ -2,15 +2,14 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://blog.linuxeye.cn
 #
-# Notes: OneinStack for CentOS/RadHat 5+ Debian 6+ and Ubuntu 12+
+# Notes: OneinStack for CentOS/RadHat 6+ Debian 6+ and Ubuntu 12+
 #
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
 
 Install_memcached() {
-  pushd ${oneinstack_dir}/src
-
+  pushd ${oneinstack_dir}/src > /dev/null
   # memcached server
   id -u memcached >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin memcached
@@ -18,7 +17,8 @@ Install_memcached() {
   tar xzf memcached-${memcached_ver}.tar.gz
   pushd memcached-${memcached_ver}
   [ ! -d "${memcached_install_dir}" ] && mkdir -p ${memcached_install_dir}
-  ./configure --prefix=${memcached_install_dir}
+  [ "${OS}" == "CentOS" ] && libevent_arg='--with-libevent=/usr/local'
+  ./configure --prefix=${memcached_install_dir} ${libevent_arg}
   make -j ${THREAD} && make install
   popd
   if [ -d "${memcached_install_dir}/include/memcached" ]; then
@@ -42,7 +42,7 @@ Install_memcached() {
 }
 
 Install_php-memcache() {
-  pushd ${oneinstack_dir}/src
+  pushd ${oneinstack_dir}/src > /dev/null
   if [ -e "${php_install_dir}/bin/phpize" ]; then
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     # php memcache extension
@@ -71,7 +71,7 @@ Install_php-memcache() {
 }
 
 Install_php-memcached() {
-  pushd ${oneinstack_dir}/src
+  pushd ${oneinstack_dir}/src > /dev/null
   if [ -e "${php_install_dir}/bin/phpize" ]; then
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     # php memcached extension

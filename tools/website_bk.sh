@@ -11,10 +11,10 @@
 . ../options.conf
 
 WebSite=$1
-LogFile=$backup_dir/web.log
-NewFile=$backup_dir/Web_${WebSite}_$(date +%Y%m%d_%H).tgz
-OldFile=$backup_dir/Web_${WebSite}_$(date +%Y%m%d --date="$expired_days days ago")*.tgz
-[ ! -e "$backup_dir" ] && mkdir -p $backup_dir
+LogFile=${backup_dir}/web.log
+NewFile=${backup_dir}/Web_${WebSite}_$(date +%Y%m%d_%H).tgz
+OldFile=${backup_dir}/Web_${WebSite}_$(date +%Y%m%d --date="$expired_days days ago")*.tgz
+[ ! -e "${backup_dir}" ] && mkdir -p ${backup_dir}
 [ ! -e "$wwwroot_dir/$WebSite" ] && { echo "[$wwwroot_dir/$WebSite] not exist" >> $LogFile ;  exit 1 ; }
 
 if [ `du -sm "$wwwroot_dir/$WebSite" | awk '{print $1}'` -lt 1024 ]; then
@@ -34,5 +34,5 @@ if [ `du -sm "$wwwroot_dir/$WebSite" | awk '{print $1}'` -lt 1024 ]; then
     popd > /dev/null
   fi
 else
-  rsync -crazP --delete $wwwroot_dir/$WebSite $backup_dir
+  rsync -crazP --delete $wwwroot_dir/$WebSite ${backup_dir}
 fi

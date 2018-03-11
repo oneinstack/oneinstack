@@ -17,9 +17,11 @@ printf "
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
-# get pwd
-sed -i "s@^oneinstack_dir.*@oneinstack_dir=$(pwd)@" ./options.conf
+# Check if user is root
+[ $(id -u) != "0" ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
 
+oneinstack_dir=$(dirname "`readlink -f $0`")
+pushd ${oneinstack_dir} > /dev/null
 . ./options.conf
 . ./versions.txt
 . ./include/color.sh
@@ -27,9 +29,6 @@ sed -i "s@^oneinstack_dir.*@oneinstack_dir=$(pwd)@" ./options.conf
 . ./include/check_dir.sh
 . ./include/download.sh
 . ./include/python.sh
-
-# Check if user is root
-[ $(id -u) != "0" ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
 
 while :; do echo
   echo 'Please select your backup destination:'
@@ -75,15 +74,15 @@ done
 if [[ $desc_bk =~ ^[1,2]$ ]]; then
   while :; do echo
     echo "Please enter the directory for save the backup file: "
-    read -p "(Default directory: $backup_dir): " new_backup_dir
-    [ -z "$new_backup_dir" ] && new_backup_dir="$backup_dir"
-    if [ -z "`echo $new_backup_dir| grep '^/'`" ]; then
+    read -p "(Default directory: ${backup_dir}): " new_backup_dir
+    [ -z "${new_backup_dir}" ] && new_backup_dir="${backup_dir}"
+    if [ -z "`echo ${new_backup_dir}| grep '^/'`" ]; then
       echo "${CWARNING}input error! ${CEND}"
     else
       break
     fi
   done
-  sed -i "s@^backup_dir=.*@backup_dir=$new_backup_dir@" ./options.conf
+  sed -i "s@^backup_dir=.*@backup_dir=${new_backup_dir}@" ./options.conf
 fi
 
 while :; do echo
@@ -95,43 +94,43 @@ done
 sed -i "s@^expired_days=.*@expired_days=$expired_days@" ./options.conf
 
 if [ "$content_bk" != '2' ]; then
-  databases=`$db_install_dir/bin/mysql -uroot -p$dbrootpwd -e "show databases\G" | grep Database | awk '{print $2}' | grep -Evw "(performance_schema|information_schema|mysql|sys)"`
+  databases=`${db_install_dir}/bin/mysql -uroot -p$dbrootpwd -e "show databases\G" | grep Database | awk '{print $2}' | grep -Evw "(performance_schema|information_schema|mysql|sys)"`
   while :; do echo
     echo "Please enter one or more name for database, separate multiple database names with commas: "
     read -p "(Default database: `echo $databases | tr ' ' ','`) " db_name
-    db_name=`echo $db_name | tr -d ' '`
-    [ -z "$db_name" ] && db_name="`echo $databases | tr ' ' ','`"
+    db_name=`echo ${db_name} | tr -d ' '`
+    [ -z "${db_name}" ] && db_name="`echo $databases | tr ' ' ','`"
     D_tmp=0
-    for D in `echo $db_name | tr ',' ' '`
+    for D in `echo ${db_name} | tr ',' ' '`
     do
       [ -z "`echo $databases | grep -w $D`" ] && { echo "${CWARNING}$D was not exist! ${CEND}" ; D_tmp=1; }
     done
     [ "$D_tmp" != '1' ] && break
   done
-  sed -i "s@^db_name=.*@db_name=$db_name@" ./options.conf
+  sed -i "s@^db_name=.*@db_name=${db_name}@" ./options.conf
 fi
 
 if [ "$content_bk" != '1' ]; then
-  websites=`ls $wwwroot_dir | grep -vw default`
+  websites=`ls ${wwwroot_dir} | grep -vw default`
   while :; do echo
     echo "Please enter one or more name for website, separate multiple website names with commas: "
     read -p "(Default website: `echo $websites | tr ' ' ','`) " website_name 
-    website_name=`echo $website_name | tr -d ' '`
-    [ -z "$website_name" ] && website_name="`echo $websites | tr ' ' ','`"
+    website_name=`echo ${website_name} | tr -d ' '`
+    [ -z "${website_name}" ] && website_name="`echo $websites | tr ' ' ','`"
     W_tmp=0
-    for W in `echo $website_name | tr ',' ' '`
+    for W in `echo ${website_name} | tr ',' ' '`
     do
-      [ ! -e "$wwwroot_dir/$W" ] && { echo "${CWARNING}$wwwroot_dir/$W not exist! ${CEND}" ; W_tmp=1; }
+      [ ! -e "${wwwroot_dir}/$W" ] && { echo "${CWARNING}${wwwroot_dir}/$W not exist! ${CEND}" ; W_tmp=1; }
     done
     [ "$W_tmp" != '1' ] && break
   done
-  sed -i "s@^website_name=.*@website_name=$website_name@" ./options.conf
+  sed -i "s@^website_name=.*@website_name=${website_name}@" ./options.conf
 fi
 
 echo
 echo "You have to backup the content:"
-[ "$content_bk" != '2' ] && echo "Database: ${CMSG}$db_name${CEND}"
-[ "$content_bk" != '1' ] && echo "Website: ${CMSG}$website_name${CEND}"
+[ "$content_bk" != '2' ] && echo "Database: ${CMSG}${db_name}${CEND}"
+[ "$content_bk" != '1' ] && echo "Website: ${CMSG}${website_name}${CEND}"
 
 if [ `echo $desc_bk | grep -e 2` ]; then
   > tools/iplist.txt
@@ -206,8 +205,8 @@ if [ `echo $desc_bk | grep -e 3` ]; then
     read -p "Please enter the Qcloud COS bucket: " bucket 
     [ -z "$bucket" ] && continue
     echo
-    $python_install_dir/bin/coscmd config -u $appid -a $SecretId -s $SecretKey -r $region -b $bucket >/dev/null 2>&1
-    $python_install_dir/bin/coscmd list >/dev/null 2>&1
+    ${python_install_dir}/bin/coscmd config -u $appid -a $SecretId -s $SecretKey -r $region -b $bucket >/dev/null 2>&1
+    ${python_install_dir}/bin/coscmd list >/dev/null 2>&1
     if [ $? = 0 ]; then
       echo "${CMSG}appid/SecretId/SecretKey/region/bucket OK${CEND}"
       echo
