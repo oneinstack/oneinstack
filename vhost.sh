@@ -320,6 +320,10 @@ What Are You Doing?
       mkdir -p ${vhostdir}
       echo "set permissions of Virtual Host directory......"
       chown -R ${run_user}.${run_user} ${vhostdir}
+      if [ ${NGX_FLAG}  == 'php' ] && [ ! -e "${vhostdir}/.user.ini" ] ; then
+          echo "open_basedir=${vhostdir}:/tmp" > "${vhostdir}/.user.ini"
+          chattr +i "${vhostdir}/.user.ini"
+      fi
       break
     fi
   done
