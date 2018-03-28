@@ -161,15 +161,15 @@ Uninstall_MongoDB() {
 Print_PHP() {
   [ -e "${php_install_dir}" ] && echo "${php_install_dir}"
   [ -e "/etc/init.d/php-fpm" ] && echo "/etc/init.d/php-fpm"
-  [ -e "/usr/local/imagemagick" ] && echo "/usr/local/imagemagick"
-  [ -e "/usr/local/graphicsmagick" ] && echo '/usr/local/graphicsmagick'
+  [ -e "${imagick_install_dir}" ] && echo "${imagick_install_dir}"
+  [ -e "${gmagick_install_dir}" ] && echo "${gmagick_install_dir}"
 }
 
 Uninstall_PHP() {
   [ -e "${php_install_dir}/bin/phpize" -a -e "${php_install_dir}/etc/php-fpm.conf" ] && { service php-fpm stop > /dev/null 2>&1; rm -rf ${php_install_dir} /etc/init.d/php-fpm; }
   [ -e "${php_install_dir}/bin/phpize" -a ! -e "${php_install_dir}/etc/php-fpm.conf" ] && rm -rf ${php_install_dir}
-  [ -e "/usr/local/imagemagick" ] && rm -rf /usr/local/imagemagick
-  [ -e "/usr/local/graphicsmagick" ] && rm -rf /usr/local/graphicsmagick
+  [ -e "${imagick_install_dir}" ] && rm -rf ${imagick_install_dir}
+  [ -e "${gmagick_install_dir}" ] && rm -rf ${gmagick_install_dir}
   sed -i "s@${php_install_dir}/bin:@@" /etc/profile
   echo "${CMSG}PHP uninstall completed! ${CEND}"
 }
