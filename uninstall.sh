@@ -163,6 +163,7 @@ Print_PHP() {
   [ -e "/etc/init.d/php-fpm" ] && echo "/etc/init.d/php-fpm"
   [ -e "${imagick_install_dir}" ] && echo "${imagick_install_dir}"
   [ -e "${gmagick_install_dir}" ] && echo "${gmagick_install_dir}"
+  [ -e "${curl_install_dir}" ] && echo "${curl_install_dir}"
 }
 
 Uninstall_PHP() {
@@ -170,6 +171,7 @@ Uninstall_PHP() {
   [ -e "${php_install_dir}/bin/phpize" -a ! -e "${php_install_dir}/etc/php-fpm.conf" ] && rm -rf ${php_install_dir}
   [ -e "${imagick_install_dir}" ] && rm -rf ${imagick_install_dir}
   [ -e "${gmagick_install_dir}" ] && rm -rf ${gmagick_install_dir}
+  [ -e "${curl_install_dir}" ] && rm -rf "${curl_install_dir}"
   sed -i "s@${php_install_dir}/bin:@@" /etc/profile
   echo "${CMSG}PHP uninstall completed! ${CEND}"
 }
@@ -222,13 +224,11 @@ Uninstall_Memcached() {
   echo "${CMSG}Memcached uninstall completed! ${CEND}"
 }
 
-Print_curlopenssl() {
-  [ -e "/usr/local/bin/curl" ] && echo "/usr/local/bin/curl"
+Print_openssl() {
   [ -d "${openssl_install_dir}" ] && echo "${openssl_install_dir}"
 }
 
-Uninstall_curlopenssl() {
-  [ -e "/usr/local/bin/curl" ] && rm -rf /usr/local/lib/libcurl* /usr/local/bin/curl
+Uninstall_openssl() {
   [ -d "${openssl_install_dir}" ] && { rm -rf ${openssl_install_dir} /etc/ld.so.conf.d/openssl.conf; ldconfig; }
 }
 
@@ -265,7 +265,7 @@ What Are You Doing?
       Print_PureFtpd
       Print_Redis
       Print_Memcached
-      Print_curlopenssl
+      Print_openssl
 
       Uninstall_status
       if [ "${uninstall_yn}" == 'y' ]; then
@@ -278,7 +278,7 @@ What Are You Doing?
         Uninstall_PureFtpd
         Uninstall_Redis
         Uninstall_Memcached
-        Uninstall_curlopenssl
+        Uninstall_openssl
       else
         exit
       fi
@@ -355,7 +355,7 @@ elif [ $# == 1 ]; then
     Print_PureFtpd
     Print_Redis
     Print_Memcached
-    Print_curlopenssl
+    Print_openssl
 
     Uninstall_status
     if [ "${uninstall_yn}" == 'y' ]; then
@@ -366,7 +366,7 @@ elif [ $# == 1 ]; then
       Uninstall_PureFtpd
       Uninstall_Redis
       Uninstall_Memcached
-      Uninstall_curlopenssl
+      Uninstall_openssl
     else
       exit
     fi
