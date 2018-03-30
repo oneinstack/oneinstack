@@ -45,7 +45,7 @@ version() {
 showhelp() {
   version
   echo "Usage: $0  command ...[parameters]....
-  --help, -h                  Show this help message
+  --help, -h                  Show this help message, More: https://oneinstack.com/autoinstall
   --version, -v               Show version info
   --nginx_option [1-3]        Install Nginx server version
   --apache_option [1-2]       Install Apache server version
