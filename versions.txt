@@ -76,7 +76,7 @@ redis_ver=4.0.9
 redis_pecl_ver=4.0.0
 
 # Memcached
-memcached_ver=1.5.6
+memcached_ver=1.5.7
 libmemcached_ver=1.0.18
 memcached_pecl_ver=2.2.0
 memcached_pecl_php7_ver=3.0.4
