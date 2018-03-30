@@ -583,6 +583,8 @@ checkDownload() {
         ;;
       7)
         src_url=http://www.php.net/distributions/php-${php72_ver}.tar.gz && Download_src
+        src_url=http://mirrors.linuxeye.com/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
+        src_url=http://mirrors.linuxeye.com/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
         ;;
     esac
   fi
