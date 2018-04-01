@@ -76,15 +76,15 @@ checkDownload() {
       case "${jdk_option}" in
         1)
           echo "Download JDK 1.8..."
-          JDK_FILE="jdk-$(echo ${jdk18_ver} | awk -F. '{print $2}')u$(echo ${jdk18_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIG_FLAG}.tar.gz"
+          JDK_FILE="jdk-$(echo ${jdk18_ver} | awk -F. '{print $2}')u$(echo ${jdk18_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIT_j}.tar.gz"
           ;;
         2)
           echo "Download JDK 1.7..."
-          JDK_FILE="jdk-$(echo ${jdk17_ver} | awk -F. '{print $2}')u$(echo ${jdk17_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIG_FLAG}.tar.gz"
+          JDK_FILE="jdk-$(echo ${jdk17_ver} | awk -F. '{print $2}')u$(echo ${jdk17_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIT_j}.tar.gz"
           ;;
         3)
           echo "Download JDK 1.6..."
-          JDK_FILE="jdk-$(echo ${jdk16_ver} | awk -F. '{print $2}')u$(echo ${jdk16_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIG_FLAG}.bin"
+          JDK_FILE="jdk-$(echo ${jdk16_ver} | awk -F. '{print $2}')u$(echo ${jdk16_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIT_j}.bin"
           ;;
       esac
       echo "Download apr..."
@@ -389,9 +389,9 @@ checkDownload() {
         fi
         # start download
         src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME} && Download_src
-        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5 && Download_src
+        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum && Download_src
         # verifying download
-        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
+        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5sum)
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum |  grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
@@ -424,9 +424,9 @@ checkDownload() {
         fi
         # start download
         src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME} && Download_src
-        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5 && Download_src
+        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum && Download_src
         # verifying download
-        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
+        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5sum)
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum |  grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
@@ -459,9 +459,9 @@ checkDownload() {
         fi
         # start download
         src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME} && Download_src
-        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5 && Download_src
+        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum && Download_src
         # verifying download
-        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
+        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5sum)
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${DOWN_ADDR_PERCONA}/${FILE_NAME}.md5sum |  grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
