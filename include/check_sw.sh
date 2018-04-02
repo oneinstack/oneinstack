@@ -168,5 +168,6 @@ installDepsBySrc() {
   else
     echo "No need to install software from source packages."
   fi
+  echo 'already initialize' > ~/.oneinstack
   popd
 }

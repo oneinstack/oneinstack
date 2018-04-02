@@ -13,6 +13,7 @@ checkDownload() {
   # General system utils
   echo "Download openSSL..."
   src_url=https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz && Download_src
+  echo "Download cacert.pem..."
   src_url=http://curl.haxx.se/ca/cacert.pem && Download_src
 
   # Web
@@ -40,10 +41,10 @@ checkDownload() {
     # apache
     if [ "${apache_option}" == '1' ]; then
       echo "Download apache 2.4..."
+      src_url=http://archive.apache.org/dist/httpd/httpd-${apache24_ver}.tar.gz && Download_src
       src_url=http://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
       src_url=http://archive.apache.org/dist/apr/apr-util-${apr_util_ver}.tar.gz && Download_src
       src_url=http://mirrors.linuxeye.com/apache/httpd/nghttp2-${nghttp2_ver}.tar.gz && Download_src
-      src_url=http://archive.apache.org/dist/httpd/httpd-${apache24_ver}.tar.gz && Download_src
     fi
     if [ "${apache_option}" == '2' ]; then
       echo "Download apache 2.2..."
@@ -56,41 +57,49 @@ checkDownload() {
     # tomcat
     case "${tomcat_option}" in
       1)
+        echo "Download tomcat 9..."
+        src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat9_ver}/apache-tomcat-${tomcat9_ver}.tar.gz && Download_src
+        src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat9_ver}/catalina-jmx-remote.jar && Download_src
+        ;;
+      2)
         echo "Download tomcat 8..."
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat8_ver}/apache-tomcat-${tomcat8_ver}.tar.gz && Download_src
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat8_ver}/catalina-jmx-remote.jar && Download_src
         ;;
-      2)
+      3)
         echo "Download tomcat 7..."
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat7_ver}/apache-tomcat-${tomcat7_ver}.tar.gz && Download_src
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat7_ver}/catalina-jmx-remote.jar && Download_src
         ;;
-      3)
+      4)
         echo "Download tomcat 6..."
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat6_ver}/apache-tomcat-${tomcat6_ver}.tar.gz && Download_src
         src_url=http://mirrors.linuxeye.com/apache/tomcat/v${tomcat6_ver}/catalina-jmx-remote.jar && Download_src
         ;;
     esac
 
-    if [[ "${jdk_option}"  =~ ^[1-3]$ ]]; then
+    if [[ "${jdk_option}"  =~ ^[1-4]$ ]]; then
       case "${jdk_option}" in
         1)
+          echo "Download JDK 9..."
+          JDK_FILE="jdk-${jdk9_ver}_linux-${SYS_BIT_j}_bin.tar.gz"
+          ;;
+        2)
           echo "Download JDK 1.8..."
           JDK_FILE="jdk-$(echo ${jdk18_ver} | awk -F. '{print $2}')u$(echo ${jdk18_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIT_j}.tar.gz"
           ;;
-        2)
+        3)
           echo "Download JDK 1.7..."
           JDK_FILE="jdk-$(echo ${jdk17_ver} | awk -F. '{print $2}')u$(echo ${jdk17_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIT_j}.tar.gz"
           ;;
-        3)
+        4)
           echo "Download JDK 1.6..."
           JDK_FILE="jdk-$(echo ${jdk16_ver} | awk -F. '{print $2}')u$(echo ${jdk16_ver} | awk -F_ '{print $NF}')-linux-${SYS_BIT_j}.bin"
           ;;
       esac
+      src_url=http://mirrors.linuxeye.com/jdk/${JDK_FILE} && Download_src
       echo "Download apr..."
       src_url=http://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
-      # start download...
-      src_url=http://mirrors.linuxeye.com/jdk/${JDK_FILE} && Download_src
     fi
   fi
 

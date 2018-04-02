@@ -8,7 +8,7 @@
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
 
-Install-JDK18() {
+Install-JDK9() {
   pushd ${oneinstack_dir}/src > /dev/null
   JDK_FILE="jdk-${jdk9_ver}_linux-${SYS_BIT_j}_bin.tar.gz"
   JAVA_dir=/usr/java
