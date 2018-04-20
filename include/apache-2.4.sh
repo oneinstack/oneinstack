@@ -44,10 +44,7 @@ Install_Apache24() {
   if [ -e "${apache_install_dir}/conf/httpd.conf" ]; then
     echo "${CSUCCESS}Apache installed successfully! ${CEND}"
     popd
-    rm -rf pcre-${pcre_ver}
-    rm -rf apr-${apr_ver}
-    rm -rf apr-util-${apr_util_ver}
-    rm -rf httpd-${apache24_ver}
+    rm -rf httpd-${apache24_ver} pcre-${pcre_ver} apr-${apr_ver} apr-util-${apr_util_ver}
   else
     rm -rf ${apache_install_dir}
     echo "${CFAILURE}Apache install failed, Please contact the author! ${CEND}"
