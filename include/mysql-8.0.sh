@@ -90,6 +90,8 @@ server-id = 1
 init-connect = 'SET NAMES utf8mb4'
 character-set-server = utf8mb4
 
+default_authentication_plugin=mysql_native_password
+
 skip-name-resolve
 #skip-networking
 back_log = 300
