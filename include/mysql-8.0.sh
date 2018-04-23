@@ -79,6 +79,7 @@ no-auto-rehash
 [mysqld]
 port = 3306
 socket = /tmp/mysql.sock
+default_authentication_plugin = mysql_native_password
 
 basedir = ${mysql_install_dir}
 datadir = ${mysql_data_dir}
@@ -89,8 +90,6 @@ server-id = 1
 
 init-connect = 'SET NAMES utf8mb4'
 character-set-server = utf8mb4
-
-default_authentication_plugin=mysql_native_password
 
 skip-name-resolve
 #skip-networking
