@@ -79,7 +79,7 @@ pureftpd_ver=1.0.47
 
 # Redis
 redis_ver=4.0.9
-redis_pecl_ver=4.0.1
+redis_pecl_ver=4.0.2
 
 # Memcached
 memcached_ver=1.5.7
@@ -89,7 +89,7 @@ memcached_pecl_php7_ver=3.0.4
 memcache_pecl_ver=3.0.8
 
 # MongoDB
-mongodb_pecl_ver=1.4.2
+mongodb_pecl_ver=1.4.3
 mongo_pecl_ver=1.6.16
 
 # phpMyadmin
@@ -108,7 +108,7 @@ libevent_ver=2.0.22-stable
 tmux_ver=2.6
 htop_ver=2.1.0
 bison_ver=2.7.1
-python_ver=2.7.14
-setuptools_ver=39.0.1
-pip_ver=10.0.0
+python_ver=2.7.15
+setuptools_ver=39.1.0
+pip_ver=10.0.1
 fail2ban_ver=0.10.3.1
