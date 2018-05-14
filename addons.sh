@@ -354,7 +354,7 @@ What Are You Doing?
               IMAP_ARGS='--with-kerberos --with-imap --with-imap-ssl'
               if [ "$OS" == 'CentOS' ]; then
                 yum -y install libc-client-devel
-                [ -a "${OS_BIT}" == '64' -a ! -e /usr/lib/libc-client.so ] && ln -s /usr/lib64/libc-client.so /usr/lib/libc-client.so
+                [ "${OS_BIT}" == '64' -a ! -e /usr/lib/libc-client.so ] && ln -s /usr/lib64/libc-client.so /usr/lib/libc-client.so
               else
                 apt-get -y install libc-client2007e-dev
               fi
