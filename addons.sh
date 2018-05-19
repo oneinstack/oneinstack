@@ -451,9 +451,9 @@ What Are You Doing?
             tar xzf swoole-${swoole_ver}.tgz
             pushd swoole-${swoole_ver}
           else
-            src_url=https://pecl.php.net/get/swoole-1.10.4.tgz && Download_src
-            tar xzf swoole-1.10.4.tgz
-            pushd swoole-1.10.4
+            src_url=https://pecl.php.net/get/swoole-1.10.5.tgz && Download_src
+            tar xzf swoole-1.10.5.tgz
+            pushd swoole-1.10.5
           fi
           ${php_install_dir}/bin/phpize
           ./configure --with-php-config=${php_install_dir}/bin/php-config
