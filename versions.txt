@@ -40,7 +40,6 @@ mongodb_ver=3.6.4
 
 # JDK
 jdk10_ver=10.0.1
-jdk9_ver=9.0.4
 jdk18_ver=1.8.0_172
 jdk17_ver=1.7.0_80
 jdk16_ver=1.6.0_45
