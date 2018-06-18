@@ -115,7 +115,7 @@ Tomcat:
 ```bash
 service tomcat {start|stop|status|restart}
 ```
-Pure-Ftpd:
+Pure-FTPd:
 ```bash
 service pureftpd {start|stop|restart|status}
 ```
