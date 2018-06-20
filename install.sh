@@ -30,7 +30,6 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/get_char.sh
 
 ssh_port=22
-phpcache_option=1
 dbrootpwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbpostgrespwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbmongopwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
