@@ -11,7 +11,7 @@
 Nginx_lua_waf() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "${nginx_install_dir}/sbin/nginx" ] && echo "${CWARNING}Nginx is not installed on your system! ${CEND}" && exit 1
-  if [ -e "/usr/local/lib/libluajit-5.1.so.2.1.0" ]; then
+  if [ ! -e "/usr/local/lib/libluajit-5.1.so.2.1.0" ]; then
     [ -e "/usr/local/lib/libluajit-5.1.so.2.0.5" ] && find /usr/local -name *luajit* | xargs rm -rf
     src_url=http://mirrors.linuxeye.com/oneinstack/src/LuaJIT-2.1.0-beta3.tar.gz && Download_src
     tar xzf LuaJIT-2.1.0-beta3.tar.gz
@@ -19,7 +19,7 @@ Nginx_lua_waf() {
     make && make install
     popd > /dev/null
   fi
-  if [ -e "/usr/local/lib/lua/5.1/cjson.so" ]; then
+  if [ ! -e "/usr/local/lib/lua/5.1/cjson.so" ]; then
     src_url=http://mirrors.linuxeye.com/oneinstack/src/lua-cjson-2.1.0.6.tar.gz && Download_src
     tar xzf lua-cjson-2.1.0.6.tar.gz
     pushd lua-cjson-2.1.0.6
@@ -30,7 +30,7 @@ Nginx_lua_waf() {
   nginx_configure_args_tmp=`cat $$ | grep 'configure arguments:' | awk -F: '{print $2}'`
   rm -rf $$
   nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@--with-openssl=../openssl-...... @--with-openssl=../openssl-${openssl_ver} @" | sed "s@--with-pcre=../pcre-.... @--with-pcre=../pcre-${pcre_ver} @"`
-  if [ -z "`grep lua-nginx-module ${nginx_configure_args}`" ]; then
+  if [ -z "`echo ${nginx_configure_args} | grep lua-nginx-module`" ]; then
     src_url=http://nginx.org/download/nginx-${nginx_ver}.tar.gz && Download_src
     src_url=https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz && Download_src
     src_url=http://mirrors.linuxeye.com/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
@@ -44,6 +44,8 @@ Nginx_lua_waf() {
     pushd nginx-${nginx_ver}
     make clean
     sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc # close debug
+    export LUAJIT_LIB=/usr/local/lib
+    export LUAJIT_INC=/usr/local/include/luajit-2.1
     ./configure ${nginx_configure_args} --add-module=../lua-nginx-module --add-module=../ngx_devel_kit
     make -j ${THREAD}
     if [ -f "objs/nginx" ]; then
@@ -65,7 +67,7 @@ Nginx_lua_waf() {
 Tengine_lua_waf() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "${tengine_install_dir}/sbin/nginx" ] && echo "${CWARNING}Tengine is not installed on your system! ${CEND}" && exit 1
-  if [ -e "/usr/local/lib/libluajit-5.1.so.2.1.0" ]; then
+  if [ ! -e "/usr/local/lib/libluajit-5.1.so.2.1.0" ]; then
     [ -e "/usr/local/lib/libluajit-5.1.so.2.0.5" ] && find /usr/local -name *luajit* | xargs rm -rf
     src_url=http://mirrors.linuxeye.com/oneinstack/src/LuaJIT-2.1.0-beta3.tar.gz && Download_src
     tar xzf LuaJIT-2.1.0-beta3.tar.gz
@@ -73,7 +75,7 @@ Tengine_lua_waf() {
     make && make install
     popd > /dev/null
   fi
-  if [ -e "/usr/local/lib/lua/5.1/cjson.so" ]; then
+  if [ ! -e "/usr/local/lib/lua/5.1/cjson.so" ]; then
     src_url=http://mirrors.linuxeye.com/oneinstack/src/lua-cjson-2.1.0.6.tar.gz && Download_src
     tar xzf lua-cjson-2.1.0.6.tar.gz
     pushd lua-cjson-2.1.0.6
@@ -84,19 +86,23 @@ Tengine_lua_waf() {
   tengine_configure_args_tmp=`cat $$ | grep 'configure arguments:' | awk -F: '{print $2}'`
   rm -rf $$
   tengine_configure_args=`echo ${tengine_configure_args_tmp} | sed "s@--with-openssl=../openssl-...... @--with-openssl=../openssl-${openssl_ver} @" | sed "s@--with-pcre=../pcre-.... @--with-pcre=../pcre-${pcre_ver} @"`
-  if [ -z "`grep lua ${tengine_configure_args}`" ]; then
+  if [ -z "`echo ${tengine_configure_args} | grep lua`" ]; then
     src_url=http://tengine.taobao.org/download/tengine-${tengine_ver}.tar.gz && Download_src
     src_url=https://www.openssl.org/source/openssl-${openssl_ver}.tar.gz && Download_src
     src_url=http://mirrors.linuxeye.com/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
     src_url=http://mirrors.linuxeye.com/oneinstack/src/ngx_devel_kit.tar.gz && Download_src
-    tar xzf nginx-${nginx_ver}.tar.gz
+    src_url=http://mirrors.linuxeye.com/oneinstack/src/lua-nginx-module.tar.gz && Download_src
+    tar xzf tengine-${tengine_ver}.tar.gz
     tar xzf openssl-${openssl_ver}.tar.gz
     tar xzf pcre-${pcre_ver}.tar.gz
     tar xzf ngx_devel_kit.tar.gz
+    tar xzf lua-nginx-module.tar.gz
     pushd tengine-${tengine_ver}
     make clean
     sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc # close debug
-    ./configure ${tengine_configure_args} --with-http_lua_module --add-module=../ngx_devel_kit
+    export LUAJIT_LIB=/usr/local/lib
+    export LUAJIT_INC=/usr/local/include/luajit-2.1
+    ./configure ${tengine_configure_args} --add-module=../lua-nginx-module --add-module=../ngx_devel_kit 
     make -j ${THREAD}
     if [ -f "objs/nginx" ]; then
       /bin/mv ${tengine_install_dir}/sbin/nginx{,`date +%m%d`}
@@ -127,7 +133,7 @@ enable_lua_waf() {
   sed -i "s@/usr/local/nginx@${web_install_dir}@g" ${web_install_dir}/conf/waf.conf
   sed -i "s@/usr/local/nginx@${web_install_dir}@" ${web_install_dir}/conf/waf/config.lua
   sed -i "s@/data/wwwlogs@${wwwlogs_dir}@" ${web_install_dir}/conf/waf/config.lua
-  [ -n "`grep 'include waf.conf;' ${web_install_dir}/conf/nginx.conf`" ] && sed -i "s@include vhost/*.conf;@include vhost/*.conf;\n  include waf.conf;@" ${web_install_dir}/conf/nginx.conf
+  [ -z "`grep 'include waf.conf;' ${web_install_dir}/conf/nginx.conf`" ] && sed -i "s@ vhost/\*.conf;@&\n  include waf.conf;@" ${web_install_dir}/conf/nginx.conf
   ${web_install_dir}/sbin/nginx -t
   if [ $? -eq 0 ]; then
     service nginx reload
