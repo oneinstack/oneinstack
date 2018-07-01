@@ -37,7 +37,7 @@ alisql_ver=5.6.32-9
 
 pgsql_ver=10.4
 
-mongodb_ver=3.6.5
+mongodb_ver=4.0.0
 
 # JDK
 jdk10_ver=10.0.1
@@ -108,7 +108,7 @@ libevent_ver=2.0.22-stable
 tmux_ver=2.7
 htop_ver=2.2.0
 bison_ver=2.7.1
-python_ver=3.6.5
+python_ver=3.6.6
 setuptools_ver=39.2.0
 pip_ver=10.0.1
 fail2ban_ver=0.10.3.1
