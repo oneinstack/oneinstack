@@ -29,8 +29,8 @@ DB_Remote_BK() {
     ./db_bk.sh ${D}
     DB_GREP="DB_${D}_`date +%Y%m%d`"
     DB_FILE=`ls -lrt ${backup_dir} | grep ${DB_GREP} | tail -1 | awk '{print $NF}'`
-    echo "file:::${backup_dir}/${DB_FILE} ${backup_dir} push" >> config_bakcup.txt
-    echo "com:::[ -e "${backup_dir}/${DB_FILE}" ] && rm -rf ${backup_dir}/DB_${D}_$(date +%Y%m%d --date="${expired_days} days ago")_*.tgz" >> config_bakcup.txt
+    echo "file:::${backup_dir}/${DB_FILE} ${backup_dir} push" >> config_backup.txt
+    echo "com:::[ -e "${backup_dir}/${DB_FILE}" ] && rm -rf ${backup_dir}/DB_${D}_$(date +%Y%m%d --date="${expired_days} days ago")_*.tgz" >> config_backup.txt
   done
 }
 
@@ -96,10 +96,10 @@ WEB_Remote_BK() {
       ./website_bk.sh $W
       Web_GREP="Web_${W}_`date +%Y%m%d`"
       Web_FILE=`ls -lrt ${backup_dir} | grep ${Web_GREP} | tail -1 | awk '{print $NF}'`
-      echo "file:::${backup_dir}/$Web_FILE ${backup_dir} push" >> config_bakcup.txt
-      echo "com:::[ -e "${backup_dir}/$Web_FILE" ] && rm -rf ${backup_dir}/Web_${W}_$(date +%Y%m%d --date="${expired_days} days ago")_*.tgz" >> config_bakcup.txt
+      echo "file:::${backup_dir}/$Web_FILE ${backup_dir} push" >> config_backup.txt
+      echo "com:::[ -e "${backup_dir}/$Web_FILE" ] && rm -rf ${backup_dir}/Web_${W}_$(date +%Y%m%d --date="${expired_days} days ago")_*.tgz" >> config_backup.txt
     else
-      echo "file:::${wwwroot_dir}/$W ${backup_dir} push" >> config_bakcup.txt
+      echo "file:::${wwwroot_dir}/$W ${backup_dir} push" >> config_backup.txt
     fi
   done
 }
@@ -183,10 +183,10 @@ do
     [ -n "`echo ${backup_content} | grep -ow web`" ] && WEB_Local_BK
   fi
   if [ "${DEST}" == 'remote' ]; then
-    echo "com:::[ ! -e "${backup_dir}" ] && mkdir -p ${backup_dir}" > config_bakcup.txt
+    echo "com:::[ ! -e "${backup_dir}" ] && mkdir -p ${backup_dir}" > config_backup.txt
     [ -n "`echo ${backup_content} | grep -ow db`" ] && DB_Remote_BK
     [ -n "`echo ${backup_content} | grep -ow web`" ] && WEB_Remote_BK
-    ./mabs.sh -c config_bakcup.txt -T -1 | tee mabs.log
+    ./mabs.sh -c config_backup.txt -T -1 | tee -a mabs.log
   fi
   if [ "${DEST}" == 'oss' ]; then
     [ -n "`echo ${backup_content} | grep -ow db`" ] && DB_OSS_BK
