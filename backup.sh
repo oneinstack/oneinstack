@@ -110,9 +110,9 @@ WEB_OSS_BK() {
     [ ! -e "${wwwroot_dir}/$WebSite" ] && { echo "[${wwwroot_dir}/$WebSite] not exist"; break; }
     PUSH_FILE="${backup_dir}/Web_${W}_$(date +%Y%m%d_%H).tgz"
     if [ ! -e "${PUSH_FILE}" ]; then
-      pushd ${wwwroot_dir}
+      pushd ${wwwroot_dir} > /dev/null
       tar czf ${PUSH_FILE} ./$W
-      popd
+      popd > /dev/null
     fi
     /usr/local/bin/ossutil cp -f ${PUSH_FILE} oss://${oss_bucket}/`date +%F`/${PUSH_FILE##*/}
     [ $? -eq 0 ] && { [ -e "${PUSH_FILE}" ] && rm -rf ${PUSH_FILE}; /usr/local/bin/ossutil rm -rf oss://${oss_bucket}/`date +%F --date="${expired_days} days ago"`/; }
@@ -125,9 +125,9 @@ WEB_COS_BK() {
     [ ! -e "${wwwroot_dir}/$WebSite" ] && { echo "[${wwwroot_dir}/$WebSite] not exist"; break; }
     PUSH_FILE="${backup_dir}/Web_${W}_$(date +%Y%m%d_%H).tgz"
     if [ ! -e "${PUSH_FILE}" ]; then
-      pushd ${wwwroot_dir}
+      pushd ${wwwroot_dir} > /dev/null
       tar czf ${PUSH_FILE} ./$W
-      popd
+      popd > /dev/null
     fi
     ${python_install_dir}/bin/coscmd upload ${PUSH_FILE} /`date +%F`/${PUSH_FILE##*/}
     if [ $? -eq 0 ]; then
@@ -144,9 +144,9 @@ WEB_UPYUN_BK() {
     [ ! -e "${backup_dir}" ] && mkdir -p ${backup_dir}
     PUSH_FILE="${backup_dir}/Web_${W}_$(date +%Y%m%d_%H).tgz"
     if [ ! -e "${PUSH_FILE}" ]; then
-      pushd ${wwwroot_dir}
+      pushd ${wwwroot_dir} > /dev/null
       tar czf ${PUSH_FILE} ./$W
-      popd
+      popd > /dev/null
     fi
     /usr/local/bin/upx put ${PUSH_FILE} /`date +%F`/${PUSH_FILE##*/}
     if [ $? -eq 0 ]; then
@@ -163,9 +163,9 @@ WEB_QINIU_BK() {
     [ ! -e "${backup_dir}" ] && mkdir -p ${backup_dir}
     PUSH_FILE="${backup_dir}/Web_${W}_$(date +%Y%m%d_%H).tgz"
     if [ ! -e "${PUSH_FILE}" ]; then
-      pushd ${wwwroot_dir}
+      pushd ${wwwroot_dir} > /dev/null
       tar czf ${PUSH_FILE} ./$W
-      popd
+      popd > /dev/null
     fi
     /usr/local/bin/qshell rput ${qiniu_bucket} /`date +%F`/${PUSH_FILE##*/} ${PUSH_FILE} 
     if [ $? -eq 0 ]; then
