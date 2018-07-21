@@ -71,7 +71,7 @@ xcache_ver=3.2.0
 apcu_ver=4.0.11
 apcu_for_php7_ver=5.1.11
 eaccelerator_ver=0.9.6.1
-swoole_ver=4.0.0
+swoole_ver=4.0.2
 xdebug_ver=2.6.0
 
 # Ftp
