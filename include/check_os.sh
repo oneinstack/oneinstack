@@ -84,14 +84,12 @@ fi
 
 THREAD=$(grep 'processor' /proc/cpuinfo | sort -u | wc -l)
 
-# Percona binary
-if [ "${CentOS_ver}" == '5' -o "${Debian_ver}" == '6' ]; then
-  sslLibVer=ssl098
-elif [ "${Debian_ver}" == '7' -o "${Ubuntu_ver}" == '12' ]; then
+# Percona binary: https://www.percona.com/doc/percona-server/5.7/installation.html#installing-percona-server-from-a-binary-tarball
+if [ ${Debian_ver} -lt 9 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -lt 14 >/dev/null 2>&1 ]; then
   sslLibVer=ssl100
-elif [ "${CentOS_ver}" == '6' -o "${Debian_ver}" == '8' -o "${Ubuntu_ver}" == '14' ]; then
+elif [[ "${CentOS_ver}" =~ ^[6-7]$ ]]; then
   sslLibVer=ssl101
-elif [ "${CentOS_ver}" == '7' -o "${Debian_ver}" == '9' -o ${Ubuntu_ver} -ge 16 >/dev/null 2>&1 ]; then
+elif [ ${Debian_ver} -ge 9 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -ge 14 >/dev/null 2>&1 ]; then
   sslLibVer=ssl102
 else
   sslLibVer=unknown
