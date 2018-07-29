@@ -18,10 +18,10 @@ apr_util_ver=1.6.1
 nghttp2_ver=1.32.0
 
 # DB
-mysql80_ver=8.0.11
-mysql57_ver=5.7.22
-mysql56_ver=5.6.40
-mysql55_ver=5.5.60
+mysql80_ver=8.0.12
+mysql57_ver=5.7.23
+mysql56_ver=5.6.41
+mysql55_ver=5.5.61
 
 mariadb103_ver=10.3.8
 mariadb102_ver=10.2.16
@@ -49,7 +49,7 @@ jdk16_ver=1.6.0_45
 php72_ver=7.2.8
 php71_ver=7.1.20
 php70_ver=7.0.31
-php56_ver=5.6.36
+php56_ver=5.6.37
 php55_ver=5.5.38
 php54_ver=5.4.45
 php53_ver=5.3.29
