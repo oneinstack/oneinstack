@@ -13,6 +13,7 @@ if [ -e /etc/redhat-release ]; then
   [ ! -e "$(which lsb_release)" ] && { yum -y install redhat-lsb-core; clear; }
   CentOS_ver=$(lsb_release -sr | awk -F. '{print $1}')
   [ "${CentOS_ver}" == '17' ] && CentOS_ver=7
+  [ "$(lsb_release -is)" == 'Fedora' ] && [ ${CentOS_ver} -ge 19 >/dev/null 2>&1 ] && { CentOS_ver=7; Fedora_ver=$(lsb_release -rs); }
 elif [ -n "$(grep 'Amazon Linux' /etc/issue)" ]; then
   OS=CentOS
   CentOS_ver=7
