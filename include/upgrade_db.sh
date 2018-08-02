@@ -12,6 +12,7 @@ Upgrade_DB() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "${db_install_dir}/bin/mysql" ] && echo "${CWARNING}MySQL/MariaDB/Percona is not installed on your system! ${CEND}" && exit 1
   OLD_db_ver_tmp=`${db_install_dir}/bin/mysql -V | awk '{print $5}' | awk -F, '{print $1}'`
+  [ -n "`echo ${OLD_db_ver_tmp} | grep glibc`" ] && OLD_db_ver_tmp=`${db_install_dir}/bin/mysql -V | awk '{print $3}' | awk -F, '{print $1}'`
   DB_tmp=`echo ${OLD_db_ver_tmp} | awk -F'-' '{print $2}'`
   if [ "${DB_tmp}" == 'MariaDB' ]; then
     [ "${IPADDR_COUNTRY}"x == "CN"x ] && DOWN_ADDR=https://mirrors.tuna.tsinghua.edu.cn/mariadb || DOWN_ADDR=https://downloads.mariadb.org/f
@@ -70,9 +71,9 @@ Upgrade_DB() {
           DB_URL=${DOWN_ADDR}/MySQL-`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`/${DB_name}.tar.gz
         fi
       fi
-      [ ! -e "`ls ${DB_name}.tar.?z`" ] && wget --no-check-certificate -c ${DB_URL} > /dev/null 2>&1
-      if [ -e "`ls ${DB_name}.tar.?z`" ]; then
-        echo "Download [${CMSG}`ls ${DB_name}.tar.?z`${CEND}] successfully! "
+      [ ! -e "`ls ${DB_name}.tar.?z 2>/dev/null`" ] && wget --no-check-certificate -c ${DB_URL} > /dev/null 2>&1
+      if [ -e "`ls ${DB_name}.tar.?z 2>/dev/null`" ]; then
+        echo "Download [${CMSG}`ls ${DB_name}.tar.?z 2>/dev/null`${CEND}] successfully! "
       else
         echo "${CWARNING}${DB} version does not exist! ${CEND}"
       fi
