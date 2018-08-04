@@ -90,7 +90,7 @@ Install_fail2ban() {
   tar xzf fail2ban-${fail2ban_ver}.tar.gz
   pushd fail2ban-${fail2ban_ver}
   ${python_install_dir}/bin/python setup.py install
-  if [ "${OS}" == "CentOS" ]; then
+  if [ "${PM}" == 'yum' ]; then
     LOGPATH=/var/log/secure
     /bin/cp files/redhat-initd /etc/init.d/fail2ban
     sed -i "s@^FAIL2BAN=.*@FAIL2BAN=${python_install_dir}/bin/fail2ban-client@" /etc/init.d/fail2ban
@@ -99,7 +99,7 @@ Install_fail2ban() {
     chkconfig --add fail2ban
     chkconfig fail2ban on
   fi
-  if [[ "${OS}" =~ ^Ubuntu$|^Debian$ ]]; then
+  if [ "${PM}" == 'apt' ]; then
     LOGPATH=/var/log/auth.log
     /bin/cp files/debian-initd /etc/init.d/fail2ban
     sed -i 's@2 3 4 5@3 4 5@' /etc/init.d/fail2ban
@@ -355,7 +355,7 @@ What Are You Doing?
             elif [ "${phpext_option}" = '2' ]; then
               PHP_extension=imap
               IMAP_ARGS='--with-kerberos --with-imap --with-imap-ssl'
-              if [ "$OS" == 'CentOS' ]; then
+              if [ "${PM}" == 'yum' ]; then
                 yum -y install libc-client-devel
                 [ "${OS_BIT}" == '64' -a ! -e /usr/lib/libc-client.so ] && ln -s /usr/lib64/libc-client.so /usr/lib/libc-client.so
               else
@@ -459,7 +459,7 @@ What Are You Doing?
             pushd swoole-1.10.5
           fi
           ${php_install_dir}/bin/phpize
-          ./configure --with-php-config=${php_install_dir}/bin/php-config
+          ./configure --with-php-config=${php_install_dir}/bin/php-config --enable-openssl --with-openssl-dir=${openssl_install_dir}
           make -j ${THREAD} && make install
           popd
           rm -rf swoole-${swoole_ver}
