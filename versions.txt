@@ -15,7 +15,7 @@ apache22_ver=2.2.34
 pcre_ver=8.42
 apr_ver=1.6.3
 apr_util_ver=1.6.1
-nghttp2_ver=1.32.1
+nghttp2_ver=1.33.0
 
 # DB
 mysql80_ver=8.0.12
@@ -31,7 +31,7 @@ mariadb55_ver=5.5.61
 
 percona57_ver=5.7.22-22
 percona56_ver=5.6.41-84.1
-percona55_ver=5.5.60-38.12
+percona55_ver=5.5.61-38.13
 
 alisql_ver=5.6.32-9
 
@@ -71,7 +71,7 @@ xcache_ver=3.2.0
 apcu_ver=4.0.11
 apcu_for_php7_ver=5.1.12
 eaccelerator_ver=0.9.6.1
-swoole_ver=4.0.4
+swoole_ver=4.1.2
 xdebug_ver=2.6.0
 
 # Ftp
