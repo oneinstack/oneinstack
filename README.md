@@ -2,9 +2,34 @@
 
 ## 使用方法
 
-		第一次直接执行install.sh 安装， 第二次安装另外的PHP版本需要手动修改 options.conf 配置文件中的
-		php_install_dir和php_vn为你想要安装的PHP版本
-		修改好后再次执行 install.sh 安装即可。
+	第一次直接执行install.sh 安装， 
+
+	第二次安装另外的PHP版本，直接选择下面需要安装的命令即可
+
+```shell
+	#PHP5.3安装
+	./install.sh --php_option 1 --phpcache_option 1 --php_extensions zendguardloader,imagick,gmagick,memcached,memcache,redis
+
+
+	#PHP5.4安装
+	./install.sh --php_option 2 --phpcache_option 1 --php_extensions zendguardloader,imagick,gmagick,memcached,memcache,redis
+
+	#PHP5.5安装
+	./install.sh --php_option 3 --phpcache_option 1 --php_extensions zendguardloader,imagick,gmagick,memcached,memcache,redis
+
+	#PHP5.6安装
+	./install.sh --php_option 4 --phpcache_option 1 --php_extensions zendguardloader,imagick,gmagick,memcached,memcache,redis
+
+	#PHP7.0安装
+	./install.sh --php_option 5 --phpcache_option 1 --php_extensions zendguardloader,imagick,gmagick,memcached,memcache,redis
+
+	#PHP7.1安装
+	./install.sh --php_option 6 --phpcache_option 1 --php_extensions zendguardloader,imagick,gmagick,memcached,memcache,redis
+
+	#PHP7.2安装
+	./install.sh --php_option 7 --phpcache_option 1 --php_extensions zendguardloader,imagick,gmagick,memcached,memcache,redis
+```
+
 
 ## 说明
 	只能使用于php-fpm方式，做了如下改动
@@ -17,14 +42,33 @@
 	include phpXX.conf 的方式载入
 
 默认目录
-		网站默认目录 /home/wwwroot
-		备份目录 /home/backup
-		数据库文件目录 /home/data
+	网站默认目录 /home/wwwroot
+	备份目录 /home/backup
+	数据库文件目录 /home/data
 
-
+PHP端口
 	如果使用端口连接则 端口号为  90XX , 如  9070 表示为php7.0的版本
 
-	系统环境中的PHP默认为最后一次安装的PHP版本，如需要调整，自行修改 /etc/profile 文件中的PATH变量为你想要的PHP版本即可
+系统环境
+系统环境中的PHP默认为最后一次安装的PHP版本，如需要调整，自行修改 /etc/profile 文件中的PATH变量为你想要的PHP版本即可
+
+
+addons.sh插件安装
+	如果是PHP插件，则默认的PHP版本为上次安装的PHP版本，如需要为其他版本安装PHP插件，则需要修改options.conf文件中相关的PHP版本号，即：
+```conf
+	php_install_dir=/usr/local/php70
+	php_vn=70
+```
+
+命令行修改 
+先加入{oneinstack_dir}目录后执行
+```shell
+	sed -i 's@^php_install_dir=.*@php_install_dir=/usr/local/php70@' ./options.conf
+	sed -i 's@^php_vn=.*@php_vn=70@' ./options.conf
+```
+把上面命令中的70换成你需要的版本【53--72】
+{oneinstack_dir}为你的oneinstack的存放目录
+
 
 # oneinstack
 [![PayPal donate button](https://img.shields.io/badge/paypal-donate-green.svg)](https://paypal.me/yeho) [![支付宝捐助按钮](https://img.shields.io/badge/%E6%94%AF%E4%BB%98%E5%AE%9D-%E5%90%91TA%E6%8D%90%E5%8A%A9-green.svg)](https://static.oneinstack.com/images/alipay.png) [![微信捐助按钮](https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1-%E5%90%91TA%E6%8D%90%E5%8A%A9-green.svg)](https://static.oneinstack.com/images/weixin.png)
