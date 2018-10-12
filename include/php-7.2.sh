@@ -246,9 +246,10 @@ EOF
       sed -i "s@^pm.max_spare_servers.*@pm.max_spare_servers = 80@" ${php_install_dir}/etc/php-fpm.conf
     fi
 
-    sed -i 's@^fastcgi_pass unix:/dev/shm/*@fastcgi_pass unix:/dev/shm/php72-cgi.sock;@' ${oneinstack_dir}/config/nginx.conf
+    sed -i 's@^fastcgi_pass unix:/dev/shm/.*@fastcgi_pass unix:/dev/shm/php72-cgi.sock;@' ${oneinstack_dir}/config/nginx.conf
+    
     #拷贝php72.conf文件到nginx配置目录
-    /bin/cp ../config/php72.conf ${nginx_install_dir}/conf/php72.conf
+    /bin/cp ${oneinstack_dir}/config/php72.conf ${nginx_install_dir}/conf/php72.conf
 
     #[ "$web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $IPADDR:9072@" ${php_install_dir}/etc/php-fpm.conf
     service php72-fpm start

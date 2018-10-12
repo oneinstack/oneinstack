@@ -237,7 +237,7 @@ EOF
     fi
 
     #[ "$web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $IPADDR:9053@" ${php_install_dir}/etc/php-fpm.conf
-    /bin/cp ../config/php53.conf ${nginx_install_dir}/conf/php53.conf
+    /bin/cp ${oneinstack_dir}/config/php53.conf ${nginx_install_dir}/conf/php53.conf
     
     service php53-fpm start
 

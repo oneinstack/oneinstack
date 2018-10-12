@@ -62,6 +62,7 @@ Install_Nginx() {
   elif [[ ${tomcat_option} =~ ^[1-2]$ ]] && [ ! -e "${php_install_dir}/bin/php" ]; then
     /bin/cp ../config/nginx_tomcat.conf ${nginx_install_dir}/conf/nginx.conf
   else
+    /bin/cp ../config/php${php_vn}.conf ${nginx_install_dir}/conf/php${php_vn}.conf
     /bin/cp ../config/nginx.conf ${nginx_install_dir}/conf/nginx.conf
     [ "${php_yn}" == 'y' ] && [ -z "`grep '/php-fpm_status' ${nginx_install_dir}/conf/nginx.conf`" ] &&  sed -i "s@index index.html index.php;@index index.html index.php;\n    location ~ /php-fpm_status {\n        #fastcgi_pass remote_php_ip:90${php_vn};\n        fastcgi_pass unix:/dev/shm/php${php_vn}-cgi.sock;\n        fastcgi_index index.php;\n        include fastcgi.conf;\n        allow 127.0.0.1;\n        deny all;\n        }@" ${nginx_install_dir}/conf/nginx.conf
   fi
@@ -85,6 +86,8 @@ EOF
   sed -i "s@/home/wwwroot/default@${wwwroot_dir}/default@" ${nginx_install_dir}/conf/nginx.conf
   sed -i "s@/home/wwwlogs@${wwwlogs_dir}@g" ${nginx_install_dir}/conf/nginx.conf
   sed -i "s@^user www www@user ${run_user} ${run_user}@" ${nginx_install_dir}/conf/nginx.conf
+
+  sed -i "s@fastcgi_pass unix:.*@fastcgi_pass unix:/dev/shm/php${php_vn}-cgi.sock;@" ${nginx_install_dir}/conf/nginx.conf
 
   # logrotate nginx log
   cat > /etc/logrotate.d/nginx << EOF

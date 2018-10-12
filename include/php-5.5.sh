@@ -243,7 +243,7 @@ EOF
       sed -i "s@^pm.max_spare_servers.*@pm.max_spare_servers = 80@" ${php_install_dir}/etc/php-fpm.conf
     fi
 
-    /bin/cp ../config/php55.conf ${nginx_install_dir}/conf/php55.conf
+    /bin/cp ${oneinstack_dir}/config/php55.conf ${nginx_install_dir}/conf/php55.conf
     #[ "$web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $IPADDR:9055@" ${php_install_dir}/etc/php-fpm.conf
     service php55-fpm start
 

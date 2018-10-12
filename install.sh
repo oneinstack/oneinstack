@@ -99,7 +99,9 @@ while :; do
       [[ ! ${php_option} =~ ^[1-7]$ ]] && { echo "${CWARNING}php_option input error! Please only input number 1~7${CEND}"; exit 1; }
       # multi php version name change
       . mphp_oper.sh
-      
+      #修改php版本后需要重新载入配置文件才能生效
+      . ./options.conf
+
       php_yn=y
       [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; php_option=Other; }
       ;;

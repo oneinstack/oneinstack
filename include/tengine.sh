@@ -60,6 +60,7 @@ Install_Tengine() {
   elif [[ ${tomcat_option} =~ ^[1-2]$ ]] && [ ! -e "${php_install_dir}/bin/php" ]; then
     /bin/cp ../config/nginx_tomcat.conf ${tengine_install_dir}/conf/nginx.conf
   else
+    /bin/cp ../config/php${php_vn}.conf ${nginx_install_dir}/conf/php${php_vn}.conf
     /bin/cp ../config/nginx.conf ${tengine_install_dir}/conf/nginx.conf
     [ "${php_yn}" == 'y' ] && [ -z "`grep '/php-fpm_status' ${tengine_install_dir}/conf/nginx.conf`" ] &&  sed -i "s@index index.html index.php;@index index.html index.php;\n    location ~ /php-fpm_status {\n        #fastcgi_pass remote_php_ip:90${php_vn};\n        fastcgi_pass unix:/dev/shm/php${php_vn}-cgi.sock;\n        fastcgi_index index.php;\n        include fastcgi.conf;\n        allow 127.0.0.1;\n        deny all;\n        }@" ${tengine_install_dir}/conf/nginx.conf
   fi

@@ -1,3 +1,5 @@
 install.log
 /*.sublime-workspace
 /*.sublime-project
+/*.prj
+*.pui
