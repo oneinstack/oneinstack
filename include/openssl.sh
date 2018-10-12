@@ -7,6 +7,7 @@
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
+#       https://github.com/tekintian/oneinstack_mphp
 
 Install_openSSL102() {
   if [ ! -e "${openssl_install_dir}/lib/libcrypto.a" ]; then

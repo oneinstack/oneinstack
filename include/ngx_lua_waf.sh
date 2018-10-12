@@ -7,6 +7,7 @@
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
+#       https://github.com/tekintian/oneinstack_mphp
 
 Nginx_lua_waf() {
   pushd ${oneinstack_dir}/src > /dev/null
@@ -143,7 +144,7 @@ enable_lua_waf() {
   tar xzf ngx_lua_waf.tar.gz -C ${web_install_dir}/conf
   sed -i "s@/usr/local/nginx@${web_install_dir}@g" ${web_install_dir}/conf/waf.conf
   sed -i "s@/usr/local/nginx@${web_install_dir}@" ${web_install_dir}/conf/waf/config.lua
-  sed -i "s@/data/wwwlogs@${wwwlogs_dir}@" ${web_install_dir}/conf/waf/config.lua
+  sed -i "s@/home/wwwlogs@${wwwlogs_dir}@" ${web_install_dir}/conf/waf/config.lua
   [ -z "`grep 'include waf.conf;' ${web_install_dir}/conf/nginx.conf`" ] && sed -i "s@ vhost/\*.conf;@&\n  include waf.conf;@" ${web_install_dir}/conf/nginx.conf
   ${web_install_dir}/sbin/nginx -t
   if [ $? -eq 0 ]; then

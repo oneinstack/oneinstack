@@ -6,6 +6,7 @@
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
+#       https://github.com/tekintian/oneinstack_mphp
 
 installDepsDebian() {
   echo "${CMSG}Removing the conflicting packages...${CEND}"

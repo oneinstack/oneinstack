@@ -7,6 +7,7 @@
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
+#       https://github.com/tekintian/oneinstack_mphp
 
 Upgrade_DB() {
   pushd ${oneinstack_dir}/src > /dev/null

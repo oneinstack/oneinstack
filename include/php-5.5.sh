@@ -7,6 +7,7 @@
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
+#       https://github.com/tekintian/oneinstack_mphp
 
 Install_PHP55() {
   pushd ${oneinstack_dir}/src > /dev/null
@@ -152,10 +153,10 @@ EOF
 
   if [[ ! ${apache_option} =~ ^[1-2]$ ]] && [ ! -e "${apache_install_dir}/bin/apxs" ]; then
     # php-fpm Init Script
-    /bin/cp sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    chmod +x /etc/init.d/php-fpm
-    [ "${PM}" == 'yum' ] && { chkconfig --add php-fpm; chkconfig php-fpm on; }
-    [ "${PM}" == 'apt' ] && update-rc.d php-fpm defaults
+    /bin/cp sapi/fpm/init.d.php-fpm /etc/init.d/php55-fpm
+    chmod +x /etc/init.d/php55-fpm
+    [ "${PM}" == 'yum' ] && { chkconfig --add php55-fpm; chkconfig php55-fpm on; }
+    [ "${PM}" == 'apt' ] && update-rc.d php55-fpm defaults
 
     cat > ${php_install_dir}/etc/php-fpm.conf <<EOF
 ;;;;;;;;;;;;;;;;;;;;;
@@ -181,7 +182,7 @@ daemonize = yes
 ;;;;;;;;;;;;;;;;;;;;
 
 [${run_user}]
-listen = /dev/shm/php-cgi.sock
+listen = /dev/shm/php55-cgi.sock
 listen.backlog = -1
 listen.allowed_clients = 127.0.0.1
 listen.owner = ${run_user}
@@ -242,8 +243,9 @@ EOF
       sed -i "s@^pm.max_spare_servers.*@pm.max_spare_servers = 80@" ${php_install_dir}/etc/php-fpm.conf
     fi
 
-    #[ "$web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $IPADDR:9000@" ${php_install_dir}/etc/php-fpm.conf
-    service php-fpm start
+    /bin/cp ../config/php55.conf ${nginx_install_dir}/conf/php55.conf
+    #[ "$web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $IPADDR:9055@" ${php_install_dir}/etc/php-fpm.conf
+    service php55-fpm start
 
   elif [[ ${apache_option} =~ ^[1-2]$ ]] || [ -e "${apache_install_dir}/bin/apxs" ]; then
     service httpd restart

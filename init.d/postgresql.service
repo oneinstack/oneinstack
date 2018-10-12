@@ -4,7 +4,7 @@ Description=PostgreSQL database server
 [Service]
 Type=notify
 User=postgres
-ExecStart=/usr/local/pgsql/bin/postgres -D /data/pgsql
+ExecStart=/usr/local/pgsql/bin/postgres -D /home/data/pgsql
 ExecReload=/bin/kill -HUP $MAINPID
 KillMode=mixed
 KillSignal=SIGINT

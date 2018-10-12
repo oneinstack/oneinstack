@@ -7,6 +7,7 @@
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
+#       https://github.com/tekintian/oneinstack_mphp
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 clear
@@ -96,6 +97,9 @@ while :; do
     --php_option)
       php_option=$2; shift 2
       [[ ! ${php_option} =~ ^[1-7]$ ]] && { echo "${CWARNING}php_option input error! Please only input number 1~7${CEND}"; exit 1; }
+      # multi php version name change
+      . mphp_oper.sh
+      
       php_yn=y
       [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; php_option=Other; }
       ;;
@@ -183,7 +187,7 @@ while :; do
 done
 
 mkdir -p ${wwwroot_dir}/default ${wwwlogs_dir}
-[ -d /data ] && chmod 755 /data
+[ -d /home ] && chmod 755 /home
 # Use default SSH port 22. If you use another SSH port on your server
 if [ -e "/etc/ssh/sshd_config" ]; then
   if [ ${ARG_NUM} == 0 ]; then
@@ -785,6 +789,8 @@ elif [ "${apache_option}" == '2' ]; then
   . include/apache-2.2.sh
   Install_Apache22 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
+# multi php version name change
+. ./mphp_oper.sh
 
 # PHP
 case "${php_option}" in

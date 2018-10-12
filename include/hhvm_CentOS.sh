@@ -7,6 +7,7 @@
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
+#       https://github.com/tekintian/oneinstack_mphp
 
 Install_hhvm_CentOS() {
 
@@ -128,7 +129,7 @@ post_max_size = 50000000
 EOF
 
   if [ -e "${web_install_dir}/sbin/nginx" -a -e "/usr/bin/hhvm" -a ! -e "${php_install_dir}" ]; then
-    sed -i 's@/dev/shm/php-cgi.sock@/var/log/hhvm/sock@' ${web_install_dir}/conf/nginx.conf
+    sed -i 's@/dev/shm/php${php_vn}-cgi.sock@/var/log/hhvm/sock@' ${web_install_dir}/conf/nginx.conf
     [ -z "$(grep 'fastcgi_param SCRIPT_FILENAME' ${web_install_dir}/conf/nginx.conf)" ] && sed -i "s@fastcgi_index index.php;@&\n\t\tfastcgi_param SCRIPT_FILENAME \$document_root\$fastcgi_script_name;@" ${web_install_dir}/conf/nginx.conf
     sed -i 's@include fastcgi.conf;@include fastcgi_params;@' ${web_install_dir}/conf/nginx.conf
     service nginx reload

@@ -5,13 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
     <meta name="description" content="OneinStack - A PHP/JAVA Deployment Tool. In order to quickly deploy lnmp,lamp,lnmpa,ltmp,lnmh,MySQL,PostgreSQL,MongoDB,oneinstack.com">
     <meta name="author" content="yeho">
-    <title>Welcome to use OneinStack</title>
+    <title>Welcome to use OneinStack_mphp</title>
     <link href="https://static.oneinstack.com/assets/ois.css" rel="stylesheet">
   </head>
 
   <body>
     <nav class="navbar navbar-dark fixed-top bg-dark flex-md-nowrap p-0 shadow">
-      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="">OneinStack</a>
+      <a class="navbar-brand col-sm-3 col-md-2 mr-0" href="">OneinStack_mphp</a>
 
       <form class="w-100" action="https://lempstack.com/qa/" method="GET" target="_blank">
       	<input class="form-control form-control-dark w-100" type="text" placeholder="What do you want to know?" aria-label="What do you want to know?" name="qs">
@@ -19,7 +19,7 @@
 
       <ul class="navbar-nav px-3">
         <li class="nav-item text-nowrap">
-          <a class="nav-link" href="https://lempstack.com" target="_blank">OneinStack</a>
+          <a class="nav-link" href="https://github.com/tekintian/oneinstack_mphp" target="_blank">OneinStack_mphp</a>
         </li>
       </ul>
     </nav>
@@ -150,7 +150,7 @@
 		
 			<section class="section" id="home_section">
 	          	<h2>Congratulations, OneinStack installed successfully!</h2>
-	          	<h3><a href="https://oneinstack.com" target="_blank" class="links">OneinStack </a><a href="http://www.linuxeye.com/" target="_blank">Linux</a>+Nginx/Tengine+MySQL/MariaDB/Percona</br>+PHP+Pureftpd+phpMyAdmin+redis+memcached+jemalloc.</h3>
+	          	<h3><a href="https://github.com/tekintian/oneinstack_mphp" target="_blank" class="links">OneinStack 多版本PHP共存</a>Linux+Nginx/Tengine+MySQL/MariaDB/Percona</br>+PHP+Pureftpd+phpMyAdmin+redis+memcached+jemalloc.</h3>
 
  			</section>
 		
@@ -263,7 +263,9 @@
 				<p class="mt-4">MongoDB:</p>
 				<div class="alert alert-primary" role="alert"><code>service mongod {start|stop|status|restart|reload}</code></div>
 				<p class="mt-4">PHP:</p>
-				<div class="alert alert-primary" role="alert"><code>service php-fpm {start<span class="pl-k">|</span>stop<span class="pl-k">|</span>restart<span class="pl-k">|</span>reload<span class="pl-k">|</span>status}</code></div>
+				<div class="alert alert-primary" role="alert"><code>service php70-fpm {start<span class="pl-k">|</span>stop<span class="pl-k">|</span>restart<span class="pl-k">|</span>reload<span class="pl-k">|</span>status}</code>
+				php{php_vn}-fpm   php_vn is the multi php version number
+				</div>
 				<p class="mt-4">HHVM:</p>
 				<div class="alert alert-primary" role="alert"><code>service supervisord {start|stop|status|restart|reload}</code></div>
 				<p class="mt-4">Apache:</p>

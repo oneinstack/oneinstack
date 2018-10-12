@@ -1,3 +1,32 @@
+# oneinstack多版本PHP共存
+
+## 使用方法
+
+		第一次直接执行install.sh 安装， 第二次安装另外的PHP版本需要手动修改 options.conf 配置文件中的
+		php_install_dir和php_vn为你想要安装的PHP版本
+		修改好后再次执行 install.sh 安装即可。
+
+## 说明
+	只能使用于php-fpm方式，做了如下改动
+	在 options.conf 文件中增加了变量 php_vn数字版本号【取值 53--72】
+	php_vn=70
+	修改php_install_dir的目录为
+	php_install_dir=/usr/local/phpXX 形式 XX为对应的 php_vn
+
+	nginx.conf 配置文件中的PHP配置可选使用  
+	include phpXX.conf 的方式载入
+
+默认目录
+		网站默认目录 /home/wwwroot
+		备份目录 /home/backup
+		数据库文件目录 /home/data
+
+
+	如果使用端口连接则 端口号为  90XX , 如  9070 表示为php7.0的版本
+
+	系统环境中的PHP默认为最后一次安装的PHP版本，如需要调整，自行修改 /etc/profile 文件中的PATH变量为你想要的PHP版本即可
+
+# oneinstack
 [![PayPal donate button](https://img.shields.io/badge/paypal-donate-green.svg)](https://paypal.me/yeho) [![支付宝捐助按钮](https://img.shields.io/badge/%E6%94%AF%E4%BB%98%E5%AE%9D-%E5%90%91TA%E6%8D%90%E5%8A%A9-green.svg)](https://static.oneinstack.com/images/alipay.png) [![微信捐助按钮](https://img.shields.io/badge/%E5%BE%AE%E4%BF%A1-%E5%90%91TA%E6%8D%90%E5%8A%A9-green.svg)](https://static.oneinstack.com/images/weixin.png)
 
 This script is written using the shell, in order to quickly deploy `LEMP`/`LAMP`/`LNMP`/`LNMPA`/`LTMP`(Linux, Nginx/Tengine/OpenResty, MySQL in a production environment/MariaDB/Percona, PHP, JAVA), applicable to CentOS 6 ~ 7(including redhat), Debian 6 ~ 9, Ubuntu 12 ~ 16, Fedora 27~28 of 32 and 64.
@@ -26,26 +55,26 @@ Script properties:
 If your server system: CentOS/Redhat (Do not enter "//" and "// subsequent sentence)
 ```bash
 yum -y install wget screen python   // for CentOS / Redhat
-wget http://mirrors.linuxeye.com/oneinstack-full.tar.gz   // Contains the source code
-tar xzf oneinstack-full.tar.gz
-cd oneinstack   // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
-screen -S oneinstack    // If network interruption, you can execute the command `screen -r oneinstack` reconnect install window
+wget https://github.com/tekintian/oneinstack_mphp/archive/master.tar.gz   // Contains the source code
+tar xzf oneinstack_mphp.tar.gz
+cd oneinstack_mphp   // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
+screen -S oneinstack_mphp    // If network interruption, you can execute the command `screen -r oneinstack_mphp` reconnect install window
 ./install.sh   // Do not sh install.sh or bash install.sh such execution
 ```
 If your server system: Debian/Ubuntu (Do not enter "//" and "// subsequent sentence)
 ```bash
 apt-get -y install wget screen python    // for Debian / Ubuntu
-wget http://mirrors.linuxeye.com/oneinstack-full.tar.gz   // Contains the source code
-tar xzf oneinstack-full.tar.gz
-cd oneinstack    // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
-screen -S oneinstack    // If network interruption, you can execute the command `screen -r oneinstack` reconnect install window
+wget http://mirrors.linuxeye.com/oneinstack_mphp.tar.gz   // Contains the source code
+tar xzf oneinstack_mphp.tar.gz
+cd oneinstack_mphp    // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
+screen -S oneinstack_mphp    // If network interruption, you can execute the command `screen -r oneinstack_mphp` reconnect install window
 ./install.sh   // Do not sh install.sh or bash install.sh such execution
 ```
 
 ## How to add Extensions
 
 ```bash
-cd ~/oneinstack    // Must enter the directory execution under oneinstack
+cd ~/oneinstack_mphp    // Must enter the directory execution under oneinstack_mphp
 ./addons.sh    // Do not sh addons.sh or bash addons.sh such execution
 
 ```
@@ -53,32 +82,32 @@ cd ~/oneinstack    // Must enter the directory execution under oneinstack
 ## How to add a virtual host
 
 ```bash
-cd ~/oneinstack    // Must enter the directory execution under oneinstack
+cd ~/oneinstack_mphp    // Must enter the directory execution under oneinstack_mphp
 ./vhost.sh    // Do not sh vhost.sh or bash vhost.sh such execution
 ```
 
 ## How to delete a virtual host
 
 ```bash
-cd ~/oneinstack
+cd ~/oneinstack_mphp
 ./vhost.sh del
 ```
 
 ## How to add FTP virtual user
 
 ```bash
-cd ~/oneinstack
+cd ~/oneinstack_mphp
 ./pureftpd_vhost.sh
 ```
 
 ## How to backup
 
 ```bash
-cd ~/oneinstack
+cd ~/oneinstack_mphp
 ./backup_setup.sh    // Backup parameters
 ./backup.sh    // Perform the backup immediately
 crontab -l    // Can be added to scheduled tasks, such as automatic backups every day 1:00
-  0 1 * * * cd ~/oneinstack;./backup.sh  > /dev/null 2>&1 &
+  0 1 * * * cd ~/oneinstack_mphp;./backup.sh  > /dev/null 2>&1 &
 ```
 
 ## How to manage service
@@ -100,8 +129,9 @@ MongoDB:
 service mongod {start|stop|status|restart|reload}
 ```
 PHP:
+根据你的版本不一样 phpXX-fpm 有不同，XX为你的数字版本号 【53-72】
 ```bash
-service php-fpm {start|stop|restart|reload|status}
+service php70-fpm {start|stop|restart|reload|status}
 ```
 HHVM:
 ```bash
@@ -146,5 +176,5 @@ service memcached {start|stop|status|restart|reload}
 ## Installation
 
 For feedback, questions, and to follow the progress of the project: <br />
-[Telegram Group](https://t.me/oneinstack)<br />
-[OneinStack](https://oneinstack.com)<br />
+[OneinStack多版本PHP共存版](https://github.com/tekintian/oneinstack_mphp)<br />
+[OneinStack](https://oneinstack_mphp.com)<br />

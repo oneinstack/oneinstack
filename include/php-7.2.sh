@@ -7,6 +7,7 @@
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/lj2007331/oneinstack
+#       https://github.com/tekintian/oneinstack_mphp
 
 Install_PHP72() {
   pushd ${oneinstack_dir}/src > /dev/null
@@ -154,11 +155,11 @@ opcache.consistency_checks=0
 EOF
 
   if [[ ! ${apache_option} =~ ^[1-2]$ ]] && [ ! -e "${apache_install_dir}/bin/apxs" ]; then
-    # php-fpm Init Script
-    /bin/cp sapi/fpm/init.d.php-fpm /etc/init.d/php-fpm
-    chmod +x /etc/init.d/php-fpm
-    [ "${PM}" == 'yum' ] && { chkconfig --add php-fpm; chkconfig php-fpm on; }
-    [ "${PM}" == 'apt' ] && update-rc.d php-fpm defaults
+    # php72-fpm Init Script
+    /bin/cp sapi/fpm/init.d.php-fpm /etc/init.d/php72-fpm
+    chmod +x /etc/init.d/php72-fpm
+    [ "${PM}" == 'yum' ] && { chkconfig --add php72-fpm; chkconfig php72-fpm on; }
+    [ "${PM}" == 'apt' ] && update-rc.d php72-fpm defaults
 
     cat > ${php_install_dir}/etc/php-fpm.conf <<EOF
 ;;;;;;;;;;;;;;;;;;;;;
@@ -184,7 +185,7 @@ daemonize = yes
 ;;;;;;;;;;;;;;;;;;;;
 
 [${run_user}]
-listen = /dev/shm/php-cgi.sock
+listen = /dev/shm/php72-cgi.sock
 listen.backlog = -1
 listen.allowed_clients = 127.0.0.1
 listen.owner = ${run_user}
@@ -245,8 +246,12 @@ EOF
       sed -i "s@^pm.max_spare_servers.*@pm.max_spare_servers = 80@" ${php_install_dir}/etc/php-fpm.conf
     fi
 
-    #[ "$web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $IPADDR:9000@" ${php_install_dir}/etc/php-fpm.conf
-    service php-fpm start
+    sed -i 's@^fastcgi_pass unix:/dev/shm/*@fastcgi_pass unix:/dev/shm/php72-cgi.sock;@' ${oneinstack_dir}/config/nginx.conf
+    #拷贝php72.conf文件到nginx配置目录
+    /bin/cp ../config/php72.conf ${nginx_install_dir}/conf/php72.conf
+
+    #[ "$web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $IPADDR:9072@" ${php_install_dir}/etc/php-fpm.conf
+    service php72-fpm start
 
   elif [[ ${apache_option} =~ ^[1-2]$ ]] || [ -e "${apache_install_dir}/bin/apxs" ]; then
     service httpd restart
