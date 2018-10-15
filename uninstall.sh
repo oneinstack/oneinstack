@@ -46,7 +46,7 @@ ${CMSG}memcached${CEND}      --->Uninstall Memcached
 
 Uninstall_status() {
   while :; do echo
-    read -p "Do you want to uninstall? [y/n]: " uninstall_yn
+    read -e -p "Do you want to uninstall? [y/n]: " uninstall_yn
     echo
     if [[ ! ${uninstall_yn} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
@@ -243,7 +243,7 @@ What Are You Doing?
 \t${CMSG}q${CEND}. Exit
 "
   echo
-  read -p "Please input the correct option: " Number
+  read -e -p "Please input the correct option: " Number
   if [[ ! $Number =~ ^[0-9,q]$ ]]; then
     echo "${CWARNING}input error! Please only input 0~9 and q${CEND}"
   else

@@ -154,7 +154,7 @@ ACTION_FUN() {
     echo "Please select an action:"
     echo -e "\t${CMSG}1${CEND}. install"
     echo -e "\t${CMSG}2${CEND}. uninstall"
-    read -p "Please input a number:(Default 1 press Enter) " ACTION
+    read -e -p "Please input a number:(Default 1 press Enter) " ACTION
     [ -z "${ACTION}" ] && ACTION=1
     if [[ ! "${ACTION}" =~ ^[1,2]$ ]]; then
       echo "${CWARNING}input error! Please only input number 1~2${CEND}"
@@ -180,7 +180,7 @@ What Are You Doing?
 \t${CMSG}11${CEND}. Install/Uninstall ngx_lua_waf 
 \t${CMSG} q${CEND}. Exit
 "
-  read -p "Please input the correct option: " Number
+  read -e -p "Please input the correct option: " Number
   if [[ ! "${Number}" =~ ^[1-9,q]$|^1[0-1]$ ]]; then
     echo "${CFAILURE}input error! Please only input 1~11 and q${CEND}"
   else
@@ -193,7 +193,7 @@ What Are You Doing?
           echo -e "\t${CMSG}2${CEND}. XCache"
           echo -e "\t${CMSG}3${CEND}. APCU"
           echo -e "\t${CMSG}4${CEND}. eAccelerator"
-          read -p "Please input a number:(Default 1 press Enter) " phpcache_option
+          read -e -p "Please input a number:(Default 1 press Enter) " phpcache_option
           [ -z "${phpcache_option}" ] && phpcache_option=1
           if [[ ! "${phpcache_option}" =~ ^[1-4]$ ]]; then
             echo "${CWARNING}input error! Please only input number 1~4${CEND}"
@@ -233,7 +233,7 @@ What Are You Doing?
             2)
               if [[ "${PHP_main_ver}" =~ ^5.[3-6]$ ]]; then
                 while :; do
-                  read -p "Please input xcache admin password: " xcachepwd
+                  read -e -p "Please input xcache admin password: " xcachepwd
                   (( ${#xcachepwd} >= 5 )) && { xcachepwd_md5=$(echo -n "${xcachepwd}" | md5sum | awk '{print $1}') ; break ; } || echo "${CFAILURE}xcache admin password least 5 characters! ${CEND}"
                 done
                 checkDownload
@@ -272,7 +272,7 @@ What Are You Doing?
           echo "Please select ZendGuardLoader/ionCube:"
           echo -e "\t${CMSG}1${CEND}. ZendGuardLoader"
           echo -e "\t${CMSG}2${CEND}. ionCube Loader"
-          read -p "Please input a number:(Default 1 press Enter) " Loader
+          read -e -p "Please input a number:(Default 1 press Enter) " Loader
           [ -z "${Loader}" ] && Loader=1
           if [[ ! "${Loader}" =~ ^[1,2]$ ]]; then
             echo "${CWARNING}input error! Please only input number 1~2${CEND}"
@@ -311,7 +311,7 @@ What Are You Doing?
           echo "Please select ImageMagick/GraphicsMagick:"
           echo -e "\t${CMSG}1${CEND}. ImageMagick"
           echo -e "\t${CMSG}2${CEND}. GraphicsMagick"
-          read -p "Please input a number:(Default 1 press Enter) " magick_option
+          read -e -p "Please input a number:(Default 1 press Enter) " magick_option
           [ -z "${magick_option}" ] && magick_option=1
           if [[ ! "${magick_option}" =~ ^[1,2]$ ]]; then
             echo "${CWARNING}input error! Please only input number 1~2${CEND}"
@@ -345,7 +345,7 @@ What Are You Doing?
           echo "Please select fileinfo/imap:"
           echo -e "\t${CMSG}1${CEND}. fileinfo"
           echo -e "\t${CMSG}2${CEND}. imap"
-          read -p "Please input a number:(Default 1 press Enter) " phpext_option
+          read -e -p "Please input a number:(Default 1 press Enter) " phpext_option
           [ -z "${phpext_option}" ] && phpext_option=1
           if [[ ! "${phpext_option}" =~ ^[1,2]$ ]]; then
             echo "${CWARNING}input error! Please only input number 1~2${CEND}"
@@ -390,7 +390,7 @@ What Are You Doing?
           echo -e "\t${CMSG}1${CEND}. memcache PHP Extension"
           echo -e "\t${CMSG}2${CEND}. memcached PHP Extension"
           echo -e "\t${CMSG}3${CEND}. memcache/memcached PHP Extension"
-          read -p "Please input a number:(Default 1 press Enter) " Memcache
+          read -e -p "Please input a number:(Default 1 press Enter) " Memcache
           [ -z "${Memcache}" ] && Memcache=1
           if [[ ! "${Memcache}" =~ ^[1-3]$ ]]; then
             echo "${CWARNING}input error! Please only input number 1~3${CEND}"
