@@ -36,7 +36,7 @@ FTP_bin=${pureftpd_install_dir}/bin/pure-pw
 
 USER() {
 while :; do echo
-  read -p "Please input a username: " User
+  read -e -p "Please input a username: " User
   if [ -z "$User" ]; then
     echo "${CWARNING}username can't be NULL! ${CEND}"
   else
@@ -47,7 +47,7 @@ done
 
 PASSWORD() {
 while :; do echo
-  read -p "Please input the password: " Password
+  read -e -p "Please input the password: " Password
   [ -n "`echo $Password | grep '[+|&]'`" ] && { echo "${CWARNING}input error,not contain a plus sign (+) and &${CEND}"; continue; }
   if (( ${#Password} >= 5 ));then
     echo -e "${Password}\n$Password" > $FTP_tmp_passfile
@@ -60,7 +60,7 @@ done
 
 DIRECTORY() {
 while :; do echo
-  read -p "Please input the directory(Default directory: ${wwwroot_dir}): " Directory
+  read -e -p "Please input the directory(Default directory: ${wwwroot_dir}): " Directory
   if [ -z "$Directory" ]; then
     Directory="${wwwroot_dir}"
   fi
@@ -83,7 +83,7 @@ What Are You Doing?
 \t${CMSG}6${CEND}. ShowUser
 \t${CMSG}q${CEND}. Exit
 "
-  read -p "Please input the correct option: " Number
+  read -e -p "Please input the correct option: " Number
   if [[ ! $Number =~ ^[1-6,q]$ ]]; then
     echo "${CFAILURE}input error! Please only input 1~6 and q${CEND}"
   else

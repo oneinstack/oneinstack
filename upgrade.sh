@@ -71,7 +71,7 @@ What Are You Doing?
 \t${CMSG}q${CEND}. Exit
 "
     echo
-    read -p "Please input the correct option: " Upgrade_flag
+    read -e -p "Please input the correct option: " Upgrade_flag
     if [[ ! ${Upgrade_flag} =~ ^[1-8,q]$ ]]; then
       echo "${CWARNING}input error! Please only input 1~8 and q${CEND}"
     else

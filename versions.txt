@@ -37,7 +37,7 @@ alisql_ver=5.6.32-9
 
 pgsql_ver=10.5
 
-mongodb_ver=4.0.2
+mongodb_ver=4.0.3
 
 # JDK
 jdk10_ver=10.0.2
@@ -82,7 +82,7 @@ redis_ver=4.0.11
 redis_pecl_ver=4.1.1
 
 # Memcached
-memcached_ver=1.5.10
+memcached_ver=1.5.11
 libmemcached_ver=1.0.18
 memcached_pecl_ver=2.2.0
 memcached_pecl_php7_ver=3.0.4

@@ -64,7 +64,7 @@ done
 
 Input_dbrootpwd() {
   while :; do echo
-    read -p "Please input the root password of database: " New_dbrootpwd
+    read -e -p "Please input the root password of database: " New_dbrootpwd
     [ -n "`echo ${New_dbrootpwd} | grep '[+|&]'`" ] && { echo "${CWARNING}input error,not contain a plus sign (+) and &${CEND}"; continue; }
     (( ${#New_dbrootpwd} >= 5 )) && break || echo "${CWARNING}database root password least 5 characters! ${CEND}"
   done
