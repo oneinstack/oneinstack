@@ -35,19 +35,19 @@ percona55_ver=5.5.61-38.13
 
 alisql_ver=5.6.32-9
 
-pgsql_ver=10.5
+pgsql_ver=11.0
 
 mongodb_ver=4.0.3
 
 # JDK
-jdk10_ver=10.0.2
-jdk18_ver=1.8.0_181
+jdk110_ver=11.0.1
+jdk18_ver=1.8.0_192
 jdk17_ver=1.7.0_80
 jdk16_ver=1.6.0_45
 
 # PHP
-php72_ver=7.2.10
-php71_ver=7.1.22
+php72_ver=7.2.11
+php71_ver=7.1.23
 php70_ver=7.0.32
 php56_ver=5.6.38
 php55_ver=5.5.38
@@ -78,7 +78,7 @@ xdebug_ver=2.6.1
 pureftpd_ver=1.0.47
 
 # Redis
-redis_ver=4.0.11
+redis_ver=5.0.0
 redis_pecl_ver=4.1.1
 
 # Memcached
