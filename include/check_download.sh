@@ -82,7 +82,7 @@ checkDownload() {
       case "${jdk_option}" in
         1)
           echo "Download JDK 10..."
-          JDK_FILE="jdk-${jdk10_ver}_linux-${SYS_BIT_j}_bin.tar.gz"
+          JDK_FILE="jdk-${jdk110_ver}_linux-${SYS_BIT_j}_bin.tar.gz"
           ;;
         2)
           echo "Download JDK 1.8..."

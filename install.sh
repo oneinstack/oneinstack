@@ -896,8 +896,8 @@ esac
 # JDK
 case "${jdk_option}" in
   1)
-    . include/jdk-10.sh
-    Install-JDK10 2>&1 | tee -a ${oneinstack_dir}/install.log
+    . include/jdk-11.0.sh
+    Install-JDK110 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   2)
     . include/jdk-1.8.sh
