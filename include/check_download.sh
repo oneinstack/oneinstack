@@ -81,7 +81,7 @@ checkDownload() {
     if [[ "${jdk_option}"  =~ ^[1-4]$ ]]; then
       case "${jdk_option}" in
         1)
-          echo "Download JDK 10..."
+          echo "Download JDK 11.0..."
           JDK_FILE="jdk-${jdk110_ver}_linux-${SYS_BIT_j}_bin.tar.gz"
           ;;
         2)
