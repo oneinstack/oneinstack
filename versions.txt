@@ -18,10 +18,10 @@ apr_util_ver=1.6.1
 nghttp2_ver=1.34.0
 
 # DB
-mysql80_ver=8.0.12
-mysql57_ver=5.7.23
-mysql56_ver=5.6.41
-mysql55_ver=5.5.61
+mysql80_ver=8.0.13
+mysql57_ver=5.7.24
+mysql56_ver=5.6.42
+mysql55_ver=5.5.62
 
 mariadb103_ver=10.3.10
 mariadb102_ver=10.2.18
@@ -108,5 +108,5 @@ libevent_ver=2.0.22-stable
 tmux_ver=2.7
 htop_ver=2.2.0
 bison_ver=2.7.1
-python_ver=3.6.6
+python_ver=3.6.7
 fail2ban_ver=0.10.4

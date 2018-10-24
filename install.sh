@@ -274,7 +274,7 @@ if [ ${ARG_NUM} == 0 ]; then
             if [ "${tomcat_option}" == '1' ]; then
               while :; do echo
                 echo 'Please select JDK version:'
-                echo -e "\t${CMSG}1${CEND}. Install JDK-10"
+                echo -e "\t${CMSG}1${CEND}. Install JDK-11.0"
                 echo -e "\t${CMSG}2${CEND}. Install JDK-1.8"
                 read -e -p "Please input a number:(Default 1 press Enter) " jdk_option
                 [ -z "${jdk_option}" ] && jdk_option=1
@@ -287,7 +287,7 @@ if [ ${ARG_NUM} == 0 ]; then
             elif [ "${tomcat_option}" == '2' ]; then
               while :; do echo
                 echo 'Please select JDK version:'
-                echo -e "\t${CMSG}1${CEND}. Install JDK-10"
+                echo -e "\t${CMSG}1${CEND}. Install JDK-11.0"
                 echo -e "\t${CMSG}2${CEND}. Install JDK-1.8"
                 echo -e "\t${CMSG}3${CEND}. Install JDK-1.7"
                 read -e -p "Please input a number:(Default 2 press Enter) " jdk_option
