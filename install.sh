@@ -709,7 +709,7 @@ fi
 # openSSL
 . ./include/openssl.sh
 if [[ ${tomcat_option} =~ ^[1-4]$ ]] || [[ ${apache_option} =~ ^[1-2]$ ]] || [[ ${php_option} =~ ^[1-7]$ ]]; then
-  Install_openSSL102 | tee -a ${oneinstack_dir}/install.log
+  Install_openSSL | tee -a ${oneinstack_dir}/install.log
 fi
 
 # Database
