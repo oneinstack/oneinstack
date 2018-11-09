@@ -664,8 +664,8 @@ IPADDR_COUNTRY=$(./include/get_ipaddr_state.py $PUBLIC_IPADDR)
 # Check download source packages
 . ./include/check_download.sh
 downloadDepsSrc=1
-[ "${PM}" == 'yum' ] && yum -y -q install wget
-[ "${PM}" == 'apt' ] && apt-get -y -q install wget
+[ "${PM}" == 'yum' ] && yum -y -q install wget gcc
+[ "${PM}" == 'apt' ] && apt-get -y -q install wget gcc
 checkDownload 2>&1 | tee -a ${oneinstack_dir}/install.log
 
 # del openssl for jcloud
