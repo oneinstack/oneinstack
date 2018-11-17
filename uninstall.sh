@@ -31,7 +31,7 @@ Usage(){
   printf "
 Usage: $0 [  ${CMSG}all${CEND} | ${CMSG}web${CEND} | ${CMSG}mysql${CEND} | ${CMSG}postgresql${CEND} | ${CMSG}mongodb${CEND} | ${CMSG}php${CEND} | ${CMSG}hhvm${CEND} | ${CMSG}pureftpd${CEND} | ${CMSG}redis${CEND} | ${CMSG}memcached${CEND} ]
 ${CMSG}all${CEND}            --->Uninstall All
-${CMSG}web${CEND}            --->Uninstall Nginx/Tengine/Apache/Tomcat
+${CMSG}web${CEND}            --->Uninstall Nginx/Tengine/OpenResty/Apache/Tomcat
 ${CMSG}mysql${CEND}          --->Uninstall MySQL/MariaDB/Percona/AliSQL
 ${CMSG}postgresql${CEND}     --->Uninstall PostgreSQL
 ${CMSG}mongodb${CEND}        --->Uninstall MongoDB
@@ -231,7 +231,7 @@ while :; do
   printf "
 What Are You Doing?
 \t${CMSG}0${CEND}. Uninstall All
-\t${CMSG}1${CEND}. Uninstall Nginx/Tengine/Apache/Tomcat
+\t${CMSG}1${CEND}. Uninstall Nginx/Tengine/OpenResty/Apache/Tomcat
 \t${CMSG}2${CEND}. Uninstall MySQL/MariaDB/Percona/AliSQL
 \t${CMSG}3${CEND}. Uninstall PostgreSQL
 \t${CMSG}4${CEND}. Uninstall MongoDB
