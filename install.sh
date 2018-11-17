@@ -50,7 +50,7 @@ showhelp() {
   --apache_option [1-2]       Install Apache server version
   --php_option [1-7]          Install PHP version
   --phpcache_option [1-4]     Install PHP opcode cache, default: 1 opcache
-  --php_extensions [ext name] Install PHP extension, include zendguardloader,ioncube,imagick,gmagick,redis,memcached,memcache
+  --php_extensions [ext name] Install PHP extension, include zendguardloader,ioncube,sourceguardian,imagick,gmagick,redis,memcached,memcache,mongodb
   --tomcat_option [1-4]       Install Tomcat version
   --jdk_option [1-4]          Install JDK version
   --db_option [1-15]          Install DB version
@@ -106,11 +106,13 @@ while :; do
       php_extensions=$2; shift 2
       [ -n "`echo ${php_extensions} | grep -w zendguardloader`" ] && zendguardloader_yn=y
       [ -n "`echo ${php_extensions} | grep -w ioncube`" ] && ioncube_yn=y
+      [ -n "`echo ${php_extensions} | grep -w sourceguardian`" ] && sourceguardian_yn=y
       [ -n "`echo ${php_extensions} | grep -w imagick`" ] && magick_option=1
       [ -n "`echo ${php_extensions} | grep -w gmagick`" ] && magick_option=2
-      [ -n "`echo ${php_extensions} | grep -w redis`" ] && redis_pecl=1
-      [ -n "`echo ${php_extensions} | grep -w memcached`" ] && memcached_pecl=1
-      [ -n "`echo ${php_extensions} | grep -w memcache`" ] && memcache_pecl=1
+      [ -n "`echo ${php_extensions} | grep -w redis`" ] && pecl_redis=1
+      [ -n "`echo ${php_extensions} | grep -w memcached`" ] && pecl_memcached=1
+      [ -n "`echo ${php_extensions} | grep -w memcache`" ] && pecl_memcache=1
+      [ -n "`echo ${php_extensions} | grep -w mongodb`" ] && pecl_mongodb=1
       ;;
     --tomcat_option)
       tomcat_option=$2; shift 2
@@ -777,6 +779,22 @@ case "${db_option}" in
     ;;
 esac
 
+# Nginx server
+case "${nginx_option}" in
+  1)
+    . include/nginx.sh
+    Install_Nginx 2>&1 | tee -a ${oneinstack_dir}/install.log
+    ;;
+  2)
+    . include/tengine.sh
+    Install_Tengine 2>&1 | tee -a ${oneinstack_dir}/install.log
+    ;;
+  3)
+    . include/openresty.sh
+    Install_OpenResty 2>&1 | tee -a ${oneinstack_dir}/install.log
+    ;;
+esac
+
 # Apache
 if [ "${apache_option}" == '1' ]; then
   . include/apache-2.4.sh
@@ -818,35 +836,6 @@ case "${php_option}" in
     ;;
 esac
 
-# pecl_pgsql
-if [ -e "${pgsql_install_dir}/bin/psql" -a -e "${php_install_dir}/bin/phpize" ]; then
-  . include/pecl_pgsql.sh
-  Install_pecl-pgsql 2>&1 | tee -a ${oneinstack_dir}/install.log
-fi
-
-# pecl_mongodb
-if [ -e "${mongo_install_dir}/bin/mongo" -a -e "${php_install_dir}/bin/phpize" ]; then
-  . include/pecl_mongodb.sh
-  Install_pecl-mongodb 2>&1 | tee -a ${oneinstack_dir}/install.log
-fi
-
-# ImageMagick or GraphicsMagick
-if [ "${magick_option}" == '1' ]; then
-  . include/ImageMagick.sh
-  [ ! -d "${imagick_install_dir}" ] && Install_ImageMagick 2>&1 | tee -a ${oneinstack_dir}/install.log
-  [ ! -e "`${php_install_dir}/bin/php-config --extension-dir`/imagick.so" ] && Install_php-imagick 2>&1 | tee -a ${oneinstack_dir}/install.log
-elif [ "${magick_option}" == '2' ]; then
-  . include/GraphicsMagick.sh
-  [ ! -d "${gmagick_install_dir}" ] && Install_GraphicsMagick 2>&1 | tee -a ${oneinstack_dir}/install.log
-  [ ! -e "`${php_install_dir}/bin/php-config --extension-dir`/gmagick.so" ] && Install_php-gmagick 2>&1 | tee -a ${oneinstack_dir}/install.log
-fi
-
-# ionCube
-if [ "${ioncube_yn}" == 'y' ]; then
-  . include/ioncube.sh
-  Install_ionCube 2>&1 | tee -a ${oneinstack_dir}/install.log
-fi
-
 # PHP opcode cache
 case "${phpcache_option}" in
   1)
@@ -877,21 +866,58 @@ if [ "${zendguardloader_yn}" == 'y' ]; then
   Install_ZendGuardLoader 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
-# Web server
-case "${nginx_option}" in
-  1)
-    . include/nginx.sh
-    Install_Nginx 2>&1 | tee -a ${oneinstack_dir}/install.log
-    ;;
-  2)
-    . include/tengine.sh
-    Install_Tengine 2>&1 | tee -a ${oneinstack_dir}/install.log
-    ;;
-  3)
-    . include/openresty.sh
-    Install_OpenResty 2>&1 | tee -a ${oneinstack_dir}/install.log
-    ;;
-esac
+# ionCube
+if [ "${ioncube_yn}" == 'y' ]; then
+  . include/ioncube.sh
+  Install_ionCube 2>&1 | tee -a ${oneinstack_dir}/install.log
+fi
+
+# SourceGuardian
+if [ "${sourceguardian_yn}" == 'y' ]; then
+  . include/sourceguardian.sh
+  Install_SourceGuardian 2>&1 | tee -a ${oneinstack_dir}/install.log
+fi
+
+# ImageMagick or GraphicsMagick
+if [ "${magick_option}" == '1' ]; then
+  . include/ImageMagick.sh
+  [ ! -d "${imagick_install_dir}" ] && Install_ImageMagick 2>&1 | tee -a ${oneinstack_dir}/install.log
+  Install_pecl-imagick 2>&1 | tee -a ${oneinstack_dir}/install.log
+elif [ "${magick_option}" == '2' ]; then
+  . include/GraphicsMagick.sh
+  [ ! -d "${gmagick_install_dir}" ] && Install_GraphicsMagick 2>&1 | tee -a ${oneinstack_dir}/install.log
+  Install_pecl-gmagick 2>&1 | tee -a ${oneinstack_dir}/install.log
+fi
+
+# pecl_memcached
+if [ "${pecl_memcached}" == '1' ]; then
+  . include/memcached.sh
+  Install_pecl-memcached 2>&1 | tee -a ${oneinstack_dir}/install.log
+fi
+
+# pecl_memcache
+if [ "${pecl_memcache}" == '1' ]; then
+  . include/memcached.sh
+  Install_pecl-memcache 2>&1 | tee -a ${oneinstack_dir}/install.log
+fi
+
+# pecl_redis
+if [ "${pecl_redis}" == '1' ]; then
+  . include/redis.sh
+  Install_pecl-redis 2>&1 | tee -a ${oneinstack_dir}/install.log
+fi
+
+# pecl_mongodb
+if [ -e "${mongo_install_dir}/bin/mongo" -o "${pecl_mongodb}" == '1' ]; then
+  . include/pecl_mongodb.sh
+  Install_pecl-mongodb 2>&1 | tee -a ${oneinstack_dir}/install.log
+fi
+
+# pecl_pgsql
+if [ -e "${pgsql_install_dir}/bin/psql" ]; then
+  . include/pecl_pgsql.sh
+  Install_pecl-pgsql 2>&1 | tee -a ${oneinstack_dir}/install.log
+fi
 
 # JDK
 case "${jdk_option}" in
@@ -948,30 +974,15 @@ fi
 if [ "${redis_yn}" == 'y' ]; then
   . include/redis.sh
   [ ! -d "${redis_install_dir}" ] && Install_redis-server 2>&1 | tee -a ${oneinstack_dir}/install.log
-  [ -e "${php_install_dir}/bin/phpize" ] && [ ! -e "$(${php_install_dir}/bin/php-config --extension-dir)/redis.so" ] && Install_php-redis 2>&1 | tee -a ${oneinstack_dir}/install.log
-fi
-
-if [ "${redis_pecl}" == '1' ]; then
-  . include/redis.sh
-  [ -e "${php_install_dir}/bin/phpize" ] && [ ! -e "$(${php_install_dir}/bin/php-config --extension-dir)/redis.so" ] && Install_php-redis 2>&1 | tee -a ${oneinstack_dir}/install.log
+  Install_pecl-redis 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
 # memcached
 if [ "${memcached_yn}" == 'y' ]; then
   . include/memcached.sh
   [ ! -d "${memcached_install_dir}/include/memcached" ] && Install_memcached 2>&1 | tee -a ${oneinstack_dir}/install.log
-  [ -e "${php_install_dir}/bin/phpize" ] && [ ! -e "$(${php_install_dir}/bin/php-config --extension-dir)/memcache.so" ] && Install_php-memcache 2>&1 | tee -a ${oneinstack_dir}/install.log
-  [ -e "${php_install_dir}/bin/phpize" ] && [ ! -e "$(${php_install_dir}/bin/php-config --extension-dir)/memcached.so" ] && Install_php-memcached 2>&1 | tee -a ${oneinstack_dir}/install.log
-fi
-
-if [ "${memcached_pecl}" == '1' ]; then
-  . include/memcached.sh
-  [ -e "${php_install_dir}/bin/phpize" ] && [ ! -e "$(${php_install_dir}/bin/php-config --extension-dir)/memcached.so" ] && Install_php-memcached 2>&1 | tee -a ${oneinstack_dir}/install.log
-fi
-
-if [ "${memcache_pecl}" == '1' ]; then
-  . include/memcached.sh
-  [ -e "${php_install_dir}/bin/phpize" ] && [ ! -e "$(${php_install_dir}/bin/php-config --extension-dir)/memcache.so" ] && Install_php-memcache 2>&1 | tee -a ${oneinstack_dir}/install.log
+  Install_pecl-memcached 2>&1 | tee -a ${oneinstack_dir}/install.log
+  Install_pecl-memcache 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
 # index example
