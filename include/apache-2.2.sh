@@ -16,7 +16,7 @@ Install_Apache22() {
   pushd httpd-${apache22_ver}
   [ ! -d "${apache_install_dir}" ] && mkdir -p ${apache_install_dir}
   [ "${Ubuntu_ver}" == "12" ] && sed -i '@SSL_PROTOCOL_SSLV2@d' modules/ssl/ssl_engine_io.c
-  LDFLAGS=-ldl ./configure --prefix=${apache_install_dir} --with-mpm=prefork --with-included-apr --enable-headers --enable-deflate --enable-so --enable-rewrite --enable-ssl--with-ssl=${openssl_install_dir} --enable-expires --enable-static-support --enable-suexec --enable-modules=all --enable-mods-shared=all
+  LDFLAGS=-ldl ./configure --prefix=${apache_install_dir} --with-mpm=prefork --enable-mpms-shared=all --with-included-apr --enable-headers --enable-mime-magic --enable-deflate --enable-proxy --enable-so --enable-dav --enable-rewrite --enable-expires --enable-static-support --enable-suexec --with-expat=builtin --enable-mods-shared=most --enable-ssl --with-ssl=${openssl_install_dir}
   make -j ${THREAD} && make install
   unset LDFLAGS
   if [ -e "${apache_install_dir}/conf/httpd.conf" ]; then
@@ -37,7 +37,7 @@ Install_Apache22() {
   sed -i '3a # description: Apache is a World Wide Web server. It is used to serve' /etc/init.d/httpd
   chmod +x /etc/init.d/httpd
   [ "${PM}" == 'yum' ] && { chkconfig --add httpd; chkconfig httpd on; }
-  [ "${PM}" == 'apt' ] && update-rc.d httpd defaults
+  [ "${PM}" == 'apt-get' ] && update-rc.d httpd defaults
 
   sed -i "s@^User daemon@User ${run_user}@" ${apache_install_dir}/conf/httpd.conf
   sed -i "s@^Group daemon@Group ${run_user}@" ${apache_install_dir}/conf/httpd.conf

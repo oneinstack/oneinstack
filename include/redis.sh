@@ -44,7 +44,7 @@ Install_redis-server() {
       /bin/cp ../init.d/Redis-server-init /etc/init.d/redis-server
       sed -i "s@/usr/local/redis@${redis_install_dir}@g" /etc/init.d/redis-server
       [ "${PM}" == 'yum' ] && { cc start-stop-daemon.c -o /sbin/start-stop-daemon; chkconfig --add redis-server; chkconfig redis-server on; }
-      [ "${PM}" == 'apt' ] && update-rc.d redis-server defaults
+      [ "${PM}" == 'apt-get' ] && update-rc.d redis-server defaults
     fi
     #[ -z "`grep 'vm.overcommit_memory' /etc/sysctl.conf`" ] && echo 'vm.overcommit_memory = 1' >> /etc/sysctl.conf
     #sysctl -p

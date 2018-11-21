@@ -26,7 +26,7 @@ Install_memcached() {
     rm -rf memcached-${memcached_ver}
     ln -s ${memcached_install_dir}/bin/memcached /usr/bin/memcached
     [ "${PM}" == 'yum' ] && { /bin/cp ../init.d/Memcached-init-CentOS /etc/init.d/memcached; chkconfig --add memcached; chkconfig memcached on; }
-    [ "${PM}" == 'apt' ] && { /bin/cp ../init.d/Memcached-init-Ubuntu /etc/init.d/memcached; update-rc.d memcached defaults; }
+    [ "${PM}" == 'apt-get' ] && { /bin/cp ../init.d/Memcached-init-Ubuntu /etc/init.d/memcached; update-rc.d memcached defaults; }
     sed -i "s@/usr/local/memcached@${memcached_install_dir}@g" /etc/init.d/memcached
     let memcachedCache="${Mem}/8"
     [ -n "$(grep 'CACHESIZE=' /etc/init.d/memcached)" ] && sed -i "s@^CACHESIZE=.*@CACHESIZE=${memcachedCache}@" /etc/init.d/memcached
@@ -80,7 +80,7 @@ Install_pecl-memcached() {
     patch -d libmemcached-${libmemcached_ver} -p0 < libmemcached-build.patch
     pushd libmemcached-${libmemcached_ver} > /dev/null
     [ "${PM}" == 'yum' ] && yum -y install cyrus-sasl-devel
-    [ "${PM}" == 'apt' ] && sed -i "s@lthread -pthread -pthreads@lthread -lpthread -pthreads@" ./configure
+    [ "${PM}" == 'apt-get' ] && sed -i "s@lthread -pthread -pthreads@lthread -lpthread -pthreads@" ./configure
     ./configure --with-memcached=${memcached_install_dir}
     make -j ${THREAD} && make install
     popd > /dev/null
