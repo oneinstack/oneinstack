@@ -63,6 +63,29 @@ if [ -e "${php_install_dir}/bin/phpize" ]; then
   phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
   PHP_detail_ver=$(${php_install_dir}/bin/php -r 'echo PHP_VERSION;')
   PHP_main_ver=${PHP_detail_ver%.*}
+  case "${PHP_main_ver}" in
+    5.3)
+      php_option=1
+    ;;
+    5.4)
+      php_option=2
+    ;;
+    5.5)
+      php_option=3
+    ;;
+    5.6)
+      php_option=4
+    ;;
+    7.0)
+      php_option=5
+    ;;
+    7.1)
+      php_option=6
+    ;;
+    7.2)
+      php_option=7
+    ;;
+  esac
 fi
 
 # Check PHP Extensions
@@ -103,7 +126,7 @@ Install_fail2ban() {
     chkconfig --add fail2ban
     chkconfig fail2ban on
   fi
-  if [ "${PM}" == 'apt' ]; then
+  if [ "${PM}" == 'apt-get' ]; then
     LOGPATH=/var/log/auth.log
     /bin/cp files/debian-initd /etc/init.d/fail2ban
     sed -i 's@2 3 4 5@3 4 5@' /etc/init.d/fail2ban

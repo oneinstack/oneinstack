@@ -103,11 +103,13 @@ Print_MySQL() {
 Print_PostgreSQL() {
   [ -e "${pgsql_install_dir}" ] && echo "${pgsql_install_dir}"
   [ -e "/etc/init.d/postgresql" ] && echo "/etc/init.d/postgresql"
+  [ -e "/lib/systemd/system/postgresql.service" ] && echo "/lib/systemd/system/postgresql.service"
 }
 
 Print_MongoDB() {
   [ -e "${mongo_install_dir}" ] && echo "${mongo_install_dir}"
   [ -e "/etc/init.d/mongod" ] && echo "/etc/init.d/mongod"
+  [ -e "/lib/systemd/system/mongod.service" ] && echo "/lib/systemd/system/mongod.service"
   [ -e "/etc/mongod.conf" ] && echo "/etc/mongod.conf"
 }
 
@@ -129,7 +131,8 @@ Uninstall_PostgreSQL() {
   if [ -e "${pgsql_install_dir}/bin/psql" ]; then
     service postgresql stop > /dev/null 2>&1
     rm -rf ${pgsql_install_dir} /etc/init.d/postgresql
-    [ -e "${php_install_dir}/etc/php.d/07-pgsql.ini" ] && rm -rf ${php_install_dir}/etc/php.d/07-pgsql.ini
+    [ -e "/lib/systemd/system/postgresql.service" ] && { systemctl disable postgresql > /dev/null 2>&1; rm -f /lib/systemd/system/postgresql.service; }
+    [ -e "${php_install_dir}/etc/php.d/07-pgsql.ini" ] && rm -f ${php_install_dir}/etc/php.d/07-pgsql.ini
     id -u postgres >/dev/null 2>&1 ; [ $? -eq 0 ] && userdel postgres
     [ -e "${pgsql_data_dir}" ] && /bin/mv ${pgsql_data_dir}{,$(date +%Y%m%d%H)}
     sed -i 's@^dbpostgrespwd=.*@dbpostgrespwd=@' ./options.conf
@@ -143,8 +146,9 @@ Uninstall_MongoDB() {
   if [ -e "${mongo_install_dir}/bin/mongo" ]; then
     service mongod stop > /dev/null 2>&1
     rm -rf ${mongo_install_dir} /etc/mongod.conf /etc/init.d/mongod /tmp/mongo*.sock
-    [ -e "${php_install_dir}/etc/php.d/07-mongo.ini" ] && rm -rf ${php_install_dir}/etc/php.d/07-mongo.ini
-    [ -e "${php_install_dir}/etc/php.d/07-mongodb.ini" ] && rm -rf ${php_install_dir}/etc/php.d/07-mongodb.ini
+    [ -e "/lib/systemd/system/mongod.service" ] && { systemctl disable mongod > /dev/null 2>&1; rm -f /lib/systemd/system/mongod.service; }
+    [ -e "${php_install_dir}/etc/php.d/07-mongo.ini" ] && rm -f ${php_install_dir}/etc/php.d/07-mongo.ini
+    [ -e "${php_install_dir}/etc/php.d/07-mongodb.ini" ] && rm -f ${php_install_dir}/etc/php.d/07-mongodb.ini
     id -u mongod > /dev/null 2>&1 ; [ $? -eq 0 ] && userdel mongod
     [ -e "${mongo_data_dir}" ] && /bin/mv ${mongo_data_dir}{,$(date +%Y%m%d%H)}
     sed -i 's@^dbmongopwd=.*@dbmongopwd=@' ./options.conf
@@ -180,30 +184,31 @@ Print_HHVM() {
 }
 
 Uninstall_HHVM() {
-  [ -e "/lib/systemd/system/hhvm.service" ] && { systemctl disable hhvm > /dev/null 2>&1; rm -rf /lib/systemd/system/hhvm.service; }
-  [ -e "/etc/init.d/supervisord" ] && { service supervisord stop > /dev/null 2>&1; rm -rf /etc/supervisord.conf /etc/init.d/supervisord; }
+  [ -e "/lib/systemd/system/hhvm.service" ] && { systemctl disable hhvm > /dev/null 2>&1; rm -f /lib/systemd/system/hhvm.service; }
+  [ -e "/etc/init.d/supervisord" ] && { service supervisord stop > /dev/null 2>&1; rm -f /etc/supervisord.conf /etc/init.d/supervisord; }
   [ -e "/usr/bin/hhvm" ] && { rpm -e hhvm; rm -rf /etc/hhvm /var/log/hhvm /usr/bin/hhvm; echo "${CMSG}HHVM uninstall completed! ${CEND}"; }
 }
 
 Print_PureFtpd() {
   [ -e "${pureftpd_install_dir}" ] && echo "${pureftpd_install_dir}"
   [ -e "/etc/init.d/pureftpd" ] && echo "/etc/init.d/pureftpd"
+  [ -e "/lib/systemd/system/pureftpd.service" ] && echo "/lib/systemd/system/pureftpd.service"
 }
 
 Uninstall_PureFtpd() {
   [ -e "${pureftpd_install_dir}" ] && { service pureftpd stop > /dev/null 2>&1; rm -rf ${pureftpd_install_dir} /etc/init.d/pureftpd; echo "${CMSG}Pureftpd uninstall completed! ${CEND}"; }
+  [ -e "/lib/systemd/system/pureftpd.service" ] && { systemctl disable pureftpd > /dev/null 2>&1; rm -f /lib/systemd/system/pureftpd.service; }
 }
 
 Print_Redis() {
-  [ -e "$redis_install_dir" ] && echo "$redis_install_dir"
+  [ -e "${redis_install_dir}" ] && echo "${redis_install_dir}"
   [ -e "/etc/init.d/redis-server" ] && echo "/etc/init.d/redis-server"
   [ -e "/lib/systemd/system/redis-server.service" ] && echo '/lib/systemd/system/redis-server.service'
 }
 
 Uninstall_Redis() {
-  [ -e "$redis_install_dir" ] && { service redis-server stop > /dev/null 2>&1; rm -rf $redis_install_dir /etc/init.d/redis-server /usr/local/bin/redis-*; echo "${CMSG}Redis uninstall completed! ${CEND}"; }
+  [ -e "${redis_install_dir}" ] && { service redis-server stop > /dev/null 2>&1; rm -rf ${redis_install_dir} /etc/init.d/redis-server /usr/local/bin/redis-*; echo "${CMSG}Redis uninstall completed! ${CEND}"; }
   [ -e "/lib/systemd/system/redis-server.service" ] && { systemctl disable redis-server > /dev/null 2>&1; rm -f /lib/systemd/system/redis-server.service; }
-  [ -e "${php_install_dir}/etc/php.d/05-redis.ini" ] && { rm -rf ${php_install_dir}/etc/php.d/05-redis.ini; echo "${CMSG}Pecl_redis uninstall completed! ${CEND}"; }
 }
 
 Print_Memcached() {
@@ -214,8 +219,6 @@ Print_Memcached() {
 
 Uninstall_Memcached() {
   [ -e "${memcached_install_dir}" ] && { service memcached stop > /dev/null 2>&1; rm -rf ${memcached_install_dir} /etc/init.d/memcached /usr/bin/memcached; echo "${CMSG}Memcached uninstall completed! ${CEND}"; }
-  [ -e "${php_install_dir}/etc/php.d/05-memcache.ini" ] && rm -rf ${php_install_dir}/etc/php.d/05-memcache.ini
-  [ -e "${php_install_dir}/etc/php.d/05-memcached.ini" ] && rm -rf ${php_install_dir}/etc/php.d/05-memcached.ini
 }
 
 Print_openssl() {

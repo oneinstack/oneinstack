@@ -658,6 +658,9 @@ if [ ${ARG_NUM} == 0 ]; then
   done
 fi
 
+# install wget gcc curl python
+${PM} -y -q install wget gcc curl python
+
 # get the IP information
 IPADDR=$(./include/get_ipaddr.py)
 PUBLIC_IPADDR=$(./include/get_public_ipaddr.py)
@@ -666,8 +669,6 @@ IPADDR_COUNTRY=$(./include/get_ipaddr_state.py $PUBLIC_IPADDR)
 # Check download source packages
 . ./include/check_download.sh
 downloadDepsSrc=1
-[ "${PM}" == 'yum' ] && yum -y -q install wget gcc
-[ "${PM}" == 'apt' ] && apt-get -y -q install wget gcc
 checkDownload 2>&1 | tee -a ${oneinstack_dir}/install.log
 
 # del openssl for jcloud

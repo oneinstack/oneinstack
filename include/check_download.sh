@@ -822,7 +822,7 @@ checkDownload() {
     if [ "${PM}" == 'yum' ]; then
       echo "Download tmux for CentOS..."
       src_url=${mirrorLink}/libevent-${libevent_ver}.tar.gz && Download_src
-      src_url=https://github.com/tmux/tmux/releases/download/${tmux_ver}/tmux-${tmux_ver}.tar.gz && Download_src
+      src_url=${mirrorLink}/tmux-${tmux_ver}.tar.gz && Download_src
 
       echo "Download htop for CentOS..."
       src_url=http://hisham.hm/htop/releases/${htop_ver}/htop-${htop_ver}.tar.gz && Download_src
