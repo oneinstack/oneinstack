@@ -249,10 +249,10 @@ Upgrade_Apache() {
     make -j ${THREAD}
     if [ -e 'httpd' ]; then
       [[ -d ${apache_install_dir}_bak && -d ${apache_install_dir} ]] && rm -rf ${apache_install_dir}_bak
-      /etc/init.d/httpd stop
+      service httpd stop
       /bin/cp -R ${apache_install_dir}{,_bak}
       make install && unset LDFLAGS
-      /etc/init.d/httpd start
+      service httpd start
       popd > /dev/null
       echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}${OLD_apache_ver}${CEND} to ${CWARNING}${NEW_apache_ver}${CEND}"
       rm -rf httpd-${NEW_apache_ver} apr-${apr_ver} apr-util-${apr_util_ver}

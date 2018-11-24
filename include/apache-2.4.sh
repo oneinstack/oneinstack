@@ -54,12 +54,18 @@ Install_Apache24() {
   [ -n "`grep ^'export PATH=' /etc/profile`" -a -z "`grep ${apache_install_dir} /etc/profile`" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${apache_install_dir}/bin:\1@" /etc/profile
   . /etc/profile
 
-  /bin/cp ${apache_install_dir}/bin/apachectl /etc/init.d/httpd
-  sed -i '2a # chkconfig: - 85 15' /etc/init.d/httpd
-  sed -i '3a # description: Apache is a World Wide Web server. It is used to serve' /etc/init.d/httpd
-  chmod +x /etc/init.d/httpd
-  [ "${PM}" == 'yum' ] && { chkconfig --add httpd; chkconfig httpd on; }
-  [ "${PM}" == 'apt-get' ] && update-rc.d httpd defaults
+  if [ -e /bin/systemctl ]; then
+    /bin/cp ../init.d/httpd.service /lib/systemd/system/
+    sed -i "s@/usr/local/apache@${apache_install_dir}@g" /lib/systemd/system/httpd.service
+    systemctl enable httpd 
+  else
+    /bin/cp ${apache_install_dir}/bin/apachectl /etc/init.d/httpd
+    sed -i '2a # chkconfig: - 85 15' /etc/init.d/httpd
+    sed -i '3a # description: Apache is a World Wide Web server. It is used to serve' /etc/init.d/httpd
+    chmod +x /etc/init.d/httpd
+    [ "${PM}" == 'yum' ] && { chkconfig --add httpd; chkconfig httpd on; }
+    [ "${PM}" == 'apt-get' ] && update-rc.d httpd defaults
+  fi
 
   sed -i "s@^User daemon@User ${run_user}@" ${apache_install_dir}/conf/httpd.conf
   sed -i "s@^Group daemon@Group ${run_user}@" ${apache_install_dir}/conf/httpd.conf

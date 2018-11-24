@@ -96,7 +96,7 @@ Check_PHP_Extension() {
 
 # restart PHP
 Restart_PHP() {
-  [ -e "${apache_install_dir}/conf/httpd.conf" ] && /etc/init.d/httpd restart || /etc/init.d/php-fpm restart
+  [ -e "${apache_install_dir}/conf/httpd.conf" ] && service httpd restart || service php-fpm restart
 }
 
 # Check succ
