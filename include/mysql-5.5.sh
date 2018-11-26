@@ -92,6 +92,7 @@ server-id = 1
 
 init-connect = 'SET NAMES utf8mb4'
 character-set-server = utf8mb4
+default-time-zoen = '+08:00'
 
 skip-name-resolve
 #skip-networking
