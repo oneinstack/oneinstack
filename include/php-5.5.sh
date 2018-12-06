@@ -128,7 +128,7 @@ Install_PHP55() {
 
   sed -i "s@^memory_limit.*@memory_limit = ${Memory_limit}M@" ${php_install_dir}/etc/php.ini
   sed -i 's@^output_buffering =@output_buffering = On\noutput_buffering =@' ${php_install_dir}/etc/php.ini
-  sed -i 's@^;cgi.fix_pathinfo.*@cgi.fix_pathinfo=0@' ${php_install_dir}/etc/php.ini
+  #sed -i 's@^;cgi.fix_pathinfo.*@cgi.fix_pathinfo=0@' ${php_install_dir}/etc/php.ini
   sed -i 's@^short_open_tag = Off@short_open_tag = On@' ${php_install_dir}/etc/php.ini
   sed -i 's@^expose_php = On@expose_php = Off@' ${php_install_dir}/etc/php.ini
   sed -i 's@^request_order.*@request_order = "CGP"@' ${php_install_dir}/etc/php.ini
