@@ -90,6 +90,10 @@ ntpdate pool.ntp.org
 
 # iptables
 if [ "${iptables_yn}" == 'y' ]; then
+  apt-get -y install debconf-utils
+  echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
+  echo iptables-persistent iptables-persistent/autosave_v6 boolean true | sudo debconf-set-selections
+  apt-get -y install iptables-persistent
   if [ -e "/etc/iptables/rules.v4" ] && [ -n "$(grep '^:INPUT DROP' /etc/iptables/rules.v4)" -a -n "$(grep 'NEW -m tcp --dport 22 -j ACCEPT' /etc/iptables/rules.v4)" -a -n "$(grep 'NEW -m tcp --dport 80 -j ACCEPT' /etc/iptables/rules.v4)" ]; then
     IPTABLES_STATUS=yes
   else
@@ -97,8 +101,6 @@ if [ "${iptables_yn}" == 'y' ]; then
   fi
 
   if [ "${IPTABLES_STATUS}" == "no" ]; then
-    apt-get -y --force-yes install iptables-persistent &&
-    [ -e "/etc/iptables/rules.v4" ] && /bin/mv /etc/iptables/rules.v4{,_bk}
     cat > /etc/iptables/rules.v4 << EOF
 # Firewall configuration written by system-config-securitylevel
 # Manual customization of this file is not recommended.
@@ -119,7 +121,11 @@ EOF
 
   FW_PORT_FLAG=$(grep -ow "dport ${ssh_port}" /etc/iptables/rules.v4)
   [ -z "${FW_PORT_FLAG}" -a "${ssh_port}" != "22" ] && sed -i "s@dport 22 -j ACCEPT@&\n-A INPUT -p tcp -m state --state NEW -m tcp --dport ${ssh_port} -j ACCEPT@" /etc/iptables/rules.v4
-  iptables-save < /etc/iptables/rules.v4
+  iptables-restore < /etc/iptables/rules.v4
+  /bin/cp /etc/iptables/rules.v{4,6}
+  sed -i 's@icmp@icmpv6@g' /etc/iptables/rules.v6
+  ip6tables-restore < /etc/iptables/rules.v6
+  ip6tables-save > /etc/iptables/rules.v6 
 fi
 service rsyslog restart
 service ssh restart
