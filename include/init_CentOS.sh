@@ -145,6 +145,7 @@ EOF
   [ -z "${FW_PORT_FLAG}" -a "${ssh_port}" != "22" ] && sed -i "s@dport 22 -j ACCEPT@&\n-A INPUT -p tcp -m state --state NEW -m tcp --dport ${ssh_port} -j ACCEPT@" /etc/sysconfig/iptables
   /bin/cp /etc/sysconfig/{iptables,ip6tables}
   sed -i 's@icmp@icmpv6@g' /etc/sysconfig/ip6tables 
+  iptables-restore < /etc/sysconfig/iptables
   ip6tables-restore < /etc/sysconfig/ip6tables
   service iptables save
   service ip6tables save

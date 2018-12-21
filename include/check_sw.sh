@@ -44,7 +44,7 @@ installDepsDebian() {
 }
 
 installDepsCentOS() {
-  sed -i 's@^exclude@#exclude@' /etc/yum.conf
+  [ -e '/etc/yum.conf' ] && sed -i 's@^exclude@#exclude@' /etc/yum.conf
   yum clean all
 
   yum makecache
