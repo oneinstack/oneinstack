@@ -88,7 +88,7 @@ pecl_redis_ver=4.2.0
 memcached_ver=1.5.12
 libmemcached_ver=1.0.18
 pecl_memcached_ver=2.2.0
-pecl_memcached_php7_ver=3.1.0
+pecl_memcached_php7_ver=3.1.2
 pecl_memcache_ver=3.0.8
 
 # MongoDB
