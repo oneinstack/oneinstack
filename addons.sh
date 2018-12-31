@@ -50,7 +50,6 @@ showhelp() {
   --fail2ban                  Fail2ban
   --ngx_lua_waf               Ngx_lua_waf
   --python                    Python3.6
-  --panel                     OneinStack Panel
   "
 }
 

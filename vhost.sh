@@ -19,7 +19,6 @@ printf "
 # Check if user is root
 [ $(id -u) != '0' ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
 
-ARG1=$1
 oneinstack_dir=$(dirname "`readlink -f $0`")
 pushd ${oneinstack_dir} > /dev/null
 . ./options.conf
@@ -28,16 +27,75 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/check_os.sh
 . ./include/get_char.sh
 
-Usage() {
-  printf "
-Usage: $0 [ ${CMSG}add${CEND} | ${CMSG}del${CEND} | ${CMSG}list${CEND} | ${CMSG}dnsapi${CEND} ]
-${CMSG}add${CEND}      --->Add Virtualhost
-${CMSG}del${CEND}      --->Delete Virtualhost
-${CMSG}list${CEND}     --->List Virtualhost
-${CMSG}dnsapi${CEND}   --->Use dns API to automatically issue Let's Encrypt Cert
-
-"
+showhelp() {
+  echo
+  echo "Usage: $0  command ...[parameters]....
+  --help, -h                  Show this help message
+  --quiet, -q                 quiet operation
+  --list, -l                  List Virtualhost
+  --add                       Add Virtualhost
+  --delete, --del             Delete Virtualhost
+  --httponly                  Use HTTP Only
+  --selfsigned                Use your own SSL Certificate and Key
+  --letsencrypt               Use Let's Encrypt to Create SSL Certificate and Key
+  --dnsapi                    Use dns API to automatically issue Let's Encrypt Cert
+  "
 }
+
+ARG_NUM=$#
+TEMP=`getopt -o hql --long help,quiet,list,add,delete,del,httponly,selfsigned,letsencrypt,dnsapi -- "$@" 2>/dev/null`
+[ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && showhelp && exit 1
+eval set -- "${TEMP}"
+while :; do
+  [ -z "$1" ] && break;
+  case "$1" in
+    -h|--help)
+      showhelp; exit 0
+      ;;
+    -q|--quiet)
+      quiet_yn=y; shift 1
+      ;;
+    -l|--list)
+      list_yn=y; shift 1
+      ;;
+    --add)
+      add_yn=y; shift 1
+      ;;
+    --delete|--del)
+      delete_yn=y; shift 1
+      ;;
+    --httponly)
+      sslquiet_yn=y
+      httponly_yn=y
+      Domian_Mode=1
+      shift 1
+      ;;
+    --selfsigned)
+      sslquiet_yn=y
+      selfsigned_yn=y
+      Domian_Mode=2
+      shift 1
+      ;;
+    --letsencrypt)
+      sslquiet_yn=y
+      letsencrypt_yn=y
+      Domian_Mode=3
+      shift 1
+      ;;
+    --dnsapi)
+      sslquiet_yn=y
+      dnsapi_yn=y
+      letsencrypt_yn=y
+      shift 1
+      ;;
+    --)
+      shift
+      ;;
+    *)
+      echo "${CWARNING}ERROR: unknown argument! ${CEND}" && showhelp && exit 1
+      ;;
+  esac
+done
 
 Choose_env() {
   if [ -e "${apache_install_dir}/bin/apachectl" ];then
@@ -174,8 +232,8 @@ If you enter '.', the field will be left blank.
 
     openssl req -new -newkey rsa:2048 -sha256 -nodes -out ${PATH_SSL}/${domain}.csr -keyout ${PATH_SSL}/${domain}.key -subj "/C=${SELFSIGNEDSSL_C}/ST=${SELFSIGNEDSSL_ST}/L=${SELFSIGNEDSSL_L}/O=${SELFSIGNEDSSL_O}/OU=${SELFSIGNEDSSL_OU}/CN=${domain}" > /dev/null 2>&1
     openssl x509 -req -days 36500 -sha256 -in ${PATH_SSL}/${domain}.csr -signkey ${PATH_SSL}/${domain}.key -out ${PATH_SSL}/${domain}.crt > /dev/null 2>&1
-  elif [ "${Domian_Mode}" == '3' -o "${ARG1}" == 'dnsapi' ]; then
-    if [ "${moredomain}" == "*.${domain}" -o "${ARG1}" == 'dnsapi' ]; then
+  elif [ "${Domian_Mode}" == '3' -o "${dnsapi_yn}" == 'y' ]; then
+    if [ "${moredomain}" == "*.${domain}" -o "${dnsapi_yn}" == 'y' ]; then
       while :; do echo
         echo 'Please select DNS provider:'
         echo "${CMSG}dp${CEND},${CMSG}cx${CEND},${CMSG}ali${CEND},${CMSG}cf${CEND},${CMSG}aws${CEND},${CMSG}linode${CEND},${CMSG}he${CEND},${CMSG}namesilo${CEND},${CMSG}dgon${CEND},${CMSG}freedns${CEND},${CMSG}gd${CEND},${CMSG}namecom${CEND} and so on."
@@ -264,14 +322,14 @@ Print_ssl() {
     echo "$(printf "%-30s" "Self-signed SSL Certificate:")${CMSG}${PATH_SSL}/${domain}.crt${CEND}"
     echo "$(printf "%-30s" "SSL Private Key:")${CMSG}${PATH_SSL}/${domain}.key${CEND}"
     echo "$(printf "%-30s" "SSL CSR File:")${CMSG}${PATH_SSL}/${domain}.csr${CEND}"
-  elif [ "${Domian_Mode}" == '3' -o "${ARG1}" == 'dnsapi' ]; then
+  elif [ "${Domian_Mode}" == '3' -o "${dnsapi_yn}" == 'y' ]; then
     echo "$(printf "%-30s" "Let's Encrypt SSL Certificate:")${CMSG}${PATH_SSL}/${domain}.crt${CEND}"
     echo "$(printf "%-30s" "SSL Private Key:")${CMSG}${PATH_SSL}/${domain}.key${CEND}"
   fi
 }
 
 Input_Add_domain() {
-  if [ "${ARG1}" != 'dnsapi' ]; then
+  if [ "${sslquiet_yn}" != 'y' ]; then
     while :;do
       printf "
 What Are You Doing?
@@ -288,7 +346,7 @@ What Are You Doing?
       fi
     done
   fi
-  if [ "${Domian_Mode}" == '3' -o "${ARG1}" == 'dnsapi' ] && [ ! -e ~/.acme.sh/acme.sh ]; then
+  if [ "${Domian_Mode}" == '3' -o "${dnsapi_yn}" == 'y' ] && [ ! -e ~/.acme.sh/acme.sh ]; then
     pushd ${oneinstack_dir}/src > /dev/null
     [ ! -e acme.sh-master.tar.gz ] && wget -qc http://mirrors.linuxeye.com/oneinstack/src/acme.sh-master.tar.gz
     tar xzf acme.sh-master.tar.gz
@@ -298,7 +356,7 @@ What Are You Doing?
     popd > /dev/null
   fi
   [ -e ~/.acme.sh/account.conf ] && sed -i '/^CERT_HOME=/d' ~/.acme.sh/account.conf
-  if [[ "${Domian_Mode}" =~ ^[2-3]$ ]] || [ "${ARG1}" == 'dnsapi' ]; then
+  if [[ "${Domian_Mode}" =~ ^[2-3]$ ]] || [ "${dnsapi_yn}" == 'y' ]; then
     if [ -e "${web_install_dir}/sbin/nginx" ]; then
       nginx_ssl_flag=y
       PATH_SSL=${web_install_dir}/conf/ssl
@@ -938,8 +996,10 @@ Del_NGX_Vhost() {
                 fi
               done
               if [ "${Del_Vhost_wwwroot_flag}" == 'y' ]; then
-                echo "Press Ctrl+c to cancel or Press any key to continue..."
-                char=$(get_char)
+		if [ "${quiet_yn}" != 'y' ]; then
+                  echo "Press Ctrl+c to cancel or Press any key to continue..."
+                  char=$(get_char)
+		fi
                 rm -rf ${Directory}
               fi
               echo
@@ -988,8 +1048,10 @@ Del_Apache_Vhost() {
               done
 
               if [ "${Del_Vhost_wwwroot_flag}" == 'y' ]; then
-                echo "Press Ctrl+c to cancel or Press any key to continue..."
-                char=$(get_char)
+		if [ "${quiet_yn}" != 'y' ]; then
+                  echo "Press Ctrl+c to cancel or Press any key to continue..."
+                  char=$(get_char)
+		fi
                 rm -rf ${Directory}
               fi
               echo "${CSUCCESS}Domain: ${domain} has been deleted.${CEND}"
@@ -1040,8 +1102,10 @@ Del_Tomcat_Vhost() {
               done
 
               if [ "${Del_Vhost_wwwroot_flag}" == 'y' ]; then
-                echo "Press Ctrl+c to cancel or Press any key to continue..."
-                char=$(get_char)
+		if [ "${quiet_yn}" != 'y' ]; then
+                  echo "Press Ctrl+c to cancel or Press any key to continue..."
+                  char=$(get_char)
+		fi
                 rm -rf ${Directory}
               fi
               echo "${CSUCCESS}Domain: ${domain} has been deleted.${CEND}"
@@ -1060,37 +1124,22 @@ Del_Tomcat_Vhost() {
 }
 
 List_Vhost() {
+  [ -e "${tomcat_install_dir}/conf/server.xml" -a ! -d "${web_install_dir}/sbin/nginx" ] && Domain_List=$(ls ${tomcat_install_dir}/conf/vhost | grep -v 'localhost.xml' | sed "s@.xml@@g")
   [ -d "${web_install_dir}/conf/vhost" ] && Domain_List=$(ls ${web_install_dir}/conf/vhost | sed "s@.conf@@g")
   [ -e "${apache_install_dir}/bin/httpd" -a ! -d "${web_install_dir}/conf/vhost" ] && Domain_List=$(ls ${apache_install_dir}/conf/vhost | grep -v '0.conf' | sed "s@.conf@@g")
-  [ -e "${tomcat_install_dir}/conf/server.xml" -a ! -d "${web_install_dir}/sbin/nginx" ] && Domain_List=$(ls ${tomcat_install_dir}/conf/vhost | grep -v 'localhost.xml' | sed "s@.xml@@g")
   if [ -n "${Domain_List}" ]; then
     echo
     echo "Virtualhost list:"
-    for D in $Domain_List; do echo ${CMSG}$D${CEND}; done
+    for D in ${Domain_List}; do echo ${CMSG}${D}${CEND}; done
   else
     echo "${CWARNING}Virtualhost was not exist! ${CEND}"
   fi
 }
 
-if [ $# == 0 ]; then
+if [ ${ARG_NUM} == 0 ]; then
   Add_Vhost
-elif [ $# == 1 ]; then
-  case ${ARG1} in
-  add|dnsapi)
-    Add_Vhost
-    ;;
-  del)
-    Del_NGX_Vhost
-    Del_Apache_Vhost
-    Del_Tomcat_Vhost
-    ;;
-  list)
-    List_Vhost
-    ;;
-  *)
-    Usage
-    ;;
-  esac
 else
-  Usage
+  [ "${add_yn}" == 'y' -o "${sslquiet_yn}" == 'y' ] && Add_Vhost
+  [ "${list_yn}" == 'y' ] && List_Vhost
+  [ "${delete_yn}" == 'y' ] && { Del_NGX_Vhost; Del_Apache_Vhost; Del_Tomcat_Vhost; }
 fi
