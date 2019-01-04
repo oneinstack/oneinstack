@@ -137,6 +137,7 @@ What Are You Doing?
         2)
           ACTION_FUN
           if [ "${install_yn}" = 'y' ]; then
+            Install_Python
             Install_fail2ban
           elif [ "${uninstall_yn}" = 'y' ]; then
             Uninstall_fail2ban
@@ -189,6 +190,7 @@ else
   fi
   if [ "${fail2ban_yn}" == 'y' ]; then
     if [ "${install_yn}" = 'y' ]; then
+      Install_Python
       Install_fail2ban
     elif [ "${uninstall_yn}" = 'y' ]; then
       Uninstall_fail2ban
