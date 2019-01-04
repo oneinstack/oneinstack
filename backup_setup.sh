@@ -56,12 +56,12 @@ while :; do echo
 done
 
 sed -i 's@^backup_destination=.*@backup_destination=@' ./options.conf
-[ `echo ${desc_bk} | grep -w 1` ] && sed -i 's@^backup_destination=.*@backup_destination=local@' ./options.conf
-[ `echo ${desc_bk} | grep -w 2` ] && sed -i 's@^backup_destination=.*@&,remote@' ./options.conf
-[ `echo ${desc_bk} | grep -w 3` ] && sed -i 's@^backup_destination=.*@&,oss@' ./options.conf
-[ `echo ${desc_bk} | grep -w 4` ] && sed -i 's@^backup_destination=.*@&,cos@' ./options.conf
-[ `echo ${desc_bk} | grep -w 5` ] && sed -i 's@^backup_destination=.*@&,upyun@' ./options.conf
-[ `echo ${desc_bk} | grep -w 6` ] && sed -i 's@^backup_destination=.*@&,qiniu@' ./options.conf
+[ -n `echo ${desc_bk} | grep -w 1` ] && sed -i 's@^backup_destination=.*@backup_destination=local@' ./options.conf
+[ -n `echo ${desc_bk} | grep -w 2` ] && sed -i 's@^backup_destination=.*@&,remote@' ./options.conf
+[ -n `echo ${desc_bk} | grep -w 3` ] && sed -i 's@^backup_destination=.*@&,oss@' ./options.conf
+[ -n `echo ${desc_bk} | grep -w 4` ] && sed -i 's@^backup_destination=.*@&,cos@' ./options.conf
+[ -n `echo ${desc_bk} | grep -w 5` ] && sed -i 's@^backup_destination=.*@&,upyun@' ./options.conf
+[ -n `echo ${desc_bk} | grep -w 6` ] && sed -i 's@^backup_destination=.*@&,qiniu@' ./options.conf
 sed -i 's@^backup_destination=,@backup_destination=@' ./options.conf
 
 while :; do echo
@@ -143,7 +143,7 @@ echo "You have to backup the content:"
 [ "${content_bk}" != '2' ] && echo "Database: ${CMSG}${db_name}${CEND}"
 [ "${content_bk}" != '1' ] && echo "Website: ${CMSG}${website_name}${CEND}"
 
-if [ `echo ${desc_bk} | grep -e 2` ]; then
+if [ -n `echo ${desc_bk} | grep -w 2` ]; then
   > tools/iplist.txt
   while :; do echo
     read -e -p "Please enter the remote host ip: " remote_ip
@@ -176,7 +176,7 @@ if [ `echo ${desc_bk} | grep -e 2` ]; then
   done
 fi
 
-if [ `echo ${desc_bk} | grep -e 3` ]; then
+if [ -n `echo ${desc_bk} | grep -w 3` ]; then
   if [ ! -e "/usr/local/bin/ossutil" ]; then
     wget -qc http://gosspublic.alicdn.com/ossutil/1.4.2/ossutil${OS_BIT} -O /usr/local/bin/ossutil
     chmod +x /usr/local/bin/ossutil
@@ -239,7 +239,7 @@ if [ `echo ${desc_bk} | grep -e 3` ]; then
   done
 fi
 
-if [ `echo ${desc_bk} | grep -e 4` ]; then
+if [ -n `echo ${desc_bk} | grep -w 4` ]; then
   Install_Python
   [ ! -e "${python_install_dir}/lib/coscmd" ] && ${python_install_dir}/bin/pip install coscmd >/dev/null 2>&1
   while :; do echo
@@ -316,7 +316,7 @@ if [ `echo ${desc_bk} | grep -e 4` ]; then
   done
 fi
 
-if [ `echo ${desc_bk} | grep -e 5` ]; then
+if [ -n `echo ${desc_bk} | grep -w 5` ]; then
   if [ ! -e "/usr/local/bin/upx" ]; then
     if [ "${OS_BIT}" == '64' ]; then
       wget -qc http://collection.b0.upaiyun.com/softwares/upx/upx-linux-amd64-v0.2.3 -O /usr/local/bin/upx
@@ -346,7 +346,7 @@ if [ `echo ${desc_bk} | grep -e 5` ]; then
   done
 fi
 
-if [ `echo ${desc_bk} | grep -e 6` ]; then
+if [ -n `echo ${desc_bk} | grep -w 6` ]; then
   if [ ! -e "/usr/local/bin/qrsctl" ]; then
     if [ "${OS_BIT}" == '64' ]; then
       wget -qc http://devtools.qiniu.com/linux/amd64/qrsctl -O /usr/local/bin/qrsctl
@@ -356,8 +356,8 @@ if [ `echo ${desc_bk} | grep -e 6` ]; then
     chmod +x /usr/local/bin/qrsctl
   fi
   if [ ! -e "/usr/local/bin/qshell" ]; then
-    wget -qc http://devtools.qiniu.com/qshell-v2.1.8.zip -O /tmp/qshell-v2.1.8.zip
-    unzip -q /tmp/qshell-v2.1.8.zip -d /tmp/
+    wget -qc http://devtools.qiniu.com/qshell-v2.3.5.zip -O /tmp/qshell-v2.3.5.zip
+    unzip -q /tmp/qshell-v2.3.5.zip -d /tmp/
     if [ "${OS_BIT}" == '64' ]; then
       /bin/cp /tmp/qshell-linux-x64 /usr/local/bin/qshell
     elif [ "${OS_BIT}" == '32' ]; then
