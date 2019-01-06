@@ -27,7 +27,7 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/check_os.sh
 . ./include/get_char.sh
 
-showhelp() {
+Show_Help() {
   echo
   echo "Usage: $0  command ...[parameters]....
   --help, -h                  Show this help message
@@ -44,13 +44,13 @@ showhelp() {
 
 ARG_NUM=$#
 TEMP=`getopt -o hql --long help,quiet,list,add,delete,del,httponly,selfsigned,letsencrypt,dnsapi -- "$@" 2>/dev/null`
-[ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && showhelp && exit 1
+[ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
   [ -z "$1" ] && break;
   case "$1" in
     -h|--help)
-      showhelp; exit 0
+      Show_Help; exit 0
       ;;
     -q|--quiet)
       quiet_yn=y; shift 1
@@ -92,12 +92,12 @@ while :; do
       shift
       ;;
     *)
-      echo "${CWARNING}ERROR: unknown argument! ${CEND}" && showhelp && exit 1
+      echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
       ;;
   esac
 done
 
-Choose_env() {
+Choose_ENV() {
   if [ -e "${apache_install_dir}/bin/apachectl" ];then
     [ "$(${apache_install_dir}/bin/apachectl -v | awk -F'.' /version/'{print $2}')" == '4' ] && { Apache_flag=24; Apache_grant='Require all granted'; }
     [ "$(${apache_install_dir}/bin/apachectl -v | awk -F'.' /version/'{print $2}')" == '2' ] && Apache_flag=22
@@ -317,7 +317,7 @@ EOF
   fi
 }
 
-Print_ssl() {
+Print_SSL() {
   if [ "${Domian_Mode}" == '2' ]; then
     echo "$(printf "%-30s" "Self-signed SSL Certificate:")${CMSG}${PATH_SSL}/${domain}.crt${CEND}"
     echo "$(printf "%-30s" "SSL Private Key:")${CMSG}${PATH_SSL}/${domain}.key${CEND}"
@@ -616,7 +616,7 @@ EOF
   echo "$(printf "%-30s" "Nginx Virtualhost conf:")${CMSG}${web_install_dir}/conf/vhost/${domain}.conf${CEND}"
   echo "$(printf "%-30s" "Tomcat Virtualhost conf:")${CMSG}${tomcat_install_dir}/conf/vhost/${domain}.xml${CEND}"
   echo "$(printf "%-30s" "Directory of:")${CMSG}${vhostdir}${CEND}"
-  Print_ssl
+  Print_SSL
 }
 
 Create_tomcat_conf() {
@@ -645,7 +645,7 @@ EOF
   echo "$(printf "%-30s" "index url:")${CMSG}http://${domain}:8080/${CEND}"
 }
 
-Create_nginx_php-fpm_hhvm_conf() {
+Create_nginx_phpfpm_hhvm_conf() {
   [ ! -d ${web_install_dir}/conf/vhost ] && mkdir ${web_install_dir}/conf/vhost
   cat > ${web_install_dir}/conf/vhost/${domain}.conf << EOF
 server {
@@ -733,7 +733,7 @@ EOF
   echo "$(printf "%-30s" "Virtualhost conf:")${CMSG}${web_install_dir}/conf/vhost/${domain}.conf${CEND}"
   echo "$(printf "%-30s" "Directory of:")${CMSG}${vhostdir}${CEND}"
   [ "${rewrite_flag}" == 'y' -a "${rewrite}" != 'magento2' -a "${rewrite}" != 'pathinfo' ] && echo "$(printf "%-30s" "Rewrite rule:")${CMSG}${web_install_dir}/conf/rewrite/${rewrite}.conf${CEND}"
-  Print_ssl
+  Print_SSL
 }
 
 Apache_log() {
@@ -823,10 +823,10 @@ EOF
   echo "$(printf "%-30s" "Your domain:")${CMSG}${domain}${CEND}"
   echo "$(printf "%-30s" "Virtualhost conf:")${CMSG}${apache_install_dir}/conf/vhost/${domain}.conf${CEND}"
   echo "$(printf "%-30s" "Directory of:")${CMSG}${vhostdir}${CEND}"
-  Print_ssl
+  Print_SSL
 }
 
-Create_nginx_apache_mod-php_conf() {
+Create_nginx_apache_modphp_conf() {
   # Nginx/Tengine/OpenResty
   [ ! -d ${web_install_dir}/conf/vhost ] && mkdir ${web_install_dir}/conf/vhost
   cat > ${web_install_dir}/conf/vhost/${domain}.conf << EOF
@@ -924,12 +924,12 @@ EOF
   echo "$(printf "%-30s" "Nginx Virtualhost conf:")${CMSG}${web_install_dir}/conf/vhost/${domain}.conf${CEND}"
   echo "$(printf "%-30s" "Apache Virtualhost conf:")${CMSG}${apache_install_dir}/conf/vhost/${domain}.conf${CEND}"
   echo "$(printf "%-30s" "Directory of:")${CMSG}${vhostdir}${CEND}"
-  Print_ssl
+  Print_SSL
 }
 
 Add_Vhost() {
   if [ -e "${web_install_dir}/sbin/nginx" -a ! -e "${apache_install_dir}/bin/httpd" ]; then
-    Choose_env
+    Choose_ENV
     Input_Add_domain
     Nginx_anti_hotlinking
     if [ "${NGX_FLAG}" == "java" ]; then
@@ -938,19 +938,19 @@ Add_Vhost() {
     else
       Nginx_rewrite
       Nginx_log
-      Create_nginx_php-fpm_hhvm_conf
+      Create_nginx_phpfpm_hhvm_conf
     fi
   elif [ ! -e "${web_install_dir}/sbin/nginx" -a -e "${apache_install_dir}/bin/httpd" ]; then
-    Choose_env
+    Choose_ENV
     Input_Add_domain
     Apache_log
     Create_apache_conf
   elif [ ! -e "${web_install_dir}/sbin/nginx" -a ! -e "${apache_install_dir}/bin/httpd" -a -e "${tomcat_install_dir}/conf/server.xml" ]; then
-    Choose_env
+    Choose_ENV
     Input_Add_domain
     Create_tomcat_conf
   elif [ -e "${web_install_dir}/sbin/nginx" -a -e "${apache_install_dir}/bin/httpd" ]; then
-    Choose_env
+    Choose_ENV
     Input_Add_domain
     Nginx_anti_hotlinking
     if [ "${NGX_FLAG}" == "java" ]; then
@@ -959,11 +959,11 @@ Add_Vhost() {
     elif [ "${NGX_FLAG}" == "hhvm" ]; then
       Nginx_rewrite
       Nginx_log
-      Create_nginx_php-fpm_hhvm_conf
+      Create_nginx_phpfpm_hhvm_conf
     elif [ "${NGX_FLAG}" == "php" ]; then
       Nginx_log
       Apache_log
-      Create_nginx_apache_mod-php_conf
+      Create_nginx_apache_modphp_conf
     fi
   else
     echo "Error! ${CFAILURE}Web server${CEND} not found!"

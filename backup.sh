@@ -98,7 +98,7 @@ DB_GDRIVE_BK() {
   done
 }
 
-WEB_Local_BK() {
+WEB_LOCAL_BK() {
   for W in `echo ${website_name} | tr ',' ' '`
   do
     ./website_bk.sh $W
@@ -108,12 +108,12 @@ WEB_Local_BK() {
 WEB_Remote_BK() {
   for W in `echo ${website_name} | tr ',' ' '`
   do
-    if [ `du -sm "${wwwroot_dir}/$WebSite" | awk '{print $1}'` -lt 1024 ]; then
+    if [ `du -sm "${wwwroot_dir}/${WebSite}" | awk '{print $1}'` -lt 2048 ]; then
       ./website_bk.sh $W
       Web_GREP="Web_${W}_`date +%Y%m%d`"
       Web_FILE=`ls -lrt ${backup_dir} | grep ${Web_GREP} | tail -1 | awk '{print $NF}'`
-      echo "file:::${backup_dir}/$Web_FILE ${backup_dir} push" >> config_backup.txt
-      echo "com:::[ -e "${backup_dir}/$Web_FILE" ] && rm -rf ${backup_dir}/Web_${W}_$(date +%Y%m%d --date="${expired_days} days ago")_*.tgz" >> config_backup.txt
+      echo "file:::${backup_dir}/${Web_FILE} ${backup_dir} push" >> config_backup.txt
+      echo "com:::[ -e "${backup_dir}/${Web_FILE}" ] && rm -rf ${backup_dir}/Web_${W}_$(date +%Y%m%d --date="${expired_days} days ago")_*.tgz" >> config_backup.txt
     else
       echo "file:::${wwwroot_dir}/$W ${backup_dir} push" >> config_backup.txt
     fi
@@ -123,7 +123,7 @@ WEB_Remote_BK() {
 WEB_OSS_BK() {
   for W in `echo $website_name | tr ',' ' '`
   do
-    [ ! -e "${wwwroot_dir}/$WebSite" ] && { echo "[${wwwroot_dir}/$WebSite] not exist"; break; }
+    [ ! -e "${wwwroot_dir}/${WebSite}" ] && { echo "[${wwwroot_dir}/${WebSite}] not exist"; break; }
     PUSH_FILE="${backup_dir}/Web_${W}_$(date +%Y%m%d_%H).tgz"
     if [ ! -e "${PUSH_FILE}" ]; then
       pushd ${wwwroot_dir} > /dev/null
@@ -138,7 +138,7 @@ WEB_OSS_BK() {
 WEB_COS_BK() {
   for W in `echo ${website_name} | tr ',' ' '`
   do
-    [ ! -e "${wwwroot_dir}/$WebSite" ] && { echo "[${wwwroot_dir}/$WebSite] not exist"; break; }
+    [ ! -e "${wwwroot_dir}/${WebSite}" ] && { echo "[${wwwroot_dir}/${WebSite}] not exist"; break; }
     PUSH_FILE="${backup_dir}/Web_${W}_$(date +%Y%m%d_%H).tgz"
     if [ ! -e "${PUSH_FILE}" ]; then
       pushd ${wwwroot_dir} > /dev/null
@@ -156,7 +156,7 @@ WEB_COS_BK() {
 WEB_UPYUN_BK() {
   for W in `echo ${website_name} | tr ',' ' '`
   do
-    [ ! -e "${wwwroot_dir}/$WebSite" ] && { echo "[${wwwroot_dir}/$WebSite] not exist"; break; }
+    [ ! -e "${wwwroot_dir}/${WebSite}" ] && { echo "[${wwwroot_dir}/${WebSite}] not exist"; break; }
     [ ! -e "${backup_dir}" ] && mkdir -p ${backup_dir}
     PUSH_FILE="${backup_dir}/Web_${W}_$(date +%Y%m%d_%H).tgz"
     if [ ! -e "${PUSH_FILE}" ]; then
@@ -175,7 +175,7 @@ WEB_UPYUN_BK() {
 WEB_QINIU_BK() {
   for W in `echo ${website_name} | tr ',' ' '`
   do
-    [ ! -e "${wwwroot_dir}/$WebSite" ] && { echo "[${wwwroot_dir}/$WebSite] not exist"; break; }
+    [ ! -e "${wwwroot_dir}/${WebSite}" ] && { echo "[${wwwroot_dir}/${WebSite}] not exist"; break; }
     [ ! -e "${backup_dir}" ] && mkdir -p ${backup_dir}
     PUSH_FILE="${backup_dir}/Web_${W}_$(date +%Y%m%d_%H).tgz"
     if [ ! -e "${PUSH_FILE}" ]; then
@@ -195,7 +195,7 @@ WEB_QINIU_BK() {
 WEB_GDRIVE_BK() {
   for W in `echo ${website_name} | tr ',' ' '`
   do
-    [ ! -e "${wwwroot_dir}/$WebSite" ] && { echo "[${wwwroot_dir}/$WebSite] not exist"; break; }
+    [ ! -e "${wwwroot_dir}/${WebSite}" ] && { echo "[${wwwroot_dir}/${WebSite}] not exist"; break; }
     [ ! -e "${backup_dir}" ] && mkdir -p ${backup_dir}
     PUSH_FILE="${backup_dir}/Web_${W}_$(date +%Y%m%d_%H).tgz"
     if [ ! -e "${PUSH_FILE}" ]; then
@@ -217,7 +217,7 @@ for DEST in `echo ${backup_destination} | tr ',' ' '`
 do
   if [ "${DEST}" == 'local' ]; then
     [ -n "`echo ${backup_content} | grep -ow db`" ] && DB_Local_BK
-    [ -n "`echo ${backup_content} | grep -ow web`" ] && WEB_Local_BK
+    [ -n "`echo ${backup_content} | grep -ow web`" ] && WEB_LOCAL_BK
   fi
   if [ "${DEST}" == 'remote' ]; then
     echo "com:::[ ! -e "${backup_dir}" ] && mkdir -p ${backup_dir}" > config_backup.txt
