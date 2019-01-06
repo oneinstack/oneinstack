@@ -32,7 +32,7 @@ pushd ${oneinstack_dir}/src > /dev/null
 
 PUBLIC_IPADDR=$(../include/get_public_ipaddr.py)
 
-showhelp() {
+Show_Help() {
   echo
   echo "Usage: $0  command ...[parameters]....
   --help, -h                  Show this help message
@@ -48,13 +48,13 @@ showhelp() {
 }
 ARG_NUM=$#
 TEMP=`getopt -o hqiu --long help,quiet,install,uninstall,libev,python,adduser,password:,port: -- "$@" 2>/dev/null`
-[ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && showhelp && exit 1
+[ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
   [ -z "$1" ] && break;
   case "$1" in
     -h|--help)
-      showhelp; exit 0
+      Show_Help; exit 0
       ;;
     -q|--quiet)
       quiet_yn=y; shift 1
@@ -84,7 +84,7 @@ while :; do
       shift
       ;;
     *)
-      echo "${CWARNING}ERROR: unknown argument! ${CEND}" && showhelp && exit 1
+      echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
       ;;
   esac
 done
@@ -104,7 +104,7 @@ AddUser_SS() {
   done
 }
 
-Iptables_set() {
+Iptables() {
   if [ -e '/etc/sysconfig/iptables' ]; then
     SS_Already_port=$(grep -oE '9[0-9][0-9][0-9]' /etc/sysconfig/iptables | head -n 1)
   elif [ -e '/etc/iptables/rules.v4' ]; then
@@ -174,7 +174,7 @@ Def_parameter() {
     fi
   done
   AddUser_SS
-  Iptables_set
+  Iptables
   if [ "${PM}" == 'yum' ]; then
     pkgList="wget unzip openssl-devel gcc swig autoconf libtool libevent automake make curl curl-devel zlib-devel perl perl-devel cpio expat-devel gettext-devel git asciidoc xmlto c-ares-devel pcre-devel udns-devel libev-devel"
     for Package in ${pkgList}; do
@@ -189,7 +189,7 @@ Def_parameter() {
   fi
 }
 
-Install_SS-python() {
+Install_SS_python() {
   Install_Python
   ${python_install_dir}/bin/pip install M2Crypto
   ${python_install_dir}/bin/pip install greenlet
@@ -215,7 +215,7 @@ Install_SS-python() {
   fi
 }
 
-Install_SS-libev() {
+Install_SS_libev() {
   src_url=http://mirrors.linuxeye.com/oneinstack/src/shadowsocks-libev-3.2.3.tar.gz && Download_src
   src_url=http://mirrors.linuxeye.com/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
   src_url=http://mirrors.linuxeye.com/oneinstack/src/mbedtls-2.16.0-apache.tgz && Download_src
@@ -345,8 +345,8 @@ Your Encryption Method: ${CMSG}aes-256-cfb${CEND}
 
 if [ "${install_yn}" == 'y' -o "${ARG_NUM}" == '0' ]; then
   Def_parameter
-  [ "${ss_option}" == '1' ] && Install_SS-libev
-  [ "${ss_option}" == '2' ] && Install_SS-python
+  [ "${ss_option}" == '1' ] && Install_SS_libev
+  [ "${ss_option}" == '2' ] && Install_SS_python
   Config_SS
   service shadowsocks start
   Print_User_SS
@@ -356,7 +356,7 @@ if [ "${adduser_yn}" == 'y' ]; then
   Check_SS
   if [ "${ss_option}" == '2' ]; then
     AddUser_SS
-    Iptables_set
+    Iptables
     AddUser_Config_SS
     service shadowsocks restart
     Print_User_SS

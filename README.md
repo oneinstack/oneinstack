@@ -25,50 +25,46 @@ Script properties:
 
 If your server system: CentOS/Redhat (Do not enter "//" and "// subsequent sentence)
 ```bash
-yum -y install wget screen python   // for CentOS / Redhat
+yum -y install wget screen   // for CentOS / Redhat
 wget http://mirrors.linuxeye.com/oneinstack-full.tar.gz   // Contains the source code
 tar xzf oneinstack-full.tar.gz
 cd oneinstack   // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
 screen -S oneinstack    // If network interruption, you can execute the command `screen -r oneinstack` reconnect install window
-./install.sh   // Do not sh install.sh or bash install.sh such execution
+./install.sh
 ```
 If your server system: Debian/Ubuntu (Do not enter "//" and "// subsequent sentence)
 ```bash
-apt-get -y install wget screen python    // for Debian / Ubuntu
+apt-get -y install wget screen   // for Debian / Ubuntu
 wget http://mirrors.linuxeye.com/oneinstack-full.tar.gz   // Contains the source code
 tar xzf oneinstack-full.tar.gz
 cd oneinstack    // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
 screen -S oneinstack    // If network interruption, you can execute the command `screen -r oneinstack` reconnect install window
-./install.sh   // Do not sh install.sh or bash install.sh such execution
+./install.sh
 ```
 
 ## How to add Extensions
 
 ```bash
-cd ~/oneinstack    // Must enter the directory execution under oneinstack
-./addons.sh    // Do not sh addons.sh or bash addons.sh such execution
+~/oneinstack/addons.sh
 
 ```
 
 ## How to add a virtual host
 
 ```bash
-cd ~/oneinstack    // Must enter the directory execution under oneinstack
-./vhost.sh    // Do not sh vhost.sh or bash vhost.sh such execution
+~/oneinstack/vhost.sh
 ```
 
 ## How to delete a virtual host
 
 ```bash
-cd ~/oneinstack
-./vhost.sh del
+~/oneinstack/vhost.sh --del
 ```
 
 ## How to add FTP virtual user
 
 ```bash
-cd ~/oneinstack
-./pureftpd_vhost.sh
+~/oneinstack/pureftpd_vhost.sh
 ```
 
 ## How to backup
@@ -78,7 +74,7 @@ cd ~/oneinstack
 ./backup_setup.sh    // Backup parameters
 ./backup.sh    // Perform the backup immediately
 crontab -l    // Can be added to scheduled tasks, such as automatic backups every day 1:00
-  0 1 * * * cd ~/oneinstack;./backup.sh  > /dev/null 2>&1 &
+  0 1 * * * cd ~/oneinstack/backup.sh  > /dev/null 2>&1 &
 ```
 
 ## How to manage service
@@ -134,13 +130,13 @@ service memcached {start|stop|status|restart|reload}
 ## How to upgrade
 
 ```bash
-./upgrade.sh
+~/oneinstack/upgrade.sh
 ```
 
 ## How to uninstall
 
 ```bash
-./uninstall.sh
+~/oneinstack/uninstall.sh
 ```
 
 ## Installation

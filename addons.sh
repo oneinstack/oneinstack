@@ -40,7 +40,7 @@ pushd ${oneinstack_dir} > /dev/null
 
 . include/panel.sh
 
-showhelp() {
+Show_Help() {
   echo
   echo "Usage: $0  command ...
   --help, -h                  Show this help message
@@ -55,13 +55,13 @@ showhelp() {
 
 ARG_NUM=$#
 TEMP=`getopt -o hiu --long help,install,uninstall,composer,fail2ban,ngx_lua_waf,python,panel -- "$@" 2>/dev/null`
-[ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && showhelp && exit 1
+[ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
   [ -z "$1" ] && break;
   case "$1" in
     -h|--help)
-      showhelp; exit 0
+      Show_Help; exit 0
       ;;
     -i|--install)
       install_yn=y; shift 1
@@ -88,7 +88,7 @@ while :; do
       shift
       ;;
     *)
-      echo "${CWARNING}ERROR: unknown argument! ${CEND}" && showhelp && exit 1
+      echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
       ;;
   esac
 done
