@@ -19,6 +19,7 @@ DEMO() {
     else
       src_url=http://mirrors.linuxeye.com/oneinstack/src/tz_e.zip && Download_src
       unzip -q tz_e.zip -d ${wwwroot_dir}/default;/bin/mv ${wwwroot_dir}/default/{tz_e.php,prober.php}
+      sed -i "s@date_default_timezone_set('Asia/Shanghai')@date_default_timezone_set('"$timezone"')@" $wwwroot_dir/default/prober.php
     fi
 
     echo "<?php phpinfo() ?>" > ${wwwroot_dir}/default/phpinfo.php
