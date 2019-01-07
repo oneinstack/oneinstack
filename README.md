@@ -12,7 +12,7 @@ Script properties:
 - Providing a plurality of Tomcat version (Tomcat-9, Tomcat-8, Tomcat-7, Tomcat-6)
 - Providing a plurality of JDK version (JDK-11.0, JDK-1.8, JDK-1.7, JDK-1.6)
 - Providing a plurality of Apache version (Apache-2.4, Apache-2.2)
-- According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php encryption and decryption tool ionCube, ZendGuardLoader, SourceGuardian, swoole, xdebug, Composer
+- According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php extensions,include ZendGuardLoader,ionCube,SourceGuardian,imagick,gmagick,fileinfo,imap,phalcon,redis,memcached,memcache,mongodb,swoole,xdebug
 - Installation Pureftpd, phpMyAdmin according to their needs
 - Install memcached, redis according to their needs
 - Jemalloc optimize MySQL, Nginx
@@ -70,9 +70,8 @@ screen -S oneinstack    // If network interruption, you can execute the command 
 ## How to backup
 
 ```bash
-cd ~/oneinstack
-./backup_setup.sh    // Backup parameters
-./backup.sh    // Perform the backup immediately
+~/oneinstack/backup_setup.sh    // Backup parameters
+~/oneinstack/backup.sh    // Perform the backup immediately
 crontab -l    // Can be added to scheduled tasks, such as automatic backups every day 1:00
   0 1 * * * cd ~/oneinstack/backup.sh  > /dev/null 2>&1 &
 ```

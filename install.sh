@@ -29,7 +29,6 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/download.sh
 . ./include/get_char.sh
 
-ssh_port=22
 dbrootpwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbpostgrespwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbmongopwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
@@ -49,6 +48,7 @@ Show_Help() {
   --nginx_option [1-3]        Install Nginx server version
   --apache_option [1-2]       Install Apache server version
   --php_option [1-8]          Install PHP version
+  --php_vn [53~73]            Install another version of php in OneinStack
   --phpcache_option [1-4]     Install PHP opcode cache, default: 1 opcache
   --php_extensions [ext name] Install PHP extensions, include zendguardloader,ioncube,
                               sourceguardian,imagick,gmagick,fileinfo,imap,phalcon,
@@ -63,13 +63,13 @@ Show_Help() {
   --memcached                 Install Memcached
   --phpmyadmin                Install phpMyAdmin
   --hhvm                      Install HHVM
-  --ssh_port [22]             SSH port, default: 22
+  --ssh_port [No.]            SSH port
   --iptables                  Enable iptables
   --reboot                    Restart the server after installation
   "
 }
 ARG_NUM=$#
-TEMP=`getopt -o hvV --long help,version,nginx_option:,apache_option:,php_option:,phpcache_option:,php_extensions:,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,phpmyadmin,hhvm,ssh_port:,iptables,reboot -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvV --long help,version,nginx_option:,apache_option:,php_option:,php_vn:,phpcache_option:,php_extensions:,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,phpmyadmin,hhvm,ssh_port:,iptables,reboot -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -85,21 +85,27 @@ while :; do
       nginx_option=$2; shift 2
       [[ ! ${nginx_option} =~ ^[1-3]$ ]] && { echo "${CWARNING}nginx_option input error! Please only input number 1~3${CEND}"; exit 1; }
       web_yn=y
-      [ -e "${nginx_install_dir}/sbin/nginx" ] && { echo "${CWARNING}Nginx already installed! ${CEND}"; nginx_option=Other; }
-      [ -e "${tengine_install_dir}/sbin/nginx" ] && { echo "${CWARNING}Tengine already installed! ${CEND}"; nginx_option=Other; }
-      [ -e "${openresty_install_dir}/nginx/sbin/nginx" ] && { echo "${CWARNING}OpenResty already installed! ${CEND}"; nginx_option=Other; }
+      [ -e "${nginx_install_dir}/sbin/nginx" ] && { echo "${CWARNING}Nginx already installed! ${CEND}"; unset nginx_option; }
+      [ -e "${tengine_install_dir}/sbin/nginx" ] && { echo "${CWARNING}Tengine already installed! ${CEND}"; unset nginx_option; }
+      [ -e "${openresty_install_dir}/nginx/sbin/nginx" ] && { echo "${CWARNING}OpenResty already installed! ${CEND}"; unset nginx_option; }
       ;;
     --apache_option)
       apache_option=$2; shift 2
       [[ ! ${apache_option} =~ ^[1-2]$ ]] && { echo "${CWARNING}apache_option input error! Please only input number 1~2${CEND}"; exit 1; }
       web_yn=y
-      [ -e "${apache_install_dir}/bin/httpd" ] && { echo "${CWARNING}Aapche already installed! ${CEND}"; apache_option=Other; }
+      [ -e "${apache_install_dir}/bin/httpd" ] && { echo "${CWARNING}Aapche already installed! ${CEND}"; unset apache_option; }
       ;;
     --php_option)
       php_option=$2; shift 2
       [[ ! ${php_option} =~ ^[1-8]$ ]] && { echo "${CWARNING}php_option input error! Please only input number 1~8${CEND}"; exit 1; }
       php_yn=y
-      [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; php_option=Other; }
+      [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; unset php_option; }
+      ;;
+    --php_vn)
+      php_vn=$2; shift 2
+      [[ "${php_vn}" =~ ^5[3-6]$|^7[0-3]$ ]] && { echo "${CWARNING}php_vn input error! Please only input number 53~73${CEND}"; exit 1; }
+      mphp_yn=y; php_yn=y
+      [ -e "${php_install_dir}${php_vn}/bin/phpize" ] && { echo "${CWARNING}PHP${php_vn} already installed! ${CEND}"; unset php_vn; }
       ;;
     --phpcache_option)
       phpcache_option=$2; shift 2
@@ -125,7 +131,7 @@ while :; do
       tomcat_option=$2; shift 2
       [[ ! ${tomcat_option} =~ ^[1-4]$ ]] && { echo "${CWARNING}tomcat_option input error! Please only input number 1~4${CEND}"; exit 1; }
       web_yn=y
-      [ -e "$tomcat_install_dir/conf/server.xml" ] && { echo "${CWARNING}Tomcat already installed! ${CEND}" ; tomcat_option=Other; }
+      [ -e "$tomcat_install_dir/conf/server.xml" ] && { echo "${CWARNING}Tomcat already installed! ${CEND}" ; unset tomcat_option; }
       ;;
     --jdk_option)
       jdk_option=$2; shift 2
@@ -135,11 +141,11 @@ while :; do
       db_option=$2; shift 2
       db_yn=y
       if [[ "${db_option}" =~ ^[1-9]$|^1[0-3]$ ]]; then
-        [ -d "${db_install_dir}/support-files" ] && { echo "${CWARNING}MySQL already installed! ${CEND}"; db_option=Other; }
+        [ -d "${db_install_dir}/support-files" ] && { echo "${CWARNING}MySQL already installed! ${CEND}"; unset db_option; }
       elif [ "${db_option}" == '14' ]; then
-        [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; db_option=Other; }
+        [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; unset db_option; }
       elif [ "${db_option}" == '15' ]; then
-        [ -e "${mongo_install_dir}/bin/mongo" ] && { echo "${CWARNING}MongoDB already installed! ${CEND}"; db_option=Other; }
+        [ -e "${mongo_install_dir}/bin/mongo" ] && { echo "${CWARNING}MongoDB already installed! ${CEND}"; unset db_option; }
       else
         echo "${CWARNING}db_option input error! Please only input number 1~15${CEND}"
         exit 1
@@ -156,27 +162,27 @@ while :; do
       ;;
     --pureftpd)
       ftp_yn=y; shift 1
-      [ -e "${pureftpd_install_dir}/sbin/pure-ftpwho" ] && { echo "${CWARNING}Pure-FTPd already installed! ${CEND}"; ftp_yn=Other; }
+      [ -e "${pureftpd_install_dir}/sbin/pure-ftpwho" ] && { echo "${CWARNING}Pure-FTPd already installed! ${CEND}"; unset ftp_yn; }
       ;;
     --redis)
       redis_yn=y; shift 1
-      [ -e "${redis_install_dir}/bin/redis-server" ] && { echo "${CWARNING}redis-server already installed! ${CEND}"; redis_yn=Other; }
+      [ -e "${redis_install_dir}/bin/redis-server" ] && { echo "${CWARNING}redis-server already installed! ${CEND}"; unset redis_yn; }
       ;;
     --memcached)
       memcached_yn=y; shift 1
-      [ -e "${memcached_install_dir}/bin/memcached" ] && { echo "${CWARNING}memcached-server already installed! ${CEND}"; memcached_yn=Other; }
+      [ -e "${memcached_install_dir}/bin/memcached" ] && { echo "${CWARNING}memcached-server already installed! ${CEND}"; unset memcached_yn; }
       ;;
     --phpmyadmin)
       phpmyadmin_yn=y; shift 1
-      [ -d "${wwwroot_dir}/default/phpMyAdmin" ] && { echo "${CWARNING}phpMyAdmin already installed! ${CEND}"; phpmyadmin_yn=Other; }
+      [ -d "${wwwroot_dir}/default/phpMyAdmin" ] && { echo "${CWARNING}phpMyAdmin already installed! ${CEND}"; unset phpmyadmin_yn; }
       ;;
     --hhvm)
       hhvm_yn=y; shift 1
-      [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; hhvm_yn=Other; }
+      [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; unset hhvm_yn; }
       ;;
     --ssh_port)
       ssh_port=$2; shift 2
-      [ ${ssh_port} -eq 22 >/dev/null 2>&1 -o ${ssh_port} -gt 1024 >/dev/null 2>&1 -a ${ssh_port} -lt 65535 >/dev/null 2>&1 ] || { echo "${CWARNING}ssh_port input error! Input range: 22,1025~65534${CEND}"; exit 1; }
+      ssh_port_yn=y
       ;;
     --iptables)
       iptables_yn=y; shift 1
@@ -193,22 +199,22 @@ while :; do
   esac
 done
 
-mkdir -p ${wwwroot_dir}/default ${wwwlogs_dir}
+[ ! -e "${wwwroot_dir}/default" ] && mkdir -p ${wwwroot_dir}/default
+[ ! -e "${wwwlogs_dir}" ] && mkdir -p ${wwwlogs_dir}
 [ -d /data ] && chmod 755 /data
+
 # Use default SSH port 22. If you use another SSH port on your server
 if [ -e "/etc/ssh/sshd_config" ]; then
-  if [ ${ARG_NUM} == 0 ]; then
-    [ -z "`grep ^Port /etc/ssh/sshd_config`" ] && now_ssh_port=22 || now_ssh_port=`grep ^Port /etc/ssh/sshd_config | awk '{print $2}'`
-    while :; do echo
-      read -e -p "Please input SSH port(Default: ${now_ssh_port}): " ssh_port
-      ssh_port=${ssh_port:-${now_ssh_port}}
-      if [ ${ssh_port} -eq 22 >/dev/null 2>&1 -o ${ssh_port} -gt 1024 >/dev/null 2>&1 -a ${ssh_port} -lt 65535 >/dev/null 2>&1 ]; then
-        break
-      else
-        echo "${CWARNING}input error! Input range: 22,1025~65534${CEND}"
-      fi
-    done
-  fi
+  [ -z "`grep ^Port /etc/ssh/sshd_config`" ] && now_ssh_port=22 || now_ssh_port=`grep ^Port /etc/ssh/sshd_config | awk '{print $2}' | head -1`
+  while :; do echo
+    [ "${ssh_port_yn}" != 'y' ] && read -e -p "Please input SSH port(Default: ${now_ssh_port}): " ssh_port
+    ssh_port=${ssh_port:-${now_ssh_port}}
+    if [ ${ssh_port} -eq 22 >/dev/null 2>&1 -o ${ssh_port} -gt 1024 >/dev/null 2>&1 -a ${ssh_port} -lt 65535 >/dev/null 2>&1 ]; then
+      break
+    else
+      echo "${CWARNING}input error! Input range: 22,1025~65534${CEND}"
+    fi
+  done
 
   if [ -z "`grep ^Port /etc/ssh/sshd_config`" -a "${ssh_port}" != '22' ]; then
     sed -i "s@^#Port.*@&\nPort ${ssh_port}@" /etc/ssh/sshd_config
@@ -249,9 +255,9 @@ if [ ${ARG_NUM} == 0 ]; then
           if [[ ! ${nginx_option} =~ ^[1-4]$ ]]; then
             echo "${CWARNING}input error! Please only input number 1~4${CEND}"
           else
-            [ "${nginx_option}" != '4' -a -e "${nginx_install_dir}/sbin/nginx" ] && { echo "${CWARNING}Nginx already installed! ${CEND}"; nginx_option=Other; }
-            [ "${nginx_option}" != '4' -a -e "${tengine_install_dir}/sbin/nginx" ] && { echo "${CWARNING}Tengine already installed! ${CEND}"; nginx_option=Other; }
-            [ "${nginx_option}" != '4' -a -e "${openresty_install_dir}/nginx/sbin/nginx" ] && { echo "${CWARNING}OpenResty already installed! ${CEND}"; nginx_option=Other; }
+            [ "${nginx_option}" != '4' -a -e "${nginx_install_dir}/sbin/nginx" ] && { echo "${CWARNING}Nginx already installed! ${CEND}"; unset nginx_option; }
+            [ "${nginx_option}" != '4' -a -e "${tengine_install_dir}/sbin/nginx" ] && { echo "${CWARNING}Tengine already installed! ${CEND}"; unset nginx_option; }
+            [ "${nginx_option}" != '4' -a -e "${openresty_install_dir}/nginx/sbin/nginx" ] && { echo "${CWARNING}OpenResty already installed! ${CEND}"; unset nginx_option; }
             break
           fi
         done
@@ -266,7 +272,7 @@ if [ ${ARG_NUM} == 0 ]; then
           if [[ ! ${apache_option} =~ ^[1-3]$ ]]; then
             echo "${CWARNING}input error! Please only input number 1~3${CEND}"
           else
-            [ "${apache_option}" != '3' -a -e "${apache_install_dir}/bin/httpd" ] && { echo "${CWARNING}Aapche already installed! ${CEND}"; apache_option=Other; }
+            [ "${apache_option}" != '3' -a -e "${apache_install_dir}/bin/httpd" ] && { echo "${CWARNING}Aapche already installed! ${CEND}"; unset apache_option; }
             break
           fi
         done
@@ -283,7 +289,7 @@ if [ ${ARG_NUM} == 0 ]; then
           if [[ ! ${tomcat_option} =~ ^[1-5]$ ]]; then
             echo "${CWARNING}input error! Please only input number 1~5${CEND}"
           else
-            [ "${tomcat_option}" != '5' -a -e "$tomcat_install_dir/conf/server.xml" ] && { echo "${CWARNING}Tomcat already installed! ${CEND}" ; tomcat_option=Other; }
+            [ "${tomcat_option}" != '5' -a -e "$tomcat_install_dir/conf/server.xml" ] && { echo "${CWARNING}Tomcat already installed! ${CEND}" ; unset tomcat_option; }
             if [ "${tomcat_option}" == '1' ]; then
               while :; do echo
                 echo 'Please select JDK version:'
@@ -376,11 +382,11 @@ if [ ${ARG_NUM} == 0 ]; then
           [[ "${db_option}" =~ ^5$|^15$ ]] && [ "${OS_BIT}" == '32' ] && { echo "${CWARNING}By not supporting 32-bit! ${CEND}"; continue; }
           if [[ "${db_option}" =~ ^[1-9]$|^1[0-5]$ ]]; then
             if [ "${db_option}" == '14' ]; then
-              [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; db_option=Other; break; }
+              [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; unset db_option; break; }
             elif [ "${db_option}" == '15' ]; then
-              [ -e "${mongo_install_dir}/bin/mongo" ] && { echo "${CWARNING}MongoDB already installed! ${CEND}"; db_option=Other; break; }
+              [ -e "${mongo_install_dir}/bin/mongo" ] && { echo "${CWARNING}MongoDB already installed! ${CEND}"; unset db_option; break; }
             else
-              [ -d "${db_install_dir}/support-files" ] && { echo "${CWARNING}MySQL already installed! ${CEND}"; db_option=Other; break; }
+              [ -d "${db_install_dir}/support-files" ] && { echo "${CWARNING}MySQL already installed! ${CEND}"; unset db_option; break; }
             fi
             while :; do
               if [ "${db_option}" == '14' ]; then
@@ -440,7 +446,7 @@ if [ ${ARG_NUM} == 0 ]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
       if [ "${php_yn}" == 'y' ]; then
-        [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; php_option=Other; break; }
+        [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; unset php_option; break; }
         while :; do echo
           echo 'Please select a version of the PHP:'
           echo -e "\t${CMSG}1${CEND}. Install php-5.3"
@@ -540,7 +546,7 @@ if [ ${ARG_NUM} == 0 ]; then
               fi
             done
           fi
-          if [[ ${php_option} =~ ^[5-8]$ ]] || [[ "${PHP_main_ver}" =~ ^7.[0-3]$ ]]; then 
+          if [[ ${php_option} =~ ^[5-8]$ ]] || [[ "${PHP_main_ver}" =~ ^7.[0-3]$ ]]; then
             while :; do
               echo 'Please select a opcode cache of the PHP:'
               echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
@@ -623,7 +629,7 @@ if [ ${ARG_NUM} == 0 ]; then
     if [[ ! ${ftp_yn} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-      [ "${ftp_yn}" == 'y' -a -e "${pureftpd_install_dir}/sbin/pure-ftpwho" ] && { echo "${CWARNING}Pure-FTPd already installed! ${CEND}"; ftp_yn=Other; }
+      [ "${ftp_yn}" == 'y' -a -e "${pureftpd_install_dir}/sbin/pure-ftpwho" ] && { echo "${CWARNING}Pure-FTPd already installed! ${CEND}"; unset ftp_yn; }
       break
     fi
   done
@@ -635,7 +641,7 @@ if [ ${ARG_NUM} == 0 ]; then
       if [[ ! ${phpmyadmin_yn} =~ ^[y,n]$ ]]; then
         echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
       else
-        [ "${phpmyadmin_yn}" == 'y' -a -d "${wwwroot_dir}/default/phpMyAdmin" ] && { echo "${CWARNING}phpMyAdmin already installed! ${CEND}"; phpmyadmin_yn=Other; }
+        [ "${phpmyadmin_yn}" == 'y' -a -d "${wwwroot_dir}/default/phpMyAdmin" ] && { echo "${CWARNING}phpMyAdmin already installed! ${CEND}"; unset phpmyadmin_yn; }
         break
       fi
     done
@@ -647,7 +653,7 @@ if [ ${ARG_NUM} == 0 ]; then
     if [[ ! ${redis_yn} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-      [ "${redis_yn}" == 'y' -a -e "${redis_install_dir}/bin/redis-server" ] && { echo "${CWARNING}redis-server already installed! ${CEND}"; redis_yn=Other; }
+      [ "${redis_yn}" == 'y' -a -e "${redis_install_dir}/bin/redis-server" ] && { echo "${CWARNING}redis-server already installed! ${CEND}"; unset redis_yn; }
       break
     fi
   done
@@ -658,7 +664,7 @@ if [ ${ARG_NUM} == 0 ]; then
     if [[ ! ${memcached_yn} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-      [ "${memcached_yn}" == 'y' -a -e "${memcached_install_dir}/bin/memcached" ] && { echo "${CWARNING}memcached-server already installed! ${CEND}"; memcached_yn=Other; }
+      [ "${memcached_yn}" == 'y' -a -e "${memcached_install_dir}/bin/memcached" ] && { echo "${CWARNING}memcached-server already installed! ${CEND}"; unset memcached_yn; }
       break
     fi
   done
@@ -669,7 +675,7 @@ if [ ${ARG_NUM} == 0 ]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
       if [ "${hhvm_yn}" == 'y' ]; then
-        [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; hhvm_yn=Other; break; }
+        [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; unset hhvm_yn; break; }
         if [ "${PM}" == 'yum' -a "${OS_BIT}" == '64' ] && [ -n "`grep -E ' 7\.| 6\.[5-9]' /etc/redhat-release`" ]; then
           break
         else
@@ -677,7 +683,7 @@ if [ ${ARG_NUM} == 0 ]; then
           echo "${CWARNING}HHVM only support CentOS6.5+ 64bit, CentOS7 64bit! ${CEND}"
           echo "Press Ctrl+c to cancel or Press any key to continue..."
           char=`get_char`
-          hhvm_yn=Other
+          unset hhvm_yn
         fi
       fi
       break
