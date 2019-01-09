@@ -84,7 +84,6 @@ while :; do
     --nginx_option)
       nginx_option=$2; shift 2
       [[ ! ${nginx_option} =~ ^[1-3]$ ]] && { echo "${CWARNING}nginx_option input error! Please only input number 1~3${CEND}"; exit 1; }
-      web_yn=y
       [ -e "${nginx_install_dir}/sbin/nginx" ] && { echo "${CWARNING}Nginx already installed! ${CEND}"; unset nginx_option; }
       [ -e "${tengine_install_dir}/sbin/nginx" ] && { echo "${CWARNING}Tengine already installed! ${CEND}"; unset nginx_option; }
       [ -e "${openresty_install_dir}/nginx/sbin/nginx" ] && { echo "${CWARNING}OpenResty already installed! ${CEND}"; unset nginx_option; }
@@ -92,20 +91,17 @@ while :; do
     --apache_option)
       apache_option=$2; shift 2
       [[ ! ${apache_option} =~ ^[1-2]$ ]] && { echo "${CWARNING}apache_option input error! Please only input number 1~2${CEND}"; exit 1; }
-      web_yn=y
       [ -e "${apache_install_dir}/bin/httpd" ] && { echo "${CWARNING}Aapche already installed! ${CEND}"; unset apache_option; }
       ;;
     --php_option)
       php_option=$2; shift 2
       [[ ! ${php_option} =~ ^[1-8]$ ]] && { echo "${CWARNING}php_option input error! Please only input number 1~8${CEND}"; exit 1; }
-      php_yn=y
       [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; unset php_option; }
       ;;
     --php_vn)
-      php_vn=$2; shift 2
+      php_vn=$2; mphp_flag=y; shift 2
       [[ "${php_vn}" =~ ^5[3-6]$|^7[0-3]$ ]] && { echo "${CWARNING}php_vn input error! Please only input number 53~73${CEND}"; exit 1; }
-      mphp_yn=y; php_yn=y
-      [ -e "${php_install_dir}${php_vn}/bin/phpize" ] && { echo "${CWARNING}PHP${php_vn} already installed! ${CEND}"; unset php_vn; }
+      [ -e "${php_install_dir}${php_vn}/bin/phpize" ] && { echo "${CWARNING}PHP${php_vn} already installed! ${CEND}"; unset php_vn mphp_flag; }
       ;;
     --phpcache_option)
       phpcache_option=$2; shift 2
@@ -130,7 +126,6 @@ while :; do
     --tomcat_option)
       tomcat_option=$2; shift 2
       [[ ! ${tomcat_option} =~ ^[1-4]$ ]] && { echo "${CWARNING}tomcat_option input error! Please only input number 1~4${CEND}"; exit 1; }
-      web_yn=y
       [ -e "$tomcat_install_dir/conf/server.xml" ] && { echo "${CWARNING}Tomcat already installed! ${CEND}" ; unset tomcat_option; }
       ;;
     --jdk_option)
@@ -139,7 +134,6 @@ while :; do
       ;;
     --db_option)
       db_option=$2; shift 2
-      db_yn=y
       if [[ "${db_option}" =~ ^[1-9]$|^1[0-3]$ ]]; then
         [ -d "${db_install_dir}/support-files" ] && { echo "${CWARNING}MySQL already installed! ${CEND}"; unset db_option; }
       elif [ "${db_option}" == '14' ]; then
@@ -161,34 +155,34 @@ while :; do
       [[ ! ${dbinstallmethod} =~ ^[1-2]$ ]] && { echo "${CWARNING}dbinstallmethod input error! Please only input number 1~2${CEND}"; exit 1; }
       ;;
     --pureftpd)
-      ftp_yn=y; shift 1
-      [ -e "${pureftpd_install_dir}/sbin/pure-ftpwho" ] && { echo "${CWARNING}Pure-FTPd already installed! ${CEND}"; unset ftp_yn; }
+      pureftpd_flag=y; shift 1
+      [ -e "${pureftpd_install_dir}/sbin/pure-ftpwho" ] && { echo "${CWARNING}Pure-FTPd already installed! ${CEND}"; unset pureftpd_flag; }
       ;;
     --redis)
-      redis_yn=y; shift 1
-      [ -e "${redis_install_dir}/bin/redis-server" ] && { echo "${CWARNING}redis-server already installed! ${CEND}"; unset redis_yn; }
+      redis_flag=y; shift 1
+      [ -e "${redis_install_dir}/bin/redis-server" ] && { echo "${CWARNING}redis-server already installed! ${CEND}"; unset redis_flag; }
       ;;
     --memcached)
-      memcached_yn=y; shift 1
-      [ -e "${memcached_install_dir}/bin/memcached" ] && { echo "${CWARNING}memcached-server already installed! ${CEND}"; unset memcached_yn; }
+      memcached_flag=y; shift 1
+      [ -e "${memcached_install_dir}/bin/memcached" ] && { echo "${CWARNING}memcached-server already installed! ${CEND}"; unset memcached_flag; }
       ;;
     --phpmyadmin)
-      phpmyadmin_yn=y; shift 1
-      [ -d "${wwwroot_dir}/default/phpMyAdmin" ] && { echo "${CWARNING}phpMyAdmin already installed! ${CEND}"; unset phpmyadmin_yn; }
+      phpmyadmin_flag=y; shift 1
+      [ -d "${wwwroot_dir}/default/phpMyAdmin" ] && { echo "${CWARNING}phpMyAdmin already installed! ${CEND}"; unset phpmyadmin_flag; }
       ;;
     --hhvm)
-      hhvm_yn=y; shift 1
-      [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; unset hhvm_yn; }
+      hhvm_flag=y; shift 1
+      [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; unset hhvm_flag; }
       ;;
     --ssh_port)
       ssh_port=$2; shift 2
-      ssh_port_yn=y
+      ssh_port_flag=y
       ;;
     --iptables)
-      iptables_yn=y; shift 1
+      iptables_flag=y; shift 1
       ;;
     --reboot)
-      reboot_yn=y; shift 1
+      reboot_flag=y; shift 1
       ;;
     --)
       shift
@@ -207,7 +201,7 @@ done
 if [ -e "/etc/ssh/sshd_config" ]; then
   [ -z "`grep ^Port /etc/ssh/sshd_config`" ] && now_ssh_port=22 || now_ssh_port=`grep ^Port /etc/ssh/sshd_config | awk '{print $2}' | head -1`
   while :; do echo
-    [ "${ssh_port_yn}" != 'y' ] && read -e -p "Please input SSH port(Default: ${now_ssh_port}): " ssh_port
+    [ "${ssh_port_flag}" != 'y' ] && read -e -p "Please input SSH port(Default: ${now_ssh_port}): " ssh_port
     ssh_port=${ssh_port:-${now_ssh_port}}
     if [ ${ssh_port} -eq 22 >/dev/null 2>&1 -o ${ssh_port} -gt 1024 >/dev/null 2>&1 -a ${ssh_port} -lt 65535 >/dev/null 2>&1 ]; then
       break
@@ -227,8 +221,8 @@ if [ ${ARG_NUM} == 0 ]; then
   if [ ! -e ~/.oneinstack ]; then
     # check iptables
     while :; do echo
-      read -e -p "Do you want to enable iptables? [y/n]: " iptables_yn
-      if [[ ! ${iptables_yn} =~ ^[y,n]$ ]]; then
+      read -e -p "Do you want to enable iptables? [y/n]: " iptables_flag
+      if [[ ! ${iptables_flag} =~ ^[y,n]$ ]]; then
         echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
       else
         break
@@ -238,11 +232,11 @@ if [ ${ARG_NUM} == 0 ]; then
 
   # check Web server
   while :; do echo
-    read -e -p "Do you want to install Web server? [y/n]: " web_yn
-    if [[ ! ${web_yn} =~ ^[y,n]$ ]]; then
+    read -e -p "Do you want to install Web server? [y/n]: " web_flag
+    if [[ ! ${web_flag} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-      if [ "${web_yn}" == 'y' ]; then
+      if [ "${web_flag}" == 'y' ]; then
         # Nginx/Tegine/OpenResty
         while :; do echo
           echo 'Please select Nginx server:'
@@ -355,11 +349,11 @@ if [ ${ARG_NUM} == 0 ]; then
 
   # choice database
   while :; do echo
-    read -e -p "Do you want to install Database? [y/n]: " db_yn
-    if [[ ! ${db_yn} =~ ^[y,n]$ ]]; then
+    read -e -p "Do you want to install Database? [y/n]: " db_flag
+    if [[ ! ${db_flag} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-      if [ "${db_yn}" == 'y' ]; then
+      if [ "${db_flag}" == 'y' ]; then
         while :; do echo
           echo 'Please select a version of the Database:'
           echo -e "\t${CMSG} 1${CEND}. Install MySQL-8.0"
@@ -441,11 +435,11 @@ if [ ${ARG_NUM} == 0 ]; then
 
   # choice php
   while :; do echo
-    read -e -p "Do you want to install PHP? [y/n]: " php_yn
-    if [[ ! ${php_yn} =~ ^[y,n]$ ]]; then
+    read -e -p "Do you want to install PHP? [y/n]: " php_flag
+    if [[ ! ${php_flag} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-      if [ "${php_yn}" == 'y' ]; then
+      if [ "${php_flag}" == 'y' ]; then
         [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; unset php_option; break; }
         while :; do echo
           echo 'Please select a version of the PHP:'
@@ -479,11 +473,11 @@ if [ ${ARG_NUM} == 0 ]; then
   # PHP opcode cache and extensions
   if [[ ${php_option} =~ ^[1-8]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
     while :; do echo
-      read -e -p "Do you want to install opcode cache of the PHP? [y/n]: " phpcache_yn
-      if [[ ! ${phpcache_yn} =~ ^[y,n]$ ]]; then
+      read -e -p "Do you want to install opcode cache of the PHP? [y/n]: " phpcache_flag
+      if [[ ! ${phpcache_flag} =~ ^[y,n]$ ]]; then
         echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
       else
-        if [ "${phpcache_yn}" == 'y' ]; then
+        if [ "${phpcache_flag}" == 'y' ]; then
           if [ "${php_option}" == '1' -o "${PHP_main_ver}" == '5.3' ]; then
             while :; do
               echo 'Please select a opcode cache of the PHP:'
@@ -625,11 +619,11 @@ if [ ${ARG_NUM} == 0 ]; then
 
   # check Pureftpd
   while :; do echo
-    read -e -p "Do you want to install Pure-FTPd? [y/n]: " ftp_yn
-    if [[ ! ${ftp_yn} =~ ^[y,n]$ ]]; then
+    read -e -p "Do you want to install Pure-FTPd? [y/n]: " pureftpd_flag
+    if [[ ! ${pureftpd_flag} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-      [ "${ftp_yn}" == 'y' -a -e "${pureftpd_install_dir}/sbin/pure-ftpwho" ] && { echo "${CWARNING}Pure-FTPd already installed! ${CEND}"; unset ftp_yn; }
+      [ "${pureftpd_flag}" == 'y' -a -e "${pureftpd_install_dir}/sbin/pure-ftpwho" ] && { echo "${CWARNING}Pure-FTPd already installed! ${CEND}"; unset pureftpd_flag; }
       break
     fi
   done
@@ -637,11 +631,11 @@ if [ ${ARG_NUM} == 0 ]; then
   # check phpMyAdmin
   if [[ ${php_option} =~ ^[1-8]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
     while :; do echo
-      read -e -p "Do you want to install phpMyAdmin? [y/n]: " phpmyadmin_yn
-      if [[ ! ${phpmyadmin_yn} =~ ^[y,n]$ ]]; then
+      read -e -p "Do you want to install phpMyAdmin? [y/n]: " phpmyadmin_flag
+      if [[ ! ${phpmyadmin_flag} =~ ^[y,n]$ ]]; then
         echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
       else
-        [ "${phpmyadmin_yn}" == 'y' -a -d "${wwwroot_dir}/default/phpMyAdmin" ] && { echo "${CWARNING}phpMyAdmin already installed! ${CEND}"; unset phpmyadmin_yn; }
+        [ "${phpmyadmin_flag}" == 'y' -a -d "${wwwroot_dir}/default/phpMyAdmin" ] && { echo "${CWARNING}phpMyAdmin already installed! ${CEND}"; unset phpmyadmin_flag; }
         break
       fi
     done
@@ -649,33 +643,33 @@ if [ ${ARG_NUM} == 0 ]; then
 
   # check redis
   while :; do echo
-    read -e -p "Do you want to install redis-server? [y/n]: " redis_yn
-    if [[ ! ${redis_yn} =~ ^[y,n]$ ]]; then
+    read -e -p "Do you want to install redis-server? [y/n]: " redis_flag
+    if [[ ! ${redis_flag} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-      [ "${redis_yn}" == 'y' -a -e "${redis_install_dir}/bin/redis-server" ] && { echo "${CWARNING}redis-server already installed! ${CEND}"; unset redis_yn; }
+      [ "${redis_flag}" == 'y' -a -e "${redis_install_dir}/bin/redis-server" ] && { echo "${CWARNING}redis-server already installed! ${CEND}"; unset redis_flag; }
       break
     fi
   done
 
   # check memcached
   while :; do echo
-    read -e -p "Do you want to install memcached-server? [y/n]: " memcached_yn
-    if [[ ! ${memcached_yn} =~ ^[y,n]$ ]]; then
+    read -e -p "Do you want to install memcached-server? [y/n]: " memcached_flag
+    if [[ ! ${memcached_flag} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-      [ "${memcached_yn}" == 'y' -a -e "${memcached_install_dir}/bin/memcached" ] && { echo "${CWARNING}memcached-server already installed! ${CEND}"; unset memcached_yn; }
+      [ "${memcached_flag}" == 'y' -a -e "${memcached_install_dir}/bin/memcached" ] && { echo "${CWARNING}memcached-server already installed! ${CEND}"; unset memcached_flag; }
       break
     fi
   done
 
   while :; do echo
-    read -e -p "Do you want to install HHVM? [y/n]: " hhvm_yn
-    if [[ ! ${hhvm_yn} =~ ^[y,n]$ ]]; then
+    read -e -p "Do you want to install HHVM? [y/n]: " hhvm_flag
+    if [[ ! ${hhvm_flag} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
-      if [ "${hhvm_yn}" == 'y' ]; then
-        [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; unset hhvm_yn; break; }
+      if [ "${hhvm_flag}" == 'y' ]; then
+        [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; unset hhvm_flag; break; }
         if [ "${PM}" == 'yum' -a "${OS_BIT}" == '64' ] && [ -n "`grep -E ' 7\.| 6\.[5-9]' /etc/redhat-release`" ]; then
           break
         else
@@ -683,7 +677,7 @@ if [ ${ARG_NUM} == 0 ]; then
           echo "${CWARNING}HHVM only support CentOS6.5+ 64bit, CentOS7 64bit! ${CEND}"
           echo "Press Ctrl+c to cancel or Press any key to continue..."
           char=`get_char`
-          unset hhvm_yn
+          unset hhvm_flag
         fi
       fi
       break
@@ -737,7 +731,7 @@ fi
 startTime=`date +%s`
 
 # Jemalloc
-if [[ ${nginx_option} =~ ^[1-3]$ ]] || [ "${db_yn}" == 'y' ]; then
+if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[1-9]$|^1[0-5]$ ]]; then
   . include/jemalloc.sh
   Install_Jemalloc | tee -a ${oneinstack_dir}/install.log
 fi
@@ -1026,40 +1020,42 @@ case "${tomcat_option}" in
 esac
 
 # Pure-FTPd
-if [ "${ftp_yn}" == 'y' ]; then
+if [ "${pureftpd_flag}" == 'y' ]; then
   . include/pureftpd.sh
   Install_PureFTPd 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
 # phpMyAdmin
-if [ "${phpmyadmin_yn}" == 'y' ]; then
+if [ "${phpmyadmin_flag}" == 'y' ]; then
   . include/phpmyadmin.sh
   Install_phpMyAdmin 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
 # redis
-if [ "${redis_yn}" == 'y' ]; then
+if [ "${redis_flag}" == 'y' ]; then
   . include/redis.sh
   Install_redis_server 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
 # memcached
-if [ "${memcached_yn}" == 'y' ]; then
+if [ "${memcached_flag}" == 'y' ]; then
   . include/memcached.sh
   Install_memcached_server 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
 # index example
-if [ ! -e "${wwwroot_dir}/default/index.html" -a "${web_yn}" == 'y' ]; then
-  . include/demo.sh
-  DEMO 2>&1 | tee -a ${oneinstack_dir}/install.log
+if [ ! -e "${wwwroot_dir}/default/index.html" ]; then
+  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ ${apache_option} =~ ^[1-2]$ ]] || [[ ${tomcat_option} =~ ^[1-4]$ ]]; then
+    . include/demo.sh
+    DEMO 2>&1 | tee -a ${oneinstack_dir}/install.log
+  fi
 fi
 
 # get web_install_dir and db_install_dir
 . include/check_dir.sh
 
 # HHVM
-if [ "${hhvm_yn}" == 'y' ] && [ "${PM}" == 'yum' -a "${OS_BIT}" == '64' ] && [ -n "`grep -E ' 7\.| 6\.[5-9]' /etc/redhat-release`" ]; then
+if [ "${hhvm_flag}" == 'y' ] && [ "${PM}" == 'yum' -a "${OS_BIT}" == '64' ] && [ -n "`grep -E ' 7\.| 6\.[5-9]' /etc/redhat-release`" ]; then
   . include/hhvm_CentOS.sh
   Install_hhvm_CentOS 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
@@ -1076,9 +1072,9 @@ endTime=`date +%s`
 ((installTime=($endTime-$startTime)/60))
 echo "####################Congratulations########################"
 echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
-[ "${web_yn}" == 'y' ] && [[ "${nginx_option}" =~ ^[1-3]$ ]] && echo -e "\n$(printf "%-32s" "Nginx install dir":)${CMSG}${web_install_dir}${CEND}"
-[ "${web_yn}" == 'y' ] && [[ "${apache_option}" =~ ^[1,2]$ ]] && echo -e "\n$(printf "%-32s" "Apache install dir":)${CMSG}${apache_install_dir}${CEND}"
-[[ "${tomcat_option}" =~ ^[1,2]$ ]] && echo -e "\n$(printf "%-32s" "Tomcat install dir":)${CMSG}${tomcat_install_dir}${CEND}"
+[[ "${nginx_option}" =~ ^[1-3]$ ]] && echo -e "\n$(printf "%-32s" "Nginx install dir":)${CMSG}${web_install_dir}${CEND}"
+[[ "${apache_option}" =~ ^[1-2]$ ]] && echo -e "\n$(printf "%-32s" "Apache install dir":)${CMSG}${apache_install_dir}${CEND}"
+[[ "${tomcat_option}" =~ ^[1-4]$ ]] && echo -e "\n$(printf "%-32s" "Tomcat install dir":)${CMSG}${tomcat_install_dir}${CEND}"
 [[ "${db_option}" =~ ^[1-9]$|^1[0-3]$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
 [[ "${db_option}" =~ ^[1-9]$|^1[0-3]$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
 [[ "${db_option}" =~ ^[1-9]$|^1[0-3]$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
@@ -1091,8 +1087,8 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${db_option}" == '15' ] && echo "$(printf "%-32s" "MongoDB data dir:")${CMSG}${mongo_data_dir}${CEND}"
 [ "${db_option}" == '15' ] && echo "$(printf "%-32s" "MongoDB user:")${CMSG}root${CEND}"
 [ "${db_option}" == '15' ] && echo "$(printf "%-32s" "MongoDB password:")${CMSG}${dbmongopwd}${CEND}"
-[ "${php_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "PHP install dir:")${CMSG}${php_install_dir}${CEND}"
-[ "${php_yn}" == 'y' -a "${phpcache_option}" == '1' ] && echo "$(printf "%-32s" "Opcache Control Panel URL:")${CMSG}http://${IPADDR}/ocp.php${CEND}"
+[[ "${php_option}" =~ ^[1-8]$ ]] && echo -e "\n$(printf "%-32s" "PHP install dir:")${CMSG}${php_install_dir}${CEND}"
+[[ "${php_option}" =~ ^[1-8]$ ]] && [ "${phpcache_option}" == '1' ] && echo "$(printf "%-32s" "Opcache Control Panel URL:")${CMSG}http://${IPADDR}/ocp.php${CEND}"
 [ "${phpcache_option}" == '2' -a -e "${php_install_dir}/etc/php.d/04-xcache.ini" ] && echo "$(printf "%-32s" "xcache Control Panel URL:")${CMSG}http://${IPADDR}/xcache${CEND}"
 [ "${phpcache_option}" == '2' -a -e "${php_install_dir}/etc/php.d/04-xcache.ini" ] && echo "$(printf "%-32s" "xcache user:")${CMSG}admin${CEND}"
 [ "${phpcache_option}" == '2' -a -e "${php_install_dir}/etc/php.d/04-xcache.ini" ] && echo "$(printf "%-32s" "xcache password:")${CMSG}${xcachepwd}${CEND}"
@@ -1100,22 +1096,24 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${phpcache_option}" == '4' -a -e "${php_install_dir}/etc/php.d/02-eaccelerator.ini" ] && echo "$(printf "%-32s" "eAccelerator Control Panel URL:")${CMSG}http://${IPADDR}/control.php${CEND}"
 [ "${phpcache_option}" == '4' -a -e "${php_install_dir}/etc/php.d/02-eaccelerator.ini" ] && echo "$(printf "%-32s" "eAccelerator user:")${CMSG}admin${CEND}"
 [ "${phpcache_option}" == '4' -a -e "${php_install_dir}/etc/php.d/02-eaccelerator.ini" ] && echo "$(printf "%-32s" "eAccelerator password:")${CMSG}eAccelerator${CEND}"
-[ "${ftp_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "Pure-FTPd install dir:")${CMSG}${pureftpd_install_dir}${CEND}"
-[ "${ftp_yn}" == 'y' ] && echo "$(printf "%-32s" "Create FTP virtual script:")${CMSG}./pureftpd_vhost.sh${CEND}"
-[ "${phpmyadmin_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "phpMyAdmin dir:")${CMSG}${wwwroot_dir}/default/phpMyAdmin${CEND}"
-[ "${phpmyadmin_yn}" == 'y' ] && echo "$(printf "%-32s" "phpMyAdmin Control Panel URL:")${CMSG}http://${IPADDR}/phpMyAdmin${CEND}"
-[ "${redis_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "redis install dir:")${CMSG}${redis_install_dir}${CEND}"
-[ "${memcached_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "memcached install dir:")${CMSG}${memcached_install_dir}${CEND}"
-[ "${web_yn}" == 'y' ] && echo -e "\n$(printf "%-32s" "Index URL:")${CMSG}http://${IPADDR}/${CEND}"
+[ "${pureftpd_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Pure-FTPd install dir:")${CMSG}${pureftpd_install_dir}${CEND}"
+[ "${pureftpd_flag}" == 'y' ] && echo "$(printf "%-32s" "Create FTP virtual script:")${CMSG}./pureftpd_vhost.sh${CEND}"
+[ "${phpmyadmin_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "phpMyAdmin dir:")${CMSG}${wwwroot_dir}/default/phpMyAdmin${CEND}"
+[ "${phpmyadmin_flag}" == 'y' ] && echo "$(printf "%-32s" "phpMyAdmin Control Panel URL:")${CMSG}http://${IPADDR}/phpMyAdmin${CEND}"
+[ "${redis_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "redis install dir:")${CMSG}${redis_install_dir}${CEND}"
+[ "${memcached_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "memcached install dir:")${CMSG}${memcached_install_dir}${CEND}"
+if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ ${apache_option} =~ ^[1-2]$ ]] || [[ ${tomcat_option} =~ ^[1-4]$ ]]; then
+  echo -e "\n$(printf "%-32s" "Index URL:")${CMSG}http://${IPADDR}/${CEND}"
+fi
 if [ ${ARG_NUM} == 0 ]; then
   while :; do echo
     echo "${CMSG}Please restart the server and see if the services start up fine.${CEND}"
-    read -e -p "Do you want to restart OS ? [y/n]: " reboot_yn
-    if [[ ! "${reboot_yn}" =~ ^[y,n]$ ]]; then
+    read -e -p "Do you want to restart OS ? [y/n]: " reboot_flag
+    if [[ ! "${reboot_flag}" =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
       break
     fi
   done
 fi
-[ "${reboot_yn}" == 'y' ] && reboot
+[ "${reboot_flag}" == 'y' ] && reboot

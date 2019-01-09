@@ -166,14 +166,14 @@ if [ -n "`echo ${desc_bk} | grep -w 2`" ]; then
     if [ $? -eq 0 ]; then
       [ -z "`grep ${remote_address} tools/iplist.txt`" ] && echo "${remote_address} ${remote_port} ${remote_user} $remote_password" >> tools/iplist.txt || echo "${CWARNING}${remote_address} has been added! ${CEND}"
       while :; do
-        read -e -p "Do you want to add more host ? [y/n]: " morehost_yn
-        if [[ ! ${morehost_yn} =~ ^[y,n]$ ]]; then
+        read -e -p "Do you want to add more host ? [y/n]: " morehost_flag
+        if [[ ! ${morehost_flag} =~ ^[y,n]$ ]]; then
           echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
         else
           break
         fi
       done
-      [ "${morehost_yn}" == 'n' ] && break
+      [ "${morehost_flag}" == 'n' ] && break
     fi
   done
 fi
