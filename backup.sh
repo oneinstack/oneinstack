@@ -242,7 +242,7 @@ do
     [ -n "`echo ${backup_content} | grep -ow web`" ] && WEB_QINIU_BK
   fi
   if [ "${DEST}" == 'gdrive' ]; then
-    [ -n "`echo ${backup_content} | grep -ow db`" ] && WEB_GDRIVE_BK
+    [ -n "`echo ${backup_content} | grep -ow db`" ] && DB_GDRIVE_BK
     [ -n "`echo ${backup_content} | grep -ow web`" ] && WEB_GDRIVE_BK
   fi
 done
