@@ -98,6 +98,17 @@ DB_GDRIVE_BK() {
   done
 }
 
+DB_DROPBOX_BK() {
+  for D in `echo ${db_name} | tr ',' ' '`
+  do
+    ./db_bk.sh ${D}
+    DB_GREP="DB_${D}_`date +%Y%m%d`"
+    DB_FILE=`ls -lrt ${backup_dir} | grep ${DB_GREP} | tail -1 | awk '{print $NF}'`
+    /usr/local/bin/dbxcli put ${backup_dir}/${DB_FILE} `date +%F`/${DB_FILE}
+    [ $? -eq 0 ] && /usr/local/bin/dbxcli rm -f `date +%F --date="${expired_days} days ago"` > /dev/null 2>&1
+  done
+}
+
 WEB_LOCAL_BK() {
   for W in `echo ${website_name} | tr ',' ' '`
   do
@@ -213,6 +224,22 @@ WEB_GDRIVE_BK() {
   done
 }
 
+WEB_DROPBOX_BK() {
+  for W in `echo ${website_name} | tr ',' ' '`
+  do
+    [ ! -e "${wwwroot_dir}/${WebSite}" ] && { echo "[${wwwroot_dir}/${WebSite}] not exist"; break; }
+    [ ! -e "${backup_dir}" ] && mkdir -p ${backup_dir}
+    PUSH_FILE="${backup_dir}/Web_${W}_$(date +%Y%m%d_%H).tgz"
+    if [ ! -e "${PUSH_FILE}" ]; then
+      pushd ${wwwroot_dir} > /dev/null
+      tar czf ${PUSH_FILE} ./$W
+      popd > /dev/null
+    fi
+    /usr/local/bin/dbxcli put ${PUSH_FILE} `date +%F`/${PUSH_FILE##*/}
+    [ $? -eq 0 ] && /usr/local/bin/dbxcli rm -f `date +%F --date="${expired_days} days ago"` > /dev/null 2>&1
+  done
+}
+
 for DEST in `echo ${backup_destination} | tr ',' ' '`
 do
   if [ "${DEST}" == 'local' ]; then
@@ -244,5 +271,9 @@ do
   if [ "${DEST}" == 'gdrive' ]; then
     [ -n "`echo ${backup_content} | grep -ow db`" ] && DB_GDRIVE_BK
     [ -n "`echo ${backup_content} | grep -ow web`" ] && WEB_GDRIVE_BK
+  fi
+  if [ "${DEST}" == 'dropbox' ]; then
+    [ -n "`echo ${backup_content} | grep -ow db`" ] && DB_DROPBOX_BK
+    [ -n "`echo ${backup_content} | grep -ow web`" ] && WEB_DROPBOX_BK
   fi
 done
