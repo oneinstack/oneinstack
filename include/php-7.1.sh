@@ -262,7 +262,6 @@ EOF
       sed -i "s@^pm.max_spare_servers.*@pm.max_spare_servers = 80@" ${php_install_dir}/etc/php-fpm.conf
     fi
 
-    #[ "$web_yn" == 'n' ] && sed -i "s@^listen =.*@listen = $IPADDR:9000@" ${php_install_dir}/etc/php-fpm.conf
     service php-fpm start
 
   elif [ "${apache_option}" == '2' ] || [ "${Apache_flag}" == '22' ]; then
