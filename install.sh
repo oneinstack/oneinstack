@@ -206,6 +206,7 @@ if [ -e "/etc/ssh/sshd_config" ]; then
       break
     else
       echo "${CWARNING}input error! Input range: 22,1025~65534${CEND}"
+      exit 1
     fi
   done
 
@@ -685,7 +686,11 @@ if [ ${ARG_NUM} == 0 ]; then
 fi
 
 # install wget gcc curl python
-[ ! -e ~/.oneinstack ] && ${PM} -y -q install wget gcc curl python
+if [ ! -e ~/.oneinstack ]; then
+  [ "${PM}" == 'apt-get' ] && apt-get -y update
+  [ "${PM}" == 'yum' ] && yum clean all
+  ${PM} -y -q install wget gcc curl python
+fi
 
 # get the IP information
 IPADDR=$(./include/get_ipaddr.py)
