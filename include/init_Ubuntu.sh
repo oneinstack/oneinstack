@@ -99,8 +99,8 @@ ntpdate pool.ntp.org
 # iptables
 if [ "${iptables_flag}" == 'y' ]; then
   apt-get -y install debconf-utils
-  echo iptables-persistent iptables-persistent/autosave_v4 boolean true | sudo debconf-set-selections
-  echo iptables-persistent iptables-persistent/autosave_v6 boolean true | sudo debconf-set-selections
+  echo iptables-persistent iptables-persistent/autosave_v4 boolean true | debconf-set-selections
+  echo iptables-persistent iptables-persistent/autosave_v6 boolean true | debconf-set-selections
   apt-get -y install iptables-persistent
   if [ -e "/etc/iptables/rules.v4" ] && [ -n "$(grep '^:INPUT DROP' /etc/iptables/rules.v4)" -a -n "$(grep 'NEW -m tcp --dport 22 -j ACCEPT' /etc/iptables/rules.v4)" -a -n "$(grep 'NEW -m tcp --dport 80 -j ACCEPT' /etc/iptables/rules.v4)" ]; then
     IPTABLES_STATUS=yes

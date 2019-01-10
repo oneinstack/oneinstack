@@ -18,7 +18,7 @@ Script properties:
 - Jemalloc optimize MySQL, Nginx
 - Providing add a virtual host script, include Let's Encrypt SSL certificate
 - Provide Nginx/Tengine/OpenResty/Apache/Tomcat, MySQL/MariaDB/Percona, PHP, Redis, Memcached, phpMyAdmin upgrade script
-- Provide local backup,remote backup (rsync between servers),Aliyun OSS,Qcloud COS,UPYUN and QINIU script
+- Provide local backup,remote backup(rsync between servers),Aliyun OSS,Qcloud COS,UPYUN,QINIU,Google Drive and Dropbox script
 - Provided under HHVM install CentOS 6,7
 
 ## How to use
