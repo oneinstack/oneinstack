@@ -82,6 +82,17 @@ DB_QINIU_BK() {
   done
 }
 
+DB_S3_BK() {
+  for D in `echo ${db_name} | tr ',' ' '`
+  do
+    ./db_bk.sh ${D}
+    DB_GREP="DB_${D}_`date +%Y%m%d`"
+    DB_FILE=`ls -lrt ${backup_dir} | grep ${DB_GREP} | tail -1 | awk '{print $NF}'`
+    ${python_install_dir}/bin/s3cmd put ${backup_dir}/${DB_FILE} s3://${s3_bucket}/`date +%F`/${DB_FILE}
+    [ $? -eq 0 ] && ${python_install_dir}/bin/s3cmd rm -r s3://${s3_bucket}/`date +%F --date="${expired_days} days ago"` > /dev/null 2>&1
+  done
+}
+
 DB_GDRIVE_BK() {
   for D in `echo ${db_name} | tr ',' ' '`
   do
@@ -203,6 +214,22 @@ WEB_QINIU_BK() {
   done
 }
 
+WEB_S3_BK() {
+  for W in `echo ${website_name} | tr ',' ' '`
+  do
+    [ ! -e "${wwwroot_dir}/${WebSite}" ] && { echo "[${wwwroot_dir}/${WebSite}] not exist"; break; }
+    [ ! -e "${backup_dir}" ] && mkdir -p ${backup_dir}
+    PUSH_FILE="${backup_dir}/Web_${W}_$(date +%Y%m%d_%H).tgz"
+    if [ ! -e "${PUSH_FILE}" ]; then
+      pushd ${wwwroot_dir} > /dev/null
+      tar czf ${PUSH_FILE} ./$W
+      popd > /dev/null
+    fi
+    ${python_install_dir}/bin/s3cmd put ${PUSH_FILE} s3://${s3_bucket}/`date +%F`/${PUSH_FILE##*/}
+    [ $? -eq 0 ] && ${python_install_dir}/bin/s3cmd rm -r s3://${s3_bucket}/`date +%F --date="${expired_days} days ago"` > /dev/null 2>&1
+  done
+}
+
 WEB_GDRIVE_BK() {
   for W in `echo ${website_name} | tr ',' ' '`
   do
@@ -267,6 +294,10 @@ do
   if [ "${DEST}" == 'qiniu' ]; then
     [ -n "`echo ${backup_content} | grep -ow db`" ] && DB_QINIU_BK
     [ -n "`echo ${backup_content} | grep -ow web`" ] && WEB_QINIU_BK
+  fi
+  if [ "${DEST}" == 's3' ]; then
+    [ -n "`echo ${backup_content} | grep -ow db`" ] && DB_S3_BK
+    [ -n "`echo ${backup_content} | grep -ow web`" ] && WEB_S3_BK
   fi
   if [ "${DEST}" == 'gdrive' ]; then
     [ -n "`echo ${backup_content} | grep -ow db`" ] && DB_GDRIVE_BK
