@@ -47,11 +47,12 @@ Show_Help() {
   --redis                       Uninstall Redis-server
   --memcached                   Uninstall Memcached-server
   --phpmyadmin                  Uninstall phpMyAdmin
+  --python                      Uninstall Python (PATH: ${python_install_dir})
   "
 }
 
 ARG_NUM=$#
-TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,phpcache,php_extensions:,hhvm,pureftpd,redis,memcached,phpmyadmin -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,phpcache,php_extensions:,hhvm,pureftpd,redis,memcached,phpmyadmin,python -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -77,6 +78,7 @@ while :; do
       redis_flag=y
       memcached_flag=y
       phpmyadmin_flag=y
+      python_flag=y
       shift 1
       ;;
     --web)
@@ -128,6 +130,9 @@ while :; do
       ;;
     --phpmyadmin)
       phpmyadmin_flag=y; shift 1
+      ;;
+    --python)
+      python_flag=y; shift 1
       ;;
     --)
       shift
@@ -492,6 +497,10 @@ Uninstall_openssl() {
   [ -d "${openssl_install_dir}" ] && rm -rf ${openssl_install_dir}
 }
 
+Print_Python() {
+  [ -d "${python_install_dir}" ] && echo "${python_install_dir}"
+}
+
 Menu() {
 while :; do
   printf "
@@ -509,12 +518,13 @@ What Are You Doing?
 \t${CMSG}10${CEND}. Uninstall Redis
 \t${CMSG}11${CEND}. Uninstall Memcached
 \t${CMSG}12${CEND}. Uninstall phpMyAdmin
+\t${CMSG}13${CEND}. Uninstall Python (PATH: ${python_install_dir})
 \t${CMSG} q${CEND}. Exit
 "
   echo
   read -e -p "Please input the correct option: " Number
-  if [[ ! "${Number}" =~ ^[0-9,q]$|^1[0-2]$ ]]; then
-    echo "${CWARNING}input error! Please only input 0~12 and q${CEND}"
+  if [[ ! "${Number}" =~ ^[0-9,q]$|^1[0-3]$ ]]; then
+    echo "${CWARNING}input error! Please only input 0~13 and q${CEND}"
   else
     case "$Number" in
     0)
@@ -530,6 +540,7 @@ What Are You Doing?
       Print_Memcached_server
       Print_openssl
       Print_phpMyAdmin
+      Print_Python
       Uninstall_status
       if [ "${uninstall_flag}" == 'y' ]; then
         Uninstall_Web
@@ -543,6 +554,7 @@ What Are You Doing?
         Uninstall_Memcached_server
         Uninstall_openssl
         Uninstall_phpMyAdmin
+        . include/python.sh; Uninstall_Python
       else
         exit
       fi
@@ -610,6 +622,11 @@ What Are You Doing?
       Uninstall_status
       [ "${uninstall_flag}" == 'y' ] && Uninstall_phpMyAdmin || exit
       ;;
+    13)
+      Print_Python
+      Uninstall_status
+      [ "${uninstall_flag}" == 'y' ] && { . include/python.sh; Uninstall_Python; } || exit
+      ;;
     q)
       exit
       ;;
@@ -631,6 +648,7 @@ else
   [ "${redis_flag}" == 'y' ] && Print_Redis_server
   [ "${memcached_flag}" == 'y' ] && Print_Memcached_server
   [ "${phpmyadmin_flag}" == 'y' ] && Print_phpMyAdmin
+  [ "${python_flag}" == 'y' ] && Print_Python
   [ "${all_flag}" == 'y' ] && Print_openssl
   Uninstall_status
   if [ "${uninstall_flag}" == 'y' ]; then
@@ -646,6 +664,7 @@ else
     [ "${redis_flag}" == 'y' ] && Uninstall_Redis_server
     [ "${memcached_flag}" == 'y' ] && Uninstall_Memcached_server
     [ "${phpmyadmin_flag}" == 'y' ] && Uninstall_phpMyAdmin
+    [ "${python_flag}" == 'y' ] && { . include/python.sh; Uninstall_Python; }
     [ "${all_flag}" == 'y' ] && Uninstall_openssl
   fi
 fi

@@ -59,6 +59,19 @@ EOF
       popd > /dev/null
     fi
 
+    if [ ! -e "${python_install_dir}/bin/pip" ]; then
+      src_url=http://mirrors.linuxeye.com/oneinstack/src/setuptools-${setuptools_ver}.zip && Download_src
+      src_url=http://mirrors.linuxeye.com/oneinstack/src/pip-${pip_ver}.tar.gz && Download_src
+      unzip -q setuptools-${setuptools_ver}.zip
+      tar xzf pip-${pip_ver}.tar.gz
+      pushd setuptools-${setuptools_ver} > /dev/null
+      ${python_install_dir}/bin/python setup.py install
+      popd > /dev/null
+      pushd pip-${pip_ver} > /dev/null
+      ${python_install_dir}/bin/python setup.py install
+      popd > /dev/null
+    fi
+
     if [ ! -e "/root/.pip/pip.conf" ] ;then
       # get the IP information
       PUBLIC_IPADDR=$(../include/get_public_ipaddr.py)

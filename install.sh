@@ -63,13 +63,14 @@ Show_Help() {
   --memcached                 Install Memcached
   --phpmyadmin                Install phpMyAdmin
   --hhvm                      Install HHVM
+  --python                    Install Python (PATH: ${python_install_dir})
   --ssh_port [No.]            SSH port
   --iptables                  Enable iptables
   --reboot                    Restart the server after installation
   "
 }
 ARG_NUM=$#
-TEMP=`getopt -o hvV --long help,version,nginx_option:,apache_option:,php_option:,php_vn:,phpcache_option:,php_extensions:,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,phpmyadmin,hhvm,ssh_port:,iptables,reboot -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvV --long help,version,nginx_option:,apache_option:,php_option:,php_vn:,phpcache_option:,php_extensions:,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,phpmyadmin,hhvm,python,ssh_port:,iptables,reboot -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -173,6 +174,9 @@ while :; do
     --hhvm)
       hhvm_flag=y; shift 1
       [ -e "/usr/bin/hhvm" ] && { echo "${CWARNING}HHVM already installed! ${CEND}"; unset hhvm_flag; }
+      ;;
+    --python)
+      python_flag=y; shift 1
       ;;
     --ssh_port)
       ssh_port=$2; shift 2
@@ -1062,6 +1066,12 @@ fi
 if [ "${hhvm_flag}" == 'y' ] && [ "${PM}" == 'yum' -a "${OS_BIT}" == '64' ] && [ -n "`grep -E ' 7\.| 6\.[5-9]' /etc/redhat-release`" ]; then
   . include/hhvm_CentOS.sh
   Install_hhvm_CentOS 2>&1 | tee -a ${oneinstack_dir}/install.log
+fi
+
+# Python
+if [ "${python_flag}" == 'y' ]; then
+  . include/python.sh
+  Install_Python 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
 # Starting DB
