@@ -114,4 +114,6 @@ tmux_ver=2.8
 htop_ver=2.2.0
 bison_ver=2.7.1
 python_ver=3.6.8
+setuptools_ver=40.6.3
+pip_ver=18.1
 fail2ban_ver=0.10.4
