@@ -247,7 +247,7 @@ EOF
 
     service php-fpm start
 
-  elif [ "${apache_option}" == '2' ] || [ "${Apache_main_ver}" == '22' ] || [ "${apache_mode_option}" != '2' ]; then 
+  elif [ "${apache_option}" == '2' ] || [ "${Apache_main_ver}" == '22' ] || [ "${apache_mode_option}" != '2' ]; then
     service httpd restart
   fi
   popd > /dev/null
