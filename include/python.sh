@@ -92,9 +92,7 @@ EOF
 
 Uninstall_Python() {
   if [ -e "${python_install_dir}/bin/python" ]; then
-    echo; echo "${CMSG}Python uninstall completed${CEND}"
+    echo "${CMSG}Python uninstall completed${CEND}"
     rm -rf ${python_install_dir}
-  else
-    echo; echo "${CWARNING}Python does not exist! ${CEND}"
   fi
 }
