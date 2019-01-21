@@ -406,7 +406,7 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG} 5${CEND}. Install MariaDB-10.3"
           echo -e "\t${CMSG} 6${CEND}. Install MariaDB-10.2"
           echo -e "\t${CMSG} 7${CEND}. Install MariaDB-10.1"
-          echo -e "\t${CMSG} 8${CEND}. Install MariaDB-10.0"
+          echo -e "\t${CMSG} 8${CEND}. Install MariaDB-5.5"
           echo -e "\t${CMSG} 9${CEND}. Install Percona-8.0"
           echo -e "\t${CMSG}10${CEND}. Install Percona-5.7"
           echo -e "\t${CMSG}11${CEND}. Install Percona-5.6"
@@ -823,8 +823,8 @@ case "${db_option}" in
     Install_MariaDB101 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   8)
-    . include/mariadb-10.0.sh
-    Install_MariaDB100 2>&1 | tee -a ${oneinstack_dir}/install.log
+    . include/mariadb-5.5.sh
+    Install_MariaDB55 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   9)
     [ "${OS}" == 'CentOS' -a "${CentOS_ver}" != '7' ] && dbinstallmethod=1
