@@ -624,7 +624,7 @@ if [ ${ARG_NUM} == 0 ]; then
       echo -e "\t${CMSG} 9${CEND}. Install phalcon(PHP>=5.5)"
       echo -e "\t${CMSG}10${CEND}. Install redis"
       echo -e "\t${CMSG}11${CEND}. Install memcached"
-      echo -e "\t${CMSG}12${CEND}. Install memcache(PHP<=7.2)"
+      echo -e "\t${CMSG}12${CEND}. Install memcache"
       echo -e "\t${CMSG}13${CEND}. Install mongodb"
       echo -e "\t${CMSG}14${CEND}. Install swoole"
       echo -e "\t${CMSG}15${CEND}. Install xdebug(PHP>=5.5)"
