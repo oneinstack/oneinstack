@@ -118,7 +118,7 @@ ft_min_word_len = 4
 
 log_bin = mysql-bin
 binlog_format = mixed
-expire_logs_days = 30
+expire_logs_days = 7 
 
 log_error = ${mariadb_data_dir}/mysql-error.log
 slow_query_log = 1
