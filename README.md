@@ -40,7 +40,6 @@ tar xzf oneinstack-full.tar.gz
 cd oneinstack    // If you need to modify the directory (installation, data storage, Nginx logs), modify options.conf file
 screen -S oneinstack    // If network interruption, you can execute the command `screen -r oneinstack` reconnect install window
 ./install.sh
-
 ```
 
 ## How to install another PHP version 

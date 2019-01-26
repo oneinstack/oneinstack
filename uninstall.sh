@@ -187,8 +187,8 @@ Print_web() {
   [ -d "${tomcat_install_dir}" ] && echo ${tomcat_install_dir}
   [ -e "/etc/init.d/tomcat" ] && echo /etc/init.d/tomcat
   [ -e "/etc/logrotate.d/tomcat" ] && echo /etc/logrotate.d/tomcat
-  [ -d "/usr/java" ] && echo '/usr/java'
-  [ -d "/usr/local/apr" ] && echo '/usr/local/apr'
+  [ -d "/usr/java" ] && echo /usr/java
+  [ -d "/usr/local/apr" ] && echo /usr/local/apr
 }
 
 Uninstall_Web() {
@@ -520,7 +520,7 @@ Uninstall_PureFtpd() {
 Print_Redis_server() {
   [ -e "${redis_install_dir}" ] && echo ${redis_install_dir}
   [ -e "/etc/init.d/redis-server" ] && echo /etc/init.d/redis-server
-  [ -e "/lib/systemd/system/redis-server.service" ] && echo '/lib/systemd/system/redis-server.service'
+  [ -e "/lib/systemd/system/redis-server.service" ] && echo /lib/systemd/system/redis-server.service
 }
 
 Uninstall_Redis_server() {
