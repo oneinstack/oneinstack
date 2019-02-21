@@ -18,7 +18,7 @@ Install_ZendOPcache() {
       tar xzf zendopcache-${zendopcache_ver}.tgz
       pushd zendopcache-${zendopcache_ver} > /dev/null
     else
-      src_url=http://www.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
+      src_url=https://secure.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
       tar xzf php-${PHP_detail_ver}.tar.gz
       pushd php-${PHP_detail_ver}/ext/opcache > /dev/null
     fi

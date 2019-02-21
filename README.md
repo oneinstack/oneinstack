@@ -42,7 +42,7 @@ screen -S oneinstack    // If network interruption, you can execute the command 
 ./install.sh
 ```
 
-## How to install another PHP version 
+## How to install another PHP version
 
 ```bash
 ~/oneinstack/install.sh --mphp_ver 54

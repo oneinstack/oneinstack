@@ -21,7 +21,7 @@ Install_SourceGuardian() {
       else
         tar xzf loaders.linux-${SYS_BIT_c}.tar.gz -C sourceguardian
       fi
-      [ -e "${php_install_dir}/bin/phpize" ] && [ ! -d "${phpExtensionDir}" ] && mkdir -p ${phpExtensionDir}
+      [ ! -d "${phpExtensionDir}" ] && mkdir -p ${phpExtensionDir}
       if [ -z "`echo ${phpExtensionDir} | grep 'non-zts'`" ]; then
         /bin/mv sourceguardian/ixed.${PHP_main_ver}ts.lin ${phpExtensionDir}
         extension="ixed.${PHP_main_ver}ts.lin"
