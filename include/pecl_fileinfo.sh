@@ -13,7 +13,7 @@ Install_pecl_fileinfo() {
     pushd ${oneinstack_dir}/src > /dev/null
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
-    src_url=http://www.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
+    src_url=https://secure.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
     tar xzf php-${PHP_detail_ver}.tar.gz
     pushd php-${PHP_detail_ver}/ext/fileinfo > /dev/null
     ${php_install_dir}/bin/phpize
