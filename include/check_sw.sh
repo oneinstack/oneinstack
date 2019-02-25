@@ -188,6 +188,9 @@ installDepsBySrc() {
       popd > /dev/null
       rm -rf htop-${htop_ver}
     fi
+
+    # upgrade autoconf for CentOS6
+    [ "${CentOS_ver}" == '6' ] && rpm -Uvh autoconf-2.69-12.2.noarch.rpm
   else
     echo "No need to install software from source packages."
   fi
