@@ -194,6 +194,13 @@ installDepsBySrc() {
   else
     echo "No need to install software from source packages."
   fi
-  echo 'already initialize' > ~/.oneinstack
+
+  if command -v lsof >/dev/null 2>&1; then
+    echo 'already initialize' > ~/.oneinstack
+  else
+    echo "${CFAILURE}${PM} config error parsing file failed${CEND}"
+    kill -9 $$
+  fi
+
   popd > /dev/null
 }
