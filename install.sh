@@ -626,24 +626,25 @@ if [ ${ARG_NUM} == 0 ]; then
       echo -e "\t${CMSG} 7${CEND}. Install imap"
       echo -e "\t${CMSG} 8${CEND}. Install ldap"
       echo -e "\t${CMSG} 9${CEND}. Install phalcon(PHP>=5.5)"
-      echo -e "\t${CMSG}10${CEND}. Install redis"
-      echo -e "\t${CMSG}11${CEND}. Install memcached"
-      echo -e "\t${CMSG}12${CEND}. Install memcache"
-      echo -e "\t${CMSG}13${CEND}. Install mongodb"
-      echo -e "\t${CMSG}14${CEND}. Install swoole"
-      echo -e "\t${CMSG}15${CEND}. Install xdebug(PHP>=5.5)"
-      read -e -p "Please input numbers:(Default '4 10 11' press Enter) " phpext_option
-      phpext_option=${phpext_option:-'4 10 11'}
+      echo -e "\t${CMSG}10${CEND}. Install yaf(PHP>=7.0)"
+      echo -e "\t${CMSG}11${CEND}. Install redis"
+      echo -e "\t${CMSG}12${CEND}. Install memcached"
+      echo -e "\t${CMSG}13${CEND}. Install memcache"
+      echo -e "\t${CMSG}14${CEND}. Install mongodb"
+      echo -e "\t${CMSG}15${CEND}. Install swoole"
+      echo -e "\t${CMSG}16${CEND}. Install xdebug(PHP>=5.5)"
+      read -e -p "Please input numbers:(Default '4 11 12' press Enter) " phpext_option
+      phpext_option=${phpext_option:-'4 11 12'}
       [ "${phpext_option}" == '0' ] && break
       array_phpext=(${phpext_option})
-      array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
+      array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16)
       for v in ${array_phpext[@]}
       do
         [ -z "`echo ${array_all[@]} | grep -w ${v}`" ] && phpext_flag=1
       done
       if [ "${phpext_flag}" == '1' ]; then
         unset phpext_flag
-        echo; echo "${CWARNING}input error! Please only input number 4 10 11 and so on${CEND}"; echo
+        echo; echo "${CWARNING}input error! Please only input number 4 11 12 and so on${CEND}"; echo
         continue
       else
         [ -n "`echo ${array_phpext[@]} | grep -w 1`" ] && pecl_zendguardloader=1
@@ -655,12 +656,13 @@ if [ ${ARG_NUM} == 0 ]; then
         [ -n "`echo ${array_phpext[@]} | grep -w 7`" ] && pecl_imap=1
         [ -n "`echo ${array_phpext[@]} | grep -w 8`" ] && pecl_ldap=1
         [ -n "`echo ${array_phpext[@]} | grep -w 9`" ] && pecl_phalcon=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 10`" ] && pecl_redis=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 11`" ] && pecl_memcached=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 12`" ] && pecl_memcache=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 13`" ] && pecl_mongodb=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 14`" ] && pecl_swoole=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 15`" ] && pecl_xdebug=1
+        [ -n "`echo ${array_phpext[@]} | grep -w 10`" ] && pecl_yaf=1
+        [ -n "`echo ${array_phpext[@]} | grep -w 11`" ] && pecl_redis=1
+        [ -n "`echo ${array_phpext[@]} | grep -w 12`" ] && pecl_memcached=1
+        [ -n "`echo ${array_phpext[@]} | grep -w 13`" ] && pecl_memcache=1
+        [ -n "`echo ${array_phpext[@]} | grep -w 14`" ] && pecl_mongodb=1
+        [ -n "`echo ${array_phpext[@]} | grep -w 15`" ] && pecl_swoole=1
+        [ -n "`echo ${array_phpext[@]} | grep -w 16`" ] && pecl_xdebug=1
         break
       fi
     done
@@ -1148,8 +1150,8 @@ fi
 [ -d "${db_install_dir}/support-files" ] && [ -z "`ps -ef | grep mysqld_safe | grep -v grep`" ] && service mysqld start
 
 # reload php
-[ -e "${php_install_dir}/sbin/php-fpm" ] && service php-fpm reload
-[ -e "${php_install_dir}${mphp_ver}/sbin/php-fpm" ] && service php${mphp_ver}-fpm reload
+[ -e "${php_install_dir}/sbin/php-fpm" ] && { [ -e "/bin/systemctl" ] && systemctl reload php-fpm || service php-fpm reload; }
+[ -n "${mphp_ver}" -a -e "${php_install_dir}${mphp_ver}/sbin/php-fpm" ] && { [ -e "/bin/systemctl" ] && systemctl reload php${mphp_ver}-fpm || service php${mphp_ver}-fpm reload; }
 [ -e "${apache_install_dir}/bin/apachectl" ] && ${apache_install_dir}/bin/apachectl -k graceful
 
 endTime=`date +%s`
