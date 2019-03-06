@@ -12,7 +12,7 @@ Script properties:
 - Providing a plurality of Tomcat version (Tomcat-9, Tomcat-8, Tomcat-7, Tomcat-6)
 - Providing a plurality of JDK version (JDK-11.0, JDK-1.8, JDK-1.7, JDK-1.6)
 - Providing a plurality of Apache version (Apache-2.4, Apache-2.2)
-- According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php extensions,include ZendGuardLoader,ionCube,SourceGuardian,imagick,gmagick,fileinfo,imap,ldap,phalcon,redis,memcached,memcache,mongodb,swoole,xdebug
+- According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php extensions,include ZendGuardLoader,ionCube,SourceGuardian,imagick,gmagick,fileinfo,imap,ldap,phalcon,yaf,redis,memcached,memcache,mongodb,swoole,xdebug
 - Installation Pureftpd, phpMyAdmin according to their needs
 - Install memcached, redis according to their needs
 - Jemalloc optimize MySQL, Nginx

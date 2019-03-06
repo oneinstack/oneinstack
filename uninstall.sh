@@ -730,7 +730,7 @@ else
     else
       [ "${php_flag}" == 'y' ] && Uninstall_PHP
       [ "${php_flag}" == 'y' ] && [ "${phpcache_flag}" == 'y' ] && Uninstall_PHPcache
-      [ "${php_flag}" == 'y' ] && [ -n "${php_extensions}" ] && Uninstall_PHPext
+      [ -n "${php_extensions}" ] && Uninstall_PHPext
       [ "${mphp_flag}" == 'y' ] && [ "${phpcache_flag}" != 'y' ] && [ -z "${php_extensions}" ] && Uninstall_MPHP
       [ "${mphp_flag}" == 'y' ] && [ "${phpcache_flag}" == 'y' ] && { php_install_dir=${php_install_dir}${mphp_ver}; Uninstall_PHPcache; }
       [ "${mphp_flag}" == 'y' ] && [ -n "${php_extensions}" ] && { php_install_dir=${php_install_dir}${mphp_ver}; Uninstall_PHPext; }
