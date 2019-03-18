@@ -55,7 +55,7 @@ Show_Help() {
   --phpcache_option [1-4]     Install PHP opcode cache, default: 1 opcache
   --php_extensions [ext name] Install PHP extensions, include zendguardloader,ioncube,
                               sourceguardian,imagick,gmagick,fileinfo,imap,ldap,phalcon,
-                              yaf,redis,memcached,memcache,mongodb,swoole,xdebug
+                              yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug
   --tomcat_option [1-4]       Install Tomcat version
   --jdk_option [1-4]          Install JDK version
   --db_option [1-15]          Install DB version
@@ -132,6 +132,7 @@ while :; do
       [ -n "`echo ${php_extensions} | grep -w ldap`" ] && pecl_ldap=1
       [ -n "`echo ${php_extensions} | grep -w phalcon`" ] && pecl_phalcon=1
       [ -n "`echo ${php_extensions} | grep -w yaf`" ] && pecl_yaf=1
+      [ -n "`echo ${php_extensions} | grep -w yar`" ] && pecl_yar=1
       [ -n "`echo ${php_extensions} | grep -w redis`" ] && pecl_redis=1
       [ -n "`echo ${php_extensions} | grep -w memcached`" ] && pecl_memcached=1
       [ -n "`echo ${php_extensions} | grep -w memcache`" ] && pecl_memcache=1
@@ -1005,6 +1006,12 @@ PHP_addons() {
   if [ "${pecl_yaf}" == '1' ]; then
     . include/pecl_yaf.sh
     Install_pecl_yaf 2>&1 | tee -a ${oneinstack_dir}/install.log
+  fi
+
+  # yar
+  if [ "${pecl_yar}" == '1' ]; then
+    . include/pecl_yar.sh
+    Install_pecl_yar 2>&1 | tee -a ${oneinstack_dir}/install.log
   fi
 
   # pecl_memcached
