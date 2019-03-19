@@ -15,11 +15,11 @@ Install_pecl_yar() {
     PHP_main_ver=${PHP_detail_ver%.*}
     if [[ "${PHP_main_ver}" =~ ^7.[0-3]$ ]]; then
       phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
-      src_url=https://pecl.php.net/get/yar-${yar_ver}.tar.gz && Download_src
-      tar xzf yar-${yar_ver}.tar.gz
+      src_url=https://pecl.php.net/get/yar-${yar_ver}.tgz && Download_src
+      tar xzf yar-${yar_ver}.tgz
       pushd yar-${yar_ver} > /dev/null
       ${php_install_dir}/bin/phpize
-      ./configure --with-php-config=${php_install_dir}/bin/php-config
+      ./configure --with-php-config=${php_install_dir}/bin/php-config --with-curl=${curl_install_dir}
       make -j ${THREAD} && make install
       popd > /dev/null
       if [ -f "${phpExtensionDir}/yar.so" ]; then
