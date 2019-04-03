@@ -213,10 +213,8 @@ while :; do
   esac
 done
 
-if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ ${apache_option} =~ ^[1-2]$ ]] || [[ ${tomcat_option} =~ ^[1-4]$ ]]; then
-  [ ! -d ${wwwroot_dir}/default ] && mkdir -p ${wwwroot_dir}/default
-  [ ! -d ${wwwlogs_dir} ] && mkdir -p ${wwwlogs_dir}
-fi
+[ ! -d ${wwwroot_dir}/default ] && mkdir -p ${wwwroot_dir}/default
+[ ! -d ${wwwlogs_dir} ] && mkdir -p ${wwwlogs_dir}
 [ -d /data ] && chmod 755 /data
 
 # Use default SSH port 22. If you use another SSH port on your server
