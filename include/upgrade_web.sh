@@ -45,8 +45,6 @@ Upgrade_Nginx() {
       char=`get_char`
     fi
     tar xzf nginx-${NEW_nginx_ver}.tar.gz
-    [ "${Fedora_ver}" == '28' ] && patch -d nginx-${NEW_nginx_ver} -p1 < 0001-unix-ngx_user-Apply-fix-for-really-old-bug-in-glibc-.patch
-    patch -d nginx-${NEW_nginx_ver} -p0 < nginx-auto-cc-gcc.patch
     pushd nginx-${NEW_nginx_ver}
     make clean
     sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc # close debug
