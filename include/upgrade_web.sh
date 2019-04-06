@@ -77,7 +77,7 @@ Upgrade_Tengine() {
   [ ! -e "${tengine_install_dir}/sbin/nginx" ] && echo "${CWARNING}Tengine is not installed on your system! ${CEND}" && exit 1
   OLD_tengine_ver_tmp=`${tengine_install_dir}/sbin/nginx -v 2>&1`
   OLD_tengine_ver="`echo ${OLD_tengine_ver_tmp#*/} | awk '{print $1}'`"
-  Latest_tengine_ver=`curl --connect-timeout 2 -m 3 -s http://tengine.taobao.org/changelog.html | grep -oE "[0-9]\.[0-9]\.[0-9]+" | head -1`
+  Latest_tengine_ver=`curl --connect-timeout 2 -m 3 -s http://tengine.taobao.org/changelog.html | grep -v generator | grep -oE "[0-9]\.[0-9]\.[0-9]+" | head -1`
   echo
   echo "Current Tengine Version: ${CMSG}${OLD_tengine_ver}${CEND}"
   while :; do echo
