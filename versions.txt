@@ -47,9 +47,9 @@ jdk17_ver=1.7.0_80
 jdk16_ver=1.6.0_45
 
 # PHP
-php73_ver=7.3.4
-php72_ver=7.2.17
-php71_ver=7.1.28
+php73_ver=7.3.5
+php72_ver=7.2.18
+php71_ver=7.1.29
 php70_ver=7.0.33
 php56_ver=5.6.40
 php55_ver=5.5.38
@@ -82,7 +82,7 @@ xdebug_ver=2.7.1
 xdebug_oldver=2.5.5
 
 # Ftp
-pureftpd_ver=1.0.47
+pureftpd_ver=1.0.49
 
 # Redis
 redis_ver=5.0.4
