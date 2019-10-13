@@ -36,7 +36,7 @@ percona55_ver=5.5.62-38.14
 
 alisql_ver=5.6.32-9
 
-pgsql_ver=11.5
+pgsql_ver=12.0
 
 mongodb_ver=4.0.10
 
@@ -55,7 +55,7 @@ php70_ver=7.0.33
 php71_ver=7.1.32
 php72_ver=7.2.23
 php73_ver=7.3.10
-php74_ver=7.4.0-RC2
+php74_ver=7.4.0RC3
 
 libiconv_ver=1.15
 curl_ver=7.66.0
@@ -66,7 +66,8 @@ freetype_ver=2.10.1
 icu4c_ver=63_1
 libsodium_ver=1.0.18
 argon2_ver=20171227
-imagemagick_ver=7.0.8-66
+onig_ver=6.9.3
+imagemagick_ver=7.0.8-68
 imagick_ver=3.4.4
 graphicsmagick_ver=1.3.33
 gmagick_ver=2.0.5RC1
@@ -93,9 +94,9 @@ pecl_redis_ver=5.0.2
 pecl_redis_oldver=4.3.0
 
 # Memcached
-memcached_ver=1.5.18
+memcached_ver=1.5.19
 libmemcached_ver=1.0.18
-pecl_memcached_ver=3.1.3
+pecl_memcached_ver=3.1.4
 pecl_memcached_oldver=2.2.0
 pecl_memcache_ver=3.0.8
 
@@ -104,7 +105,7 @@ pecl_mongodb_ver=1.6.0
 pecl_mongo_ver=1.6.16
 
 # phpMyadmin
-phpmyadmin_ver=4.9.0.1
+phpmyadmin_ver=4.9.1
 phpmyadmin_oldver=4.4.15.10
 
 # jemalloc
