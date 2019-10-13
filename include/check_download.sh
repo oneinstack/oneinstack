@@ -669,6 +669,7 @@ checkDownload() {
       src_url=https://secure.php.net/distributions/php-${php74_ver}.tar.gz && Download_src
       src_url=http://mirrors.linuxeye.com/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
       src_url=http://mirrors.linuxeye.com/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
+      src_url=http://mirrors.linuxeye.com/oneinstack/src/onig-${onig_ver}.tar.gz && Download_src
       ;;
   esac
 

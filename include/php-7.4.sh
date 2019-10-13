@@ -63,6 +63,15 @@ Install_PHP74() {
     rm -rf libsodium-${libsodium_ver}
   fi
 
+  if [ ! -e "/usr/local/lib/libonig.la" ]; then
+    tar xzf onig-${onig_ver}.tar.gz
+    pushd onig-${onig_ver} > /dev/null
+    ./configure
+    make -j ${THREAD} && make install
+    popd > /dev/null
+    rm -rf onig-${onig_ver}
+  fi
+
   if [ ! -e "/usr/local/include/mhash.h" -a ! -e "/usr/include/mhash.h" ]; then
     tar xzf mhash-${mhash_ver}.tar.gz
     pushd mhash-${mhash_ver} > /dev/null
