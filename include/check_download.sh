@@ -669,7 +669,6 @@ checkDownload() {
       src_url=https://secure.php.net/distributions/php-${php74_ver}.tar.gz && Download_src
       src_url=http://mirrors.linuxeye.com/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
       src_url=http://mirrors.linuxeye.com/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
-      src_url=http://mirrors.linuxeye.com/oneinstack/src/onig-${onig_ver}.tar.gz && Download_src
       ;;
   esac
 
@@ -814,11 +813,11 @@ checkDownload() {
   if [ "${pecl_memcache}" == '1' ]; then
     if [[ "${php_option}" =~ ^[1-4]$ ]]; then
       echo "Download pecl_memcache for php..."
-      src_url=https://pecl.php.net/get/memcache-${pecl_memcache_ver}.tgz && Download_src
+      src_url=https://pecl.php.net/get/memcache-${pecl_memcache_oldver}.tgz && Download_src
     else
       echo "Download pecl_memcache for php 7.x..."
       # src_url=https://codeload.github.com/websupport-sk/pecl-memcache/zip/php7 && Download_src
-      src_url=${mirrorLink}/pecl-memcache-php7.tgz && Download_src
+      src_url=${mirrorLink}/pecl-memcache-${pecl_memcache_ver}.tar.gz && Download_src
     fi
   fi
 
