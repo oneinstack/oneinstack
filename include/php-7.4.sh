@@ -63,15 +63,6 @@ Install_PHP74() {
     rm -rf libsodium-${libsodium_ver}
   fi
 
-  if [ ! -e "/usr/local/lib/libonig.la" ]; then
-    tar xzf onig-${onig_ver}.tar.gz
-    pushd onig-${onig_ver} > /dev/null
-    ./configure
-    make -j ${THREAD} && make install
-    popd > /dev/null
-    rm -rf onig-${onig_ver}
-  fi
-
   if [ ! -e "/usr/local/include/mhash.h" -a ! -e "/usr/include/mhash.h" ]; then
     tar xzf mhash-${mhash_ver}.tar.gz
     pushd mhash-${mhash_ver} > /dev/null
@@ -99,6 +90,7 @@ Install_PHP74() {
   tar xzf php-${php74_ver}.tar.gz
   pushd php-${php74_ver} > /dev/null
   make clean
+  export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/:$PKG_CONFIG_PATH
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}
   [ "${phpcache_option}" == '1' ] && phpcache_arg='--enable-opcache' || phpcache_arg='--disable-opcache'
   if [ "${apache_option}" == '2' ] || [ "${Apache_main_ver}" == '22' ] || [ "${apache_mode_option}" == '2' ]; then
