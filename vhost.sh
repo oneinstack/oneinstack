@@ -978,11 +978,11 @@ Add_Vhost() {
     Choose_ENV
     Input_Add_domain
     Nginx_anti_hotlinking
+    Nginx_rewrite
     if [ "${NGX_FLAG}" == "java" ]; then
       Nginx_log
       Create_nginx_tomcat_conf
     else
-      Nginx_rewrite
       Nginx_log
       Create_nginx_phpfpm_hhvm_conf
     fi
@@ -1000,6 +1000,7 @@ Add_Vhost() {
     Input_Add_domain
     Nginx_anti_hotlinking
     if [ "${NGX_FLAG}" == "java" ]; then
+      Nginx_rewrite
       Nginx_log
       Create_nginx_tomcat_conf
     elif [ "${NGX_FLAG}" == "hhvm" ]; then
