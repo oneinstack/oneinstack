@@ -250,7 +250,7 @@ If you enter '.', the field will be left blank.
         fi
       done
       [ "${moredomainame_flag}" == 'y' ] && moredomainame_D="$(for D in ${moredomainame}; do echo -d ${D}; done)"
-      ~/.acme.sh/acme.sh --force --issue --dns dns_${DNS_PRO} -d ${domain} ${moredomainame_D}
+      ~/.acme.sh/acme.sh --force --listen-v4 --issue --dns dns_${DNS_PRO} -d ${domain} ${moredomainame_D}
     else
       if [ "${nginx_ssl_flag}" == 'y' ]; then
         [ ! -d ${web_install_dir}/conf/vhost ] && mkdir ${web_install_dir}/conf/vhost
@@ -287,7 +287,7 @@ EOF
       done
       rm -f ${vhostdir}/${auth_file}
       [ "${moredomainame_flag}" == 'y' ] && moredomainame_D="$(for D in ${moredomainame}; do echo -d ${D}; done)"
-      ~/.acme.sh/acme.sh --force --issue -d ${domain} ${moredomainame_D} -w ${vhostdir}
+      ~/.acme.sh/acme.sh --force --listen-v4 --issue -d ${domain} ${moredomainame_D} -w ${vhostdir}
     fi
     if [ -s ~/.acme.sh/${domain}/fullchain.cer ]; then
       [ -e "${PATH_SSL}/${domain}.crt" ] && rm -f ${PATH_SSL}/${domain}.{crt,key}
