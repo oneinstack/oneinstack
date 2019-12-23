@@ -509,10 +509,10 @@ What Are You Doing?
   elif [ "$apache_ssl_flag" == 'y' ]; then
     Create_SSL
     Apache_SSL=$(echo -e "SSLEngine on\n  SSLCertificateFile \"${PATH_SSL}/${domain}.crt\"\n  SSLCertificateKeyFile \"${PATH_SSL}/${domain}.key\"")
-    [ -z "$(grep 'Listen 443' ${apache_install_dir}/conf/httpd.conf)" ] && sed -i "s@Listen 80@&\nListen 443@" ${apache_install_dir}/conf/httpd.conf
+    [ -z "$(grep 'Listen 0.0.0.0:443' ${apache_install_dir}/conf/httpd.conf)" ] && sed -i "s@Listen 0.0.0.0:80@&\nListen 0.0.0.0:443@" ${apache_install_dir}/conf/httpd.conf
     [ -z "$(grep 'ServerName 0.0.0.0:443' ${apache_install_dir}/conf/httpd.conf)" ] && sed -i "s@ServerName 0.0.0.0:80@&\nServerName 0.0.0.0:443@" ${apache_install_dir}/conf/httpd.conf
   else
-    Nginx_conf="listen 80;"
+    Nginx_conf="listen 0.0.0.0:80;\n listen [::]:80 default ipv6only=on;"
   fi
 }
 
