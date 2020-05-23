@@ -83,7 +83,7 @@ yaf_ver=3.0.9
 yar_ver=2.0.7
 swoole_ver=4.4.16
 swoole_oldver=1.10.5
-xdebug_ver=2.9.2
+xdebug_ver=2.9.5
 xdebug_oldver=2.5.5
 
 # Ftp
