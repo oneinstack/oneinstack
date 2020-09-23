@@ -446,7 +446,7 @@ What Are You Doing?
       echo "Create Virtul Host directory......"
       mkdir -p ${vhostdir}
       echo "set permissions of Virtual Host directory......"
-      chown -R ${run_user}.${run_user} ${vhostdir}
+      chown -R ${run_user}.${run_group} ${vhostdir}
       break
     fi
   done
