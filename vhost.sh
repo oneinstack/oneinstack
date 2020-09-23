@@ -209,6 +209,7 @@ If you enter '.', the field will be left blank.
     echo
     read -e -p "Country Name (2 letter code) [CN]: " SELFSIGNEDSSL_C
     SELFSIGNEDSSL_C=${SELFSIGNEDSSL_C:-CN}
+    # shellcheck disable=SC2104
     [ ${#SELFSIGNEDSSL_C} != 2 ] && { echo "${CWARNING}input error, You must input 2 letter code country name${CEND}"; continue; }
     echo
     read -e -p "State or Province Name (full name) [Shanghai]: " SELFSIGNEDSSL_ST
