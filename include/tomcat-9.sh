@@ -14,7 +14,7 @@ Install_Tomcat9() {
   id -g ${run_group} >/dev/null 2>&1
   [ $? -ne 0 ] && groupadd ${run_group}
   id -u ${run_user} >/dev/null 2>&1
-  [ $? -ne 0 ] && useradd -M -s /bin/bash ${run_user} || { [ -z "$(grep ^${run_user} /etc/passwd | grep '/bin/bash')" ] && usermod -s /bin/bash ${run_user}; }
+  [ $? -ne 0 ] && useradd -g ${run_group} -M -s /bin/bash ${run_user} || { [ -z "$(grep ^${run_user} /etc/passwd | grep '/bin/bash')" ] && usermod -g ${run_group} -s /bin/bash ${run_user}; }
 
   # install apr
   if [ ! -e "${apr_install_dir}/bin/apr-1-config" ]; then

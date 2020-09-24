@@ -86,7 +86,7 @@ Install_PHP73() {
   id -g ${run_group} >/dev/null 2>&1
   [ $? -ne 0 ] && groupadd ${run_group}
   id -u ${run_user} >/dev/null 2>&1
-  [ $? -ne 0 ] && useradd -M -s /sbin/nologin ${run_user}
+  [ $? -ne 0 ] && useradd -g ${run_group} -M -s /sbin/nologin ${run_user}
 
   tar xzf php-${php73_ver}.tar.gz
   pushd php-${php73_ver} > /dev/null
