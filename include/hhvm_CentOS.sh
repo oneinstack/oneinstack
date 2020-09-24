@@ -9,7 +9,8 @@
 #       https://github.com/oneinstack/oneinstack
 
 Install_hhvm_CentOS() {
-
+  id -g ${run_group} >/dev/null 2>&1
+  [ $? -ne 0 ] && groupadd ${run_group}
   id -u ${run_user} >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin ${run_user}
 
