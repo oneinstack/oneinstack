@@ -9,9 +9,10 @@
 #       https://github.com/oneinstack/oneinstack
 
 Install_hhvm_CentOS() {
-
+  id -g ${run_group} >/dev/null 2>&1
+  [ $? -ne 0 ] && groupadd ${run_group}
   id -u ${run_user} >/dev/null 2>&1
-  [ $? -ne 0 ] && useradd -M -s /sbin/nologin ${run_user}
+  [ $? -ne 0 ] && useradd -g ${run_group} -M -s /sbin/nologin ${run_user}
 
   [ "${PM}" == 'yum' ] && [ ! -e /etc/yum.repos.d/epel.repo ] && yum -y install epel-release
   if [ "${CentOS_ver}" == '7' ]; then
