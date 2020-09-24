@@ -13,7 +13,7 @@ Install_Apache22() {
   id -g ${run_group} >/dev/null 2>&1
   [ $? -ne 0 ] && groupadd ${run_group}
   id -u ${run_user} >/dev/null 2>&1
-  [ $? -ne 0 ] && useradd -M -s /sbin/nologin ${run_user}
+  [ $? -ne 0 ] && useradd -g ${run_group} -M -s /sbin/nologin ${run_user}
   tar xzf httpd-${apache22_ver}.tar.gz
   pushd httpd-${apache22_ver} > /dev/null
   [ ! -d "${apache_install_dir}" ] && mkdir -p ${apache_install_dir}
