@@ -115,7 +115,7 @@ phpmyadmin_oldver=4.4.15.10
 jemalloc_ver=5.2.1
 
 # boost
-boost_ver=1.70.0
+boost_ver=1.73.0
 boost_percona_ver=1.72.0
 boost_oldver=1.59.0
 
