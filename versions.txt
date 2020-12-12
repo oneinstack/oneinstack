@@ -59,7 +59,7 @@ php74_ver=7.4.13
 php80_ver=8.0.0
 
 libiconv_ver=1.16
-curl_ver=7.73.0
+curl_ver=7.74.0
 libmcrypt_ver=2.5.8
 mcrypt_ver=2.6.8
 mhash_ver=0.9.9.9
@@ -68,7 +68,7 @@ icu4c_ver=63_1
 libsodium_ver=1.0.18
 libzip_ver=1.2.0
 argon2_ver=20171227
-imagemagick_ver=7.0.10-43
+imagemagick_ver=7.0.10-48
 imagick_ver=3.4.4
 graphicsmagick_ver=1.3.35
 gmagick_ver=2.0.5RC1
@@ -97,7 +97,7 @@ pecl_redis_ver=5.3.2
 pecl_redis_oldver=4.3.0
 
 # Memcached
-memcached_ver=1.6.8
+memcached_ver=1.6.9
 libmemcached_ver=1.0.18
 pecl_memcached_ver=3.1.5
 pecl_memcached_oldver=2.2.0
@@ -105,7 +105,7 @@ pecl_memcache_ver=4.0.5.2
 pecl_memcache_oldver=3.0.8
 
 # MongoDB
-pecl_mongodb_ver=1.8.2
+pecl_mongodb_ver=1.9.0
 pecl_mongo_ver=1.6.16
 
 # phpMyadmin
