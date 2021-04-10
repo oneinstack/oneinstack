@@ -1,0 +1,55 @@
+#! /bin/sh
+
+### BEGIN INIT INFO
+# Provides:          httpd
+# Required-Start:    $all
+# Required-Stop:     $all
+# Default-Start:     2 3 4 5
+# Default-Stop:      0 1 6
+# Short-Description: starts the httpd web server
+# Description:       starts httpd using start-stop-daemon
+### END INIT INFO
+
+PATH=/usr/local/sbin:/usr/local/bin:/usr/sbin:/usr/bin:/sbin:/bin
+DAEMON=/usr/local/apache/bin/apachectl
+NAME=httpd
+DESC=httpd
+
+test -x $DAEMON || exit 0
+
+set -e
+
+case "$1" in
+  start)
+    echo -n "Starting $DESC: "
+    /usr/local/apache/bin/apachectl -k start
+    echo "$NAME."
+    ;;
+  stop)
+    echo -n "Stopping $DESC: "
+    /usr/local/apache/bin/apachectl -k graceful-stop
+    echo "$NAME."
+    ;;
+  restart|force-reload)
+    echo -n "Restarting $DESC: "
+    /usr/local/apache/bin/apachectl -k graceful-stop
+    sleep 1
+    /usr/local/apache/bin/apachectl -k start
+    echo "$NAME."
+    ;;
+  reload)
+    echo -n "Reloading $DESC configuration: "
+    /usr/local/apache/bin/apachectl -k graceful
+    echo "$NAME."
+    ;;
+  configtest)
+    $DAEMON -t
+    ;;
+  *)
+    N=/etc/init.d/$NAME
+    echo "Usage: $N {start|stop|restart|configtest|force-reload}" >&2
+    exit 1
+    ;;
+esac
+
+exit 0
