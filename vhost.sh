@@ -359,6 +359,8 @@ What Are You Doing?
     ./acme.sh --install > /dev/null 2>&1
     popd > /dev/null
     popd > /dev/null
+
+    ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt
   fi
   [ -e ~/.acme.sh/account.conf ] && sed -i '/^CERT_HOME=/d' ~/.acme.sh/account.conf
   if [[ "${Domian_Mode}" =~ ^[2-3]$ ]] || [ "${dnsapi_flag}" == 'y' ]; then
