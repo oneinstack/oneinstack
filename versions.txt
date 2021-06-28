@@ -6,9 +6,9 @@ openresty_ver=1.19.3.2
 openssl11_ver=1.1.1k
 openssl_ver=1.0.2u
 
-tomcat10_ver=10.0.6
-tomcat9_ver=9.0.46
-tomcat8_ver=8.5.66
+tomcat10_ver=10.0.7
+tomcat9_ver=9.0.48
+tomcat8_ver=8.5.68
 tomcat7_ver=7.0.109
 
 apache_ver=2.4.48
@@ -23,9 +23,9 @@ mysql57_ver=5.7.34
 mysql56_ver=5.6.50
 mysql55_ver=5.5.62
 
-mariadb105_ver=10.5.10
-mariadb104_ver=10.4.19
-mariadb103_ver=10.3.29
+mariadb105_ver=10.5.11
+mariadb104_ver=10.4.20
+mariadb103_ver=10.3.30
 mariadb55_ver=5.5.68
 
 percona80_ver=8.0.23-14
@@ -56,7 +56,7 @@ php74_ver=7.4.20
 php80_ver=8.0.7
 
 # Nodejs
-node_ver=14.17.0
+node_ver=14.17.1
 
 libiconv_ver=1.16
 curl_ver=7.77.0
@@ -68,7 +68,7 @@ icu4c_ver=63_1
 libsodium_ver=1.0.18
 libzip_ver=1.2.0
 argon2_ver=20171227
-imagemagick_ver=7.0.11-14
+imagemagick_ver=7.1.0-2
 imagick_ver=3.4.4
 graphicsmagick_ver=1.3.36
 gmagick_ver=2.0.5RC1

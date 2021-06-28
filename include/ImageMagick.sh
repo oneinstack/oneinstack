@@ -14,6 +14,11 @@ Install_ImageMagick() {
   else
     pushd ${oneinstack_dir}/src > /dev/null
     tar xzf ImageMagick-${imagemagick_ver}.tar.gz
+    #if [ "${PM}" == 'yum' ]; then
+    #  yum -y install libwebp-devel
+    #else if [ "${PM}" == 'apt-get' ]; then
+    #  yum -y install libwebp-dev
+    #fi
     pushd ImageMagick-${imagemagick_ver} > /dev/null
     ./configure --prefix=${imagick_install_dir} --enable-shared --enable-static
     make -j ${THREAD} && make install
@@ -25,7 +30,7 @@ Install_ImageMagick() {
 
 Uninstall_ImageMagick() {
   if [ -d "${imagick_install_dir}" ]; then
-    rm -rf ${imagick_install_dir} 
+    rm -rf ${imagick_install_dir}
     echo; echo "${CMSG}ImageMagick uninstall completed${CEND}"
   fi
 }
