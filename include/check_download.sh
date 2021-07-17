@@ -269,13 +269,13 @@ checkDownload() {
       [5-8])
 	case "${db_option}" in
           5)
-            mariadb_ver=${mariadb105_ver}
+            mariadb_ver=${mariadb106_ver}
 	    ;;
           6)
-            mariadb_ver=${mariadb104_ver}
+            mariadb_ver=${mariadb105_ver}
 	    ;;
           7)
-            mariadb_ver=${mariadb103_ver}
+            mariadb_ver=${mariadb104_ver}
 	    ;;
           8)
             mariadb_ver=${mariadb55_ver}
@@ -284,13 +284,13 @@ checkDownload() {
 
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download MariaDB ${mariadb_ver} binary package..."
-          FILE_NAME=mariadb-${mariadb_ver}-linux-${SYS_BIT_b}.tar.gz
+          FILE_NAME=mariadb-${mariadb_ver}-linux-systemd-${SYS_BIT_b}.tar.gz
           if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
-            DOWN_ADDR_MARIADB=http://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb_ver}/bintar-linux-${SYS_BIT_a}
-            DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb_ver}/bintar-linux-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB=http://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb_ver}/bintar-linux-systemd-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb_ver}/bintar-linux-systemd-${SYS_BIT_a}
           else
-            DOWN_ADDR_MARIADB=http://ftp.osuosl.org/pub/mariadb/mariadb-${mariadb_ver}/bintar-linux-${SYS_BIT_a}
-            DOWN_ADDR_MARIADB_BK=http://mirror.nodesdirect.com/mariadb/mariadb-${mariadb_ver}/bintar-linux-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB=http://ftp.osuosl.org/pub/mariadb/mariadb-${mariadb_ver}/bintar-linux-systemd-${SYS_BIT_a}
+            DOWN_ADDR_MARIADB_BK=http://mirror.nodesdirect.com/mariadb/mariadb-${mariadb_ver}/bintar-linux-systemd-${SYS_BIT_a}
           fi
         elif [ "${dbinstallmethod}" == '2' ]; then
           echo "Download MariaDB ${mariadb_ver} source package..."
@@ -627,7 +627,11 @@ checkDownload() {
     echo "Download ImageMagick..."
     src_url=${mirrorLink}/ImageMagick-${imagemagick_ver}.tar.gz && Download_src
     echo "Download imagick..."
-    src_url=https://pecl.php.net/get/imagick-${imagick_ver}.tgz && Download_src
+    if [[ "${php_option}" =~ ^1$ ]]; then
+      src_url=https://pecl.php.net/get/imagick-${imagick_oldver}.tgz && Download_src
+    else
+      src_url=https://pecl.php.net/get/imagick-${imagick_ver}.tgz && Download_src
+    fi
   fi
 
   # graphicsmagick

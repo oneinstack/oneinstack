@@ -38,9 +38,16 @@ Uninstall_ImageMagick() {
 Install_pecl_imagick() {
   if [ -e "${php_install_dir}/bin/phpize" ]; then
     pushd ${oneinstack_dir}/src > /dev/null
+    PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
+    PHP_main_ver=${PHP_detail_ver%.*}
     phpExtensionDir=`${php_install_dir}/bin/php-config --extension-dir`
-    tar xzf imagick-${imagick_ver}.tgz
-    pushd imagick-${imagick_ver} > /dev/null
+    if [[ "${PHP_main_ver}" =~ ^5.3$ ]]; then
+      tar xzf imagick-${imagick_oldver}.tgz
+      pushd imagick-${imagick_oldver} > /dev/null
+    else
+      tar xzf imagick-${imagick_ver}.tgz
+      pushd imagick-${imagick_ver} > /dev/null
+    fi
     export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig
     ${php_install_dir}/bin/phpize
     ./configure --with-php-config=${php_install_dir}/bin/php-config --with-imagick=${imagick_install_dir}
@@ -49,7 +56,7 @@ Install_pecl_imagick() {
     if [ -f "${phpExtensionDir}/imagick.so" ]; then
       echo 'extension=imagick.so' > ${php_install_dir}/etc/php.d/03-imagick.ini
       echo "${CSUCCESS}PHP imagick module installed successfully! ${CEND}"
-      rm -rf imagick-${imagick_ver}
+      rm -rf imagick-${imagick_ver} imagick-${imagick_oldver}
     else
       echo "${CFAILURE}PHP imagick module install failed, Please contact the author! ${CEND}" && lsb_release -a
     fi
