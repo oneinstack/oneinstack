@@ -132,8 +132,8 @@ checkDownload() {
           DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/Downloads/MySQL-8.0
           DOWN_ADDR_MYSQL_BK2=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-8.0
         else
-          DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-8.0
-          DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-8.0
+          DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-8.0
+          DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-8.0
         fi
 
         if [ "${dbinstallmethod}" == '1' ]; then
@@ -167,8 +167,8 @@ checkDownload() {
           DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/Downloads/MySQL-5.7
           DOWN_ADDR_MYSQL_BK2=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-5.7
         else
-          DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.7
-          DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.7
+          DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.7
+          DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-5.7
         fi
 
         if [ "${dbinstallmethod}" == '1' ]; then
@@ -202,8 +202,8 @@ checkDownload() {
           DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/Downloads/MySQL-5.6
           DOWN_ADDR_MYSQL_BK2=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-5.6
         else
-          DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.6
-          DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.6
+          DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.6
+          DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-5.6
         fi
 
         if [ "${dbinstallmethod}" == '1' ]; then
@@ -237,8 +237,8 @@ checkDownload() {
           DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/Downloads/MySQL-5.5
           DOWN_ADDR_MYSQL_BK2=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-5.5
         else
-          DOWN_ADDR_MYSQL=http://cdn.mysql.com/Downloads/MySQL-5.5
-          DOWN_ADDR_MYSQL_BK=http://mysql.he.net/Downloads/MySQL-5.5
+          DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.5
+          DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-5.5
         fi
 
         if [ "${dbinstallmethod}" == '1' ]; then

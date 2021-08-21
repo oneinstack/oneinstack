@@ -139,12 +139,10 @@ innodb_open_files = 500
 innodb_buffer_pool_size = 64M
 innodb_write_io_threads = 4
 innodb_read_io_threads = 4
-innodb_thread_concurrency = 0
 innodb_purge_threads = 1
 innodb_flush_log_at_trx_commit = 2
 innodb_log_buffer_size = 2M
 innodb_log_file_size = 32M
-innodb_log_files_in_group = 3
 innodb_max_dirty_pages_pct = 90
 innodb_lock_wait_timeout = 120
 
