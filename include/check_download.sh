@@ -652,7 +652,7 @@ checkDownload() {
     echo "Download redis-server..."
     src_url=http://download.redis.io/releases/redis-${redis_ver}.tar.gz && Download_src
     if [ "${PM}" == 'yum' ]; then
-      echo "Download start-stop-daemon.c for CentOS..."
+      echo "Download start-stop-daemon.c for RHEL..."
       src_url=${mirrorLink}/start-stop-daemon.c && Download_src
     fi
   fi
@@ -731,9 +731,9 @@ checkDownload() {
     fi
   fi
 
-  # autoconf for CentOS6
-  if [ "${downloadDepsSrc}" == '1' ] && [ "${CentOS_ver}" == '6' ]; then
-    echo "Download autoconf rpm for CentOS6..."
+  # autoconf for RHEL6
+  if [ "${downloadDepsSrc}" == '1' ] && [ "${RHEL_ver}" == '6' ]; then
+    echo "Download autoconf rpm for RHEL6..."
     src_url=${mirrorLink}/autoconf-2.69-12.2.noarch.rpm && Download_src
   fi
 
