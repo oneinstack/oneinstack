@@ -38,6 +38,8 @@ Install_MySQL80() {
     -DWITH_MYISAM_STORAGE_ENGINE=1 \
     -DENABLED_LOCAL_INFILE=1 \
     -DFORCE_INSOURCE_BUILD=1 \
+    -DCMAKE_C_COMPILER=/usr/bin/gcc \
+    -DCMAKE_CXX_COMPILER=/usr/bin/g++ \
     -DDEFAULT_CHARSET=utf8mb4
     make -j ${THREAD}
     make install
