@@ -770,9 +770,13 @@ if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[1-9]$|^1[0-2]$ ]];
 fi
 
 # openSSL
-if [[ ${tomcat_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [[ ${php_option} =~ ^[1-9]$|^10$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^80$ ]]; then
+if [[ "${tomcat_option}" =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [[ "${php_option}" =~ ^[1-9]$|^10$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^80$ ]]; then
   . include/openssl.sh
-  Install_openSSL | tee -a ${oneinstack_dir}/install.log
+  if [[ "${php_option}" =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]]; then
+    Install_openSSL102 | tee -a ${oneinstack_dir}/install.log
+  else
+    Install_openSSL | tee -a ${oneinstack_dir}/install.log
+  fi
 fi
 
 # Database
