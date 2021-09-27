@@ -17,9 +17,17 @@ checkDownload() {
   fi
 
   # General system utils
-  if [[ ${tomcat_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [[ ${php_option} =~ ^[1-9]$|^10$ ]]; then
-    echo "Download openSSL..."
-    src_url=https://www.openssl.org/source/old/1.0.2/openssl-${openssl_ver}.tar.gz && Download_src
+
+  # openssl
+  if [[ "${tomcat_option}" =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [[ "${php_flag}" == 'y' ]] || "${mphp_flag}" == 'y' || [[ "${nginx_option}" =~ ^[1-3]$ ]]; then
+    # Only the deprecated PHP5 requires openssl 1.0.2
+    if [[ "${php_option}" =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]]; then
+      echo "Download openSSL 1.0.2..."
+      src_url=https://www.openssl.org/source/old/1.0.2/openssl-${openssl_ver}.tar.gz && Download_src
+    else
+      echo "Download openSSL 1.1..."
+      src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
+    fi
     echo "Download cacert.pem..."
     src_url=https://curl.se/ca/cacert.pem && Download_src
   fi
@@ -28,12 +36,6 @@ checkDownload() {
   if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[1-9]$|^1[0-2]$ ]]; then
     echo "Download jemalloc..."
     src_url=${mirrorLink}/jemalloc-${jemalloc_ver}.tar.bz2 && Download_src
-  fi
-
-  # openssl1.1
-  if [[ ${nginx_option} =~ ^[1-3]$ ]]; then
-      echo "Download openSSL1.1..."
-      src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
   fi
 
   # nginx/tengine/openresty
