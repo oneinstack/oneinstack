@@ -129,8 +129,8 @@ checkDownload() {
         # MySQL 8.0
         if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
           DOWN_ADDR_MYSQL=http://mirrors.aliyun.com/mysql/MySQL-8.0
-          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/Downloads/MySQL-8.0
-          DOWN_ADDR_MYSQL_BK2=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-8.0
+          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-8.0
+          DOWN_ADDR_MYSQL_BK2=http://repo.huaweicloud.com/mysql/Downloads/MySQL-8.0
         else
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-8.0
           DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-8.0
@@ -164,8 +164,8 @@ checkDownload() {
         # MySQL 5.7
         if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
           DOWN_ADDR_MYSQL=http://mirrors.aliyun.com/mysql/MySQL-5.7
-          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/Downloads/MySQL-5.7
-          DOWN_ADDR_MYSQL_BK2=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-5.7
+          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
+          DOWN_ADDR_MYSQL_BK2=http://repo.huaweicloud.com/mysql/Downloads/MySQL-5.7
         else
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.7
           DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-5.7
@@ -199,8 +199,8 @@ checkDownload() {
         # MySQL 5.6
         if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
           DOWN_ADDR_MYSQL=http://mirrors.aliyun.com/mysql/MySQL-5.6
-          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/Downloads/MySQL-5.6
-          DOWN_ADDR_MYSQL_BK2=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-5.6
+          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.6
+          DOWN_ADDR_MYSQL_BK2=http://repo.huaweicloud.com/mysql/Downloads/MySQL-5.6
         else
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.6
           DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-5.6
@@ -234,8 +234,8 @@ checkDownload() {
         # MySQL 5.5
         if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
           DOWN_ADDR_MYSQL=http://mirrors.aliyun.com/mysql/MySQL-5.5
-          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/Downloads/MySQL-5.5
-          DOWN_ADDR_MYSQL_BK2=http://mirrors.huaweicloud.com/repository/toolkit/mysql/Downloads/MySQL-5.5
+          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.5
+          DOWN_ADDR_MYSQL_BK2=http://repo.huaweicloud.com/mysql/Downloads/MySQL-5.5
         else
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.5
           DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-5.5
