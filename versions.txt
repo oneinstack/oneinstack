@@ -11,7 +11,7 @@ tomcat9_ver=9.0.55
 tomcat8_ver=8.5.73
 tomcat7_ver=7.0.109
 
-apache_ver=2.4.51
+apache_ver=2.4.52
 pcre_ver=8.45
 apr_ver=1.7.0
 apr_util_ver=1.6.1
