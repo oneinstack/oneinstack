@@ -714,10 +714,10 @@ checkDownload() {
   fi
 
   # nodejs
-  if [ "${node_flag}" == 'y' ]; then
+  if [ "${nodejs_flag}" == 'y' ]; then
     echo "Download Nodejs..."
     [ "${IPADDR_COUNTRY}"x == "CN"x ] && DOWN_ADDR_NODE=https://nodejs.org/dist || DOWN_ADDR_NODE=https://mirrors.tuna.tsinghua.edu.cn/nodejs-release
-    src_url=${DOWN_ADDR_NODE}/v${node_ver}/node-v${node_ver}-linux-${SYS_BIT_n}.tar.gz && Download_src
+    src_url=${DOWN_ADDR_NODE}/v${nodejs_ver}/node-v${nodejs_ver}-linux-${SYS_BIT_n}.tar.gz && Download_src
   fi
 
   # pureftpd
