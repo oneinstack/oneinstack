@@ -11,6 +11,7 @@
 Upgrade_DB() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "${db_install_dir}/bin/mysql" ] && echo "${CWARNING}MySQL/MariaDB/Percona is not installed on your system! ${CEND}" && exit 1
+  [ "${armplatform}" == 'y' ] && echo "${CWARNING}The arm architecture operating system does not support upgrading MySQL/MariaDB/Percona! ${CEND}" && exit 1
 
   # check db passwd
   while :; do
