@@ -183,9 +183,9 @@ fi
 if [ -n "`echo ${desc_bk} | grep -w 3`" ]; then
   if [ ! -e "/usr/local/bin/ossutil" ]; then
     if [ "${armplatform}" == 'y' ]; then
-      wget -qc https://gosspublic.alicdn.com/ossutil/1.7.9/ossutilarm${OS_BIT} -O /usr/local/bin/ossutil
+      wget -qc https://gosspublic.alicdn.com/ossutil/1.7.10/ossutilarm64 -O /usr/local/bin/ossutil
     else
-      wget -qc https://gosspublic.alicdn.com/ossutil/1.7.9/ossutil${OS_BIT} -O /usr/local/bin/ossutil
+      wget -qc https://gosspublic.alicdn.com/ossutil/1.7.10/ossutil64 -O /usr/local/bin/ossutil
     fi
     chmod +x /usr/local/bin/ossutil
   fi
@@ -350,17 +350,12 @@ fi
 
 if [ -n "`echo ${desc_bk} | grep -w 5`" ]; then
   if [ ! -e "/usr/local/bin/upx" ]; then
-    if [ "${OS_BIT}" == '64' ]; then
-      if [ "${armplatform}" == 'y' ]; then
-        wget -qc http://collection.b0.upaiyun.com/softwares/upx/upx_0.3.6_linux_arm64.tar.gz -O /tmp/upx_0.3.6_linux_arm64.tar.gz
-        tar xzf /tmp/upx_0.3.6_linux_arm64.tar.gz -C /tmp/
-      else
-        wget -qc http://collection.b0.upaiyun.com/softwares/upx/upx_0.3.6_linux_x86_64.tar.gz -O /tmp/upx_0.3.6_linux_x86_64.tar.gz
-        tar xzf /tmp/upx_0.3.6_linux_x86_64.tar.gz -C /tmp/
-      fi
-    elif [ "${OS_BIT}" == '32' ]; then
-      wget -qc http://collection.b0.upaiyun.com/softwares/upx/upx_0.3.6_linux_i386.tar.gz -O /tmp/upx_0.3.6_linux_i386.tar.gz
-      tar xzf /tmp/upx_0.3.6_linux_i386.tar.gz -C /tmp/
+    if [ "${armplatform}" == 'y' ]; then
+      wget -qc http://collection.b0.upaiyun.com/softwares/upx/upx_0.3.6_linux_arm64.tar.gz -O /tmp/upx_0.3.6_linux_arm64.tar.gz
+      tar xzf /tmp/upx_0.3.6_linux_arm64.tar.gz -C /tmp/
+    else
+      wget -qc http://collection.b0.upaiyun.com/softwares/upx/upx_0.3.6_linux_x86_64.tar.gz -O /tmp/upx_0.3.6_linux_x86_64.tar.gz
+      tar xzf /tmp/upx_0.3.6_linux_x86_64.tar.gz -C /tmp/
     fi
     /bin/mv /tmp/upx /usr/local/bin/upx
     chmod +x /usr/local/bin/upx
@@ -389,22 +384,12 @@ fi
 
 if [ -n "`echo ${desc_bk} | grep -w 6`" ]; then
   if [ ! -e "/usr/local/bin/qshell" ]; then
-    if [ "${OS_BIT}" == '64' ]; then
-      if [ "${armplatform}" == 'y' ]; then
-        wget -qc https://devtools.qiniu.com/qshell-v2.6.2-linux-arm64.tar.gz -O /tmp/qshell-v2.6.2-linux-arm64.tar.gz
-	tar xzf /tmp/qshell-v2.6.2-linux-arm64.tar.gz -C /usr/local/bin/
-      else
-        wget -qc https://devtools.qiniu.com/qshell-v2.6.2-linux-amd64.tar.gz -O /tmp/qshell-v2.6.2-linux-amd64.tar.gz
-        tar xzf /tmp/qshell-v2.6.2-linux-amd64.tar.gz -C /usr/local/bin/
-      fi
-    elif [ "${OS_BIT}" == '32' ]; then
-      if [ "${armplatform}" == 'y' ]; then
-        wget -qc https://devtools.qiniu.com/qshell-v2.6.2-linux-arm.tar.gz -O /tmp/qshell-v2.6.2-linux-arm.tar.gz
-        tar xzf /tmp/qshell-v2.6.2-linux-arm.tar.gz -C /usr/local/bin/
-      else
-        wget -qc https://devtools.qiniu.com/qshell-v2.6.2-linux-386.tar.gz -O /tmp/qshell-v2.6.2-linux-386.tar.gz
-        tar xzf /tmp/qshell-v2.6.2-linux-386.tar.gz -C /usr/local/bin/
-      fi
+    if [ "${armplatform}" == 'y' ]; then
+      wget -qc https://devtools.qiniu.com/qshell-v2.6.2-linux-arm64.tar.gz -O /tmp/qshell-v2.6.2-linux-arm64.tar.gz
+      tar xzf /tmp/qshell-v2.6.2-linux-arm64.tar.gz -C /usr/local/bin/
+    else
+      wget -qc https://devtools.qiniu.com/qshell-v2.6.2-linux-amd64.tar.gz -O /tmp/qshell-v2.6.2-linux-amd64.tar.gz
+      tar xzf /tmp/qshell-v2.6.2-linux-amd64.tar.gz -C /usr/local/bin/
     fi
     chmod +x /usr/local/bin/qshell
     rm -f /tmp/qshell*
@@ -535,7 +520,9 @@ fi
 
 if [ -n "`echo ${desc_bk} | grep -w 8`" ]; then
   if [ ! -e "/usr/local/bin/dbxcli" ]; then
-    if [ "${OS_BIT}" == '64' ]; then
+    if [ "${armplatform}" == 'y' ]; then
+      wget -qc http://mirrors.linuxeye.com/oneinstack/src/dbxcli-linux-arm -O /usr/local/bin/dbxcli
+    else
       wget -qc http://mirrors.linuxeye.com/oneinstack/src/dbxcli-linux-amd64 -O /usr/local/bin/dbxcli
     fi
     chmod +x /usr/local/bin/dbxcli
