@@ -88,8 +88,8 @@ checkDownload() {
       ;;
   esac
 
-  # openjdk apr
-  if [[ "${openjdk_option}"  =~ ^[1-2]$ ]]; then
+  # jdk apr
+  if [[ "${jdk_option}"  =~ ^[1-2]$ ]]; then
     echo "Download apr..."
     src_url=http://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
   fi

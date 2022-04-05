@@ -58,7 +58,7 @@ Show_Help() {
                               yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug
   --nodejs                    Install Nodejs
   --tomcat_option [1-4]       Install Tomcat version
-  --openjdk_option [1-2]      Install OpenJDK version
+  --jdk_option [1-2]          Install JDK version
   --db_option [1-14]          Install DB version
   --dbinstallmethod [1-2]     DB install method, default: 1 binary install
   --dbrootpwd [password]      DB super password
@@ -73,7 +73,7 @@ Show_Help() {
   "
 }
 ARG_NUM=$#
-TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,openjdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,phpmyadmin,python,ssh_port:,iptables,reboot -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,phpmyadmin,python,ssh_port:,iptables,reboot -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -149,9 +149,9 @@ while :; do
       [[ ! ${tomcat_option} =~ ^[1-4]$ ]] && { echo "${CWARNING}tomcat_option input error! Please only input number 1~4${CEND}"; exit 1; }
       [ -e "$tomcat_install_dir/conf/server.xml" ] && { echo "${CWARNING}Tomcat already installed! ${CEND}" ; unset tomcat_option; }
       ;;
-    --openjdk_option)
-      openjdk_option=$2; shift 2
-      [[ ! ${openjdk_option} =~ ^[1-2]$ ]] && { echo "${CWARNING}openjdk_option input error! Please only input number 1~2${CEND}"; exit 1; }
+    --jdk_option)
+      jdk_option=$2; shift 2
+      [[ ! ${jdk_option} =~ ^[1-2]$ ]] && { echo "${CWARNING}jdk_option input error! Please only input number 1~2${CEND}"; exit 1; }
       ;;
     --db_option)
       db_option=$2; shift 2
@@ -326,12 +326,12 @@ if [ ${ARG_NUM} == 0 ]; then
             [ "${tomcat_option}" != '5' -a -e "$tomcat_install_dir/conf/server.xml" ] && { echo "${CWARNING}Tomcat already installed! ${CEND}" ; unset tomcat_option; }
             if [[ "${tomcat_option}" =~ ^[1-3]$ ]]; then
               while :; do echo
-                echo 'Please select OpenJDK version:'
+                echo 'Please select JDK version:'
                 echo -e "\t${CMSG}1${CEND}. Install openjdk-8-jdk"
                 echo -e "\t${CMSG}2${CEND}. Install openjdk-11-jdk"
-                read -e -p "Please input a number:(Default 1 press Enter) " openjdk_option
-                openjdk_option=${openjdk_option:-1}
-                if [[ ! ${openjdk_option} =~ ^[1-2]$ ]]; then
+                read -e -p "Please input a number:(Default 1 press Enter) " jdk_option
+                jdk_option=${jdk_option:-1}
+                if [[ ! ${jdk_option} =~ ^[1-2]$ ]]; then
                   echo "${CWARNING}input error! Please only input number 1~3${CEND}"
                 else
                   break
@@ -339,11 +339,11 @@ if [ ${ARG_NUM} == 0 ]; then
               done
             elif [ "${tomcat_option}" == '4' ]; then
               while :; do echo
-                echo 'Please select OpenJDK version:'
+                echo 'Please select JDK version:'
                 echo -e "\t${CMSG}1${CEND}. Install openjdk-8-jdk"
-                read -e -p "Please input a number:(Default 1 press Enter) " openjdk_option
-                openjdk_option=${openjdk_option:-1}
-                if [[ ! ${openjdk_option} =~ ^1$ ]]; then
+                read -e -p "Please input a number:(Default 1 press Enter) " jdk_option
+                jdk_option=${jdk_option:-1}
+                if [[ ! ${jdk_option} =~ ^1$ ]]; then
                   echo "${CWARNING}input error! Please only input number 1${CEND}"
                 else
                   break
@@ -1040,7 +1040,7 @@ if [ "${mphp_flag}" == 'y' ]; then
 fi
 
 # JDK
-case "${openjdk_option}" in
+case "${jdk_option}" in
   1)
     . include/openjdk-8.sh
     Install_OpenJDK8 2>&1 | tee -a ${oneinstack_dir}/install.log
