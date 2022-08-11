@@ -49,8 +49,8 @@ Upgrade_DB() {
   #backup
   echo
   echo "${CSUCCESS}Starting ${DB} backup${CEND}......"
-  ${db_install_dir}/bin/mysqldump -uroot -p${dbrootpwd} --opt --all-databases > DB_all_backup_$(date +"%Y%m%d").sql
-  [ -f "DB_all_backup_$(date +"%Y%m%d").sql" ] && echo "${DB} backup success, Backup file: ${MSG}`pwd`/DB_all_backup_$(date +"%Y%m%d").sql${CEND}"
+  ${db_install_dir}/bin/mysqldump -uroot -p${dbrootpwd} --opt --all-databases > DB_all_backup_$(date +"%Y%m%d_%H%M%S").sql
+  [ -f "DB_all_backup_$(date +"%Y%m%d_%H%M%S").sql" ] && echo "${DB} backup success, Backup file: ${MSG}`pwd`/DB_all_backup_$(date +"%Y%m%d_%H%M%S").sql${CEND}"
 
   #upgrade
   echo
