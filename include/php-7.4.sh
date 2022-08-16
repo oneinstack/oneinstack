@@ -109,7 +109,7 @@ Install_PHP74() {
     --with-iconv-dir=/usr/local --with-freetype --with-jpeg --with-zlib \
     --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
     --enable-sysvsem --enable-inline-optimization --with-curl=${curl_install_dir} --enable-mbregex \
-    --enable-mbstring --with-password-argon2 --with-sodium=/usr/local --enable-gd --with-openssl=${openssl_install_dir} \
+    --enable-mbstring --with-password-argon2 --with-sodium=/usr/local --enable-gd --with-openssl-dir=${openssl_install_dir} \
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
     --with-gettext --with-zip=/usr/local --enable-soap --disable-debug ${php_modules_options}
   else
@@ -120,7 +120,7 @@ Install_PHP74() {
     --with-iconv-dir=/usr/local --with-freetype --with-jpeg --with-zlib \
     --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
     --enable-sysvsem --enable-inline-optimization --with-curl=${curl_install_dir} --enable-mbregex \
-    --enable-mbstring --with-password-argon2 --with-sodium=/usr/local --enable-gd --with-openssl=${openssl_install_dir} \
+    --enable-mbstring --with-password-argon2 --with-sodium=/usr/local --enable-gd --with-openssl-dir=${openssl_install_dir} \
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
     --with-gettext --with-zip=/usr/local --enable-soap --disable-debug ${php_modules_options}
   fi
