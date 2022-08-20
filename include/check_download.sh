@@ -303,7 +303,7 @@ checkDownload() {
         # Percona 8.0
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download Percona 8.0 binary package..."
-          FILE_NAME=Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.17.tar.gz
+          FILE_NAME=Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.27.tar.gz
           DOWN_ADDR_PERCONA=https://downloads.percona.com/downloads/Percona-Server-8.0/Percona-Server-${percona80_ver}/binary/tarball
         elif [ "${dbinstallmethod}" == '2' ]; then
           echo "Download Percona 8.0 source package..."

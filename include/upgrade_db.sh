@@ -67,8 +67,10 @@ Upgrade_DB() {
         else
           perconaVerStr1=${NEW_db_ver}
         fi
-        if [[ "`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`" =~ ^5.7$|^8.0$ ]]; then
-           DB_filename=Percona-Server-${perconaVerStr1}-Linux.x86_64.glibc2.12
+        if [[ "`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`" =~ ^8.0$ ]]; then
+           DB_filename=Percona-Server-${perconaVerStr1}-Linux.x86_64.glibc2.27
+        elif [[ "`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`" =~ ^5.7$ ]]; then
+           DB_filename=Percona-Server-${perconaVerStr1}-Linux.x86_64.glibc2.17
         else
            DB_filename=Percona-Server-${perconaVerStr1}-Linux.x86_64.${sslLibVer}
         fi
