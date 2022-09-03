@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://linuxeye.com
 #
-# Notes: OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+
+# Notes: OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -149,7 +149,6 @@ innodb_lock_wait_timeout = 120
 bulk_insert_buffer_size = 8M
 myisam_sort_buffer_size = 8M
 myisam_max_sort_file_size = 10G
-myisam_repair_threads = 1
 
 interactive_timeout = 28800
 wait_timeout = 28800

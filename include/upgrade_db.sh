@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://linuxeye.com
 #
-# Notes: OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+
+# Notes: OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -165,6 +165,7 @@ Upgrade_DB() {
 
       chown mysql.mysql -R ${mysql_data_dir}
       [ -e "${mysql_install_dir}/my.cnf" ] && rm -rf ${mysql_install_dir}/my.cnf
+      sed -i '/myisam_repair_threads/d' /etc/my.cnf
       service mysqld start
       ${mysql_install_dir}/bin/mysql < DB_all_backup_$(date +"%Y%m%d").sql
       service mysqld restart

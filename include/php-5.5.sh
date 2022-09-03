@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://linuxeye.com
 #
-# Notes: OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+
+# Notes: OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -10,10 +10,6 @@
 
 Install_PHP55() {
   pushd ${oneinstack_dir}/src > /dev/null
-  if [ -e "${apache_install_dir}/bin/httpd" ];then
-    [ "$(${apache_install_dir}/bin/httpd -v | awk -F'.' /version/'{print $2}')" == '4' ] && Apache_main_ver=24
-    [ "$(${apache_install_dir}/bin/httpd -v | awk -F'.' /version/'{print $2}')" == '2' ] && Apache_main_ver=22
-  fi
   if [ ! -e "/usr/local/lib/libiconv.la" ]; then
     tar xzf libiconv-${libiconv_ver}.tar.gz
     pushd libiconv-${libiconv_ver} > /dev/null
@@ -26,10 +22,8 @@ Install_PHP55() {
   if [ ! -e "${curl_install_dir}/lib/libcurl.la" ]; then
     tar xzf curl-${curl_ver}.tar.gz
     pushd curl-${curl_ver} > /dev/null
-    [ "${Debian_ver}" == '8' ] && apt-get -y remove zlib1g-dev
-    ./configure --prefix=${curl_install_dir} --with-ssl=${openssl_install_dir}
+    ./configure --prefix=${curl_install_dir} ${php5_with_ssl}
     make -j ${THREAD} && make install
-    [ "${Debian_ver}" == '8' ] && apt-get -y install libc-client2007e-dev libglib2.0-dev libpng12-dev libssl-dev libzip-dev zlib1g-dev
     popd > /dev/null
     rm -rf curl-${curl_ver}
   fi
@@ -97,15 +91,15 @@ Install_PHP55() {
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}
   { [ ${Debian_ver} -ge 10 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -ge 19 >/dev/null 2>&1 ]; } || intl_modules_options='--enable-intl'
   [ "${phpcache_option}" == '1' ] && phpcache_arg='--enable-opcache' || phpcache_arg='--disable-opcache'
-  if [ "${Apache_main_ver}" == '22' ] || [ "${apache_mode_option}" == '2' ]; then
+  if [ "${apache_mode_option}" == '2' ]; then
     ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
     --with-apxs2=${apache_install_dir}/bin/apxs ${phpcache_arg} --disable-fileinfo \
     --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
     --with-iconv-dir=/usr/local --with-freetype-dir=${freetype_install_dir} --with-jpeg-dir --with-png-dir --with-zlib \
     --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
-    --enable-sysvsem --enable-inline-optimization --with-curl=${curl_install_dir} --enable-mbregex \
-    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf --with-openssl=${openssl_install_dir} \
+    --enable-sysvsem --enable-inline-optimization ${php5_with_curl} --enable-mbregex \
+    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf ${php5_with_openssl} \
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --with-xsl ${intl_modules_options} \
     --with-gettext --enable-zip --enable-soap --disable-debug ${php_modules_options}
   else
@@ -115,8 +109,8 @@ Install_PHP55() {
     --with-mysql=mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
     --with-iconv-dir=/usr/local --with-freetype-dir=${freetype_install_dir} --with-jpeg-dir --with-png-dir --with-zlib \
     --with-libxml-dir=/usr --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
-    --enable-sysvsem --enable-inline-optimization --with-curl=${curl_install_dir} --enable-mbregex \
-    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf --with-openssl=${openssl_install_dir} \
+    --enable-sysvsem --enable-inline-optimization ${php5_with_curl} --enable-mbregex \
+    --enable-mbstring --with-mcrypt --with-gd --enable-gd-native-ttf ${php5_with_openssl} \
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --with-xsl ${intl_modules_options} \
     --with-gettext --enable-zip --enable-soap --disable-debug ${php_modules_options}
   fi
@@ -168,7 +162,7 @@ opcache.enable_cli=1
 ;opcache.optimization_level=0
 EOF
 
-  if [ ! -e "${apache_install_dir}/bin/apxs" -o "${Apache_main_ver}" == '24' ] && [ "${apache_mode_option}" != '2' ]; then
+  if [ "${apache_mode_option}" != '2' ]; then
     # php-fpm Init Script
     /bin/cp ${oneinstack_dir}/init.d/php-fpm.service /lib/systemd/system/
     sed -i "s@/usr/local/php@${php_install_dir}@g" /lib/systemd/system/php-fpm.service
@@ -259,7 +253,7 @@ EOF
 
     systemctl start php-fpm
 
-  elif [ "${Apache_main_ver}" == '22' ] || [ "${apache_mode_option}" == '2' ]; then
+  elif [ "${apache_mode_option}" == '2' ]; then
     systemctl restart httpd
   fi
   popd > /dev/null

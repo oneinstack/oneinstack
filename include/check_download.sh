@@ -1,7 +1,7 @@
 #!/bin/bash
 # Author:  Alpha Eva <kaneawk AT gmail.com>
 #
-# Notes: OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+
+# Notes: OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -17,7 +17,7 @@ checkDownload() {
   fi
 
   # General system utils
-  if [[ ${tomcat_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [[ ${php_option} =~ ^[1-9]$|^1[0-1]$ ]]; then
+  if [ "${with_old_openssl_flag}" == 'y' ]; then
     echo "Download openSSL..."
     src_url=https://www.openssl.org/source/old/1.0.2/openssl-${openssl_ver}.tar.gz && Download_src
     echo "Download cacert.pem..."

@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://linuxeye.com
 #
-# Notes: OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+
+# Notes: OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -53,14 +53,8 @@ Install_Apache() {
     rm -rf nghttp2-${nghttp2_ver}
   fi
 
-  if openssl version | grep -Eqi 'OpenSSL 1.1'; then
-    with_ssl="--with-ssl"
-  else
-    with_old_ssl_flag='y'
-    with_ssl="--with-ssl=${openssl_install_dir}"
-  fi
   pushd httpd-${apache_ver} > /dev/null
-  LDFLAGS=-ldl ./configure --prefix=${apache_install_dir} --enable-mpms-shared=all --with-pcre --with-apr=${apr_install_dir} --with-apr-util=${apr_install_dir} --enable-headers --enable-mime-magic --enable-deflate --enable-proxy --enable-so --enable-dav --enable-rewrite --enable-remoteip --enable-expires --enable-static-support --enable-suexec --enable-mods-shared=most --enable-nonportable-atomics=yes --enable-ssl ${with_ssl} --enable-http2 --with-nghttp2=/usr/local
+  LDFLAGS=-ldl ./configure --prefix=${apache_install_dir} --enable-mpms-shared=all --with-pcre --with-apr=${apr_install_dir} --with-apr-util=${apr_install_dir} --enable-headers --enable-mime-magic --enable-deflate --enable-proxy --enable-so --enable-dav --enable-rewrite --enable-remoteip --enable-expires --enable-static-support --enable-suexec --enable-mods-shared=most --enable-nonportable-atomics=yes --enable-ssl --with-ssl --enable-http2 --with-nghttp2=/usr/local
   make -j ${THREAD} && make install
   popd > /dev/null
   unset LDFLAGS
@@ -190,7 +184,7 @@ EOF
     sed -i "s@LogFormat \"%h %l@LogFormat \"%h %a %l@g" ${apache_install_dir}/conf/httpd.conf
   fi
   ldconfig
-  [ "${with_old_ssl_flag}" == 'y' ] && sed -i "s@^export LD_LIBRARY_PATH.*@export LD_LIBRARY_PATH=${openssl_install_dir}/lib:\$LD_LIBRARY_PATH@" ${apache_install_dir}/bin/envvars
+  [ "${with_old_openssl_flag}" == 'y' ] && sed -i "s@^export LD_LIBRARY_PATH.*@export LD_LIBRARY_PATH=${openssl_install_dir}/lib:\$LD_LIBRARY_PATH@" ${apache_install_dir}/bin/envvars
   systemctl start httpd
   popd > /dev/null
 }
