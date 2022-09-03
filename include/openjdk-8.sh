@@ -2,18 +2,18 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://linuxeye.com
 #
-# Notes: OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+
+# Notes: OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+
 #
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/oneinstack/oneinstack
 
 Install_OpenJDK8() {
-  if [ "${Family}" == 'RHEL' ]; then
+  if [ "${Family}" == 'rhel' ]; then
     yum -y install java-1.8.0-openjdk-devel
     JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
-  elif [ "${Family}" == 'Debian' ]; then
-    if [[ "${Debian_ver}" =~ ^8$|^10$|^11$ ]]; then
+  elif [ "${Family}" == 'debian' ]; then
+    if [[ "${Debian_ver}" =~ ^10$|^11$ ]]; then
       #wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | apt-key add -
       cat ${oneinstack_dir}/src/adoptium.key | sudo apt-key add -
       apt-add-repository --yes https://mirrors.tuna.tsinghua.edu.cn/Adoptium/deb
@@ -24,7 +24,7 @@ Install_OpenJDK8() {
       apt-get --no-install-recommends -y install openjdk-8-jdk
       JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${SYS_ARCH}
     fi
-  elif [ "${Family}" == 'Ubuntu' ]; then
+  elif [ "${Family}" == 'ubuntu' ]; then
     apt-get --no-install-recommends -y install openjdk-8-jdk
     JAVA_HOME=/usr/lib/jvm/java-8-openjdk-${SYS_ARCH}
   fi

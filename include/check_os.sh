@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://linuxeye.com
 #
-# Notes: OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+
+# Notes: OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -40,7 +40,7 @@ fi
 Platform=$(lsb_release -is 2>/dev/null)
 ARCH=$(arch)
 if [[ "${Platform}" =~ ^CentOS$|^CentOSStream$|^RedHat$|^RedHatEnterprise$|^Rocky$|^AlmaLinux$|^Fedora$|^Amazon$|^AlibabaCloud$|^AlibabaCloud\(AliyunLinux\)$|^AnolisOS$|^EulerOS$|^openEuler$|^Oracle$ ]]; then
-  Family=RHEL
+  Family=rhel
   RHEL_ver=$(lsb_release -rs 2>/dev/null | awk -F. '{print $1}' | awk '{print $1}' 2>/dev/null)
   [[ "${Platform}" =~ ^Fedora$ ]] && [ ${RHEL_ver} -ge 19 >/dev/null 2>&1 ] && { RHEL_ver=7; Fedora_ver=$(lsb_release -rs); }
   [[ "${Platform}" =~ ^Amazon$|^EulerOS$|^openEuler$ ]] && RHEL_ver=7
@@ -48,12 +48,12 @@ if [[ "${Platform}" =~ ^CentOS$|^CentOSStream$|^RedHat$|^RedHatEnterprise$|^Rock
   [[ "${Platform}" =~ ^AlibabaCloud$|^AlibabaCloud\(AliyunLinux\)$ ]] && [[ "${RHEL_ver}" =~ ^2$ ]] && RHEL_ver=7
   [[ "${Platform}" =~ ^AlibabaCloud$|^AlibabaCloud\(AliyunLinux\)$ ]] && [[ "${RHEL_ver}" =~ ^3$ ]] && RHEL_ver=8
 elif [[ "${Platform}" =~ ^Debian$|^Deepin$|^Uos$|^Kali$ ]]; then
-  Family=Debian
+  Family=debian
   Debian_ver=$(lsb_release -rs 2>/dev/null | awk -F. '{print $1}' | awk '{print $1}')
   [[ "${Platform}" =~ ^Deepin$|^Uos$ ]] && [[ "${Debian_ver}" =~ ^20$ ]] && Debian_ver=10
   [[ "${Platform}" =~ ^Kali$ ]] && [[ "${Debian_ver}" =~ ^202 ]] && Debian_ver=10
 elif [[ "${Platform}" =~ ^Ubuntu$|^LinuxMint$|^elementary$ ]]; then
-  Family=Ubuntu
+  Family=ubuntu
   Ubuntu_ver=$(lsb_release -rs 2>/dev/null | awk -F. '{print $1}' | awk '{print $1}')
   if [[ "${Platform}" =~ ^LinuxMint$ ]]; then
     [[ "${Ubuntu_ver}" =~ ^18$ ]] && Ubuntu_ver=16
@@ -65,11 +65,11 @@ elif [[ "${Platform}" =~ ^Ubuntu$|^LinuxMint$|^elementary$ ]]; then
     [[ "${Ubuntu_ver}" =~ ^6$ ]] && Ubuntu_ver=20
   fi
 elif [ -e "/etc/almalinux-release" ]; then
-  Family=RHEL
+  Family=rhel
   Platform=AlmaLinux
   grep -Eqi "release 9." /etc/almalinux-release && RHEL_ver=9
 elif [ -e "/etc/rocky-release" ]; then
-  Family=RHEL
+  Family=rhel
   Platform=Rocky
   grep -Eqi "release 9." /etc/rocky-release && RHEL_ver=9
 else
@@ -77,8 +77,8 @@ else
 fi
 
 # Check OS Version
-if [ ${RHEL_ver} -lt 7 >/dev/null 2>&1 ] || [ ${Debian_ver} -lt 8 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -lt 16 >/dev/null 2>&1 ]; then
-  echo "${CFAILURE}Does not support this OS, Please install CentOS 7+,Debian 8+,Ubuntu 16+ ${CEND}"
+if [ ${RHEL_ver} -lt 7 >/dev/null 2>&1 ] || [ ${Debian_ver} -lt 9 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -lt 16 >/dev/null 2>&1 ]; then
+  echo "${CFAILURE}Does not support this OS, Please install CentOS 7+,Debian 9+,Ubuntu 16+ ${CEND}"
   kill -9 $$; exit 1;
 fi
 

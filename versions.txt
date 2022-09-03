@@ -6,9 +6,9 @@ openresty_ver=1.21.4.1
 openssl11_ver=1.1.1q
 openssl_ver=1.0.2u
 
-tomcat10_ver=10.0.22
-tomcat9_ver=9.0.64
-tomcat8_ver=8.5.81
+tomcat10_ver=10.0.23
+tomcat9_ver=9.0.65
+tomcat8_ver=8.5.82
 tomcat7_ver=7.0.109
 
 apache_ver=2.4.54
@@ -23,9 +23,9 @@ mysql57_ver=5.7.38
 mysql56_ver=5.6.50
 mysql55_ver=5.5.62
 
-mariadb106_ver=10.6.8
-mariadb105_ver=10.5.16
-mariadb104_ver=10.4.25
+mariadb106_ver=10.6.9
+mariadb105_ver=10.5.17
+mariadb104_ver=10.4.26
 mariadb55_ver=5.5.68
 
 percona80_ver=8.0.29-21

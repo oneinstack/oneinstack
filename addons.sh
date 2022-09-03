@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://linuxeye.com
 #
-# Notes: OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+
+# Notes: OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -12,7 +12,7 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 clear
 printf "
 #######################################################################
-#       OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+      #
+#       OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+      #
 #                    Install/Uninstall Extensions                     #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
@@ -40,8 +40,6 @@ pushd ${oneinstack_dir} > /dev/null
 
 . ./include/ngx_lua_waf.sh
 
-. ./include/panel.sh
-
 # shellcheck disable=SC2154
 Show_Help() {
   echo
@@ -57,7 +55,7 @@ Show_Help() {
 }
 
 ARG_NUM=$#
-TEMP=`getopt -o hiu --long help,install,uninstall,composer,fail2ban,ngx_lua_waf,python,panel -- "$@" 2>/dev/null`
+TEMP=`getopt -o hiu --long help,install,uninstall,composer,fail2ban,ngx_lua_waf,python -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -83,9 +81,6 @@ while :; do
       ;;
     --python)
       python_flag=y; shift 1
-      ;;
-    --panel)
-      panel_flag=y; shift 1
       ;;
     --)
       shift
@@ -215,14 +210,6 @@ else
       Install_Python
     elif [ "${uninstall_flag}" = 'y' ]; then
       Uninstall_Python
-    fi
-  fi
-  if [ "${panel_flag}" == 'y' ]; then
-    if [ "${install_flag}" = 'y' ]; then
-      Install_Python
-      Install_Panel
-    elif [ "${uninstall_flag}" = 'y' ]; then
-      Uninstall_Panel
     fi
   fi
 fi

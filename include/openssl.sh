@@ -2,32 +2,145 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://linuxeye.com
 #
-# Notes: OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+
+# Notes: OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+
 #
 # Project home page:
 #       https://oneinstack.com
 #       https://github.com/oneinstack/oneinstack
 
+if openssl version | grep -Eqi 'OpenSSL 1.0.2*'; then
+  php5_with_openssl="--with-openssl"
+  php70_with_openssl="--with-openssl"
+  php71_with_openssl="--with-openssl"
+  php72_with_openssl="--with-openssl"
+  php73_with_openssl="--with-openssl"
+  php74_with_openssl="--with-openssl"
+  php80_with_openssl="--with-openssl"
+  php81_with_openssl="--with-openssl"
+
+  php5_with_ssl="--with-ssl"
+  php70_with_ssl="--with-ssl"
+  php71_with_ssl="--with-ssl"
+  php72_with_ssl="--with-ssl"
+  php73_with_ssl="--with-ssl"
+  php74_with_ssl="--with-ssl"
+  php80_with_ssl="--with-ssl"
+  php81_with_ssl="--with-ssl"
+
+  php5_with_curl="--with-curl"
+  php70_with_curl="--with-curl"
+  php71_with_curl="--with-curl"
+  php72_with_curl="--with-curl"
+  php73_with_curl="--with-curl"
+  php74_with_curl="--with-curl"
+  php80_with_curl="--with-curl"
+  php81_with_curl="--with-curl"
+elif openssl version | grep -Eqi 'OpenSSL 1.1.*'; then
+  php5_with_openssl="--with-openssl=${openssl_install_dir}"
+  php70_with_openssl="--with-openssl"
+  php71_with_openssl="--with-openssl"
+  php72_with_openssl="--with-openssl"
+  php73_with_openssl="--with-openssl"
+  php74_with_openssl="--with-openssl"
+  php80_with_openssl="--with-openssl"
+  php81_with_openssl="--with-openssl"
+
+  php5_with_ssl="--with-ssl=${openssl_install_dir}"
+  php70_with_ssl="--with-ssl"
+  php71_with_ssl="--with-ssl"
+  php72_with_ssl="--with-ssl"
+  php73_with_ssl="--with-ssl"
+  php74_with_ssl="--with-ssl"
+  php80_with_ssl="--with-ssl"
+  php81_with_ssl="--with-ssl"
+
+  php5_with_curl="--with-curl=${curl_install_dir}"
+  php70_with_curl="--with-curl"
+  php71_with_curl="--with-curl"
+  php72_with_curl="--with-curl"
+  php73_with_curl="--with-curl"
+  php74_with_curl="--with-curl"
+  php80_with_curl="--with-curl"
+  php81_with_curl="--with-curl"
+  [[ ${php_option} =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]] && with_old_openssl_flag=y
+elif openssl version | grep -Eqi 'OpenSSL 3.*'; then
+  php5_with_openssl="--with-openssl=${openssl_install_dir}"
+  php70_with_openssl="--with-openssl=${openssl_install_dir}"
+  php71_with_openssl="--with-openssl=${openssl_install_dir}"
+  php72_with_openssl="--with-openssl=${openssl_install_dir}"
+  php73_with_openssl="--with-openssl=${openssl_install_dir}"
+  php74_with_openssl="--with-openssl=${openssl_install_dir} --with-openssl-dir=${openssl_install_dir}"
+  php80_with_openssl="--with-openssl=${openssl_install_dir} --with-openssl-dir=${openssl_install_dir}"
+  php81_with_openssl="--with-openssl"
+
+  php5_with_ssl="--with-ssl=${openssl_install_dir}"
+  php70_with_ssl="--with-ssl=${openssl_install_dir}"
+  php71_with_ssl="--with-ssl=${openssl_install_dir}"
+  php72_with_ssl="--with-ssl=${openssl_install_dir}"
+  php73_with_ssl="--with-ssl=${openssl_install_dir}"
+  php74_with_ssl="--with-ssl=${openssl_install_dir}"
+  php80_with_ssl="--with-ssl=${openssl_install_dir}"
+  php81_with_ssl="--with-ssl"
+
+  php5_with_curl="--with-curl=${curl_install_dir}"
+  php70_with_curl="--with-curl=${curl_install_dir}"
+  php71_with_curl="--with-curl=${curl_install_dir}"
+  php72_with_curl="--with-curl=${curl_install_dir}"
+  php73_with_curl="--with-curl=${curl_install_dir}"
+  php74_with_curl="--with-curl=${curl_install_dir}"
+  php80_with_curl="--with-curl=${curl_install_dir}"
+  php81_with_curl="--with-curl"
+  [[ ${php_option} =~ ^[1-9]$|^10$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^80$ ]] && with_old_openssl_flag=y
+else
+  php5_with_openssl="--with-openssl=${openssl_install_dir}"
+  php70_with_openssl="--with-openssl=${openssl_install_dir}"
+  php71_with_openssl="--with-openssl=${openssl_install_dir}"
+  php72_with_openssl="--with-openssl=${openssl_install_dir}"
+  php73_with_openssl="--with-openssl=${openssl_install_dir}"
+  php74_with_openssl="--with-openssl=${openssl_install_dir} --with-openssl-dir=${openssl_install_dir}"
+  php80_with_openssl="--with-openssl=${openssl_install_dir} --with-openssl-dir=${openssl_install_dir}"
+  php81_with_openssl="--with-openssl=${openssl_install_dir} --with-openssl-dir=${openssl_install_dir}"
+
+  php5_with_ssl="--with-ssl=${openssl_install_dir}"
+  php70_with_ssl="--with-ssl=${openssl_install_dir}"
+  php71_with_ssl="--with-ssl=${openssl_install_dir}"
+  php72_with_ssl="--with-ssl=${openssl_install_dir}"
+  php73_with_ssl="--with-ssl=${openssl_install_dir}"
+  php74_with_ssl="--with-ssl=${openssl_install_dir}"
+  php80_with_ssl="--with-ssl=${openssl_install_dir}"
+  php81_with_ssl="--with-ssl=${openssl_install_dir}"
+
+  php5_with_curl="--with-curl=${curl_install_dir}"
+  php70_with_curl="--with-curl=${curl_install_dir}"
+  php71_with_curl="--with-curl=${curl_install_dir}"
+  php72_with_curl="--with-curl=${curl_install_dir}"
+  php73_with_curl="--with-curl=${curl_install_dir}"
+  php74_with_curl="--with-curl=${curl_install_dir}"
+  php80_with_curl="--with-curl=${curl_install_dir}"
+  php81_with_curl="--with-curl=${curl_install_dir}"
+  with_old_openssl_flag=y
+fi
+
 Install_openSSL() {
-  if [ -e "${openssl_install_dir}/lib/libssl.a" ]; then
-    echo "${CWARNING}openSSL already installed! ${CEND}"
-  else
-    pushd ${oneinstack_dir}/src > /dev/null
-    tar xzf openssl-${openssl_ver}.tar.gz
-    pushd openssl-${openssl_ver} > /dev/null
-    make clean
-    ./config -Wl,-rpath=${openssl_install_dir}/lib -fPIC --prefix=${openssl_install_dir} --openssldir=${openssl_install_dir}
-    make depend
-    make -j ${THREAD} && make install
-    popd > /dev/null
-    if [ -f "${openssl_install_dir}/lib/libcrypto.a" ]; then
-      echo "${CSUCCESS}openSSL installed successfully! ${CEND}"
-      /bin/cp cacert.pem ${openssl_install_dir}/cert.pem
-      rm -rf openssl-${openssl_ver}
-    else
-      echo "${CFAILURE}openSSL install failed, Please contact the author! ${CEND}" && lsb_release -a
-      kill -9 $$; exit 1;
+  if [ "${with_old_openssl_flag}" == 'y' ]; then
+    if [ ! -e "${openssl_install_dir}/lib/libssl.a" ]; then
+      pushd ${oneinstack_dir}/src > /dev/null
+      tar xzf openssl-${openssl_ver}.tar.gz
+      pushd openssl-${openssl_ver} > /dev/null
+      make clean
+      ./config -Wl,-rpath=${openssl_install_dir}/lib -fPIC --prefix=${openssl_install_dir} --openssldir=${openssl_install_dir}
+      make depend
+      make -j ${THREAD} && make install
+      popd > /dev/null
+      if [ -f "${openssl_install_dir}/lib/libcrypto.a" ]; then
+        echo "${CSUCCESS}openSSL installed successfully! ${CEND}"
+        /bin/cp cacert.pem ${openssl_install_dir}/cert.pem
+        rm -rf openssl-${openssl_ver}
+      else
+        echo "${CFAILURE}openSSL install failed, Please contact the author! ${CEND}" && lsb_release -a
+        kill -9 $$; exit 1;
+      fi
+      popd > /dev/null
     fi
-    popd > /dev/null
   fi
 }

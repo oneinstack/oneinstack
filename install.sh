@@ -2,7 +2,7 @@
 # Author:  yeho <lj2007331 AT gmail.com>
 # BLOG:  https://linuxeye.com
 #
-# Notes: OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+
+# Notes: OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+
 #
 # Project home page:
 #       https://oneinstack.com
@@ -12,7 +12,7 @@ export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 clear
 printf "
 #######################################################################
-#       OneinStack for CentOS/RedHat 7+ Debian 8+ and Ubuntu 16+      #
+#       OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+      #
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
@@ -36,8 +36,8 @@ xcachepwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbinstallmethod=1
 
 version() {
-  echo "version: 2.4"
-  echo "updated date: 2021-10-01"
+  echo "version: 2.6"
+  echo "updated date: 2022-09-03"
 }
 
 Show_Help() {
@@ -703,6 +703,7 @@ if [ ! -e ~/.oneinstack ]; then
   [ "${PM}" == 'yum' ] && yum clean all
   ${PM} -y install wget gcc curl python
   [ "${RHEL_ver}" == '8' ] && { yum -y install python36; sudo alternatives --set python /usr/bin/python3; }
+  [ ! -e "/usr/bin/python" ] && [ -e "/usr/bin/python3" ] && ln -s /usr/bin/python3 /usr/bin/python
   clear
 fi
 
@@ -711,14 +712,14 @@ IPADDR=$(./include/get_ipaddr.py)
 PUBLIC_IPADDR=$(./include/get_public_ipaddr.py)
 IPADDR_COUNTRY=$(./include/get_ipaddr_state.py ${PUBLIC_IPADDR})
 
+# openSSL
+. ./include/openssl.sh
+
 # Check download source packages
 . ./include/check_download.sh
+
 [ "${armplatform}" == "y" ] && dbinstallmethod=2
 checkDownload 2>&1 | tee -a ${oneinstack_dir}/install.log
-
-# del openssl for jcloud
-[ -e "/usr/local/bin/openssl" ] && rm -rf /usr/local/bin/openssl
-[ -e "/usr/local/include/openssl" ] && rm -rf /usr/local/include/openssl
 
 # get OS Memory
 . ./include/memory.sh
@@ -727,15 +728,15 @@ if [ ! -e ~/.oneinstack ]; then
   # Check binary dependencies packages
   . ./include/check_sw.sh
   case "${Family}" in
-    "RHEL")
+    "rhel")
       installDepsRHEL 2>&1 | tee ${oneinstack_dir}/install.log
       . include/init_RHEL.sh 2>&1 | tee -a ${oneinstack_dir}/install.log
       ;;
-    "Debian")
+    "debian")
       installDepsDebian 2>&1 | tee ${oneinstack_dir}/install.log
       . include/init_Debian.sh 2>&1 | tee -a ${oneinstack_dir}/install.log
       ;;
-    "Ubuntu")
+    "ubuntu")
       installDepsUbuntu 2>&1 | tee ${oneinstack_dir}/install.log
       . include/init_Ubuntu.sh 2>&1 | tee -a ${oneinstack_dir}/install.log
       ;;
@@ -747,20 +748,17 @@ fi
 # start Time
 startTime=`date +%s`
 
+# openSSL
+Install_openSSL | tee -a ${oneinstack_dir}/install.log
+
 # Jemalloc
 if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[1-9]$|^1[0-2]$ ]]; then
   . include/jemalloc.sh
   Install_Jemalloc | tee -a ${oneinstack_dir}/install.log
 fi
 
-# openSSL
-if [[ ${tomcat_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [[ ${php_option} =~ ^[1-9]$|^1[0-1]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-1]$ ]]; then
-  . include/openssl.sh
-  Install_openSSL | tee -a ${oneinstack_dir}/install.log
-fi
-
 # Database
-[ "${Family}" == 'RHEL' ] && [ "${RHEL_ver}" == '9' ] && dbinstallmethod=2 && checkDownload
+[ "${Family}" == 'rhel' ] && [ "${RHEL_ver}" == '9' ] && dbinstallmethod=2 && checkDownload
 case "${db_option}" in
   1)
     . include/mysql-8.0.sh
@@ -795,7 +793,7 @@ case "${db_option}" in
     Install_MariaDB55 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   9)
-    [ "${Family}" == 'RHEL' ] && [ "${RHEL_ver}" == '8' ] && dbinstallmethod=2 && checkDownload
+    [ "${Family}" == 'rhel' ] && [ "${RHEL_ver}" == '8' ] && dbinstallmethod=2 && checkDownload
     . include/percona-8.0.sh
     Install_Percona80 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
