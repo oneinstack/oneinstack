@@ -176,17 +176,32 @@ If you enter '.', the field will be left blank.
     openssl req -utf8 -new -newkey rsa:2048 -sha256 -nodes -out ${PATH_SSL}/${domain}.csr -keyout ${PATH_SSL}/${domain}.key -subj "/C=${SELFSIGNEDSSL_C}/ST=${SELFSIGNEDSSL_ST}/L=${SELFSIGNEDSSL_L}/O=${SELFSIGNEDSSL_O}/OU=${SELFSIGNEDSSL_OU}/CN=${domain}" > /dev/null 2>&1
     openssl x509 -req -days 36500 -sha256 -in ${PATH_SSL}/${domain}.csr -signkey ${PATH_SSL}/${domain}.key -out ${PATH_SSL}/${domain}.crt > /dev/null 2>&1
   elif [ "${Domian_Mode}" == '3' -o "${dnsapi_flag}" == 'y' ]; then
-    if [ ! -e ~/.acme.sh/ca/acme.zerossl.com/account.key ]; then
       while :; do echo
-        read -e -p "Please enter your email: " Email
+        echo 'Please select domain cert key length.'
+        echo "${CMSG}Enter one of 2048, 3072, 4096, 8192 will issue a RSA cert.${CEND}"
+        echo "${CMSG}Enter one of ec-256, ec-384, ec-521 will issue a ECC cert.${CEND}"
         echo
-        if [[ $Email =~ ^[A-Za-z0-9._-]+@[A-Za-z0-9._-]+\.[A-Za-z]{2,9}$ ]]; then
+        read -e -p "Please enter your cert key length (default 2048): " CERT_KEYLENGTH
+        if [ "${CERT_KEYLENGTH}" == "" ]; then
+          CERT_KEYLENGTH="2048"
+        fi
+        if [[ "${CERT_KEYLENGTH}" =~ ^2048$|^3072$|^4096$|^8192$|^ec-256$|^ec-384$|^ec-521$ ]]; then
           break
         else
           echo "${CWARNING}input error!${CEND}"
         fi
       done
-      ~/.acme.sh/acme.sh --register-account -m $Email
+    if [ ! -e ~/.acme.sh/ca/acme.zerossl.com/account.key ]; then
+      while :; do echo
+        read -e -p "Please enter your email: " EMAIL
+        echo
+        if [[ "${EMAIL}" =~ ^[A-Za-z0-9._-]+@[A-Za-z0-9._-]+\.[A-Za-z]{2,9}$ ]]; then
+          break
+        else
+          echo "${CWARNING}input error!${CEND}"
+        fi
+      done
+      ~/.acme.sh/acme.sh --register-account -m ${EMAIL}
     fi
     if [ "${moredomain}" == "*.${domain}" -o "${dnsapi_flag}" == 'y' ]; then
       while :; do echo
@@ -212,7 +227,7 @@ If you enter '.', the field will be left blank.
         fi
       done
       [ "${moredomainame_flag}" == 'y' ] && moredomainame_D="$(for D in ${moredomainame}; do echo -d ${D}; done)"
-      ~/.acme.sh/acme.sh --force --listen-v4 --issue --dns dns_${DNS_PRO} -d ${domain} ${moredomainame_D}
+      ~/.acme.sh/acme.sh --force --issue -k ${CERT_KEYLENGTH} --dns dns_${DNS_PRO} -d ${domain} ${moredomainame_D}
     else
       if [ "${nginx_ssl_flag}" == 'y' ]; then
         [ ! -d ${web_install_dir}/conf/vhost ] && mkdir ${web_install_dir}/conf/vhost
@@ -253,9 +268,9 @@ EOF
       done
       rm -f ${vhostdir}/${auth_file}
       [ "${moredomainame_flag}" == 'y' ] && moredomainame_D="$(for D in ${moredomainame}; do echo -d ${D}; done)"
-      ~/.acme.sh/acme.sh --force --listen-v4 --issue -d ${domain} ${moredomainame_D} -w ${vhostdir}
+      ~/.acme.sh/acme.sh --force --issue -k ${CERT_KEYLENGTH} -w ${vhostdir} -d ${domain} ${moredomainame_D}
     fi
-    if [ -s ~/.acme.sh/${domain}/fullchain.cer ]; then
+    if [ -s ~/.acme.sh/${domain}/fullchain.cer -o -s ~/.acme.sh/${domain}_ecc/fullchain.cer ]; then
       [ -e "${PATH_SSL}/${domain}.crt" ] && rm -f ${PATH_SSL}/${domain}.{crt,key}
       Nginx_cmd="/bin/systemctl restart nginx"
       Apache_cmd="${apache_install_dir}/bin/apachectl -k graceful"
@@ -266,7 +281,11 @@ EOF
       elif [ ! -e "${web_install_dir}/sbin/nginx" -a -e "${apache_install_dir}/bin/httpd" ]; then
         Command="${Apache_cmd}"
       fi
-      ~/.acme.sh/acme.sh --force --install-cert -d ${domain} --fullchain-file ${PATH_SSL}/${domain}.crt --key-file ${PATH_SSL}/${domain}.key --reloadcmd "${Command}" > /dev/null
+      if [ -s ~/.acme.sh/${domain}/fullchain.cer ] && [[ "${CERT_KEYLENGTH}" =~ ^2048$|^3072$|^4096$|^8192$ ]]; then
+        ~/.acme.sh/acme.sh --force --install-cert -d ${domain} --fullchain-file ${PATH_SSL}/${domain}.crt --key-file ${PATH_SSL}/${domain}.key --reloadcmd "${Command}" > /dev/null
+      elif [ -s ~/.acme.sh/${domain}_ecc/fullchain.cer ] && [[ "${CERT_KEYLENGTH}" =~ ^ec-256$|^ec-384$|^ec-521$ ]]; then
+        ~/.acme.sh/acme.sh --force --install-cert --ecc -d ${domain} --fullchain-file ${PATH_SSL}/${domain}.crt --key-file ${PATH_SSL}/${domain}.key --reloadcmd "${Command}" > /dev/null
+      fi
     else
       echo "${CFAILURE}Error: Create Let's Encrypt SSL Certificate failed! ${CEND}"
       [ -e "${web_install_dir}/conf/vhost/${domain}.conf" ] && rm -f ${web_install_dir}/conf/vhost/${domain}.conf
@@ -1126,6 +1145,7 @@ Del_NGX_Vhost() {
               fi
               echo
               [ -d ~/.acme.sh/${domain} ] && ~/.acme.sh/acme.sh --force --remove -d ${domain} > /dev/null 2>&1
+              [ -d ~/.acme.sh/${domain}_ecc ] && ~/.acme.sh/acme.sh --force --remove --ecc -d ${domain} > /dev/null 2>&1
               echo "${CMSG}Domain: ${domain} has been deleted.${CEND}"
               echo
             else
@@ -1178,6 +1198,7 @@ Del_Apache_Vhost() {
                 rm -rf ${Directory}
               fi
               [ -d ~/.acme.sh/${domain} ] && ~/.acme.sh/acme.sh --force --remove -d ${domain} > /dev/null 2>&1
+              [ -d ~/.acme.sh/${domain}_ecc ] && ~/.acme.sh/acme.sh --force --remove --ecc -d ${domain} > /dev/null 2>&1
               echo "${CSUCCESS}Domain: ${domain} has been deleted.${CEND}"
             else
               echo "${CWARNING}Virtualhost: ${domain} was not exist! ${CEND}"
