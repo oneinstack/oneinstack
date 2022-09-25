@@ -180,7 +180,7 @@ If you enter '.', the field will be left blank.
       while :; do echo
         read -e -p "Please enter your email: " Email
         echo
-        if [[ $Email =~ ^[A-Za-z0-9._-]+@[A-Za-z0-9._-]+\.[A-Za-z]{2,4}$ ]]; then
+        if [[ $Email =~ ^[A-Za-z0-9._-]+@[A-Za-z0-9._-]+\.[A-Za-z]{2,9}$ ]]; then
           break
         else
           echo "${CWARNING}input error!${CEND}"
@@ -216,7 +216,11 @@ If you enter '.', the field will be left blank.
     else
       if [ "${nginx_ssl_flag}" == 'y' ]; then
         [ ! -d ${web_install_dir}/conf/vhost ] && mkdir ${web_install_dir}/conf/vhost
-        echo "server {  server_name ${domain}${moredomainame};  root ${vhostdir};  access_log off; }" > ${web_install_dir}/conf/vhost/${domain}.conf
+        if [ -n "`ifconfig | grep inet6`" ]; then
+          echo "server {  listen 80;  listen [::]:80;  server_name ${domain}${moredomainame};  root ${vhostdir};  access_log off; }" > ${web_install_dir}/conf/vhost/${domain}.conf
+        else
+          echo "server {  listen 80;  server_name ${domain}${moredomainame};  root ${vhostdir};  access_log off; }" > ${web_install_dir}/conf/vhost/${domain}.conf
+        fi
         ${web_install_dir}/sbin/nginx -s reload
       fi
       if [ "${apache_ssl_flag}" == 'y' ]; then
