@@ -184,8 +184,8 @@ If you enter '.', the field will be left blank.
         read -e -p "Please enter your cert key length (default 2048): " CERT_KEYLENGTH
         if [ "${CERT_KEYLENGTH}" == "" ]; then
           CERT_KEYLENGTH="2048"
-        fi
-        if [[ "${CERT_KEYLENGTH}" =~ ^2048$|^3072$|^4096$|^8192$|^ec-256$|^ec-384$|^ec-521$ ]]; then
+          break
+        elif [[ "${CERT_KEYLENGTH}" =~ ^2048$|^3072$|^4096$|^8192$|^ec-256$|^ec-384$|^ec-521$ ]]; then
           break
         else
           echo "${CWARNING}input error!${CEND}"
