@@ -122,6 +122,7 @@ installDepsUbuntu() {
   apt-get -y autoremove
   apt-get -yf install
   export DEBIAN_FRONTEND=noninteractive
+  [[ "${Ubuntu_ver}" =~ ^22$ ]] && apt-get -y --allow-downgrades install libicu70=70.1-2 libglib2.0-0=2.72.1-1 libxml2-dev
 
   # critical security updates
   grep security /etc/apt/sources.list > /tmp/security.sources.list

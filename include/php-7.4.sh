@@ -91,6 +91,10 @@ Install_PHP74() {
 
   tar xzf php-${php74_ver}.tar.gz
   pushd php-${php74_ver} > /dev/null
+  if [ -e ext/openssl/openssl.c ] && ! grep -Eqi '^#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c; then
+    sed -i '/OPENSSL_SSLV23_PADDING/i#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c
+    sed -i '/OPENSSL_SSLV23_PADDING/a#endif' ext/openssl/openssl.c
+  fi
   make clean
   export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/:$PKG_CONFIG_PATH
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}

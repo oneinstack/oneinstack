@@ -82,6 +82,10 @@ Install_PHP73() {
 
   tar xzf php-${php73_ver}.tar.gz
   pushd php-${php73_ver} > /dev/null
+  if [ -e ext/openssl/openssl.c ] && ! grep -Eqi '^#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c; then
+    sed -i '/OPENSSL_SSLV23_PADDING/i#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c
+    sed -i '/OPENSSL_SSLV23_PADDING/a#endif' ext/openssl/openssl.c
+  fi
   make clean
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}
   [ "${phpcache_option}" == '1' ] && phpcache_arg='--enable-opcache' || phpcache_arg='--disable-opcache'
