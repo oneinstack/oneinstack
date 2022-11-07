@@ -1,14 +1,14 @@
 # newest software version
 # Web
-nginx_ver=1.22.0
+nginx_ver=1.22.1
 tengine_ver=2.3.3
 openresty_ver=1.21.4.1
 openssl11_ver=1.1.1q
 openssl_ver=1.0.2u
 
-tomcat10_ver=10.0.26
-tomcat9_ver=9.0.67
-tomcat8_ver=8.5.82
+tomcat10_ver=10.0.27
+tomcat9_ver=9.0.68
+tomcat8_ver=8.5.83
 tomcat7_ver=7.0.109
 
 apache_ver=2.4.54
@@ -47,14 +47,14 @@ php71_ver=7.1.33
 php72_ver=7.2.34
 php73_ver=7.3.33
 php74_ver=7.4.32
-php80_ver=8.0.24
-php81_ver=8.1.11
+php80_ver=8.0.25
+php81_ver=8.1.12
 
 # Nodejs
-nodejs_ver=16.17.1
+nodejs_ver=18.12.0
 
 libiconv_ver=1.16
-curl_ver=7.85.0
+curl_ver=7.86.0
 libmcrypt_ver=2.5.8
 mcrypt_ver=2.6.8
 mhash_ver=0.9.9.9
@@ -63,7 +63,7 @@ icu4c_ver=63_1
 libsodium_ver=1.0.18
 libzip_ver=1.2.0
 argon2_ver=20171227
-imagemagick_ver=7.1.0-50
+imagemagick_ver=7.1.0-52
 imagick_ver=3.5.1
 imagick_oldver=3.4.4
 graphicsmagick_ver=1.3.36
@@ -87,7 +87,7 @@ xdebug_oldver=2.9.8
 pureftpd_ver=1.0.49
 
 # Redis
-redis_ver=6.2.7
+redis_ver=7.0.5
 redis_oldver=5.0.14
 pecl_redis_ver=5.3.7
 pecl_redis_oldver=4.3.0
@@ -118,10 +118,10 @@ boost_percona_ver=1.73.0
 boost_oldver=1.59.0
 
 # Others
-lua_nginx_module_ver=0.10.21
-luajit2_ver=2.1-20220411
-lua_resty_core_ver=0.1.23
-lua_resty_lrucache_ver=0.11
+lua_nginx_module_ver=0.10.22
+luajit2_ver=2.1-20220915
+lua_resty_core_ver=0.1.24
+lua_resty_lrucache_ver=0.13
 lua_cjson_ver=2.1.0.10
 python_ver=3.6.15
 setuptools_ver=61.2.0

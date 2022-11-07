@@ -91,7 +91,7 @@ if { $yesnoflag == 1 } {
       send "$passwd\r"
     }
 
-    "yes/no)?" {
+    "yes/no" {
       set yesnoflag 2
       send "yes\r"
     }
