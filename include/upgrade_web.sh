@@ -48,14 +48,38 @@ Upgrade_Nginx() {
       echo "Press Ctrl+c to cancel or Press any key to continue..."
       char=`get_char`
     fi
-    tar xzf nginx-${NEW_nginx_ver}.tar.gz
-    pushd nginx-${NEW_nginx_ver}
-    make clean
-    sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc # close debug
     ${nginx_install_dir}/sbin/nginx -V &> $$
     nginx_configure_args_tmp=`cat $$ | grep 'configure arguments:' | awk -F: '{print $2}'`
     rm -rf $$
     nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@lua-nginx-module-\w.\w\+.\w\+ @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@lua-nginx-module @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@--with-openssl=../openssl-\w.\w.\w\+ @--with-openssl=../openssl-${openssl11_ver} @" | sed "s@--with-pcre=../pcre-\w.\w\+ @--with-pcre=../pcre-${pcre_ver} @"`
+    if [ -n `echo $nginx_configure_args | grep lua-nginx-module` ]; then
+      ${oneinstack_dir}/upgrade.sh --oneinstack > /dev/null
+      src_url=http://mirrors.linuxeye.com/oneinstack/src/luajit2-${luajit2_ver}.tar.gz && Download_src
+      tar xzf luajit2-${luajit2_ver}.tar.gz
+      pushd luajit2-${luajit2_ver}
+      make && make install
+      popd > /dev/null
+      rm -rf luajit2-${luajit2_ver}
+
+      src_url=http://mirrors.linuxeye.com/oneinstack/src/lua-resty-core-${lua_resty_core_ver}.tar.gz && Download_src
+      tar xzf lua-resty-core-${lua_resty_core_ver}.tar.gz
+      pushd lua-resty-core-${lua_resty_core_ver}
+      make install
+      popd > /dev/null
+      rm -rf lua-resty-core-${lua_resty_core_ver}
+
+      src_url=http://mirrors.linuxeye.com/oneinstack/src/lua-resty-lrucache-${lua_resty_lrucache_ver}.tar.gz && Download_src
+      tar xzf lua-resty-lrucache-${lua_resty_lrucache_ver}.tar.gz
+      pushd lua-resty-lrucache-${lua_resty_lrucache_ver}
+      make install
+      popd > /dev/null
+      rm -rf lua-resty-lrucache-${lua_resty_lrucache_ver}
+    fi
+
+    tar xzf nginx-${NEW_nginx_ver}.tar.gz
+    pushd nginx-${NEW_nginx_ver}
+    make clean
+    sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc # close debug
     export LUAJIT_LIB=/usr/local/lib
     export LUAJIT_INC=/usr/local/include/luajit-2.1
     ./configure ${nginx_configure_args}

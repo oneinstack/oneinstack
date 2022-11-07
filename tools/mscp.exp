@@ -70,7 +70,7 @@ for {} {1} {} {
       break;
     }
 
-    "yes/no)?" {
+    "yes/no" {
       set yesnoflag 1
       send "yes\r"
       break;
