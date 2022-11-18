@@ -15,40 +15,56 @@ Install_fail2ban() {
   pushd fail2ban-${fail2ban_ver} > /dev/null
   sed -i 's@for i in xrange(50)@for i in range(50)@' fail2ban/__init__.py
   ${python_install_dir}/bin/python setup.py install
-  if [ -e /bin/systemctl ]; then
-    /bin/cp build/fail2ban.service /lib/systemd/system/
-    systemctl enable fail2ban
-  else
-    if [ "${PM}" == 'yum' ]; then
-      /bin/cp files/redhat-initd /etc/init.d/fail2ban
-      sed -i "s@^FAIL2BAN=.*@FAIL2BAN=${python_install_dir}/bin/fail2ban-client@" /etc/init.d/fail2ban
-      sed -i 's@Starting fail2ban.*@&\n    [ ! -e "/var/run/fail2ban" ] \&\& mkdir /var/run/fail2ban@' /etc/init.d/fail2ban
-      chmod +x /etc/init.d/fail2ban
-      chkconfig --add fail2ban
-      chkconfig fail2ban on
-    elif [ "${PM}" == 'apt-get' ]; then
-      /bin/cp files/debian-initd /etc/init.d/fail2ban
-      sed -i 's@2 3 4 5@3 4 5@' /etc/init.d/fail2ban
-      sed -i "s@^DAEMON=.*@DAEMON=${python_install_dir}/bin/\$NAME-client@" /etc/init.d/fail2ban
-      chmod +x /etc/init.d/fail2ban
-      update-rc.d fail2ban defaults
-    fi
-  fi
+  /bin/cp build/fail2ban.service /lib/systemd/system/
+  systemctl enable fail2ban
   [ -z "`grep ^Port /etc/ssh/sshd_config`" ] && now_ssh_port=22 || now_ssh_port=`grep ^Port /etc/ssh/sshd_config | awk '{print $2}' | head -1`
-  [ "${PM}" == 'yum' ] && LOGPATH=/var/log/secure
-  [ "${PM}" == 'apt-get' ] && LOGPATH=/var/log/auth.log
+  if [ "${PM}" == 'yum' ]; then
   cat > /etc/fail2ban/jail.local << EOF
 [DEFAULT]
 ignoreip = 127.0.0.1/8
 bantime  = 86400
 findtime = 600
 maxretry = 5
-[ssh-iptables]
+backend = auto
+banaction = firewallcmd-ipset
+action = %(action_mwl)s
+
+[sshd]
 enabled = true
 filter  = sshd
-action  = iptables[name=SSH, port=${now_ssh_port}, protocol=tcp]
-logpath = ${LOGPATH}
+port    = ${now_ssh_port}
+action = %(action_mwl)s
+logpath = /var/log/secure
+bantime  = 86400
+findtime = 600
+maxretry = 5
 EOF
+  elif [ "${PM}" == 'apt-get' ]; then
+    if ufw status | grep -wq inactive; then
+      ufw default allow incoming
+      ufw --force enable
+    fi
+    cat > /etc/fail2ban/jail.local << EOF
+[DEFAULT]
+ignoreip = 127.0.0.1/8
+bantime  = 86400
+findtime = 600
+maxretry = 5
+backend = auto
+banaction = ufw
+action = %(action_mwl)s
+
+[sshd]
+enabled = true
+filter  = sshd
+port    = ${now_ssh_port}
+action = %(action_mwl)s
+logpath = /var/log/auth.log
+bantime  = 86400
+findtime = 600
+maxretry = 5
+EOF
+  fi
   cat > /etc/logrotate.d/fail2ban << EOF
 /var/log/fail2ban.log {
     missingok
@@ -58,9 +74,8 @@ EOF
     endscript
 }
 EOF
-  sed -i 's@^iptables = iptables.*@iptables = iptables@' /etc/fail2ban/action.d/iptables-common.conf
   kill -9 `ps -ef | grep fail2ban | grep -v grep | awk '{print $2}'` > /dev/null 2>&1
-  service fail2ban start
+  systemctl start fail2ban
   popd > /dev/null
   if [ -e "${python_install_dir}/bin/fail2ban-server" ]; then
     echo; echo "${CSUCCESS}fail2ban installed successfully! ${CEND}"

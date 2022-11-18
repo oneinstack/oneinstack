@@ -36,7 +36,7 @@ EOF
       echo "${CSUCCESS}PHP apcu module installed successfully! ${CEND}"
       rm -rf apcu-${apcu_ver} apcu-${apcu_oldver} package.xml
     else
-      echo "${CFAILURE}PHP apcu module install failed, Please contact the author! ${CEND}" && lsb_release -a
+      echo "${CFAILURE}PHP apcu module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     fi
     popd > /dev/null
   fi

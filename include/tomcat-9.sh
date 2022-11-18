@@ -33,7 +33,7 @@ Install_Tomcat9() {
 
   if [ ! -e "${tomcat_install_dir}/conf/server.xml" ]; then
     rm -rf ${tomcat_install_dir}
-    echo "${CFAILURE}Tomcat install failed, Please contact the author! ${CEND}" && lsb_release -a
+    echo "${CFAILURE}Tomcat install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     kill -9 $$; exit 1;
   fi
 
@@ -67,25 +67,13 @@ EOF
 
     if [ ! -e "${nginx_install_dir}/sbin/nginx" -a ! -e "${tengine_install_dir}/sbin/nginx" -a ! -e "${openresty_install_dir}/nginx/sbin/nginx" -a ! -e "${apache_install_dir}/bin/httpd" ]; then
       if [ "${PM}" == 'yum' ]; then
-        if [ -n "`grep 'dport 80 ' /etc/sysconfig/iptables`" ] && [ -z "$(grep -w '8080' /etc/sysconfig/iptables)" ]; then
-          iptables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 8080 -j ACCEPT
-          service iptables save
-          ip6tables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 8080 -j ACCEPT
-          service ip6tables save
-        fi
+        if [ "`firewall-cmd --state`" == "running" ]; then
+          firewall-cmd --permanent --zone=public --add-port=8080/tcp
+          firewall-cmd --reload
+	fi
       elif [ "${PM}" == 'apt-get' ]; then
-        if [ -e '/etc/iptables/rules.v4' ]; then
-          if [ -n "`grep 'dport 80 ' /etc/iptables/rules.v4`" ] && [ -z "$(grep -w '8080' /etc/iptables/rules.v4)" ]; then
-            iptables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 8080 -j ACCEPT
-            iptables-save > /etc/iptables/rules.v4
-            ip6tables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 8080 -j ACCEPT
-            ip6tables-save > /etc/iptables/rules.v6
-          fi
-        elif [ -e '/etc/iptables.up.rules' ]; then
-          if [ -n "`grep 'dport 80 ' /etc/iptables.up.rules`" ] && [ -z "$(grep -w '8080' /etc/iptables.up.rules)" ]; then
-            iptables -I INPUT 5 -p tcp -m state --state NEW -m tcp --dport 8080 -j ACCEPT
-            iptables-save > /etc/iptables.up.rules
-          fi
+        if ufw status | grep -wq active; then
+            ufw allow 8080/tcp
         fi
       fi
     fi
@@ -134,7 +122,7 @@ EOF
     rm -rf apache-tomcat-${tomcat9_ver}
   else
     popd > /dev/null
-    echo "${CFAILURE}Tomcat install failed, Please contact the author! ${CEND}" && lsb_release -a
+    echo "${CFAILURE}Tomcat install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
   fi
   service tomcat start
   popd > /dev/null

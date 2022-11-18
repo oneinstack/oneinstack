@@ -57,7 +57,7 @@ Install_Percona55() {
     fi
   else
     rm -rf ${percona_install_dir}
-    echo "${CFAILURE}Percona install failed, Please contact the author! ${CEND}" && lsb_release -a
+    echo "${CFAILURE}Percona install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     kill -9 $$; exit 1;
   fi
 

@@ -22,7 +22,8 @@ Install_PHP70() {
   if [ ! -e "${curl_install_dir}/lib/libcurl.la" ]; then
     tar xzf curl-${curl_ver}.tar.gz
     pushd curl-${curl_ver} > /dev/null
-    ./configure --prefix=${curl_install_dir} ${php70_with_ssl}
+    [ -e "/usr/local/lib/libnghttp2.so" ] && with_nghttp2='--with-nghttp2=/usr/local'
+    ./configure --prefix=${curl_install_dir} ${php70_with_ssl} ${with_nghttp2}
     make -j ${THREAD} && make install
     popd > /dev/null
     rm -rf curl-${curl_ver}

@@ -63,7 +63,7 @@ Install_Apache() {
     rm -rf httpd-${apache_ver} pcre-${pcre_ver}
   else
     rm -rf ${apache_install_dir}
-    echo "${CFAILURE}Apache install failed, Please contact the author! ${CEND}" && lsb_release -a
+    echo "${CFAILURE}Apache install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     kill -9 $$; exit 1;
   fi
 
