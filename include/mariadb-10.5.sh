@@ -58,7 +58,7 @@ Install_MariaDB105() {
     fi
   else
     rm -rf ${mariadb_install_dir}
-    echo "${CFAILURE}MariaDB install failed, Please contact the author! ${CEND}" && lsb_release -a
+    echo "${CFAILURE}MariaDB install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     kill -9 $$; exit 1;
   fi
 

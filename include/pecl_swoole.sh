@@ -40,7 +40,7 @@ Install_pecl_swoole() {
       echo "${CSUCCESS}PHP swoole module installed successfully! ${CEND}"
       rm -rf swoole-${swoole_ver} swoole-${swoole_oldver}
     else
-      echo "${CFAILURE}PHP swoole module install failed, Please contact the author! ${CEND}" && lsb_release -a
+      echo "${CFAILURE}PHP swoole module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     fi
     popd > /dev/null
   fi

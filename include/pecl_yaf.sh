@@ -27,7 +27,7 @@ Install_pecl_yaf() {
         echo "${CSUCCESS}PHP yaf module installed successfully! ${CEND}"
         rm -rf yaf-${yaf_ver}
       else
-        echo "${CFAILURE}PHP yaf module install failed, Please contact the author! ${CEND}" && lsb_release -a
+        echo "${CFAILURE}PHP yaf module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
       fi
     else
       echo "${CWARNING}Your php ${PHP_detail_ver} does not support yaf! ${CEND}";

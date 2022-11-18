@@ -38,7 +38,7 @@ Install_pecl_phalcon() {
       echo "${CSUCCESS}PHP phalcon module installed successfully! ${CEND}"
       rm -rf cphalcon-${phalcon_oldver} phalcon-${phalcon_ver}
     else
-      echo "${CFAILURE}PHP phalcon module install failed, Please contact the author! ${CEND}" && lsb_release -a
+      echo "${CFAILURE}PHP phalcon module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     fi
     popd > /dev/null
   fi

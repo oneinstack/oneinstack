@@ -35,7 +35,7 @@ EOF
     . /etc/profile.d/openjdk.sh
     echo "${CSUCCESS}OpenJDK11 installed successfully! ${CEND}"
   else
-    echo "${CFAILURE}OpenJDK11 install failed, Please contact the author! ${CEND}" && lsb_release -a
+    echo "${CFAILURE}OpenJDK11 install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     kill -9 $$; exit 1;
   fi
 }
