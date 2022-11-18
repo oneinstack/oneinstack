@@ -25,7 +25,7 @@ Install_pecl_mongodb() {
         rm -rf mongo-${pecl_mongo_ver}
         echo "${CSUCCESS}PHP mongo module installed successfully! ${CEND}"
       else
-        echo "${CFAILURE}PHP mongo module install failed, Please contact the author! ${CEND}" && lsb_release -a
+        echo "${CFAILURE}PHP mongo module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
       fi
     else
       if [[ "$(${php_install_dir}/bin/php-config --version | awk -F. '{print $1$2}')" =~ ^7[0-2]$ ]]; then
@@ -46,7 +46,7 @@ Install_pecl_mongodb() {
         echo "${CSUCCESS}PHP mongodb module installed successfully! ${CEND}"
         rm -rf mongodb-${pecl_mongodb_oldver} mongodb-${pecl_mongodb_ver}
       else
-        echo "${CFAILURE}PHP mongodb module install failed, Please contact the author! ${CEND}" && lsb_release -a
+        echo "${CFAILURE}PHP mongodb module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
       fi
     fi
     popd > /dev/null

@@ -40,7 +40,7 @@ Install_redis_server() {
     systemctl start redis-server
   else
     rm -rf ${redis_install_dir}
-    echo "${CFAILURE}Redis-server install failed, Please contact the author! ${CEND}" && lsb_release -a
+    echo "${CFAILURE}Redis-server install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     kill -9 $$; exit 1;
   fi
   popd > /dev/null
@@ -66,7 +66,7 @@ Install_pecl_redis() {
       echo "${CSUCCESS}PHP Redis module installed successfully! ${CEND}"
       rm -rf redis-${pecl_redis_ver} redis-${pecl_redis_oldver}
     else
-      echo "${CFAILURE}PHP Redis module install failed, Please contact the author! ${CEND}" && lsb_release -a
+      echo "${CFAILURE}PHP Redis module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     fi
     popd > /dev/null
   fi
