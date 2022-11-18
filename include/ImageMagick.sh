@@ -58,7 +58,7 @@ Install_pecl_imagick() {
       echo "${CSUCCESS}PHP imagick module installed successfully! ${CEND}"
       rm -rf imagick-${imagick_ver} imagick-${imagick_oldver}
     else
-      echo "${CFAILURE}PHP imagick module install failed, Please contact the author! ${CEND}" && lsb_release -a
+      echo "${CFAILURE}PHP imagick module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     fi
     popd > /dev/null
   fi

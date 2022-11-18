@@ -25,7 +25,7 @@ Install_pecl_calendar() {
       echo "${CSUCCESS}PHP calendar module installed successfully! ${CEND}"
       rm -rf php-${PHP_detail_ver}
     else
-      echo "${CFAILURE}PHP calendar module install failed, Please contact the author! ${CEND}" && lsb_release -a
+      echo "${CFAILURE}PHP calendar module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     fi
     popd > /dev/null
   fi

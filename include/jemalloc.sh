@@ -27,7 +27,7 @@ Install_Jemalloc() {
       echo "${CSUCCESS}jemalloc module installed successfully! ${CEND}"
       rm -rf jemalloc-${jemalloc_ver}
     else
-      echo "${CFAILURE}jemalloc install failed, Please contact the author! ${CEND}" && lsb_release -a
+      echo "${CFAILURE}jemalloc install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
       kill -9 $$; exit 1;
     fi
     popd > /dev/null
