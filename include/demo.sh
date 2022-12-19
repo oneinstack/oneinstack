@@ -11,7 +11,7 @@
 DEMO() {
   pushd ${oneinstack_dir}/src > /dev/null
   if [ ! -e ${wwwroot_dir}/default/index.html ]; then 
-    [ "${IPADDR_COUNTRY}"x == "CN"x ] && /bin/cp ${oneinstack_dir}/config/index_cn.html ${wwwroot_dir}/default/index.html || /bin/cp ${oneinstack_dir}/config/index.html ${wwwroot_dir}/default
+    [ "${OUTIP_STATE}"x == "China"x ] && /bin/cp ${oneinstack_dir}/config/index_cn.html ${wwwroot_dir}/default/index.html || /bin/cp ${oneinstack_dir}/config/index.html ${wwwroot_dir}/default
   fi
 
   if [ -e "${php_install_dir}/bin/php" ]; then

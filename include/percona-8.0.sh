@@ -17,10 +17,10 @@ Install_Percona80() {
   mkdir -p ${percona_data_dir};chown mysql.mysql -R ${percona_data_dir}
 
   if [ "${dbinstallmethod}" == "1" ]; then
-    tar xzf ./Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.27.tar.gz
-    mv Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.27/* ${percona_install_dir}
+    tar xzf ./Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.28.tar.gz
+    mv Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.28/* ${percona_install_dir}
     #sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${percona_install_dir}/bin/mysqld_safe
-    sed -i "s@/usr/local/Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.27@${percona_install_dir}@g" ${percona_install_dir}/bin/mysqld_safe
+    sed -i "s@/usr/local/Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.28@${percona_install_dir}@g" ${percona_install_dir}/bin/mysqld_safe
   elif [ "${dbinstallmethod}" == "2" ]; then
     boostVersion2=$(echo ${boost_percona_ver} | awk -F. '{print $1"_"$2"_"$3}')
     tar xzf boost_${boostVersion2}.tar.gz
@@ -56,7 +56,7 @@ Install_Percona80() {
     sed -i "s+^dbrootpwd.*+dbrootpwd='${dbrootpwd}'+" ../options.conf
     echo "${CSUCCESS}Percona installed successfully! ${CEND}"
     if [ "${dbinstallmethod}" == "1" ]; then
-      rm -rf Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.12
+      rm -rf Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.28
     elif [ "${dbinstallmethod}" == "2" ]; then
       rm -rf percona-server-${percona80_ver} boost_${boostVersion2}
     fi

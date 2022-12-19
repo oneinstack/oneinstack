@@ -17,37 +17,42 @@ fi
 
 # Get OS Version
 Platform=${ID,,}
-VERSION_ID=${VERSION_ID%%.*}
+VERSION_MAIN_ID=${VERSION_ID%%.*}
 ARCH=$(arch)
-if [[ "${Platform}" =~ ^centos$|^rhel$|^almalinux$|^rocky$|^fedora$|^amzn$|^ol$|^alinux$|^anolis$|^tencentos$|^euleros$|^openeuler$|^kylin$ ]]; then
+if [[ "${Platform}" =~ ^centos$|^rhel$|^almalinux$|^rocky$|^fedora$|^amzn$|^ol$|^alinux$|^anolis$|^tencentos$|^euleros$|^openeuler$|^kylin$|^uos$|^kylinsecos$ ]]; then
   PM=yum
   Family=rhel
-  RHEL_ver=${VERSION_ID}
+  RHEL_ver=${VERSION_MAIN_ID}
   if [[ "${Platform}" =~ ^centos$ ]]; then
-    if [ "${VERSION_ID}" == '6' ]; then
+    if [ "${VERSION_MAIN_ID}" == '6' ]; then
       sed -i "s@centos/\$releasever@centos-vault/6.10@g" /etc/yum.repos.d/CentOS-Base.repo
       sed -i 's@centos/RPM-GPG@centos-vault/RPM-GPG@g' /etc/yum.repos.d/CentOS-Base.repo
       [ -e /etc/yum.repos.d/epel.repo ] && rm -f /etc/yum.repos.d/epel.repo
     fi
   elif [[ "${Platform}" =~ ^fedora$ ]]; then
-    Fedora_ver=${VERSION_ID}
-    [ ${VERSION_ID} -ge 19 ] && [ ${VERSION_ID} -lt 28 ] && RHEL_ver=7
-    [ ${VERSION_ID} -ge 28 ] && [ ${VERSION_ID} -lt 34 ] && RHEL_ver=8
-    [ ${VERSION_ID} -ge 34 ] && RHEL_ver=9
+    Fedora_ver=${VERSION_MAIN_ID}
+    [ ${VERSION_MAIN_ID} -ge 19 ] && [ ${VERSION_MAIN_ID} -lt 28 ] && RHEL_ver=7
+    [ ${VERSION_MAIN_ID} -ge 28 ] && [ ${VERSION_MAIN_ID} -lt 34 ] && RHEL_ver=8
+    [ ${VERSION_MAIN_ID} -ge 34 ] && RHEL_ver=9
   elif [[ "${Platform}" =~ ^amzn$|^alinux$|^tencentos$|^euleros$ ]]; then
-    [[ "${VERSION_ID}" =~ ^2$ ]] && RHEL_ver=7
-    [[ "${VERSION_ID}" =~ ^3$ ]] && RHEL_ver=8
+    [[ "${VERSION_MAIN_ID}" =~ ^2$ ]] && RHEL_ver=7
+    [[ "${VERSION_MAIN_ID}" =~ ^3$ ]] && RHEL_ver=8
   elif [[ "${Platform}" =~ ^openeuler$ ]]; then
     [[ "${RHEL_ver}" =~ ^20$ ]] && RHEL_ver=7
     [[ "${RHEL_ver}" =~ ^2[1,2]$ ]] && RHEL_ver=8
   elif [[ "${Platform}" =~ ^kylin$ ]]; then
     [[ "${RHEL_ver}" =~ ^V10$ ]] && RHEL_ver=7
+  elif [[ "${Platform}" =~ ^uos$ ]]; then
+    [[ "${RHEL_ver}" =~ ^20$ ]] && RHEL_ver=8
+  elif [[ "${Platform}" =~ ^kylinsecos$ ]]; then
+    [[ "${VERSION_ID}" =~ ^3.4 ]] && RHEL_ver=7
+    [[ "${VERSION_ID}" =~ ^3.5 ]] && RHEL_ver=8
   fi
-elif [[ "${Platform}" =~ ^debian$|^deepin$|^uos$|^kali$ ]]; then
+elif [[ "${Platform}" =~ ^debian$|^deepin$|^kali$ ]]; then
   PM=apt-get
   Family=debian
-  Debian_ver=${VERSION_ID}
-  if [[ "${Platform}" =~ ^deepin$|^uos$ ]]; then
+  Debian_ver=${VERSION_MAIN_ID}
+  if [[ "${Platform}" =~ ^deepin$ ]]; then
     [[ "${Debian_ver}" =~ ^20$ ]] && Debian_ver=10
     [[ "${Debian_ver}" =~ ^23$ ]] && Debian_ver=11
   elif [[ "${Platform}" =~ ^kali$ ]]; then
@@ -56,16 +61,16 @@ elif [[ "${Platform}" =~ ^debian$|^deepin$|^uos$|^kali$ ]]; then
 elif [[ "${Platform}" =~ ^ubuntu$|^linuxmint$|^elementary$ ]]; then
   PM=apt-get
   Family=ubuntu
-  Ubuntu_ver=${VERSION_ID}
+  Ubuntu_ver=${VERSION_MAIN_ID}
   if [[ "${Platform}" =~ ^linuxmint$ ]]; then
-    [[ "${VERSION_ID}" =~ ^18$ ]] && Ubuntu_ver=16
-    [[ "${VERSION_ID}" =~ ^19$ ]] && Ubuntu_ver=18
-    [[ "${VERSION_ID}" =~ ^20$ ]] && Ubuntu_ver=20
-    [[ "${VERSION_ID}" =~ ^21$ ]] && Ubuntu_ver=22
+    [[ "${VERSION_MAIN_ID}" =~ ^18$ ]] && Ubuntu_ver=16
+    [[ "${VERSION_MAIN_ID}" =~ ^19$ ]] && Ubuntu_ver=18
+    [[ "${VERSION_MAIN_ID}" =~ ^20$ ]] && Ubuntu_ver=20
+    [[ "${VERSION_MAIN_ID}" =~ ^21$ ]] && Ubuntu_ver=22
   elif [[ "${Platform}" =~ ^elementary$ ]]; then
-    [[ "${VERSION_ID}" =~ ^5$ ]] && Ubuntu_ver=18
-    [[ "${VERSION_ID}" =~ ^6$ ]] && Ubuntu_ver=20
-    [[ "${VERSION_ID}" =~ ^7$ ]] && Ubuntu_ver=22
+    [[ "${VERSION_MAIN_ID}" =~ ^5$ ]] && Ubuntu_ver=18
+    [[ "${VERSION_MAIN_ID}" =~ ^6$ ]] && Ubuntu_ver=20
+    [[ "${VERSION_MAIN_ID}" =~ ^7$ ]] && Ubuntu_ver=22
   fi
 else
   echo "${CFAILURE}Does not support this OS ${CEND}"
