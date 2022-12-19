@@ -7,8 +7,8 @@ openssl11_ver=1.1.1s
 openssl_ver=1.0.2u
 
 tomcat10_ver=10.0.27
-tomcat9_ver=9.0.68
-tomcat8_ver=8.5.83
+tomcat9_ver=9.0.70
+tomcat8_ver=8.5.84
 tomcat7_ver=7.0.109
 
 apache_ver=2.4.54
@@ -28,8 +28,8 @@ mariadb105_ver=10.5.18
 mariadb104_ver=10.4.27
 mariadb55_ver=5.5.68
 
-percona80_ver=8.0.29-21
-percona57_ver=5.7.39-42
+percona80_ver=8.0.30-22
+percona57_ver=5.7.40-43
 percona56_ver=5.6.51-91.0
 percona55_ver=5.5.62-38.14
 
@@ -49,9 +49,10 @@ php73_ver=7.3.33
 php74_ver=7.4.32
 php80_ver=8.0.25
 php81_ver=8.1.12
+php82_ver=8.2.0
 
 # Nodejs
-nodejs_ver=18.12.0
+nodejs_ver=18.12.1
 
 libiconv_ver=1.16
 curl_ver=7.86.0
@@ -63,8 +64,8 @@ icu4c_ver=63_1
 libsodium_ver=1.0.18
 libzip_ver=1.2.0
 argon2_ver=20171227
-imagemagick_ver=7.1.0-52
-imagick_ver=3.5.1
+imagemagick_ver=7.1.0-55
+imagick_ver=3.7.0
 imagick_oldver=3.4.4
 graphicsmagick_ver=1.3.36
 gmagick_ver=2.0.6RC1
@@ -78,8 +79,8 @@ phalcon_ver=4.1.2
 phalcon_oldver=3.4.5
 yaf_ver=3.3.2
 yar_ver=2.2.0
-swoole_ver=4.8.10
-swoole_oldver=4.5.2
+swoole_ver=5.0.1
+swoole_oldver=4.8.12
 xdebug_ver=3.1.2
 xdebug_oldver=2.9.8
 
@@ -87,7 +88,7 @@ xdebug_oldver=2.9.8
 pureftpd_ver=1.0.51
 
 # Redis
-redis_ver=7.0.5
+redis_ver=7.0.6
 redis_oldver=5.0.14
 pecl_redis_ver=5.3.7
 pecl_redis_oldver=4.3.0
@@ -95,7 +96,7 @@ pecl_redis_oldver=4.3.0
 # Memcached
 memcached_ver=1.6.17
 libmemcached_ver=1.0.18
-pecl_memcached_ver=3.1.5
+pecl_memcached_ver=3.2.0
 pecl_memcached_oldver=2.2.0
 pecl_memcache_ver=4.0.5.2
 pecl_memcache_oldver=3.0.8

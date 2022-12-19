@@ -37,7 +37,7 @@ dbinstallmethod=1
 
 version() {
   echo "version: 2.6"
-  echo "updated date: 2022-09-03"
+  echo "updated date: 2022-11-22"
 }
 
 Show_Help() {
@@ -49,7 +49,7 @@ Show_Help() {
   --apache                    Install Apache
   --apache_mode_option [1-2]  Apache2.4 mode, 1(default): php-fpm, 2: mod_php
   --apache_mpm_option [1-3]   Apache2.4 MPM, 1(default): event, 2: prefork, 3: worker
-  --php_option [1-11]         Install PHP version
+  --php_option [1-12]         Install PHP version
   --mphp_ver [53~81]          Install another PHP version (PATH: ${php_install_dir}\${mphp_ver})
   --mphp_addons               Only install another PHP addons
   --phpcache_option [1-4]     Install PHP opcode cache, default: 1 opcache
@@ -106,7 +106,7 @@ while :; do
       ;;
     --php_option)
       php_option=$2; shift 2
-      [[ ! ${php_option} =~ ^[1-9]$|^1[0-1]$ ]] && { echo "${CWARNING}php_option input error! Please only input number 1~11${CEND}"; exit 1; }
+      [[ ! ${php_option} =~ ^[1-9]$|^1[0-2]$ ]] && { echo "${CWARNING}php_option input error! Please only input number 1~12${CEND}"; exit 1; }
       [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; unset php_option; }
       ;;
     --mphp_ver)
@@ -462,10 +462,11 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG} 9${CEND}. Install php-7.4"
           echo -e "\t${CMSG}10${CEND}. Install php-8.0"
           echo -e "\t${CMSG}11${CEND}. Install php-8.1"
+          echo -e "\t${CMSG}12${CEND}. Install php-8.2"
           read -e -p "Please input a number:(Default 7 press Enter) " php_option
           php_option=${php_option:-7}
-          if [[ ! ${php_option} =~ ^[1-9]$|^1[0-1]$ ]]; then
-            echo "${CWARNING}input error! Please only input number 1~11${CEND}"
+          if [[ ! ${php_option} =~ ^[1-9]$|^1[0-2]$ ]]; then
+            echo "${CWARNING}input error! Please only input number 1~12${CEND}"
           else
             break
           fi
@@ -482,7 +483,7 @@ if [ ${ARG_NUM} == 0 ]; then
   fi
 
   # PHP opcode cache and extensions
-  if [[ ${php_option} =~ ^[1-9]$|^1[0-1]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
+  if [[ ${php_option} =~ ^[1-9]$|^1[0-2]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
     while :; do echo
       read -e -p "Do you want to install opcode cache of the PHP? [y/n]: " phpcache_flag
       if [[ ! ${phpcache_flag} =~ ^[y,n]$ ]]; then
@@ -540,8 +541,8 @@ if [ ${ARG_NUM} == 0 ]; then
             while :; do
               echo 'Please select a opcode cache of the PHP:'
               echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
-              echo -e "\t${CMSG}2${CEND}. Install XCache"
-              echo -e "\t${CMSG}3${CEND}. Install APCU"
+              echo -e "\t${CMSG}2${CEND}. Install APCU"
+              echo -e "\t${CMSG}3${CEND}. Install XCache"
               read -e -p "Please input a number:(Default 1 press Enter) " phpcache_option
               phpcache_option=${phpcache_option:-1}
               if [[ ! ${phpcache_option} =~ ^[1-3]$ ]]; then
@@ -551,7 +552,7 @@ if [ ${ARG_NUM} == 0 ]; then
               fi
             done
           fi
-          if [[ ${php_option} =~ ^[5-9]$|^1[0-1]$ ]] || [[ "${PHP_main_ver}" =~ ^7.[0-4]$|^8.[0-1]$ ]]; then
+          if [[ ${php_option} =~ ^[5-9]$|^1[0-2]$ ]] || [[ "${PHP_main_ver}" =~ ^7.[0-4]$|^8.[0-2]$ ]]; then
             while :; do
               echo 'Please select a opcode cache of the PHP:'
               echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
@@ -655,7 +656,7 @@ if [ ${ARG_NUM} == 0 ]; then
   done
 
   # check phpMyAdmin
-  if [[ ${php_option} =~ ^[1-9]$|^1[0-1]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
+  if [[ ${php_option} =~ ^[1-9]$|^1[0-2]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
     while :; do echo
       read -e -p "Do you want to install phpMyAdmin? [y/n]: " phpmyadmin_flag
       if [[ ! ${phpmyadmin_flag} =~ ^[y,n]$ ]]; then
@@ -696,21 +697,17 @@ if [[ ${nginx_option} =~ ^[1-3]$ ]] || [ "${apache_flag}" == 'y' ] || [[ ${tomca
 fi
 [ -d /data ] && chmod 755 /data
 
-# install wget gcc curl python
+# install wget gcc curl
 if [ ! -e ~/.oneinstack ]; then
   downloadDepsSrc=1
   [ "${PM}" == 'apt-get' ] && apt-get -y update > /dev/null
-  [ "${PM}" == 'yum' ] && yum clean all
-  ${PM} -y install wget gcc curl python
-  [ "${RHEL_ver}" == '8' ] && { yum -y install python36; sudo alternatives --set python /usr/bin/python3; }
-  [ ! -e "/usr/bin/python" ] && [ -e "/usr/bin/python3" ] && ln -s /usr/bin/python3 /usr/bin/python
-  clear
+  [ "${PM}" == 'yum' ] && yum clean all > /dev/null
+  ${PM} -y install wget gcc curl > /dev/null
 fi
 
 # get the IP information
-IPADDR=$(./include/get_ipaddr.py)
-PUBLIC_IPADDR=$(./include/get_public_ipaddr.py)
-IPADDR_COUNTRY=$(./include/get_ipaddr_state.py ${PUBLIC_IPADDR})
+IPADDR=$(./include/ois.${ARCH} ip_local)
+OUTIP_STATE=$(./include/ois.${ARCH} ip_state)
 
 # openSSL
 . ./include/openssl.sh
@@ -888,6 +885,10 @@ case "${php_option}" in
   11)
     . include/php-8.1.sh
     Install_PHP81 2>&1 | tee -a ${oneinstack_dir}/install.log
+    ;;
+  12)
+    . include/php-8.2.sh
+    Install_PHP82 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
 esac
 
@@ -1142,7 +1143,7 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${db_option}" == '14' ] && echo "$(printf "%-32s" "MongoDB data dir:")${CMSG}${mongo_data_dir}${CEND}"
 [ "${db_option}" == '14' ] && echo "$(printf "%-32s" "MongoDB user:")${CMSG}root${CEND}"
 [ "${db_option}" == '14' ] && echo "$(printf "%-32s" "MongoDB password:")${CMSG}${dbmongopwd}${CEND}"
-[[ "${php_option}" =~ ^[1-9]$|^1[0-1]$ ]] && echo -e "\n$(printf "%-32s" "PHP install dir:")${CMSG}${php_install_dir}${CEND}"
+[[ "${php_option}" =~ ^[1-9]$|^1[0-2]$ ]] && echo -e "\n$(printf "%-32s" "PHP install dir:")${CMSG}${php_install_dir}${CEND}"
 [ "${phpcache_option}" == '1' ] && echo "$(printf "%-32s" "Opcache Control Panel URL:")${CMSG}http://${IPADDR}/ocp.php${CEND}"
 [ "${phpcache_option}" == '2' ] && echo "$(printf "%-32s" "APC Control Panel URL:")${CMSG}http://${IPADDR}/apc.php${CEND}"
 [ "${phpcache_option}" == '3' -a -e "${php_install_dir}/etc/php.d/04-xcache.ini" ] && echo "$(printf "%-32s" "xcache Control Panel URL:")${CMSG}http://${IPADDR}/xcache${CEND}"

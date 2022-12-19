@@ -53,10 +53,7 @@ Install_Python() {
     fi
 
     if [ ! -e "/root/.pip/pip.conf" ] ;then
-      # get the IP information
-      PUBLIC_IPADDR=$(../include/get_public_ipaddr.py)
-      IPADDR_COUNTRY=$(../include/get_ipaddr_state.py ${PUBLIC_IPADDR})
-      if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+      if [ "${OUTIP_STATE}"x == "China"x ]; then
         [ ! -d "/root/.pip" ] && mkdir /root/.pip
         echo -e "[global]\nindex-url = https://pypi.tuna.tsinghua.edu.cn/simple" > /root/.pip/pip.conf
       fi

@@ -34,14 +34,15 @@ Upgrade_DB() {
 
   OLD_db_ver_tmp=`${db_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e 'select version()\G;' | grep version | awk '{print $2}'`
   if [ -n "`${db_install_dir}/bin/mysql -V | grep -o MariaDB`" ]; then
-    [ "${IPADDR_COUNTRY}"x == "CN"x ] && DOWN_ADDR=https://mirrors.tuna.tsinghua.edu.cn/mariadb || DOWN_ADDR=https://downloads.mariadb.org/f
+    [ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR=https://mirrors.tuna.tsinghua.edu.cn/mariadb || DOWN_ADDR=https://downloads.mariadb.org/f
     DB=MariaDB
     OLD_db_ver=`echo ${OLD_db_ver_tmp} | awk -F'-' '{print $1}'`
   elif [ -n "`${db_install_dir}/bin/mysql -V | grep -o Percona`" ]; then
     DB=Percona
     OLD_db_ver=${OLD_db_ver_tmp}
   else
-    [ "${IPADDR_COUNTRY}"x == "CN"x ] && DOWN_ADDR=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads || DOWN_ADDR=http://cdn.mysql.com/Downloads
+    #[ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR=http://mirrors.ustc.edu.cn/mysql-ftp/Downloads || DOWN_ADDR=http://cdn.mysql.com/Downloads
+    DOWN_ADDR=http://cdn.mysql.com/Downloads
     DB=MySQL
     OLD_db_ver=${OLD_db_ver_tmp%%-log}
   fi
@@ -68,7 +69,7 @@ Upgrade_DB() {
           perconaVerStr1=${NEW_db_ver}
         fi
         if [[ "`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`" =~ ^8.0$ ]]; then
-           DB_filename=Percona-Server-${perconaVerStr1}-Linux.x86_64.glibc2.27
+           DB_filename=Percona-Server-${perconaVerStr1}-Linux.x86_64.glibc2.28
         elif [[ "`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`" =~ ^5.7$ ]]; then
            DB_filename=Percona-Server-${perconaVerStr1}-Linux.x86_64.glibc2.17
         else
@@ -121,7 +122,7 @@ Upgrade_DB() {
       ${mariadb_install_dir}/bin/mysql_upgrade -uroot -p${dbrootpwd} >/dev/null 2>&1
       [ $? -eq 0 ] &&  echo "You have ${CMSG}successfully${CEND} upgrade from ${CMSG}${OLD_db_ver}${CEND} to ${CMSG}${NEW_db_ver}${CEND}"
     elif [ "${DB}" == 'Percona' ]; then
-      tar xzf ./${DB_filename}.tar.gz
+      tar xzf ${DB_filename}.tar.gz
       service mysqld stop
       mv ${percona_install_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       mv ${percona_data_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}

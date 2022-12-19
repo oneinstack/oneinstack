@@ -191,7 +191,7 @@ If you enter '.', the field will be left blank.
           echo "${CWARNING}input error!${CEND}"
         fi
       done
-    if [ ! -e ~/.acme.sh/ca/acme.zerossl.com/account.key ]; then
+    if [ ! -e ~/.acme.sh/ca/acme.zerossl.com/v2/DV90/account.key ]; then
       while :; do echo
         read -e -p "Please enter your email: " EMAIL
         echo
@@ -353,11 +353,12 @@ What Are You Doing?
         [ -e "/dev/shm/php73-cgi.sock" ] && echo -e "\t${CMSG} 8${CEND}. PHP 7.3"
         [ -e "/dev/shm/php74-cgi.sock" ] && echo -e "\t${CMSG} 9${CEND}. PHP 7.4"
         [ -e "/dev/shm/php80-cgi.sock" ] && echo -e "\t${CMSG}10${CEND}. PHP 8.0"
-        [ -e "/dev/shm/php81-cgi.sock" ] && echo -e "\t${CMSG}10${CEND}. PHP 8.1"
+        [ -e "/dev/shm/php81-cgi.sock" ] && echo -e "\t${CMSG}11${CEND}. PHP 8.1"
+        [ -e "/dev/shm/php82-cgi.sock" ] && echo -e "\t${CMSG}12${CEND}. PHP 8.2"
         read -e -p "Please input a number:(Default 0 press Enter) " php_option
         php_option=${php_option:-0}
-        if [[ ! ${php_option} =~ ^[0-9]$|^1[0-1]$ ]]; then
-          echo "${CWARNING}input error! Please only input number 0~11${CEND}"
+        if [[ ! ${php_option} =~ ^[0-9]$|^1[0-2]$ ]]; then
+          echo "${CWARNING}input error! Please only input number 1~12${CEND}"
         else
           break
         fi
@@ -374,6 +375,7 @@ What Are You Doing?
     [ "${php_option}" == '9' ] && mphp_ver=74
     [ "${php_option}" == '10' ] && mphp_ver=80
     [ "${php_option}" == '11' ] && mphp_ver=81
+    [ "${php_option}" == '12' ] && mphp_ver=82
     [ ! -e "/dev/shm/php${mphp_ver}-cgi.sock" ] && unset mphp_ver
   fi
 

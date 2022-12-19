@@ -99,7 +99,7 @@ checkDownload() {
       [[ "${db_option}" =~ ^[2,5,6,7]$|^10$ ]] && boost_ver=${boost_oldver}
       [[ "${db_option}" =~ ^9$ ]] && boost_ver=${boost_percona_ver}
       echo "Download boost..."
-      [ "${IPADDR_COUNTRY}"x == "CN"x ] && DOWN_ADDR_BOOST=${mirrorLink} || DOWN_ADDR_BOOST=https://downloads.sourceforge.net/project/boost/boost/${boost_ver}
+      [ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR_BOOST=${mirrorLink} || DOWN_ADDR_BOOST=https://downloads.sourceforge.net/project/boost/boost/${boost_ver}
       boostVersion2=$(echo ${boost_ver} | awk -F. '{print $1"_"$2"_"$3}')
       src_url=${DOWN_ADDR_BOOST}/boost_${boostVersion2}.tar.gz && Download_src
     fi
@@ -107,7 +107,7 @@ checkDownload() {
     case "${db_option}" in
       1)
         # MySQL 8.0
-        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+        if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-8.0
           DOWN_ADDR_MYSQL_BK=http://repo.huaweicloud.com/mysql/Downloads/MySQL-8.0
           DOWN_ADDR_MYSQL_BK2=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-8.0
@@ -142,7 +142,7 @@ checkDownload() {
         ;;
       2)
         # MySQL 5.7
-        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+        if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.7
           DOWN_ADDR_MYSQL_BK=http://repo.huaweicloud.com/mysql/Downloads/MySQL-5.7
           DOWN_ADDR_MYSQL_BK2=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
@@ -177,7 +177,7 @@ checkDownload() {
         ;;
       3)
         # MySQL 5.6
-        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+        if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_MYSQL=http://mirrors.aliyun.com/mysql/MySQL-5.6
           DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.6
           DOWN_ADDR_MYSQL_BK2=http://repo.huaweicloud.com/mysql/Downloads/MySQL-5.6
@@ -212,7 +212,7 @@ checkDownload() {
         ;;
       4)
         # MySQL 5.5
-        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+        if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_MYSQL=http://mirrors.aliyun.com/mysql/MySQL-5.5
           DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.5
           DOWN_ADDR_MYSQL_BK2=http://repo.huaweicloud.com/mysql/Downloads/MySQL-5.5
@@ -270,7 +270,7 @@ checkDownload() {
 	  FILE_TYPE=source
         fi
 
-        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+        if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_MARIADB=http://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
           DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
         else
@@ -303,12 +303,12 @@ checkDownload() {
         # Percona 8.0
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download Percona 8.0 binary package..."
-          FILE_NAME=Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.27.tar.gz
+          FILE_NAME=Percona-Server-${percona80_ver}-Linux.x86_64.glibc2.28.tar.gz
           DOWN_ADDR_PERCONA=https://downloads.percona.com/downloads/Percona-Server-8.0/Percona-Server-${percona80_ver}/binary/tarball
         elif [ "${dbinstallmethod}" == '2' ]; then
           echo "Download Percona 8.0 source package..."
           FILE_NAME=percona-server-${percona80_ver}.tar.gz
-          if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+          if [ "${OUTIP_STATE}"x == "China"x ]; then
             DOWN_ADDR_PERCONA=${mirrorLink}
           else
             DOWN_ADDR_PERCONA=https://downloads.percona.com/downloads/Percona-Server-8.0/Percona-Server-${percona80_ver}/source/tarball
@@ -335,12 +335,12 @@ checkDownload() {
         # Precona 5.7
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download Percona 5.7 binary package..."
-          FILE_NAME=Percona-Server-${percona57_ver}-Linux.x86_64.glibc2.12.tar.gz
+          FILE_NAME=Percona-Server-${percona57_ver}-Linux.x86_64.glibc2.17.tar.gz
           DOWN_ADDR_PERCONA=https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-${percona57_ver}/binary/tarball
         elif [ "${dbinstallmethod}" == '2' ]; then
           echo "Download Percona 5.7 source package..."
           FILE_NAME=percona-server-${percona57_ver}.tar.gz
-          if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+          if [ "${OUTIP_STATE}"x == "China"x ]; then
             DOWN_ADDR_PERCONA=${mirrorLink}
           else
             DOWN_ADDR_PERCONA=https://downloads.percona.com/downloads/Percona-Server-5.7/Percona-Server-${percona57_ver}/source/tarball
@@ -373,7 +373,7 @@ checkDownload() {
         elif [ "${dbinstallmethod}" == '2' ]; then
           echo "Download Percona 5.6 source package..."
           FILE_NAME=percona-server-${percona56_ver}.tar.gz
-          if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+          if [ "${OUTIP_STATE}"x == "China"x ]; then
             DOWN_ADDR_PERCONA=${mirrorLink}
           else
             DOWN_ADDR_PERCONA=https://downloads.percona.com/downloads/Percona-Server-5.6/Percona-Server-${percona56_ver}/source/tarball
@@ -406,7 +406,7 @@ checkDownload() {
         elif [ "${dbinstallmethod}" == '2' ]; then
           echo "Download Percona 5.5 source package..."
           FILE_NAME=percona-server-${percona55_ver}.tar.gz
-          if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+          if [ "${OUTIP_STATE}"x == "China"x ]; then
             DOWN_ADDR_PERCONA=${mirrorLink}
           else
             DOWN_ADDR_PERCONA=https://downloads.percona.com/downloads/Percona-Server-5.5/Percona-Server-${percona55_ver}/source/tarball
@@ -431,7 +431,7 @@ checkDownload() {
         ;;
       13)
         FILE_NAME=postgresql-${pgsql_ver}.tar.gz
-        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+        if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_PGSQL=https://mirrors.tuna.tsinghua.edu.cn/postgresql/source/v${pgsql_ver}
           DOWN_ADDR_PGSQL_BK=https://mirrors.ustc.edu.cn/postgresql/source/v${pgsql_ver}
         else
@@ -457,7 +457,7 @@ checkDownload() {
         # MongoDB
         echo "Download MongoDB binary package..."
         FILE_NAME=mongodb-linux-x86_64-${mongodb_ver}.tgz
-        if [ "${IPADDR_COUNTRY}"x == "CN"x ]; then
+        if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_MongoDB=${mirrorLink}
         else
           DOWN_ADDR_MongoDB=https://fastdl.mongodb.org/linux
@@ -528,6 +528,11 @@ checkDownload() {
     src_url=http://mirrors.linuxeye.com/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
   elif [ "${php_option}" == '11' ] || [ "${mphp_ver}" == '81' ]; then
     src_url=https://secure.php.net/distributions/php-${php81_ver}.tar.gz && Download_src
+    src_url=http://mirrors.linuxeye.com/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
+    src_url=http://mirrors.linuxeye.com/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
+    src_url=http://mirrors.linuxeye.com/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
+  elif [ "${php_option}" == '12' ] || [ "${mphp_ver}" == '82' ]; then
+    src_url=https://secure.php.net/distributions/php-${php82_ver}.tar.gz && Download_src
     src_url=http://mirrors.linuxeye.com/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
     src_url=http://mirrors.linuxeye.com/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
     src_url=http://mirrors.linuxeye.com/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
@@ -652,7 +657,7 @@ checkDownload() {
   # memcached-server
   if [ "${memcached_flag}" == 'y' ]; then
     echo "Download memcached-server..."
-    [ "${IPADDR_COUNTRY}"x == "CN"x ] && DOWN_ADDR=${mirrorLink} || DOWN_ADDR=http://www.memcached.org/files
+    [ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR=${mirrorLink} || DOWN_ADDR=http://www.memcached.org/files
     src_url=${DOWN_ADDR}/memcached-${memcached_ver}.tar.gz && Download_src
   fi
 
@@ -692,7 +697,7 @@ checkDownload() {
   # nodejs
   if [ "${nodejs_flag}" == 'y' ]; then
     echo "Download Nodejs..."
-    [ "${IPADDR_COUNTRY}"x == "CN"x ] && DOWN_ADDR_NODE=https://mirrors.tuna.tsinghua.edu.cn/nodejs-release || DOWN_ADDR_NODE=https://nodejs.org/dist
+    [ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR_NODE=https://mirrors.tuna.tsinghua.edu.cn/nodejs-release || DOWN_ADDR_NODE=https://nodejs.org/dist
     src_url=${DOWN_ADDR_NODE}/v${nodejs_ver}/node-v${nodejs_ver}-linux-${SYS_ARCH_n}.tar.gz && Download_src
   fi
 
