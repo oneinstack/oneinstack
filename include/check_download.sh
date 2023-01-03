@@ -481,7 +481,7 @@ checkDownload() {
   fi
 
   # PHP
-  if [[ "${php_option}" =~ ^[1-9]$|^1[0-1]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-1]$ ]]; then
+  if [[ "${php_option}" =~ ^[1-9]$|^1[0-2]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-2]$ ]]; then
     echo "PHP common..."
     src_url=${mirrorLink}/libiconv-${libiconv_ver}.tar.gz && Download_src
     src_url=https://curl.haxx.se/download/curl-${curl_ver}.tar.gz && Download_src
