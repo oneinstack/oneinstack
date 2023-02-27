@@ -37,7 +37,7 @@ dbinstallmethod=1
 
 version() {
   echo "version: 2.6"
-  echo "updated date: 2022-11-22"
+  echo "updated date: 2023-02-04"
 }
 
 Show_Help() {

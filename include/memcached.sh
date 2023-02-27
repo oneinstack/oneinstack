@@ -43,6 +43,9 @@ Install_pecl_memcache() {
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
     if [ "$(${php_install_dir}/bin/php-config --version | awk -F. '{print $1}')" == '5' ]; then
+      tar xzf memcache-3.0.8.tgz
+      pushd memcache-3.0.8 > /dev/null
+    elif [ "$(${php_install_dir}/bin/php-config --version | awk -F. '{print $1}')" == '7' ]; then
       tar xzf memcache-${pecl_memcache_oldver}.tgz
       pushd memcache-${pecl_memcache_oldver} > /dev/null
     else
