@@ -637,10 +637,6 @@ checkDownload() {
   if [ "${redis_flag}" == 'y' ]; then
     echo "Download redis-server..."
     src_url=http://download.redis.io/releases/redis-${redis_ver}.tar.gz && Download_src
-    if [ "${PM}" == 'yum' ]; then
-      echo "Download start-stop-daemon.c for RHEL..."
-      src_url=${mirrorLink}/start-stop-daemon.c && Download_src
-    fi
   fi
 
   # pecl_redis
@@ -677,11 +673,13 @@ checkDownload() {
   # memcached-server pecl_memcached pecl_memcache
   if [ "${pecl_memcache}" == '1' ]; then
     if [[ "${php_option}" =~ ^[1-4]$ ]]; then
-      echo "Download pecl_memcache for php..."
+      echo "Download pecl_memcache for php 5.x..."
+      src_url=https://pecl.php.net/get/memcache-3.0.8.tgz && Download_src
+    elif [[ "${php_option}" =~ ^[5-9]$ ]]; then
+      echo "Download pecl_memcache for php 7.x..."
       src_url=https://pecl.php.net/get/memcache-${pecl_memcache_oldver}.tgz && Download_src
     else
-      echo "Download pecl_memcache for php 7.x..."
-      # src_url=https://codeload.github.com/websupport-sk/pecl-memcache/zip/php7 && Download_src
+      echo "Download pecl_memcache for php 8.x..."
       src_url=https://pecl.php.net/get/memcache-${pecl_memcache_ver}.tgz && Download_src
     fi
   fi

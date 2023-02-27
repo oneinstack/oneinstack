@@ -6,20 +6,20 @@ openresty_ver=1.21.4.1
 openssl11_ver=1.1.1s
 openssl_ver=1.0.2u
 
-tomcat10_ver=10.0.27
-tomcat9_ver=9.0.70
-tomcat8_ver=8.5.84
+tomcat10_ver=10.1.6
+tomcat9_ver=9.0.72
+tomcat8_ver=8.5.86
 tomcat7_ver=7.0.109
 
-apache_ver=2.4.54
+apache_ver=2.4.55
 pcre_ver=8.45
 apr_ver=1.7.0
 apr_util_ver=1.6.1
 nghttp2_ver=1.42.0
 
 # DB
-mysql80_ver=8.0.31
-mysql57_ver=5.7.40
+mysql80_ver=8.0.32
+mysql57_ver=5.7.41
 mysql56_ver=5.6.51
 mysql55_ver=5.5.62
 
@@ -28,7 +28,7 @@ mariadb105_ver=10.5.18
 mariadb104_ver=10.4.27
 mariadb55_ver=5.5.68
 
-percona80_ver=8.0.30-22
+percona80_ver=8.0.31-23
 percona57_ver=5.7.40-43
 percona56_ver=5.6.51-91.0
 percona55_ver=5.5.62-38.14
@@ -46,16 +46,16 @@ php70_ver=7.0.33
 php71_ver=7.1.33
 php72_ver=7.2.34
 php73_ver=7.3.33
-php74_ver=7.4.32
-php80_ver=8.0.25
-php81_ver=8.1.12
-php82_ver=8.2.0
+php74_ver=7.4.33
+php80_ver=8.0.28
+php81_ver=8.1.16
+php82_ver=8.2.3
 
 # Nodejs
-nodejs_ver=18.12.1
+nodejs_ver=18.14.2
 
 libiconv_ver=1.16
-curl_ver=7.86.0
+curl_ver=7.88.1
 libmcrypt_ver=2.5.8
 mcrypt_ver=2.6.8
 mhash_ver=0.9.9.9
@@ -64,7 +64,7 @@ icu4c_ver=63_1
 libsodium_ver=1.0.18
 libzip_ver=1.2.0
 argon2_ver=20171227
-imagemagick_ver=7.1.0-55
+imagemagick_ver=7.1.0-62
 imagick_ver=3.7.0
 imagick_oldver=3.4.4
 graphicsmagick_ver=1.3.36
@@ -88,30 +88,30 @@ xdebug_oldver=2.9.8
 pureftpd_ver=1.0.51
 
 # Redis
-redis_ver=7.0.6
+redis_ver=7.0.8
 redis_oldver=5.0.14
 pecl_redis_ver=5.3.7
 pecl_redis_oldver=4.3.0
 
 # Memcached
-memcached_ver=1.6.17
+memcached_ver=1.6.18
 libmemcached_ver=1.0.18
 pecl_memcached_ver=3.2.0
 pecl_memcached_oldver=2.2.0
-pecl_memcache_ver=4.0.5.2
-pecl_memcache_oldver=3.0.8
+pecl_memcache_ver=8.0
+pecl_memcache_oldver=4.0.5.2
 
 # MongoDB
-pecl_mongodb_ver=1.13.0
+pecl_mongodb_ver=1.15.0
 pecl_mongodb_oldver=1.9.2
 pecl_mongo_ver=1.6.16
 
 # phpMyadmin
-phpmyadmin_ver=5.2.0
+phpmyadmin_ver=5.2.1
 phpmyadmin_oldver=4.4.15.10
 
 # jemalloc
-jemalloc_ver=5.2.1
+jemalloc_ver=5.3.0
 
 # boost
 boost_ver=1.77.0
@@ -119,11 +119,11 @@ boost_percona_ver=1.73.0
 boost_oldver=1.59.0
 
 # Others
-lua_nginx_module_ver=0.10.22
-luajit2_ver=2.1-20220915
-lua_resty_core_ver=0.1.24
+lua_nginx_module_ver=0.10.23
+luajit2_ver=2.1-20230119
+lua_resty_core_ver=0.1.25
 lua_resty_lrucache_ver=0.13
-lua_cjson_ver=2.1.0.10
+lua_cjson_ver=2.1.0.12
 python_ver=3.6.15
 setuptools_ver=61.2.0
 pip_ver=22.0.4
