@@ -86,7 +86,7 @@ stop() {
 }
 
 user_exists() {
-  if [ "`cat /etc/passwd | grep ftp | cut -d ":" -f7 | cut -d "/" -f4`" = "nologin" ]; then
+  if [ "`cat /etc/passwd | grep www | cut -d ":" -f7 | cut -d "/" -f4`" = "nologin" ]; then
     if id -u $1 >/dev/null 2>&1; then
       echo "1"
     else
