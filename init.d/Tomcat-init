@@ -86,11 +86,12 @@ stop() {
 }
 
 user_exists() {
-  if [ "`cat /etc/passwd | grep www | cut -d ":" -f7 | cut -d "/" -f4`" = "nologin" ]; then
-    if id -u $1 >/dev/null 2>&1; then
-      echo "1"
-    else
+  if id -u $1 >/dev/null 2>&1; then
+	temp=`cat /etc/passwd | grep ^www: | grep nologin$`
+	if [ "${temp: -7}" = "nologin" ]; then
       echo "0"
+    else
+      echo "1"	
     fi
   else
     echo "0"
