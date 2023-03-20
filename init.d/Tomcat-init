@@ -86,8 +86,12 @@ stop() {
 }
 
 user_exists() {
-  if id -u $1 >/dev/null 2>&1; then
-    echo "1"
+  if [ "`cat /etc/passwd | grep ftp | cut -d ":" -f7 | cut -d "/" -f4`" = "nologin" ]; then
+    if id -u $1 >/dev/null 2>&1; then
+      echo "1"
+    else
+      echo "0"
+    fi
   else
     echo "0"
   fi
