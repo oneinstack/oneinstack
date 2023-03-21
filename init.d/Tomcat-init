@@ -87,8 +87,8 @@ stop() {
 
 user_exists() {
   if id -u $1 >/dev/null 2>&1; then
-	temp=`cat /etc/passwd | grep ^www: | grep nologin$`
-	if [ "${temp: -7}" = "nologin" ]; then
+	islogin=`cat /etc/passwd | grep ^www: | grep nologin$`
+	if [ "${islogin: -7}" = "nologin" ]; then
       echo "0"
     else
       echo "1"	
