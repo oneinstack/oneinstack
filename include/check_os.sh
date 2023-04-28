@@ -19,7 +19,7 @@ fi
 Platform=${ID,,}
 VERSION_MAIN_ID=${VERSION_ID%%.*}
 ARCH=$(arch)
-if [[ "${Platform}" =~ ^centos$|^rhel$|^almalinux$|^rocky$|^fedora$|^amzn$|^ol$|^alinux$|^anolis$|^tencentos$|^euleros$|^openeuler$|^kylin$|^uos$|^kylinsecos$ ]]; then
+if [[ "${Platform}" =~ ^centos$|^rhel$|^almalinux$|^rocky$|^fedora$|^amzn$|^ol$|^alinux$|^anolis$|^tencentos$|^opencloudos$|^euleros$|^openeuler$|^kylin$|^uos$|^kylinsecos$ ]]; then
   PM=yum
   Family=rhel
   RHEL_ver=${VERSION_MAIN_ID}

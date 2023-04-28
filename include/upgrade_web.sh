@@ -52,7 +52,7 @@ Upgrade_Nginx() {
     nginx_configure_args_tmp=`cat $$ | grep 'configure arguments:' | awk -F: '{print $2}'`
     rm -rf $$
     nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@lua-nginx-module-\w.\w\+.\w\+ @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@lua-nginx-module @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@--with-openssl=../openssl-\w.\w.\w\+ @--with-openssl=../openssl-${openssl11_ver} @" | sed "s@--with-pcre=../pcre-\w.\w\+ @--with-pcre=../pcre-${pcre_ver} @"`
-    if [ -n `echo $nginx_configure_args | grep lua-nginx-module` ]; then
+    if [ -n "`echo $nginx_configure_args | grep lua-nginx-module`" ]; then
       ${oneinstack_dir}/upgrade.sh --oneinstack > /dev/null
       src_url=http://mirrors.linuxeye.com/oneinstack/src/luajit2-${luajit2_ver}.tar.gz && Download_src
       tar xzf luajit2-${luajit2_ver}.tar.gz

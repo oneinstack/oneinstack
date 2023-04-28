@@ -1,9 +1,9 @@
 # newest software version
 # Web
-nginx_ver=1.22.1
-tengine_ver=2.3.3
+nginx_ver=1.24.0
+tengine_ver=2.4.0
 openresty_ver=1.21.4.1
-openssl11_ver=1.1.1s
+openssl11_ver=1.1.1t
 openssl_ver=1.0.2u
 
 tomcat10_ver=10.1.6
@@ -18,18 +18,18 @@ apr_util_ver=1.6.1
 nghttp2_ver=1.42.0
 
 # DB
-mysql80_ver=8.0.32
-mysql57_ver=5.7.41
+mysql80_ver=8.0.33
+mysql57_ver=5.7.42
 mysql56_ver=5.6.51
 mysql55_ver=5.5.62
 
-mariadb106_ver=10.6.11
-mariadb105_ver=10.5.18
-mariadb104_ver=10.4.27
+mariadb106_ver=10.6.12
+mariadb105_ver=10.5.19
+mariadb104_ver=10.4.28
 mariadb55_ver=5.5.68
 
-percona80_ver=8.0.31-23
-percona57_ver=5.7.40-43
+percona80_ver=8.0.32-24
+percona57_ver=5.7.41-44
 percona56_ver=5.6.51-91.0
 percona55_ver=5.5.62-38.14
 
@@ -48,8 +48,8 @@ php72_ver=7.2.34
 php73_ver=7.3.33
 php74_ver=7.4.33
 php80_ver=8.0.28
-php81_ver=8.1.16
-php82_ver=8.2.3
+php81_ver=8.1.18
+php82_ver=8.2.5
 
 # Nodejs
 nodejs_ver=18.14.2
@@ -64,10 +64,10 @@ icu4c_ver=63_1
 libsodium_ver=1.0.18
 libzip_ver=1.2.0
 argon2_ver=20171227
-imagemagick_ver=7.1.0-62
+imagemagick_ver=7.1.1-8
 imagick_ver=3.7.0
 imagick_oldver=3.4.4
-graphicsmagick_ver=1.3.36
+graphicsmagick_ver=1.3.40
 gmagick_ver=2.0.6RC1
 gmagick_oldver=1.1.7RC3
 zendopcache_ver=7.0.5
@@ -88,13 +88,13 @@ xdebug_oldver=2.9.8
 pureftpd_ver=1.0.51
 
 # Redis
-redis_ver=7.0.8
+redis_ver=7.0.11
 redis_oldver=5.0.14
 pecl_redis_ver=5.3.7
 pecl_redis_oldver=4.3.0
 
 # Memcached
-memcached_ver=1.6.18
+memcached_ver=1.6.19
 libmemcached_ver=1.0.18
 pecl_memcached_ver=3.2.0
 pecl_memcached_oldver=2.2.0
@@ -119,9 +119,9 @@ boost_percona_ver=1.73.0
 boost_oldver=1.59.0
 
 # Others
-lua_nginx_module_ver=0.10.23
+lua_nginx_module_ver=0.10.24
 luajit2_ver=2.1-20230119
-lua_resty_core_ver=0.1.25
+lua_resty_core_ver=0.1.26
 lua_resty_lrucache_ver=0.13
 lua_cjson_ver=2.1.0.12
 python_ver=3.6.15
