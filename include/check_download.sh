@@ -44,7 +44,8 @@ checkDownload() {
       ;;
     2)
       echo "Download tengine..."
-      src_url=http://tengine.taobao.org/download/tengine-${tengine_ver}.tar.gz && Download_src
+      #src_url=http://tengine.taobao.org/download/tengine-${tengine_ver}.tar.gz && Download_src
+      src_url=${mirrorLink}/tengine-${tengine_ver}.tar.gz && Download_src
       ;;
     3)
       echo "Download openresty..."
