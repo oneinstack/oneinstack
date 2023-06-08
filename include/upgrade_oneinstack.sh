@@ -16,7 +16,7 @@ Upgrade_OneinStack() {
     /bin/mv options.conf /tmp
     sed -i '/oneinstack_dir=/d' /tmp/options.conf
     [ -e /tmp/oneinstack.tar.gz ] && rm -rf /tmp/oneinstack.tar.gz
-    wget -qc http://mirrors.linuxeye.com/oneinstack.tar.gz -O /tmp/oneinstack.tar.gz
+    wget --no-check-certificate -qc http://mirrors.linuxeye.com/oneinstack.tar.gz -O /tmp/oneinstack.tar.gz
     if [ -n "`echo ${oneinstack_dir} | grep lnmp`" ]; then
       tar xzf /tmp/oneinstack.tar.gz -C /tmp
       /bin/cp -R /tmp/oneinstack/* ${oneinstack_dir}/

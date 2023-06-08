@@ -321,14 +321,8 @@ if [ -n "`echo ${desc_bk} | grep -w 4`" ]; then
     [ -z "${SECRET_KEY}" ] && continue
     echo
     read -e -p "Please enter the Qcloud COS BUCKET: " COS_BUCKET
-    if [[ ${COS_BUCKET} =~ "-${APPID}"$ ]]; then
-      COS_BUCKET=${COS_BUCKET}
-    else
-      [ -z "${COS_BUCKET}" ] && continue
-      echo
-      COS_BUCKET=${COS_BUCKET}-${APPID}
-    fi
-    ${python_install_dir}/bin/coscmd config -u ${APPID} -a ${SECRET_ID} -s ${SECRET_KEY} -r ${REGION} -b ${COS_BUCKET} > /dev/null 2>&1
+    [ -z "${COS_BUCKET}" ] && continue
+    ${python_install_dir}/bin/coscmd config -a ${SECRET_ID} -s ${SECRET_KEY} -r ${REGION} -b ${COS_BUCKET} > /dev/null 2>&1
     ${python_install_dir}/bin/coscmd list > /dev/null 2>&1
     if [ $? -eq 0 ]; then
       echo "${CMSG}APPID/SECRET_ID/SECRET_KEY/REGION/BUCKET OK${CEND}"

@@ -25,9 +25,6 @@ oneinstack_dir=$(dirname "`readlink -f $0`")
 # shellcheck disable=SC2164
 pushd ${oneinstack_dir} > /dev/null
 
-# get the out ip country
-OUTIP_STATE=$(./include/ois.${ARCH} ip_state)
-
 . ./versions.txt
 . ./options.conf
 . ./include/color.sh
@@ -42,6 +39,9 @@ OUTIP_STATE=$(./include/ois.${ARCH} ip_state)
 . ./include/fail2ban.sh
 
 . ./include/ngx_lua_waf.sh
+
+# get the out ip country
+OUTIP_STATE=$(./include/ois.${ARCH} ip_state)
 
 # shellcheck disable=SC2154
 Show_Help() {
