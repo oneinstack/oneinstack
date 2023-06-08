@@ -12,8 +12,19 @@ Install_pecl_imap() {
   if [ -e "${php_install_dir}/bin/phpize" ]; then
     pushd ${oneinstack_dir}/src > /dev/null
     if [ "${PM}" == 'yum' ]; then
-      yum -y install libc-client-devel
-      [ ! -e /usr/lib/libc-client.so ] && ln -s /usr/lib64/libc-client.so /usr/lib/libc-client.so
+      if [ "${RHEL_ver}" == '9' ]; then
+        cat > /etc/yum.repos.d/remi.repo << EOF
+[remi]
+name=Remi's RPM repository for Enterprise Linux 9 - \$basearch
+mirrorlist=http://cdn.remirepo.net/enterprise/9/remi/\$basearch/mirror
+enabled=0
+gpgcheck=0
+EOF
+        dnf -y --enablerepo=remi install uw-imap-devel
+      else
+        yum -y install libc-client-devel
+        [ ! -e /usr/lib/libc-client.so ] && ln -s /usr/lib64/libc-client.so /usr/lib/libc-client.so
+      fi
     else
       apt-get -y install libc-client2007e-dev
     fi

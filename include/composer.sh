@@ -15,10 +15,10 @@ Install_composer() {
     else
       pushd ${oneinstack_dir}/src > /dev/null
       if [ "${OUTIP_STATE}"x == "China"x ]; then
-        wget -c https://mirrors.aliyun.com/composer/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
+        wget --no-check-certificate -c https://mirrors.aliyun.com/composer/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
         ${php_install_dir}/bin/php /usr/local/bin/composer config -g repo.packagist composer https://packagist.phpcomposer.com
       else
-        wget -c https://getcomposer.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
+        wget --no-check-certificate -c https://getcomposer.org/composer.phar -O /usr/local/bin/composer > /dev/null 2>&1
       fi
       chmod +x /usr/local/bin/composer
       if [ -e "/usr/local/bin/composer" ]; then

@@ -10,7 +10,7 @@ Script properties:
 - Providing multiple PHP versions (PHP-8.2, PHP-8.1, PHP-8.0, PHP-7.4, PHP-7.3, PHP-7.2, PHP-7.1, PHP-7.0, PHP-5.6, PHP-5.5, PHP-5.4, PHP-5.3)
 - Provide Nginx, Tengine, OpenResty, Apache and ngx_lua_waf
 - Providing a plurality of Tomcat version (Tomcat-10, Tomcat-9, Tomcat-8, Tomcat-7)
-- Providing a plurality of JDK version (OpenJDK-8, OpenJDK-11)
+- Providing a plurality of JDK version (OpenJDK-8, OpenJDK-11, OpenJDK-17)
 - According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php extensions,include ZendGuardLoader,ionCube,SourceGuardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug
 - Installation Nodejs, Pureftpd, phpMyAdmin according to their needs
 - Install memcached, redis according to their needs
