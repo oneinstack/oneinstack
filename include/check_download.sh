@@ -250,7 +250,7 @@ checkDownload() {
       [5-8])
 	case "${db_option}" in
           5)
-            mariadb_ver=${mariadb106_ver}
+            mariadb_ver=${mariadb1011_ver}
 	    ;;
           6)
             mariadb_ver=${mariadb105_ver}

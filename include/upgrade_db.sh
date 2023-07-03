@@ -109,11 +109,11 @@ Upgrade_DB() {
       mv ${mariadb_install_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       mv ${mariadb_data_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       [ ! -d "${mariadb_install_dir}" ] && mkdir -p ${mariadb_install_dir}
-      mkdir -p ${mariadb_data_dir};chown mysql.mysql -R ${mariadb_data_dir}
+      mkdir -p ${mariadb_data_dir};chown mysql:mysql -R ${mariadb_data_dir}
       mv ${DB_filename}/* ${mariadb_install_dir}/
       sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${mariadb_install_dir}/bin/mysqld_safe
       ${mariadb_install_dir}/scripts/mysql_install_db --user=mysql --basedir=${mariadb_install_dir} --datadir=${mariadb_data_dir}
-      chown mysql.mysql -R ${mariadb_data_dir}
+      chown mysql:mysql -R ${mariadb_data_dir}
       service mysqld start
       ${mariadb_install_dir}/bin/mysql < DB_all_backup_$(date +"%Y%m%d").sql
       service mysqld restart
@@ -127,7 +127,7 @@ Upgrade_DB() {
       mv ${percona_install_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       mv ${percona_data_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       [ ! -d "${percona_install_dir}" ] && mkdir -p ${percona_install_dir}
-      mkdir -p ${percona_data_dir};chown mysql.mysql -R ${percona_data_dir}
+      mkdir -p ${percona_data_dir};chown mysql:mysql -R ${percona_data_dir}
       mv ${DB_filename}/* ${percona_install_dir}/
       sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${percona_install_dir}/bin/mysqld_safe
       sed -i "s@/usr/local/${DB_filename}@${percona_install_dir}@g" ${percona_install_dir}/bin/mysqld_safe
@@ -136,7 +136,7 @@ Upgrade_DB() {
       else
         ${percona_install_dir}/bin/mysqld --initialize-insecure --user=mysql --basedir=${percona_install_dir} --datadir=${percona_data_dir}
       fi
-      chown mysql.mysql -R ${percona_data_dir}
+      chown mysql:mysql -R ${percona_data_dir}
       service mysqld start
       ${percona_install_dir}/bin/mysql < DB_all_backup_$(date +"%Y%m%d").sql
       service mysqld restart
@@ -154,7 +154,7 @@ Upgrade_DB() {
       mv ${mysql_install_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       mv ${mysql_data_dir}{,_old_`date +"%Y%m%d_%H%M%S"`}
       [ ! -d "${mysql_install_dir}" ] && mkdir -p ${mysql_install_dir}
-      mkdir -p ${mysql_data_dir};chown mysql.mysql -R ${mysql_data_dir}
+      mkdir -p ${mysql_data_dir};chown mysql:mysql -R ${mysql_data_dir}
       mv ${DB_filename}/* ${mysql_install_dir}/
       sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${mysql_install_dir}/bin/mysqld_safe
       sed -i "s@/usr/local/mysql@${mysql_install_dir}@g" ${mysql_install_dir}/bin/mysqld_safe
@@ -164,7 +164,7 @@ Upgrade_DB() {
         ${mysql_install_dir}/bin/mysqld --initialize-insecure --user=mysql --basedir=${mysql_install_dir} --datadir=${mysql_data_dir}
       fi
 
-      chown mysql.mysql -R ${mysql_data_dir}
+      chown mysql:mysql -R ${mysql_data_dir}
       [ -e "${mysql_install_dir}/my.cnf" ] && rm -rf ${mysql_install_dir}/my.cnf
       sed -i '/myisam_repair_threads/d' /etc/my.cnf
       service mysqld start

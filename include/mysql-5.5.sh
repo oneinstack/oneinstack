@@ -14,7 +14,7 @@ Install_MySQL55() {
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin mysql
 
   [ ! -d "${mysql_install_dir}" ] && mkdir -p ${mysql_install_dir}
-  mkdir -p ${mysql_data_dir};chown mysql.mysql -R ${mysql_data_dir}
+  mkdir -p ${mysql_data_dir};chown mysql:mysql -R ${mysql_data_dir}
 
   if [ "${dbinstallmethod}" == "1" ]; then
     tar xzf mysql-${mysql55_ver}-linux-glibc2.12-x86_64.tar.gz
@@ -198,7 +198,7 @@ EOF
   ${mysql_install_dir}/scripts/mysql_install_db --user=mysql --basedir=${mysql_install_dir} --datadir=${mysql_data_dir}
 
   [ "${Wsl}" == true ] && chmod 600 /etc/my.cnf
-  chown mysql.mysql -R ${mysql_data_dir}
+  chown mysql:mysql -R ${mysql_data_dir}
   [ -d "/etc/mysql" ] && /bin/mv /etc/mysql{,_bk}
   service mysqld start
   [ -z "$(grep ^'export PATH=' /etc/profile)" ] && echo "export PATH=${mysql_install_dir}/bin:\$PATH" >> /etc/profile
