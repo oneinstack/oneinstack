@@ -85,7 +85,7 @@ installDepsRHEL() {
     yum -y groupremove "Basic Web Server" "MySQL Database server" "MySQL Database client"
   fi
 
-  [ "${RHEL_ver}" == '9' ] && [ ! -e "/usr/lib64/libtinfo.so.5" ] && ln -s /usr/lib64/libtinfo.so.6.1 /usr/lib64/libtinfo.so.5
+  [ "${RHEL_ver}" == '9' ] && [ ! -e "/usr/lib64/libtinfo.so.5" ] && ln -s /usr/lib64/libtinfo.so.6 /usr/lib64/libtinfo.so.5
 
   echo "${CMSG}Installing dependencies packages...${CEND}"
   # Install needed packages

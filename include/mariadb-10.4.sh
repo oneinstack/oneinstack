@@ -14,7 +14,7 @@ Install_MariaDB104() {
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin mysql
 
   [ ! -d "${mariadb_install_dir}" ] && mkdir -p ${mariadb_install_dir}
-  mkdir -p ${mariadb_data_dir};chown mysql.mysql -R ${mariadb_data_dir}
+  mkdir -p ${mariadb_data_dir};chown mysql:mysql -R ${mariadb_data_dir}
 
   if [ "${dbinstallmethod}" == "1" ]; then
     tar zxf mariadb-${mariadb104_ver}-linux-systemd-x86_64.tar.gz
@@ -196,7 +196,7 @@ EOF
   ${mariadb_install_dir}/scripts/mysql_install_db --user=mysql --basedir=${mariadb_install_dir} --datadir=${mariadb_data_dir}
 
   [ "${Wsl}" == true ] && chmod 600 /etc/my.cnf
-  chown mysql.mysql -R ${mariadb_data_dir}
+  chown mysql:mysql -R ${mariadb_data_dir}
   [ -d "/etc/mysql" ] && /bin/mv /etc/mysql{,_bk}
   service mysqld start
   [ -z "$(grep ^'export PATH=' /etc/profile)" ] && echo "export PATH=${mariadb_install_dir}/bin:\$PATH" >> /etc/profile
