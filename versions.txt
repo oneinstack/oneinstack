@@ -1,7 +1,7 @@
 # newest software version
 # Web
 nginx_ver=1.24.0
-tengine_ver=2.4.0
+tengine_ver=2.4.1
 openresty_ver=1.21.4.1
 openssl11_ver=1.1.1u
 openssl_ver=1.0.2u
@@ -48,8 +48,8 @@ php72_ver=7.2.34
 php73_ver=7.3.33
 php74_ver=7.4.33
 php80_ver=8.0.29
-php81_ver=8.1.20
-php82_ver=8.2.7
+php81_ver=8.1.21
+php82_ver=8.2.8
 
 # Nodejs
 nodejs_ver=18.14.2
@@ -88,7 +88,7 @@ xdebug_oldver=2.9.8
 pureftpd_ver=1.0.51
 
 # Redis
-redis_ver=7.0.11
+redis_ver=7.0.12
 redis_oldver=5.0.14
 pecl_redis_ver=5.3.7
 pecl_redis_oldver=4.3.0
