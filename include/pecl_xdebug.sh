@@ -29,7 +29,7 @@ Install_pecl_xdebug() {
       make -j ${THREAD} && make install
       popd > /dev/null
       if [ -f "${phpExtensionDir}/xdebug.so" ]; then
-        src_url=http://mirrors.linuxeye.com/oneinstack/src/webgrind-master.zip && Download_src
+        src_url=${mirror_link}/oneinstack/src/webgrind-master.zip && Download_src
         unzip -q webgrind-master.zip
         /bin/mv webgrind-master ${wwwroot_dir}/default/webgrind
         [ ! -e /tmp/xdebug ] && { mkdir /tmp/xdebug; chown ${run_user}:${run_group} /tmp/xdebug; }

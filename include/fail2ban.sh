@@ -10,11 +10,14 @@
 
 Install_fail2ban() {
   pushd ${oneinstack_dir}/src > /dev/null
-  src_url=http://mirrors.linuxeye.com/oneinstack/src/fail2ban-${fail2ban_ver}.tar.gz && Download_src
+  src_url=${mirror_link}/oneinstack/src/fail2ban-${fail2ban_ver}.tar.gz && Download_src
   tar xzf fail2ban-${fail2ban_ver}.tar.gz
   pushd fail2ban-${fail2ban_ver} > /dev/null
-  sed -i 's@for i in xrange(50)@for i in range(50)@' fail2ban/__init__.py
-  ${python_install_dir}/bin/python setup.py install
+  if command -v python3 > /dev/null 2>&1; then
+    python3 setup.py install
+  else
+    python setup.py install
+  fi
   /bin/cp build/fail2ban.service /lib/systemd/system/
   systemctl enable fail2ban
   [ -z "`grep ^Port /etc/ssh/sshd_config`" ] && now_ssh_port=22 || now_ssh_port=`grep ^Port /etc/ssh/sshd_config | awk '{print $2}' | head -1`
@@ -70,14 +73,14 @@ EOF
     missingok
     notifempty
     postrotate
-      ${python_install_dir}/bin/fail2ban-client flushlogs >/dev/null || true
+      /usr/local/bin/fail2ban-client flushlogs >/dev/null || true
     endscript
 }
 EOF
   kill -9 `ps -ef | grep fail2ban | grep -v grep | awk '{print $2}'` > /dev/null 2>&1
   systemctl start fail2ban
   popd > /dev/null
-  if [ -e "${python_install_dir}/bin/fail2ban-server" ]; then
+  if [ -e "/usr/local/bin/fail2ban-server" ]; then
     echo; echo "${CSUCCESS}fail2ban installed successfully! ${CEND}"
   else
     echo; echo "${CFAILURE}fail2ban install failed, Please try again! ${CEND}"
@@ -86,8 +89,8 @@ EOF
 }
 
 Uninstall_fail2ban() {
-  service fail2ban stop
-  ${python_install_dir}/bin/pip uninstall -y fail2ban > /dev/null 2>&1
-  rm -rf /etc/init.d/fail2ban /etc/fail2ban /etc/logrotate.d/fail2ban /var/log/fail2ban.* /var/run/fail2ban
+  systemctl stop fail2ban
+  systemctl disable fail2ban
+  rm -rf /usr/local/bin/fail2ban* /etc/init.d/fail2ban /etc/fail2ban /etc/logrotate.d/fail2ban /var/log/fail2ban.* /var/run/fail2ban /lib/systemd/system/fail2ban.service
   echo; echo "${CMSG}fail2ban uninstall completed${CEND}";
 }

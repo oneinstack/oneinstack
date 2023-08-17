@@ -94,16 +94,16 @@ Reset_force_dbrootpwd() {
     sleep 1
   done
   echo "${CMSG}skip grant tables...${CEND}"
-  ${db_install_dir}/bin/mysqld_safe --skip-grant-tables > /dev/null 2>&1 &
-  sleep 5
+  sed -i '/\[mysqld\]/a\skip-grant-tables' /etc/my.cnf
+  service mysqld start > /dev/null 2>&1
+  sed -i '/^skip-grant-tables/d' /etc/my.cnf
   while [ -z "`ps -ef | grep 'mysqld ' | grep -v grep | awk '{print $2}'`" ]; do
     sleep 1
   done
-  if echo "${DB_Ver}" | grep -Eqi '^8.0.|^5.7.|^10.2.'; then
+  if echo "${DB_Ver}" | grep -Eqi '^8.0.|^5.7.|^10.[4-5].|^10.11.'; then
     ${db_install_dir}/bin/mysql -uroot -hlocalhost << EOF
+update mysql.user set authentication_string=password("${New_dbrootpwd}") where user="root";
 flush privileges;
-alter user 'root'@'localhost' identified by "${New_dbrootpwd}";
-alter user 'root'@'127.0.0.1' identified by "${New_dbrootpwd}";
 EOF
   else
     ${db_install_dir}/bin/mysql -uroot -hlocalhost << EOF
