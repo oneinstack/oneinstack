@@ -10,13 +10,13 @@
 
 Upgrade_OneinStack() {
   pushd ${oneinstack_dir} > /dev/null
-  Latest_OneinStack_MD5=$(curl --connect-timeout 3 -m 5 -s http://mirrors.linuxeye.com/md5sum.txt | grep oneinstack.tar.gz | awk '{print $1}')
+  Latest_OneinStack_MD5=$(curl --connect-timeout 3 -m 5 -s ${mirror_link}/md5sum.txt | grep oneinstack.tar.gz | awk '{print $1}')
   [ ! -e README.md ] && ois_flag=n
   if [ "${oneinstack_md5}" != "${Latest_OneinStack_MD5}" ]; then
     /bin/mv options.conf /tmp
     sed -i '/oneinstack_dir=/d' /tmp/options.conf
     [ -e /tmp/oneinstack.tar.gz ] && rm -rf /tmp/oneinstack.tar.gz
-    wget --no-check-certificate -qc http://mirrors.linuxeye.com/oneinstack.tar.gz -O /tmp/oneinstack.tar.gz
+    wget --no-check-certificate -qc ${mirror_link}/oneinstack.tar.gz -O /tmp/oneinstack.tar.gz
     if [ -n "`echo ${oneinstack_dir} | grep lnmp`" ]; then
       tar xzf /tmp/oneinstack.tar.gz -C /tmp
       /bin/cp -R /tmp/oneinstack/* ${oneinstack_dir}/
@@ -37,7 +37,7 @@ Upgrade_OneinStack() {
     sed -i "s@^oneinstack_md5=.*@oneinstack_md5=${Latest_OneinStack_MD5}@" ./options.conf
     if [ -e "change_jdk_version.sh" ]; then
       rm -f change_jdk_version.sh
-      wget -qc http://mirrors.linuxeye.com/scripts/change_jdk_version.sh
+      wget -qc ${mirror_link}/scripts/change_jdk_version.sh
       chmod +x change_jdk_version.sh
     fi
     if [ -e "${php_install_dir}/sbin/php-fpm" ]; then

@@ -15,13 +15,13 @@ DEMO() {
   fi
 
   if [ -e "${php_install_dir}/bin/php" ]; then
-    src_url=http://mirrors.linuxeye.com/oneinstack/src/xprober.php && Download_src
+    src_url=${mirror_link}/oneinstack/src/xprober.php && Download_src
     /bin/cp xprober.php ${wwwroot_dir}/default
 
     echo "<?php phpinfo() ?>" > ${wwwroot_dir}/default/phpinfo.php
     case "${phpcache_option}" in
       1)
-        src_url=http://mirrors.linuxeye.com/oneinstack/src/ocp.php && Download_src
+        src_url=${mirror_link}/oneinstack/src/ocp.php && Download_src
         /bin/cp ocp.php ${wwwroot_dir}/default
         ;;
       2)

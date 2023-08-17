@@ -12,7 +12,9 @@ Upgrade_PHP() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "${php_install_dir}" ] && echo "${CWARNING}PHP is not installed on your system! ${CEND}" && exit 1
   OLD_php_ver=`${php_install_dir}/bin/php-config --version`
-  Latest_php_ver=`curl --connect-timeout 2 -m 3 -s https://www.php.net/releases/active.php | python -mjson.tool | awk '/version/{print $2}' | sed 's/"//g' | grep "${OLD_php_ver%.*}"`
+  pythonCtl=python
+  command -v python3 > /dev/null 2>&1 && pythonCtl=python3
+  Latest_php_ver=`curl --connect-timeout 2 -m 3 -s https://www.php.net/releases/active.php | ${pythonCtl} -mjson.tool | awk '/version/{print $2}' | sed 's/"//g' | grep "${OLD_php_ver%.*}"`
   Latest_php_ver=${Latest_php_ver:-5.5.38}
   echo
   echo "Current PHP Version: ${CMSG}$OLD_php_ver${CEND}"
@@ -40,7 +42,7 @@ Upgrade_PHP() {
       char=`get_char`
     fi
     tar xzf php-${NEW_php_ver}.tar.gz
-    src_url=http://mirrors.linuxeye.com/oneinstack/src/fpm-race-condition.patch && Download_src
+    src_url=${mirror_link}/oneinstack/src/fpm-race-condition.patch && Download_src
     patch -d php-${NEW_php_ver} -p0 < fpm-race-condition.patch
     pushd php-${NEW_php_ver}
     if [[ "${OLD_php_ver%.*}" =~ ^7.[1-4]$|^8.[0-1]$ ]] && [ -e ext/openssl/openssl.c ] && ! grep -Eqi '^#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c; then

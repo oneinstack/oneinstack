@@ -48,13 +48,12 @@ Show_Help() {
   --redis                       Uninstall Redis-server
   --memcached                   Uninstall Memcached-server
   --phpmyadmin                  Uninstall phpMyAdmin
-  --python                      Uninstall Python (PATH: ${python_install_dir})
   --node                        Uninstall Nodejs (PATH: ${nodejs_install_dir})
   "
 }
 
 ARG_NUM=$#
-TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,mphp_ver:,allphp,phpcache,php_extensions:,pureftpd,redis,memcached,phpmyadmin,python,node -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,mphp_ver:,allphp,phpcache,php_extensions:,pureftpd,redis,memcached,phpmyadmin,node -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -80,7 +79,6 @@ while :; do
       redis_flag=y
       memcached_flag=y
       phpmyadmin_flag=y
-      python_flag=y
       shift 1
       ;;
     --web)
@@ -143,9 +141,6 @@ while :; do
       ;;
     --phpmyadmin)
       phpmyadmin_flag=y; shift 1
-      ;;
-    --python)
-      python_flag=y; shift 1
       ;;
     --)
       shift
@@ -563,10 +558,6 @@ Uninstall_openssl() {
   [ -d "${openssl_install_dir}" ] && rm -rf ${openssl_install_dir}
 }
 
-Print_Python() {
-  [ -d "${python_install_dir}" ] && echo ${python_install_dir}
-}
-
 Print_Nodejs() {
   [ -e "${nodejs_install_dir}" ] && echo ${nodejs_install_dir}
   [ -e "/etc/profile.d/nodejs.sh" ] && echo /etc/profile.d/nodejs.sh
@@ -588,14 +579,13 @@ What Are You Doing?
 \t${CMSG} 9${CEND}. Uninstall Redis
 \t${CMSG}10${CEND}. Uninstall Memcached
 \t${CMSG}11${CEND}. Uninstall phpMyAdmin
-\t${CMSG}12${CEND}. Uninstall Python (PATH: ${python_install_dir})
-\t${CMSG}13${CEND}. Uninstall Nodejs (PATH: ${nodejs_install_dir})
+\t${CMSG}12${CEND}. Uninstall Nodejs (PATH: ${nodejs_install_dir})
 \t${CMSG} q${CEND}. Exit
 "
   echo
   read -e -p "Please input the correct option: " Number
   if [[ ! "${Number}" =~ ^[0-9,q]$|^1[0-3]$ ]]; then
-    echo "${CWARNING}input error! Please only input 0~13 and q${CEND}"
+    echo "${CWARNING}input error! Please only input 0~12 and q${CEND}"
   else
     case "$Number" in
     0)
@@ -610,7 +600,6 @@ What Are You Doing?
       Print_Memcached_server
       Print_openssl
       Print_phpMyAdmin
-      Print_Python
       Print_Nodejs
       Uninstall_status
       if [ "${uninstall_flag}" == 'y' ]; then
@@ -624,7 +613,6 @@ What Are You Doing?
         Uninstall_Memcached_server
         Uninstall_openssl
         Uninstall_phpMyAdmin
-        . include/python.sh; Uninstall_Python
         . include/nodejs.sh; Uninstall_Nodejs
       else
         exit
@@ -689,11 +677,6 @@ What Are You Doing?
       [ "${uninstall_flag}" == 'y' ] && Uninstall_phpMyAdmin || exit
       ;;
     12)
-      Print_Python
-      Uninstall_status
-      [ "${uninstall_flag}" == 'y' ] && { . include/python.sh; Uninstall_Python; } || exit
-      ;;
-    13)
       Print_Nodejs
       Uninstall_status
       [ "${uninstall_flag}" == 'y' ] && { . include/nodejs.sh; Uninstall_Nodejs; } || exit
@@ -723,7 +706,6 @@ else
   [ "${redis_flag}" == 'y' ] && Print_Redis_server
   [ "${memcached_flag}" == 'y' ] && Print_Memcached_server
   [ "${phpmyadmin_flag}" == 'y' ] && Print_phpMyAdmin
-  [ "${python_flag}" == 'y' ] && Print_Python
   [ "${nodejs_flag}" == 'y' ] && Print_Nodejs
   [ "${all_flag}" == 'y' ] && Print_openssl
   Uninstall_status
@@ -746,7 +728,6 @@ else
     [ "${redis_flag}" == 'y' ] && Uninstall_Redis_server
     [ "${memcached_flag}" == 'y' ] && Uninstall_Memcached_server
     [ "${phpmyadmin_flag}" == 'y' ] && Uninstall_phpMyAdmin
-    [ "${python_flag}" == 'y' ] && { . include/python.sh; Uninstall_Python; }
     [ "${nodejs_flag}" == 'y' ] && { . include/nodejs.sh; Uninstall_Nodejs; }
     [ "${all_flag}" == 'y' ] && Uninstall_openssl
   fi

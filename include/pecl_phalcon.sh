@@ -24,7 +24,7 @@ Install_pecl_phalcon() {
       make -j ${THREAD} && make install
       popd > /dev/null
     elif [[ "${PHP_main_ver}" =~ ^5.[5-6]$|^7.[0-1]$ ]]; then
-      src_url=http://mirrors.linuxeye.com/oneinstack/src/cphalcon-${phalcon_oldver}.tar.gz && Download_src
+      src_url=${mirror_link}/oneinstack/src/cphalcon-${phalcon_oldver}.tar.gz && Download_src
       tar xzf cphalcon-${phalcon_oldver}.tar.gz
       pushd cphalcon-${phalcon_oldver}/build > /dev/null
       echo "${CMSG}It may take a few minutes... ${CEND}"

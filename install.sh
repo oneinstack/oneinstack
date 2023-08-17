@@ -66,14 +66,13 @@ Show_Help() {
   --redis                     Install Redis
   --memcached                 Install Memcached
   --phpmyadmin                Install phpMyAdmin
-  --python                    Install Python (PATH: ${python_install_dir})
   --ssh_port [No.]            SSH port
   --firewall                  Enable firewall
   --reboot                    Restart the server after installation
   "
 }
 ARG_NUM=$#
-TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,phpmyadmin,python,ssh_port:,firewall,reboot -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,phpmyadmin,ssh_port:,firewall,reboot -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -190,9 +189,6 @@ while :; do
     --phpmyadmin)
       phpmyadmin_flag=y; shift 1
       [ -d "${wwwroot_dir}/default/phpMyAdmin" ] && { echo "${CWARNING}phpMyAdmin already installed! ${CEND}"; unset phpmyadmin_flag; }
-      ;;
-    --python)
-      python_flag=y; shift 1
       ;;
     --ssh_port)
       ssh_port=$2; shift 2
@@ -1125,12 +1121,6 @@ fi
 
 # get web_install_dir and db_install_dir
 . include/check_dir.sh
-
-# Python
-if [ "${python_flag}" == 'y' ]; then
-  . include/python.sh
-  Install_Python 2>&1 | tee -a ${oneinstack_dir}/install.log
-fi
 
 # Starting DB
 [ -d "/etc/mysql" ] && /bin/mv /etc/mysql{,_bk}

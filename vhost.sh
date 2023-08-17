@@ -390,7 +390,7 @@ What Are You Doing?
 
   if [ "${Domian_Mode}" == '3' -o "${dnsapi_flag}" == 'y' ] && [ ! -e ~/.acme.sh/acme.sh ]; then
     pushd ${oneinstack_dir}/src > /dev/null
-    [ ! -e acme.sh-master.tar.gz ] && wget -qc http://mirrors.linuxeye.com/oneinstack/src/acme.sh-master.tar.gz
+    [ ! -e acme.sh-master.tar.gz ] && wget -qc ${mirror_link}/oneinstack/src/acme.sh-master.tar.gz
     tar xzf acme.sh-master.tar.gz
     pushd acme.sh-master > /dev/null
     ./acme.sh --install > /dev/null 2>&1
