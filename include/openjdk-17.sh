@@ -31,6 +31,9 @@ EOF
       apt -y update
       apt-get --no-install-recommends -y install temurin-17-jdk
       JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-${SYS_ARCH}
+    else
+      apt-get --no-install-recommends -y install openjdk-17-jdk
+      JAVA_HOME=/usr/lib/jvm/java-17-openjdk-${SYS_ARCH}
     fi
   elif [ "${Family}" == 'ubuntu' ]; then
     if [[ "${Ubuntu_ver}" =~ ^16$ ]]; then
