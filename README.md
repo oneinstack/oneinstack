@@ -38,7 +38,7 @@ apt-get -y install wget screen
 #### Download Source and Install
 
 ```bash
-wget http://mirrors.linuxeye.com/oneinstack-full.tar.gz
+wget http://mirrors.oneinstack.com/oneinstack-full.tar.gz
 tar xzf oneinstack-full.tar.gz
 cd oneinstack
 ```
