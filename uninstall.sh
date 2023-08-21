@@ -38,7 +38,7 @@ Show_Help() {
   --postgresql                  Uninstall PostgreSQL
   --mongodb                     Uninstall MongoDB
   --php                         Uninstall PHP (PATH: ${php_install_dir})
-  --mphp_ver [53~81]            Uninstall another PHP version (PATH: ${php_install_dir}\${mphp_ver})
+  --mphp_ver [53~82]            Uninstall another PHP version (PATH: ${php_install_dir}\${mphp_ver})
   --allphp                      Uninstall all PHP
   --phpcache                    Uninstall PHP opcode cache
   --php_extensions [ext name]   Uninstall PHP extensions, include zendguardloader,ioncube,
@@ -48,12 +48,12 @@ Show_Help() {
   --redis                       Uninstall Redis-server
   --memcached                   Uninstall Memcached-server
   --phpmyadmin                  Uninstall phpMyAdmin
-  --node                        Uninstall Nodejs (PATH: ${nodejs_install_dir})
+  --nodejs                      Uninstall Nodejs (PATH: ${nodejs_install_dir})
   "
 }
 
 ARG_NUM=$#
-TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,mphp_ver:,allphp,phpcache,php_extensions:,pureftpd,redis,memcached,phpmyadmin,node -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,mphp_ver:,allphp,phpcache,php_extensions:,pureftpd,redis,memcached,phpmyadmin,nodejs -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -127,7 +127,7 @@ while :; do
       [ -n "`echo ${php_extensions} | grep -w swoole`" ] && pecl_swoole=1
       [ -n "`echo ${php_extensions} | grep -w xdebug`" ] && pecl_xdebug=1
       ;;
-    --node)
+    --nodejs)
       nodejs_flag=y; shift 1
       ;;
     --pureftpd)

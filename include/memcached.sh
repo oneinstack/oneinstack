@@ -60,7 +60,7 @@ Install_pecl_memcache() {
     if [ -f "${phpExtensionDir}/memcache.so" ]; then
       echo "extension=memcache.so" > ${php_install_dir}/etc/php.d/05-memcache.ini
       echo "${CSUCCESS}PHP memcache module installed successfully! ${CEND}"
-      rm -rf memcache-${pecl_memcache_ver} memcache-${pecl_memcache_oldver}
+      rm -rf memcache-${pecl_memcache_ver} memcache-${pecl_memcache_oldver} memcache-3.0.8
     else
       echo "${CFAILURE}PHP memcache module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     fi
