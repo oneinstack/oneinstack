@@ -115,7 +115,7 @@ jemalloc_ver=5.3.0
 
 # boost
 boost_ver=1.77.0
-boost_percona_ver=1.73.0
+boost_percona_ver=1.77.0
 boost_oldver=1.59.0
 
 # Others
