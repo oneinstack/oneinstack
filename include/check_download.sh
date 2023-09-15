@@ -642,10 +642,13 @@ checkDownload() {
   # pecl_redis
   if [ "${pecl_redis}" == '1' ]; then
     if [[ "${php_option}" =~ ^[1-4]$ ]]; then
-      echo "Download pecl_redis for php..."
-      src_url=https://pecl.php.net/get/redis-${pecl_redis_oldver}.tgz && Download_src
+      echo "Download pecl_redis for php 5.x..."
+      src_url=https://pecl.php.net/get/redis-4.3.0.tgz && Download_src
+    elif [[ "${php_option}" =~ ^[5-6]$ ]]; then
+      echo "Download pecl_redis for php 7.0~7.1..."
+      src_url=https://pecl.php.net/get/redis-5.3.7.tgz && Download_src
     else
-      echo "Download pecl_redis for php 7.x..."
+      echo "Download pecl_redis for php 7.2+..."
       src_url=https://pecl.php.net/get/redis-${pecl_redis_ver}.tgz && Download_src
     fi
   fi
