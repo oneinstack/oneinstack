@@ -18,6 +18,7 @@ baseurl=https://mirrors.tuna.tsinghua.edu.cn/Adoptium/rpm/rhel\$releasever-\$bas
 enabled=1
 gpgcheck=0
 EOF
+      yum -y install temurin-17-jdk
       JAVA_HOME=/usr/lib/jvm/temurin-17-jdk
     else
       yum -y install java-17-openjdk-devel
