@@ -18,7 +18,7 @@ Environment=PORT=11211
 Environment=USER=memcached
 Environment=MAXCONN=1024
 Environment=CACHESIZE=256
-Environment=OPTIONS="-l 127.0.0.1"
+Environment="OPTIONS=-l 127.0.0.1"
 ExecStart=/usr/bin/memcached -p ${PORT} -u ${USER} -m ${CACHESIZE} -c ${MAXCONN} $OPTIONS
 
 # Set up a new file system namespace and mounts private /tmp and /var/tmp
