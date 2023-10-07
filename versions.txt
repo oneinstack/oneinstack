@@ -48,14 +48,14 @@ php72_ver=7.2.34
 php73_ver=7.3.33
 php74_ver=7.4.33
 php80_ver=8.0.30
-php81_ver=8.1.23
-php82_ver=8.2.10
+php81_ver=8.1.24
+php82_ver=8.2.11
 
 # Nodejs
-nodejs_ver=18.17.1
+nodejs_ver=18.18.0
 
 libiconv_ver=1.16
-curl_ver=8.2.1
+curl_ver=8.3.0
 libmcrypt_ver=2.5.8
 mcrypt_ver=2.6.8
 mhash_ver=0.9.9.9
@@ -64,7 +64,7 @@ icu4c_ver=63_1
 libsodium_ver=1.0.18
 libzip_ver=1.2.0
 argon2_ver=20171227
-imagemagick_ver=7.1.1-16
+imagemagick_ver=7.1.1-19
 imagick_ver=3.7.0
 imagick_oldver=3.4.4
 graphicsmagick_ver=1.3.40
