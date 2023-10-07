@@ -217,7 +217,7 @@ if [ ${ARG_NUM} == 0 ]; then
   # Check md5sum
   while :; do echo
     read -e -p "Do you want to check md5sum? [y/n]: " md5sum_flag
-    if [[ ! ${firewall_flag} =~ ^[y,n]$ ]]; then
+    if [[ ! ${md5sum_flag} =~ ^[y,n]$ ]]; then
       echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
     else
       break
