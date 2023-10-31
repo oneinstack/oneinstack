@@ -62,5 +62,6 @@ Upgrade_OneinStack() {
   else
     echo "${CWARNING}Your OneinStack already has the latest version or does not need to be upgraded! ${CEND}"
   fi
+  [ ! -e "${oneinstack_dir}/options.conf" ] && [ -e "/tmp/options.conf" ] && /bin/cp /tmp/options.conf ${oneinstack_dir}/options.conf
   popd > /dev/null
 }
