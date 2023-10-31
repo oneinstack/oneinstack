@@ -213,7 +213,7 @@ while :; do
 done
 
 # Check md5sum
-if [ ${ARG_NUM} == 0 ]; then
+if [ ${ARG_NUM} == 0 ] && [ ! -e ~/.oneinstack ]; then
   # Check md5sum
   while :; do echo
     read -e -p "Do you want to check md5sum? [y/n]: " md5sum_flag
