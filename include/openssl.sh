@@ -18,6 +18,7 @@ if openssl version | grep -Eqi 'OpenSSL 1.0.2*'; then
   php80_with_openssl="--with-openssl"
   php81_with_openssl="--with-openssl"
   php82_with_openssl="--with-openssl"
+  php83_with_openssl="--with-openssl"
 
   php5_with_ssl="--with-ssl"
   php70_with_ssl="--with-ssl"
@@ -28,6 +29,7 @@ if openssl version | grep -Eqi 'OpenSSL 1.0.2*'; then
   php80_with_ssl="--with-ssl"
   php81_with_ssl="--with-ssl"
   php82_with_ssl="--with-ssl"
+  php83_with_ssl="--with-ssl"
 
   php5_with_curl="--with-curl"
   php70_with_curl="--with-curl"
@@ -38,6 +40,7 @@ if openssl version | grep -Eqi 'OpenSSL 1.0.2*'; then
   php80_with_curl="--with-curl"
   php81_with_curl="--with-curl"
   php82_with_curl="--with-curl"
+  php83_with_curl="--with-curl"
 elif openssl version | grep -Eqi 'OpenSSL 1.1.*'; then
   php5_with_openssl="--with-openssl=${openssl_install_dir}"
   php70_with_openssl="--with-openssl"
@@ -48,6 +51,7 @@ elif openssl version | grep -Eqi 'OpenSSL 1.1.*'; then
   php80_with_openssl="--with-openssl"
   php81_with_openssl="--with-openssl"
   php82_with_openssl="--with-openssl"
+  php83_with_openssl="--with-openssl"
 
   php5_with_ssl="--with-ssl=${openssl_install_dir}"
   php70_with_ssl="--with-ssl"
@@ -58,6 +62,7 @@ elif openssl version | grep -Eqi 'OpenSSL 1.1.*'; then
   php80_with_ssl="--with-ssl"
   php81_with_ssl="--with-ssl"
   php82_with_ssl="--with-ssl"
+  php83_with_ssl="--with-ssl"
 
   php5_with_curl="--with-curl=${curl_install_dir}"
   php70_with_curl="--with-curl"
@@ -68,6 +73,7 @@ elif openssl version | grep -Eqi 'OpenSSL 1.1.*'; then
   php80_with_curl="--with-curl"
   php81_with_curl="--with-curl"
   php82_with_curl="--with-curl"
+  php83_with_curl="--with-curl"
   [[ ${php_option} =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]] && with_old_openssl_flag=y
 elif openssl version | grep -Eqi 'OpenSSL 3.*'; then
   php5_with_openssl="--with-openssl=${openssl_install_dir}"
@@ -79,6 +85,7 @@ elif openssl version | grep -Eqi 'OpenSSL 3.*'; then
   php80_with_openssl="--with-openssl"
   php81_with_openssl="--with-openssl"
   php82_with_openssl="--with-openssl"
+  php83_with_openssl="--with-openssl"
 
   php5_with_ssl="--with-ssl=${openssl_install_dir}"
   php70_with_ssl="--with-ssl=${openssl_install_dir}"
@@ -89,6 +96,7 @@ elif openssl version | grep -Eqi 'OpenSSL 3.*'; then
   php80_with_ssl="--with-ssl"
   php81_with_ssl="--with-ssl"
   php82_with_ssl="--with-ssl"
+  php83_with_ssl="--with-ssl"
 
   php5_with_curl="--with-curl=${curl_install_dir}"
   php70_with_curl="--with-curl=${curl_install_dir}"
@@ -99,6 +107,7 @@ elif openssl version | grep -Eqi 'OpenSSL 3.*'; then
   php80_with_curl="--with-curl"
   php81_with_curl="--with-curl"
   php82_with_curl="--with-curl"
+  php83_with_curl="--with-curl"
   [[ ${php_option} =~ ^[1-5]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^70$ ]] && with_old_openssl_flag=y
 else
   php5_with_openssl="--with-openssl=${openssl_install_dir}"
@@ -110,6 +119,7 @@ else
   php80_with_openssl="--with-openssl=${openssl_install_dir} --with-openssl-dir=${openssl_install_dir}"
   php81_with_openssl="--with-openssl=${openssl_install_dir} --with-openssl-dir=${openssl_install_dir}"
   php82_with_openssl="--with-openssl=${openssl_install_dir} --with-openssl-dir=${openssl_install_dir}"
+  php83_with_openssl="--with-openssl=${openssl_install_dir} --with-openssl-dir=${openssl_install_dir}"
 
   php5_with_ssl="--with-ssl=${openssl_install_dir}"
   php70_with_ssl="--with-ssl=${openssl_install_dir}"
@@ -120,6 +130,7 @@ else
   php80_with_ssl="--with-ssl=${openssl_install_dir}"
   php81_with_ssl="--with-ssl=${openssl_install_dir}"
   php82_with_ssl="--with-ssl=${openssl_install_dir}"
+  php83_with_ssl="--with-ssl=${openssl_install_dir}"
 
   php5_with_curl="--with-curl=${curl_install_dir}"
   php70_with_curl="--with-curl=${curl_install_dir}"
@@ -130,6 +141,7 @@ else
   php80_with_curl="--with-curl=${curl_install_dir}"
   php81_with_curl="--with-curl=${curl_install_dir}"
   php82_with_curl="--with-curl=${curl_install_dir}"
+  php83_with_curl="--with-curl=${curl_install_dir}"
   with_old_openssl_flag=y
 fi
 

@@ -49,8 +49,8 @@ Show_Help() {
   --apache                    Install Apache
   --apache_mode_option [1-2]  Apache2.4 mode, 1(default): php-fpm, 2: mod_php
   --apache_mpm_option [1-3]   Apache2.4 MPM, 1(default): event, 2: prefork, 3: worker
-  --php_option [1-12]         Install PHP version
-  --mphp_ver [53~82]          Install another PHP version (PATH: ${php_install_dir}\${mphp_ver})
+  --php_option [1-13]         Install PHP version
+  --mphp_ver [53~83]          Install another PHP version (PATH: ${php_install_dir}\${mphp_ver})
   --mphp_addons               Only install another PHP addons
   --phpcache_option [1-4]     Install PHP opcode cache, default: 1 opcache
   --php_extensions [ext name] Install PHP extensions, include zendguardloader,ioncube,
@@ -106,12 +106,12 @@ while :; do
       ;;
     --php_option)
       php_option=$2; shift 2
-      [[ ! ${php_option} =~ ^[1-9]$|^1[0-2]$ ]] && { echo "${CWARNING}php_option input error! Please only input number 1~12${CEND}"; exit 1; }
+      [[ ! ${php_option} =~ ^[1-9]$|^1[0-3]$ ]] && { echo "${CWARNING}php_option input error! Please only input number 1~13${CEND}"; exit 1; }
       [ -e "${php_install_dir}/bin/phpize" ] && { echo "${CWARNING}PHP already installed! ${CEND}"; unset php_option; }
       ;;
     --mphp_ver)
       mphp_ver=$2; mphp_flag=y; shift 2
-      [[ ! "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-2]$ ]] && { echo "${CWARNING}mphp_ver input error! Please only input number 53~82${CEND}"; exit 1; }
+      [[ ! "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-3]$ ]] && { echo "${CWARNING}mphp_ver input error! Please only input number 53~83${CEND}"; exit 1; }
       ;;
     --mphp_addons)
       mphp_addons_flag=y; shift 1
@@ -506,10 +506,11 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG}10${CEND}. Install php-8.0"
           echo -e "\t${CMSG}11${CEND}. Install php-8.1"
           echo -e "\t${CMSG}12${CEND}. Install php-8.2"
+          echo -e "\t${CMSG}13${CEND}. Install php-8.3"
           read -e -p "Please input a number:(Default 7 press Enter) " php_option
           php_option=${php_option:-7}
-          if [[ ! ${php_option} =~ ^[1-9]$|^1[0-2]$ ]]; then
-            echo "${CWARNING}input error! Please only input number 1~12${CEND}"
+          if [[ ! ${php_option} =~ ^[1-9]$|^1[0-3]$ ]]; then
+            echo "${CWARNING}input error! Please only input number 1~13${CEND}"
           else
             break
           fi
@@ -526,7 +527,7 @@ if [ ${ARG_NUM} == 0 ]; then
   fi
 
   # PHP opcode cache and extensions
-  if [[ ${php_option} =~ ^[1-9]$|^1[0-2]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
+  if [[ ${php_option} =~ ^[1-9]$|^1[0-3]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
     while :; do echo
       read -e -p "Do you want to install opcode cache of the PHP? [y/n]: " phpcache_flag
       if [[ ! ${phpcache_flag} =~ ^[y,n]$ ]]; then
@@ -595,7 +596,7 @@ if [ ${ARG_NUM} == 0 ]; then
               fi
             done
           fi
-          if [[ ${php_option} =~ ^[5-9]$|^1[0-2]$ ]] || [[ "${PHP_main_ver}" =~ ^7.[0-4]$|^8.[0-2]$ ]]; then
+          if [[ ${php_option} =~ ^[5-9]$|^1[0-3]$ ]] || [[ "${PHP_main_ver}" =~ ^7.[0-4]$|^8.[0-3]$ ]]; then
             while :; do
               echo 'Please select a opcode cache of the PHP:'
               echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
@@ -699,7 +700,7 @@ if [ ${ARG_NUM} == 0 ]; then
   done
 
   # check phpMyAdmin
-  if [[ ${php_option} =~ ^[1-9]$|^1[0-2]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
+  if [[ ${php_option} =~ ^[1-9]$|^1[0-3]$ ]] || [ -e "${php_install_dir}/bin/phpize" ]; then
     while :; do echo
       read -e -p "Do you want to install phpMyAdmin? [y/n]: " phpmyadmin_flag
       if [[ ! ${phpmyadmin_flag} =~ ^[y,n]$ ]]; then
@@ -931,6 +932,10 @@ case "${php_option}" in
   12)
     . include/php-8.2.sh
     Install_PHP82 2>&1 | tee -a ${oneinstack_dir}/install.log
+    ;;
+  13)
+    . include/php-8.3.sh
+    Install_PHP83 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
 esac
 

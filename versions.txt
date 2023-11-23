@@ -6,9 +6,9 @@ openresty_ver=1.21.4.3
 openssl11_ver=1.1.1w
 openssl_ver=1.0.2u
 
-tomcat10_ver=10.1.15
-tomcat9_ver=9.0.82
-tomcat8_ver=8.5.95
+tomcat10_ver=10.1.16
+tomcat9_ver=9.0.83
+tomcat8_ver=8.5.96
 tomcat7_ver=7.0.109
 
 apache_ver=2.4.58
@@ -18,14 +18,14 @@ apr_util_ver=1.6.1
 nghttp2_ver=1.42.0
 
 # DB
-mysql80_ver=8.0.34
-mysql57_ver=5.7.43
+mysql80_ver=8.0.35
+mysql57_ver=5.7.44
 mysql56_ver=5.6.51
 mysql55_ver=5.5.62
 
-mariadb1011_ver=10.11.5
-mariadb105_ver=10.5.22
-mariadb104_ver=10.4.31
+mariadb1011_ver=10.11.6
+mariadb105_ver=10.5.23
+mariadb104_ver=10.4.32
 mariadb55_ver=5.5.68
 
 percona80_ver=8.0.33-25
@@ -48,11 +48,12 @@ php72_ver=7.2.34
 php73_ver=7.3.33
 php74_ver=7.4.33
 php80_ver=8.0.30
-php81_ver=8.1.25
-php82_ver=8.2.12
+php81_ver=8.1.26
+php82_ver=8.2.13
+php83_ver=8.3.0
 
 # Nodejs
-nodejs_ver=20.9.0
+nodejs_ver=20.10.0
 
 libiconv_ver=1.16
 curl_ver=8.4.0
@@ -75,7 +76,7 @@ apcu_ver=5.1.21
 apcu_oldver=4.0.11
 xcache_ver=3.2.0
 eaccelerator_ver=0.9.6.1
-phalcon_ver=4.1.2
+phalcon_ver=5.4.0
 phalcon_oldver=3.4.5
 yaf_ver=3.3.2
 yar_ver=2.2.0
@@ -88,8 +89,8 @@ xdebug_oldver=2.9.8
 pureftpd_ver=1.0.51
 
 # Redis
-redis_ver=7.2.2
-redis_oldver=6.2.13
+redis_ver=7.2.3
+redis_oldver=6.2.14
 pecl_redis_ver=6.0.2
 
 # Memcached
@@ -97,11 +98,11 @@ memcached_ver=1.6.22
 libmemcached_ver=1.0.18
 pecl_memcached_ver=3.2.0
 pecl_memcached_oldver=2.2.0
-pecl_memcache_ver=8.0
+pecl_memcache_ver=8.2
 pecl_memcache_oldver=4.0.5.2
 
 # MongoDB
-pecl_mongodb_ver=1.15.0
+pecl_mongodb_ver=1.16.2
 pecl_mongodb_oldver=1.9.2
 pecl_mongo_ver=1.6.16
 
