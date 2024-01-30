@@ -19,7 +19,7 @@ nghttp2_ver=1.42.0
 
 # DB
 mysql82_ver=8.2.0
-mysql80_ver=8.0.35
+mysql80_ver=8.0.36
 mysql57_ver=5.7.44
 mysql56_ver=5.6.51
 mysql55_ver=5.5.62
@@ -51,7 +51,7 @@ php74_ver=7.4.33
 php80_ver=8.0.30
 php81_ver=8.1.27
 php82_ver=8.2.14
-php83_ver=8.3.1
+php83_ver=8.3.2
 
 # Nodejs
 nodejs_ver=20.10.0
