@@ -33,7 +33,7 @@ Show_Help() {
   --help, -h                    Show this help message, More: https://oneinstack.com
   --quiet, -q                   quiet operation
   --all                         Uninstall All
-  --web                         Uninstall Nginx/Tengine/OpenResty/Apache/Tomcat
+  --web                         Uninstall Nginx/Tengine/OpenResty/Apache/Tomcat/Caddy
   --mysql                       Uninstall MySQL/MariaDB/Percona
   --postgresql                  Uninstall PostgreSQL
   --mongodb                     Uninstall MongoDB
@@ -177,6 +177,9 @@ Print_web() {
   [ -e "/lib/systemd/system/nginx.service" ] && echo /lib/systemd/system/nginx.service
   [ -e "/etc/logrotate.d/nginx" ] && echo /etc/logrotate.d/nginx
 
+  [ -d "${caddy_install_dir}" ] && echo ${caddy_install_dir}
+  [ -e "/lib/systemd/system/caddy.service" ] && echo /lib/systemd/system/caddy.service
+
   [ -d "${apache_install_dir}" ] && echo ${apache_install_dir}
   [ -e "/lib/systemd/system/httpd.service" ] && echo /lib/systemd/system/httpd.service
   [ -e "/etc/init.d/httpd" ] && echo /etc/init.d/httpd
@@ -193,7 +196,9 @@ Uninstall_Web() {
   [ -d "${nginx_install_dir}" ] && { killall nginx > /dev/null 2>&1; rm -rf ${nginx_install_dir} /etc/init.d/nginx /etc/logrotate.d/nginx; sed -i "s@${nginx_install_dir}/sbin:@@" /etc/profile; echo "${CMSG}Nginx uninstall completed! ${CEND}"; }
   [ -d "${tengine_install_dir}" ] && { killall nginx > /dev/null 2>&1; rm -rf ${tengine_install_dir} /etc/init.d/nginx /etc/logrotate.d/nginx; sed -i "s@${tengine_install_dir}/sbin:@@" /etc/profile; echo "${CMSG}Tengine uninstall completed! ${CEND}"; }
   [ -d "${openresty_install_dir}" ] && { killall nginx > /dev/null 2>&1; rm -rf ${openresty_install_dir} /etc/init.d/nginx /etc/logrotate.d/nginx; sed -i "s@${openresty_install_dir}/nginx/sbin:@@" /etc/profile; echo "${CMSG}OpenResty uninstall completed! ${CEND}"; }
+  [ -d "${caddy_install_dir}" ] && { killall caddy > /dev/null 2>&1; rm -rf ${caddy_install_dir} /etc/init.d/caddy /etc/logrotate.d/caddy; sed -i "s@${caddy_install_dir}/bin:@@" /etc/profile; echo "${CMSG}Caddy uninstall completed! ${CEND}"; }
   [ -e "/lib/systemd/system/nginx.service" ] && { systemctl disable nginx > /dev/null 2>&1; rm -f /lib/systemd/system/nginx.service; }
+  [ -e "/lib/systemd/system/caddy.service" ] && { systemctl disable caddy > /dev/null 2>&1; rm -f /lib/systemd/system/caddy.service; }
   [ -d "${apache_install_dir}" ] && { service httpd stop > /dev/null 2>&1; rm -rf ${apache_install_dir} /etc/init.d/httpd /etc/logrotate.d/apache; sed -i "s@${apache_install_dir}/bin:@@" /etc/profile; echo "${CMSG}Apache uninstall completed! ${CEND}"; }
   [ -e "/lib/systemd/system/httpd.service" ] && { systemctl disable httpd > /dev/null 2>&1; rm -f /lib/systemd/system/httpd.service; }
   [ -d "${tomcat_install_dir}" ] && { killall java > /dev/null 2>&1; rm -rf ${tomcat_install_dir} /etc/init.d/tomcat /etc/logrotate.d/tomcat; echo "${CMSG}Tomcat uninstall completed! ${CEND}"; }
@@ -568,7 +573,7 @@ while :; do
   printf "
 What Are You Doing?
 \t${CMSG} 0${CEND}. Uninstall All
-\t${CMSG} 1${CEND}. Uninstall Nginx/Tengine/OpenResty/Apache/Tomcat
+\t${CMSG} 1${CEND}. Uninstall Nginx/Tengine/OpenResty/Apache/Tomcat/Caddy
 \t${CMSG} 2${CEND}. Uninstall MySQL/MariaDB/Percona
 \t${CMSG} 3${CEND}. Uninstall PostgreSQL
 \t${CMSG} 4${CEND}. Uninstall MongoDB
