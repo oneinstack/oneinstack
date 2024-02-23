@@ -58,6 +58,18 @@ checkDownload() {
     src_url=https://downloads.sourceforge.net/project/pcre/pcre/${pcre_ver}/pcre-${pcre_ver}.tar.gz && Download_src
   fi
 
+  # if nginx_option=4 download caddy
+  if [ "${nginx_option}" == '4' ]; then
+    echo "Download caddy ${caddy_ver}"
+    src_url=${mirror_link}/caddy/v${caddy_ver}/caddy-${caddy_ver}.tar.gz  && Download_src
+  fi
+
+  # caddy
+  if [ "${caddy_flag}" == 'y' ]; then
+    echo "Download caddy ${caddy_ver}"
+    src_url=${mirror_link}/caddy/v${caddy_ver}/caddy-${caddy_ver}.tar.gz  && Download_src
+  fi
+
   # apache
   if [ "${apache_flag}" == 'y' ]; then
     echo "Download apache 2.4..."
@@ -481,7 +493,7 @@ checkDownload() {
   fi
 
   # PHP
-  if [[ "${php_option}" =~ ^[1-9]$|^1[0-3]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-3]$ ]]; then
+  if [[ "${php_option}" =~ ^[1-9]$|^1[0-2]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-2]$ ]]; then
     echo "PHP common..."
     src_url=${mirror_link}/oneinstack/src/libiconv-${libiconv_ver}.tar.gz && Download_src
     src_url=https://curl.haxx.se/download/curl-${curl_ver}.tar.gz && Download_src
@@ -533,11 +545,6 @@ checkDownload() {
     src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
   elif [ "${php_option}" == '12' ] || [ "${mphp_ver}" == '82' ]; then
     src_url=https://secure.php.net/distributions/php-${php82_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '13' ] || [ "${mphp_ver}" == '83' ]; then
-    src_url=https://secure.php.net/distributions/php-${php83_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
@@ -647,13 +654,10 @@ checkDownload() {
   # pecl_redis
   if [ "${pecl_redis}" == '1' ]; then
     if [[ "${php_option}" =~ ^[1-4]$ ]]; then
-      echo "Download pecl_redis for php 5.x..."
-      src_url=https://pecl.php.net/get/redis-4.3.0.tgz && Download_src
-    elif [[ "${php_option}" =~ ^[5-6]$ ]]; then
-      echo "Download pecl_redis for php 7.0~7.1..."
-      src_url=https://pecl.php.net/get/redis-5.3.7.tgz && Download_src
+      echo "Download pecl_redis for php..."
+      src_url=https://pecl.php.net/get/redis-${pecl_redis_oldver}.tgz && Download_src
     else
-      echo "Download pecl_redis for php 7.2+..."
+      echo "Download pecl_redis for php 7.x..."
       src_url=https://pecl.php.net/get/redis-${pecl_redis_ver}.tgz && Download_src
     fi
   fi
