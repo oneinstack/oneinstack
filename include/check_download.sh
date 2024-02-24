@@ -18,7 +18,7 @@ checkDownload() {
   # General system utils
   if [ "${with_old_openssl_flag}" == 'y' ]; then
     echo "Download openSSL..."
-    src_url=https://www.openssl.org/source/old/1.0.2/openssl-${openssl_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/openssl-${openssl_ver}.tar.gz && Download_src
     echo "Download cacert.pem..."
     src_url=https://curl.se/ca/cacert.pem && Download_src
   fi
@@ -26,7 +26,7 @@ checkDownload() {
   # openssl1.1
   if [[ ${nginx_option} =~ ^[1-3]$ ]]; then
       echo "Download openSSL1.1..."
-      src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
+      src_url=${mirror_link}/oneinstack/src/openssl-${openssl11_ver}.tar.gz && Download_src
   fi
 
   # jemalloc
@@ -35,11 +35,17 @@ checkDownload() {
     src_url=${mirror_link}/oneinstack/src/jemalloc-${jemalloc_ver}.tar.bz2 && Download_src
   fi
 
+  # pcre
+  if [[ "${nginx_option}" =~ ^[1-3]$ ]] || [ "${apache_flag}" == 'y' ]; then
+    echo "Download pcre..."
+    src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
+  fi
+
   # nginx/tengine/openresty
   case "${nginx_option}" in
     1)
       echo "Download nginx..."
-      src_url=http://nginx.org/download/nginx-${nginx_ver}.tar.gz && Download_src
+      src_url=${mirror_link}/oneinstack/src/nginx-${nginx_ver}.tar.gz && Download_src
       ;;
     2)
       echo "Download tengine..."
@@ -48,15 +54,9 @@ checkDownload() {
       ;;
     3)
       echo "Download openresty..."
-      src_url=https://openresty.org/download/openresty-${openresty_ver}.tar.gz && Download_src
+      src_url=${mirror_link}/oneinstack/src/openresty-${openresty_ver}.tar.gz && Download_src
       ;;
   esac
-
-  # pcre
-  if [[ "${nginx_option}" =~ ^[1-3]$ ]] || [ "${apache_flag}" == 'y' ]; then
-    echo "Download pcre..."
-    src_url=https://downloads.sourceforge.net/project/pcre/pcre/${pcre_ver}/pcre-${pcre_ver}.tar.gz && Download_src
-  fi
 
   # if nginx_option=4 download caddy
   if [ "${nginx_option}" == '4' ]; then
@@ -493,7 +493,7 @@ checkDownload() {
   fi
 
   # PHP
-  if [[ "${php_option}" =~ ^[1-9]$|^1[0-2]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-2]$ ]]; then
+  if [[ "${php_option}" =~ ^[1-9]$|^1[0-3]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-3]$ ]]; then
     echo "PHP common..."
     src_url=${mirror_link}/oneinstack/src/libiconv-${libiconv_ver}.tar.gz && Download_src
     src_url=https://curl.haxx.se/download/curl-${curl_ver}.tar.gz && Download_src
@@ -545,6 +545,11 @@ checkDownload() {
     src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
   elif [ "${php_option}" == '12' ] || [ "${mphp_ver}" == '82' ]; then
     src_url=https://secure.php.net/distributions/php-${php82_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
+  elif [ "${php_option}" == '13' ] || [ "${mphp_ver}" == '83' ]; then
+    src_url=https://secure.php.net/distributions/php-${php83_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
@@ -654,10 +659,13 @@ checkDownload() {
   # pecl_redis
   if [ "${pecl_redis}" == '1' ]; then
     if [[ "${php_option}" =~ ^[1-4]$ ]]; then
-      echo "Download pecl_redis for php..."
-      src_url=https://pecl.php.net/get/redis-${pecl_redis_oldver}.tgz && Download_src
+      echo "Download pecl_redis for php 5.x..."
+      src_url=https://pecl.php.net/get/redis-4.3.0.tgz && Download_src
+    elif [[ "${php_option}" =~ ^[5-6]$ ]]; then
+      echo "Download pecl_redis for php 7.0~7.1..."
+      src_url=https://pecl.php.net/get/redis-5.3.7.tgz && Download_src
     else
-      echo "Download pecl_redis for php 7.x..."
+      echo "Download pecl_redis for php 7.2+..."
       src_url=https://pecl.php.net/get/redis-${pecl_redis_ver}.tgz && Download_src
     fi
   fi
