@@ -26,6 +26,7 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/check_dir.sh
 . ./include/check_os.sh
 . ./include/get_char.sh
+. ./include/openssl.sh
 
 Show_Help() {
   echo
@@ -1287,6 +1288,7 @@ List_Vhost() {
 }
 
 if [ ${ARG_NUM} == 0 ]; then
+  Install_openSSL | tee -a ${oneinstack_dir}/install.log
   Add_Vhost
 else
   [ "${add_flag}" == 'y' -o "${proxy_flag}" == 'y' -o "${sslquiet_flag}" == 'y' ] && Add_Vhost
