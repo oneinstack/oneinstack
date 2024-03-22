@@ -65,6 +65,7 @@ mhash_ver=0.9.9.9
 freetype_ver=2.10.1
 icu4c_ver=63_1
 libsodium_ver=1.0.18
+libsodium_up_ver=1.0.19
 libzip_ver=1.2.0
 argon2_ver=20171227
 imagemagick_ver=7.1.1-23
