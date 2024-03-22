@@ -51,12 +51,12 @@ Install_PHP83() {
   fi
 
   if [ ! -e "/usr/local/lib/libsodium.la" ]; then
-    tar xzf libsodium-${libsodium_ver}.tar.gz
-    pushd libsodium-${libsodium_ver} > /dev/null
+    tar xzf libsodium-${libsodium_up_ver}.tar.gz
+    pushd libsodium-${libsodium_up_ver} > /dev/null
     ./configure --disable-dependency-tracking --enable-minimal
     make -j ${THREAD} && make install
     popd > /dev/null
-    rm -rf libsodium-${libsodium_ver}
+    rm -rf libsodium-${libsodium_up_ver}
   fi
 
   if [ ! -e "/usr/local/lib/libzip.la" ]; then
