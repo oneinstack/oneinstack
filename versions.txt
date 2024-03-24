@@ -25,7 +25,7 @@ mysql57_ver=5.7.44
 mysql56_ver=5.6.51
 mysql55_ver=5.5.62
 
-mariadb1011_ver=10.11.6
+mariadb1011_ver=10.11.7
 mariadb105_ver=10.5.23
 mariadb104_ver=10.4.32
 mariadb55_ver=5.5.68
