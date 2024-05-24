@@ -13,7 +13,7 @@ Install_OpenJDK8() {
     yum -y install java-1.8.0-openjdk-devel
     JAVA_HOME=/usr/lib/jvm/java-1.8.0-openjdk
   elif [ "${Family}" == 'debian' ]; then
-    if [[ "${Debian_ver}" =~ ^10$|^11$ ]]; then
+    if [[ "${Debian_ver}" =~ ^10$|^11$|^12$ ]]; then
       #wget -qO - https://packages.adoptium.net/artifactory/api/gpg/key/public | apt-key add -
       cat ${oneinstack_dir}/src/adoptium.key | sudo apt-key add -
       apt-add-repository --yes https://mirrors.tuna.tsinghua.edu.cn/Adoptium/deb
