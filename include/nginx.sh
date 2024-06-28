@@ -32,10 +32,10 @@ Install_Nginx() {
   make -j ${THREAD} && make install
   if [ -e "${nginx_install_dir}/conf/nginx.conf" ]; then
     popd > /dev/null
-    rm -rf pcre-${pcre_ver} openssl-${openssl11_ver} nginx-${nginx_ver}
+    rm -rf pcre-${pcre_ver}* openssl-${openssl11_ver}* nginx-${nginx_ver}* ${nginx_install_dir}*
     echo "${CSUCCESS}Nginx installed successfully! ${CEND}"
   else
-    rm -rf ${nginx_install_dir}
+    rm -rf pcre-${pcre_ver}* openssl-${openssl11_ver}* nginx-${nginx_ver}* ${nginx_install_dir}*
     echo "${CFAILURE}Nginx install failed, Please Contact the author! ${CEND}"
     kill -9 $$; exit 1;
   fi
