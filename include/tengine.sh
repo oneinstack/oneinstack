@@ -27,10 +27,10 @@ Install_Tengine() {
   make && make install
   if [ -e "${tengine_install_dir}/conf/nginx.conf" ]; then
     popd > /dev/null
-    rm -rf pcre-${pcre_ver} openssl-${openssl11_ver} tengine-${tengine_ver}
+    rm -rf pcre-${pcre_ver}* openssl-${openssl11_ver}* tengine-${tengine_ver}* rm -rf ${tengine_install_dir}*
     echo "${CSUCCESS}Tengine installed successfully! ${CEND}"
   else
-    rm -rf ${tengine_install_dir}
+    rm -rf pcre-${pcre_ver}* openssl-${openssl11_ver}* tengine-${tengine_ver}* rm -rf ${tengine_install_dir}*
     echo "${CFAILURE}Tengine install failed, Please Contact the author! ${CEND}"
     kill -9 $$; exit 1;
   fi

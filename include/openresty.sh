@@ -28,10 +28,10 @@ Install_OpenResty() {
   make -j ${THREAD} && make install
   if [ -e "${openresty_install_dir}/nginx/conf/nginx.conf" ]; then
     popd > /dev/null
-    rm -rf pcre-${pcre_ver} openssl-${openssl11_ver} openresty-${openresty_ver}
+    rm -rf pcre-${pcre_ver}* openssl-${openssl11_ver}* openresty-${openresty_ver}* ${openresty_install_dir}*
     echo "${CSUCCESS}OpenResty installed successfully! ${CEND}"
   else
-    rm -rf ${openresty_install_dir}
+    rm -rf pcre-${pcre_ver}* openssl-${openssl11_ver}* openresty-${openresty_ver}* ${openresty_install_dir}*
     echo "${CFAILURE}OpenResty install failed, Please Contact the author! ${CEND}"
     kill -9 $$; exit 1;
   fi
