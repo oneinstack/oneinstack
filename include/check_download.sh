@@ -120,11 +120,11 @@ checkDownload() {
       1)
         # MySQL 8.0
         if [ "${OUTIP_STATE}"x == "China"x ]; then
-          DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-8.0
+          DOWN_ADDR_MYSQL=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-8.0
           DOWN_ADDR_MYSQL_BK=https://mirrors.aliyun.com/mysql/MySQL-8.0
           DOWN_ADDR_MYSQL_BK2=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-8.0
         else
-          DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-8.0
+          DOWN_ADDR_MYSQL=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-8.0
           DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-8.0
         fi
 
@@ -283,11 +283,11 @@ checkDownload() {
         fi
 
         if [ "${OUTIP_STATE}"x == "China"x ]; then
-          DOWN_ADDR_MARIADB=https://mirrors.xtom.com.hk/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
+          DOWN_ADDR_MARIADB=${mirror_link}/oneinstack/src/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
           DOWN_ADDR_MARIADB_BK=http://mirrors.ustc.edu.cn/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
         else
-          DOWN_ADDR_MARIADB=https://mirrors.xtom.com.hk/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
-          DOWN_ADDR_MARIADB_BK=http://mirror.nodesdirect.com/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
+          DOWN_ADDR_MARIADB=${mirror_link}/oneinstack/src/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
+          DOWN_ADDR_MARIADB_BK=${mirror_link}/oneinstack/src/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
         fi
 
         if [ "${db_option}" == '8' ]; then
