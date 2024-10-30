@@ -120,12 +120,9 @@ checkDownload() {
       1)
         # MySQL 8.0
         if [ "${OUTIP_STATE}"x == "China"x ]; then
-          DOWN_ADDR_MYSQL=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-8.0
-          DOWN_ADDR_MYSQL_BK=https://mirrors.aliyun.com/mysql/MySQL-8.0
-          DOWN_ADDR_MYSQL_BK2=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-8.0
+          DOWN_ADDR_MYSQL=https://mirrors.oneinstack.com/oneinstack/src/
         else
-          DOWN_ADDR_MYSQL=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-8.0
-          DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-8.0
+          DOWN_ADDR_MYSQL=https://mirrors.oneinstack.com/oneinstack/src/
         fi
 
         if [ "${dbinstallmethod}" == '1' ]; then
