@@ -1,6 +1,6 @@
 # newest software version
 # Web
-nginx_ver=1.24.0
+nginx_ver=1.26.3
 caddy_ver=2.7.6
 tengine_ver=3.1.0
 openresty_ver=1.21.4.3
