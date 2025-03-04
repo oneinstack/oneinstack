@@ -1,3 +1,5 @@
+[English](README.md) | [中文](README.zh-CN.md)
+
 This script is written using the shell, in order to quickly deploy `LEMP`/`LAMP`/`LNMP`/`LNMPA`/`LTMP`(Linux, Nginx/Tengine/OpenResty, MySQL in a production environment/MariaDB/Percona, PHP, JAVA), applicable to RHEL 7, 8, 9(including CentOS,RedHat,AlmaLinux,Rocky), Debian 9, 10, 11, 12, Ubuntu 16, 18, 20, 22 and Fedora 27+ of 64.
 
 Script properties:
@@ -150,5 +152,5 @@ systemctl {start|stop|status|restart|reload} memcached
 ## Installation
 
 For feedback, questions, and to follow the progress of the project: <br />
-[Telegram Group](https://t.me/oneinstack)<br />
+[Telegram Group](https://t.me/oneinstackn)<br />
 [OneinStack](https://oneinstack.com)<br />
