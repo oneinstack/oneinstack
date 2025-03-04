@@ -138,8 +138,8 @@ while :; do
   --php_option)
     php_option=$2
     shift 2
-    [[ ! ${php_option} =~ ^[1-9]$|^1[0-3]$ ]] && {
-      echo "${CWARNING}php_option input error! Please only input number 1~12${CEND}"
+    [[ ! ${php_option} =~ ^[1-9]$|^1[0-4]$ ]] && {
+      echo "${CWARNING}php_option input error! Please only input number 1~14${CEND}"
       exit 1
     }
     [ -e "${php_install_dir}/bin/phpize" ] && {
@@ -403,7 +403,7 @@ if [ ${ARG_NUM} == 0 ]; then
               echo "${CWARNING}OpenResty already installed! ${CEND}"
               unset nginx_option
             }
-            [ "${nginx_option}" != '5' -a -e "${caddy_install_dir}/nginx/sbin/nginx" ] && {
+            [ "${nginx_option}" != '5' -a -e "${caddy_install_dir}/bin/caddy" ] && {
               echo "${CWARNING}Caddy already installed! ${CEND}"
               unset nginx_option
             }
@@ -648,6 +648,7 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG}11${CEND}. Install php-8.1"
           echo -e "\t${CMSG}12${CEND}. Install php-8.2"
           echo -e "\t${CMSG}13${CEND}. Install php-8.3"
+          echo -e "\t${CMSG}14${CEND}. Install php-8.4"
           read -e -p "Please input a number:(Default 7 press Enter) " php_option
           php_option=${php_option:-7}
           if [[ ! ${php_option} =~ ^[1-9]$|^1[0-3]$ ]]; then
@@ -1082,6 +1083,10 @@ case "${php_option}" in
   13)
     . include/php-8.3.sh
     Install_PHP83 2>&1 | tee -a ${oneinstack_dir}/install.log
+    ;;
+  14)
+    . include/php-8.4.sh
+    Install_PHP84 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
 esac
 
