@@ -106,7 +106,7 @@ installDepsUbuntu() {
   echo "${CMSG}Removing the conflicting packages...${CEND}"
   if [ "${apache_flag}" == 'y' ]; then
     killall apache2
-    pkgList="apache2 apache2-doc apache2-utils apache2.2-common apache2.2-bin apache2-mpm-prefork apache2-doc apache2-mpm-worker php5 php5-common php5-cgi php5-cli php5-mysql php5-curl php5-gd"
+    pkgList="apache2 apache2-doc apache2-utils apache2.2-common apache2.2-bin apache2-mpm-prefork apache2-doc apache2-mpm-worker php5 php5-common php5-cgi php5-cli php5-mysql php5-curl php5-gd libncurses5"
     for Package in ${pkgList};do
       apt-get -y purge ${Package}
     done
