@@ -1,6 +1,15 @@
 #!/bin/bash
 
 Install_PHP84() {
+  # Check CentOS version
+  if [ -f /etc/redhat-release ]; then
+    OS_VERSION=$(grep -oE '[0-9]+\.[0-9]+' /etc/redhat-release | cut -d'.' -f1)
+    if [ "${OS_VERSION}" -lt "8" ]; then
+      echo "${CFAILURE}Error: PHP 8.4 cannot be installed on CentOS ${OS_VERSION}. Minimum required version is CentOS 8.${CEND}"
+      kill -9 $$; exit 1;
+    fi
+  fi
+
   pushd ${oneinstack_dir}/src > /dev/null
   
   if [ ! -e "${php_install_dir}/bin/phpize" ]; then
@@ -9,9 +18,6 @@ Install_PHP84() {
     
     # 下载和校验
     src_url=https://www.php.net/distributions/php-${PHP_version}.tar.gz && Download_src
-    
-    # 安装依赖
-    Install_PHP_Dependent
     
     # 编译安装
     tar xzf php-${PHP_version}.tar.gz
