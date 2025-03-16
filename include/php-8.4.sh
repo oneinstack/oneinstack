@@ -25,7 +25,6 @@ Install_PHP84() {
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
     --with-fpm-user=${run_user} \
     --with-fpm-group=${run_user} \
-    --with-pear=/usr/share/php \
     --enable-mysqlnd \
     --with-mysqli=mysqlnd \
     --with-pdo-mysql=mysqlnd \
@@ -38,9 +37,7 @@ Install_PHP84() {
     --with-iconv \
     --with-gettext \
     --with-readline \
-    --with-mhash \
-    --with-ldap \
-    --with-ldap-sasl \
+    --with-ldapsasl \
     --with-sodium \
     --enable-bcmath \
     --enable-fpm \
