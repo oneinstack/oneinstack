@@ -53,6 +53,7 @@ php80_ver=8.0.30
 php81_ver=8.1.27
 php82_ver=8.2.14
 php83_ver=8.3.2
+php84_ver=8.4.4
 
 # Nodejs
 nodejs_ver=20.10.0
@@ -68,7 +69,7 @@ libsodium_ver=1.0.18
 libsodium_up_ver=1.0.19
 libzip_ver=1.2.0
 argon2_ver=20171227
-imagemagick_ver=7.1.1-23
+imagemagick_ver=7.1.1-45
 imagick_ver=3.7.0
 imagick_oldver=3.4.4
 graphicsmagick_ver=1.3.40
@@ -83,7 +84,7 @@ phalcon_ver=5.4.0
 phalcon_oldver=3.4.5
 yaf_ver=3.3.2
 yar_ver=2.2.0
-swoole_ver=5.0.3
+swoole_ver=6.0.1
 swoole_oldver=4.8.12
 xdebug_ver=3.1.2
 xdebug_oldver=2.9.8
@@ -94,7 +95,7 @@ pureftpd_ver=1.0.51
 # Redis
 redis_ver=7.2.3
 redis_oldver=6.2.14
-pecl_redis_ver=6.0.2
+pecl_redis_ver=6.1.0
 
 # Memcached
 memcached_ver=1.6.22
@@ -105,7 +106,7 @@ pecl_memcache_ver=8.2
 pecl_memcache_oldver=4.0.5.2
 
 # MongoDB
-pecl_mongodb_ver=1.16.2
+pecl_mongodb_ver=1.21.0
 pecl_mongodb_oldver=1.9.2
 pecl_mongo_ver=1.6.16
 

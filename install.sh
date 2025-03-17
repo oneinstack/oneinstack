@@ -651,8 +651,8 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG}14${CEND}. Install php-8.4"
           read -e -p "Please input a number:(Default 7 press Enter) " php_option
           php_option=${php_option:-7}
-          if [[ ! ${php_option} =~ ^[1-9]$|^1[0-3]$ ]]; then
-            echo "${CWARNING}input error! Please only input number 1~13${CEND}"
+          if [[ ! ${php_option} =~ ^[1-9]$|^1[0-4]$ ]]; then
+            echo "${CWARNING}input error! Please only input number 1~14${CEND}"
           else
             break
           fi
