@@ -74,7 +74,7 @@ Install_PHP84() {
       \cp php.ini-production ${php_install_dir}/etc/php.ini
       tee -a ${php_install_dir}/etc/php.ini <<EOF
 
-;Modify php.ini Config by User
+; Modify php.ini Config by User
 memory_limit = 512M
 output_buffering = On
 short_open_tag = On
@@ -102,7 +102,7 @@ EOF
       sed -i "s@^include=@;include=@" ${php_install_dir}/etc/php-fpm.conf
       tee -a ${php_install_dir}/etc/php-fpm.conf <<EOF
 
-;Modify php-fpm.conf Config by User
+; Modify php-fpm.conf Config by User
 pid = run/php-fpm.pid
 error_log = log/php-fpm.log
 log_level = warning
@@ -116,7 +116,7 @@ EOF
       # php-fpm.d/www.conf配置
       tee -a ${php_install_dir}/etc/php-fpm.d/www.conf <<EOF
 
-;Modify php-fpm.d/www.conf Config by User
+; Modify php-fpm.d/www.conf Config by User
 [${run_user}]
 listen = /dev/shm/php-cgi.sock
 listen.backlog = 65535
@@ -154,44 +154,46 @@ php_admin_value[opcache.max_accelerated_files] = 10000
 php_admin_value[opcache.validate_timestamps] = 1
 php_admin_value[opcache.revalidate_freq] = 60
 
+env[HOSTNAME] = $HOSTNAME
 env[PATH] = /usr/local/bin:/usr/bin:/bin
 env[TMP] = /tmp
 env[TMPDIR] = /tmp
 env[TEMP] = /tmp
 
+; Recommended, if you need to adjust, please modify the following parameters.
 EOF
 
       # php-fpm内存优化
       if [ $Mem -gt 8500 ]; then
-        tee -a ${php_install_dir}/etc/php-fpm.conf <<EOF
+        tee -a ${php_install_dir}/etc/php-fpm.d/www.conf <<EOF
 pm.max_children = 80
 pm.start_servers = 60
 pm.min_spare_servers = 50
 pm.max_spare_servers = 80
 EOF
       elif [ $Mem -gt 6500 ]; then
-        tee -a ${php_install_dir}/etc/php-fpm.conf <<EOF
+        tee -a ${php_install_dir}/etc/php-fpm.d/www.conf <<EOF
 pm.max_children = 70
 pm.start_servers = 50
 pm.min_spare_servers = 40
 pm.max_spare_servers = 70
 EOF
       elif [ $Mem -gt 4500 ]; then
-        tee -a ${php_install_dir}/etc/php-fpm.conf <<EOF
+        tee -a ${php_install_dir}/etc/php-fpm.d/www.conf <<EOF
 pm.max_children = 60
 pm.start_servers = 40
 pm.min_spare_servers = 30
 pm.max_spare_servers = 60
 EOF
       elif [ $Mem -gt 3000 ]; then
-        tee -a ${php_install_dir}/etc/php-fpm.conf <<EOF
+        tee -a ${php_install_dir}/etc/php-fpm.d/www.conf <<EOF
 pm.max_children = 50
 pm.start_servers = 30
 pm.min_spare_servers = 20
 pm.max_spare_servers = 50
 EOF
       else
-        tee -a ${php_install_dir}/etc/php-fpm.conf <<EOF
+        tee -a ${php_install_dir}/etc/php-fpm.d/www.conf <<EOF
 pm.max_children = $(($Mem/3/20))
 pm.start_servers = $(($Mem/3/30))
 pm.min_spare_servers = $(($Mem/3/40))
