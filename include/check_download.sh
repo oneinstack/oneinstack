@@ -676,7 +676,7 @@ checkDownload() {
   # pecl_memcached
   if [ "${pecl_memcached}" == '1' ]; then
     echo "Download libmemcached..."
-    src_url=https://launchpad.net/libmemcached/1.0/${libmemcached_ver}/+download/libmemcached-${libmemcached_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/libmemcached-${libmemcached_ver}.tar.gz && Download_src
     if [[ "${php_option}" =~ ^[1-4]$ ]]; then
       echo "Download pecl_memcached for php..."
       src_url=https://pecl.php.net/get/memcached-${pecl_memcached_oldver}.tgz && Download_src
