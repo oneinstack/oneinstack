@@ -11,10 +11,13 @@
 Install_Caddy() {
 
   pushd ${oneinstack_dir}/src > /dev/null
-  id -g ${run_group} >/dev/null 2>&1
-  [ $? -ne 0 ] && groupadd ${run_group}
-  id -u ${run_user} >/dev/null 2>&1
-  [ $? -ne 0 ] && useradd -g ${run_group} -M -s /sbin/nologin ${run_user}
+  id -g caddy >/dev/null 2>&1
+  [ $? -ne 0 ] && groupadd caddy
+  id -u caddy >/dev/null 2>&1
+  [ $? -ne 0 ] && useradd -g caddy -M -s /sbin/nologin caddy
+  
+  # 确保安装目录存在
+  [ ! -d "/usr/local/caddy" ] && mkdir -p /usr/local/caddy
 
   #unzip caddy_${caddy_ver}_linux_amd64.zip
   tar xzf caddy-${caddy_ver}.tar.gz
