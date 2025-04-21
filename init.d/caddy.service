@@ -5,8 +5,8 @@ Requires=network-online.target
 
 [Service]
 Type=notify
-User=caddy
-Group=caddy
+User=nobody
+Group=nobody
 ExecStart=/usr/local/caddy/bin/caddy run --environ --config /usr/local/caddy/conf/Caddyfile
 ExecReload=/usr/local/caddy/bin/caddy reload --config /usr/local/caddy/conf/Caddyfile --force
 TimeoutStopSec=5s
