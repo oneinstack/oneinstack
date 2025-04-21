@@ -16,7 +16,7 @@ Install_Caddy() {
   id -u caddy >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -g caddy -M -s /sbin/nologin caddy
   
-  # 确保安装目录存在
+  # 确保安装目录的存在
   [ ! -d "/usr/local/caddy" ] && mkdir -p /usr/local/caddy
 
   #unzip caddy_${caddy_ver}_linux_amd64.zip
