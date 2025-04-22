@@ -84,6 +84,11 @@ checkDownload() {
     1)
       echo "Download tomcat 10..."
       src_url=${mirror_link}/apache/tomcat/v${tomcat10_ver}/apache-tomcat-${tomcat10_ver}.tar.gz && Download_src
+      if [ ! -e "apache-tomcat-${tomcat10_ver}.tar.gz" ] || \
+         [ "$(md5sum apache-tomcat-${tomcat10_ver}.tar.gz | awk '{print $1}')" != "${tomcat10_md5}" ]; then
+        echo "Download failed or checksum mismatch"
+        exit 1
+      fi
       ;;
     2)
       echo "Download tomcat 9..."
