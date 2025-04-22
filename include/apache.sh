@@ -106,7 +106,6 @@ Install_Apache() {
   elif [ "${apache_mpm_option}" == '3' ]; then
     sed -ri 's@^(LoadModule.*mod_mpm_event.so)@#\1@' ${apache_install_dir}/conf/httpd.conf
     sed -i 's@^#LoadModule mpm_worker_module@LoadModule mpm_worker_module@' ${apache_install_dir}/conf/httpd.conf
-    # 验证worker模式是否生效
     if ! ${apache_install_dir}/bin/httpd -V | grep -q 'worker.c'; then
       echo "${CFAILURE}Failed to enable worker mode! ${CEND}"
       exit 1
