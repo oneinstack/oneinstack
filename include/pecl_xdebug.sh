@@ -14,7 +14,7 @@ Install_pecl_xdebug() {
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
-    if [[ "${PHP_main_ver}" =~ ^7.[0-4]$|^80$ ]]; then
+    if [[ "${PHP_main_ver}" =~ ^7.[0-4]$|^8.[0-2]$ ]]; then
       if [[ "${PHP_main_ver}" =~ ^7.[0-1]$ ]]; then
         src_url=https://pecl.php.net/get/xdebug-${xdebug_oldver}.tgz && Download_src
         tar xzf xdebug-${xdebug_oldver}.tgz
