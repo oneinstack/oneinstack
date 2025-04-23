@@ -127,3 +127,15 @@ EOF
   service tomcat start
   popd > /dev/null
 }
+
+1. 在安装前添加JDK版本检查：
+   if [ "$(java -version 2>&1 | awk -F '"' '/version/ {print $2}' | cut -d. -f1)" -lt 11 ]; then
+     echo "Tomcat 10.1 requires JDK 11 or higher"
+     exit 1
+   fi
+
+2. 在启动服务前添加JAVA_HOME验证：
+   if [ -z "${JAVA_HOME}" ]; then
+     echo "JAVA_HOME environment variable is not set"
+     exit 1
+   fi

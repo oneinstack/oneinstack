@@ -30,7 +30,12 @@ Install_Caddy() {
   . /etc/profile
 
   #make soft link
-  # [ ! -L "/usr/local/bin/caddy" ] && ln -s ${caddy_install_dir}/bin/caddy /usr/local/bin/caddy
+  # 在用户创建部分后添加
+  sed -i "s@User=caddy@User=${run_user}@" /lib/systemd/system/caddy.service
+  sed -i "s@Group=caddy@Group=${run_group}@" /lib/systemd/system/caddy.service
+  
+  # 在PATH配置部分后添加软链接
+  [ ! -L "/usr/local/bin/caddy" ] && ln -s ${caddy_install_dir}/bin/caddy /usr/local/bin/caddy
 
   #move caddyfile to /usr/local/caddy/conf
   [ ! -d "${caddy_install_dir}/conf" ] && mkdir -p ${caddy_install_dir}/conf
