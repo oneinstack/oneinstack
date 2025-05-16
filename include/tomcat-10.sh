@@ -7,12 +7,12 @@ CWARNING='\033[33m'
 CINFO='\033[36m'
 CEND='\033[0m'
 
-# Check if JAVA_HOME is set
-if [ -z "${JAVA_HOME}" ]; then
-    echo "${CFAILURE}JAVA_HOME environment variable is not set${CEND}"
-    echo "请设置JAVA_HOME环境变量，例如：export JAVA_HOME=/path/to/your/jdk && export PATH=\$JAVA_HOME/bin:\$PATH"
-    kill -9 $$; exit 1;
-fi
+# Check if JAVA_HOME is set  取消
+#if [ -z "${JAVA_HOME}" ]; then
+#    echo "${CFAILURE}JAVA_HOME environment variable is not set${CEND}"
+#    echo "请设置JAVA_HOME环境变量，例如：export JAVA_HOME=/path/to/your/jdk && export PATH=\$JAVA_HOME/bin:\$PATH"
+#    kill -9 $$; exit 1;
+#fi
 
 # Check if user is root
 if [ "$(id -u)" != "0" ]; then

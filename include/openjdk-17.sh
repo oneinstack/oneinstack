@@ -44,10 +44,17 @@ EOF
       apt-get --no-install-recommends -y install temurin-17-jdk
       JAVA_HOME=/usr/lib/jvm/temurin-17-jdk-${SYS_ARCH}
     else
-      apt-get --no-install-recommends -y install openjdk-17-jdk
+      # For Ubuntu 24.04 and newer
+      apt-get update
+      if ! apt-get --no-install-recommends -y install openjdk-17-jdk; then
+          echo "${CWARNING}First attempt failed, retrying with fix-missing...${CEND}"
+          apt-get update --fix-missing
+          apt-get --no-install-recommends -y install openjdk-17-jdk
+      fi
       JAVA_HOME=/usr/lib/jvm/java-17-openjdk-${SYS_ARCH}
     fi
   fi
+
   if [ -e "${JAVA_HOME}/bin/java" ]; then
     cat > /etc/profile.d/openjdk.sh << EOF
 export JAVA_HOME=${JAVA_HOME}
