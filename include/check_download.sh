@@ -493,9 +493,9 @@ checkDownload() {
     echo "PHP common..."
     src_url=${mirror_link}/oneinstack/src/libiconv-${libiconv_ver}.tar.gz && Download_src
     src_url=https://curl.haxx.se/download/curl-${curl_ver}.tar.gz && Download_src
-    src_url=https://downloads.sourceforge.net/project/mhash/mhash/${mhash_ver}/mhash-${mhash_ver}.tar.gz && Download_src
-    src_url=https://downloads.sourceforge.net/project/mcrypt/Libmcrypt/${libmcrypt_ver}/libmcrypt-${libmcrypt_ver}.tar.gz && Download_src
-    src_url=https://downloads.sourceforge.net/project/mcrypt/MCrypt/${mcrypt_ver}/mcrypt-${mcrypt_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/mhash-${mhash_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/libmcrypt-${libmcrypt_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/mcrypt-${mcrypt_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/freetype-${freetype_ver}.tar.gz && Download_src
   fi
 
