@@ -66,7 +66,7 @@ Install_PHP84() {
     --disable-phar \
     --disable-rpath
 
-    make -j ${THREAD} && make install
+    make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD} && make install
     
     if [ -e "${php_install_dir}/bin/phpize" ]; then
       # php.ini配置
