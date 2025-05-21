@@ -84,6 +84,11 @@ checkDownload() {
     1)
       echo "Download tomcat 10..."
       src_url=${mirror_link}/apache/tomcat/v${tomcat10_ver}/apache-tomcat-${tomcat10_ver}.tar.gz && Download_src
+      if [ ! -e "apache-tomcat-${tomcat10_ver}.tar.gz" ] || \
+         [ "$(md5sum apache-tomcat-${tomcat10_ver}.tar.gz | awk '{print $1}')" != "${tomcat10_md5}" ]; then
+        echo "Download failed or checksum mismatch"
+        exit 1
+      fi
       ;;
     2)
       echo "Download tomcat 9..."
@@ -579,10 +584,10 @@ checkDownload() {
       # php 5.3 5.4
       if [ "${php_option}" == '1' ]; then
         echo "Download eaccelerator 0.9..."
-        src_url=https://github.com/downloads/eaccelerator/eaccelerator/eaccelerator-${eaccelerator_ver}.tar.bz2 && Download_src
+        src_url=${mirror_link}/oneinstack/src/eaccelerator-${eaccelerator_ver}.tar.bz2 && Download_src
       elif [ "${php_option}" == '2' ]; then
         echo "Download eaccelerator 1.0 dev..."
-        src_url=https://github.com/eaccelerator/eaccelerator/tarball/master && Download_src
+        src_url=https://downloads.sourceforge.net/project/eaccelerator/eaccelerator/eaccelerator-0.9.5/eaccelerator-0.9.5.tar.gz && Download_src
       fi
       ;;
   esac
