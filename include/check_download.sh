@@ -82,18 +82,22 @@ checkDownload() {
   # tomcat
   case "${tomcat_option}" in
     1)
+      echo "Download tomcat 11..."
+      src_url=${mirror_link}/apache/tomcat/v${tomcat11_ver}/apache-tomcat-${tomcat11_ver}.tar.gz && Download_src
+      ;;
+    2)
       echo "Download tomcat 10..."
       src_url=${mirror_link}/apache/tomcat/v${tomcat10_ver}/apache-tomcat-${tomcat10_ver}.tar.gz && Download_src
       ;;
-    2)
+    3)
       echo "Download tomcat 9..."
       src_url=${mirror_link}/apache/tomcat/v${tomcat9_ver}/apache-tomcat-${tomcat9_ver}.tar.gz && Download_src
       ;;
-    3)
+    4)
       echo "Download tomcat 8..."
       src_url=${mirror_link}/apache/tomcat/v${tomcat8_ver}/apache-tomcat-${tomcat8_ver}.tar.gz && Download_src
       ;;
-    4)
+    5)
       echo "Download tomcat 7..."
       src_url=${mirror_link}/apache/tomcat/v${tomcat7_ver}/apache-tomcat-${tomcat7_ver}.tar.gz && Download_src
       src_url=${mirror_link}/apache/tomcat/v${tomcat7_ver}/catalina-jmx-remote.jar && Download_src

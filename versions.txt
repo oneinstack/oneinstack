@@ -7,6 +7,7 @@ openresty_ver=1.21.4.3
 openssl11_ver=1.1.1w
 openssl_ver=1.0.2u
 
+tomcat11_ver=11.0.8
 tomcat10_ver=10.1.16
 tomcat9_ver=9.0.83
 tomcat8_ver=8.5.96
