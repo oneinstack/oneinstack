@@ -555,6 +555,7 @@ if [ ${ARG_NUM} == 0 ]; then
         while :; do
           echo
           echo 'Please select a version of the Database:'
+          echo -e "\t${CMSG} 0${CEND}. Install MySQL-8.2"
           echo -e "\t${CMSG} 1${CEND}. Install MySQL-8.0"
           echo -e "\t${CMSG} 2${CEND}. Install MySQL-5.7"
           echo -e "\t${CMSG} 3${CEND}. Install MySQL-5.6"
@@ -571,7 +572,7 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG}14${CEND}. Install MongoDB"
           read -e -p "Please input a number:(Default 2 press Enter) " db_option
           db_option=${db_option:-2}
-          if [[ "${db_option}" =~ ^[1-9]$|^1[0-4]$ ]]; then
+          if [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
             if [ "${db_option}" == '13' ]; then
               [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; unset db_option; break; }
             elif [ "${db_option}" == '14' ]; then
@@ -605,7 +606,7 @@ if [ ${ARG_NUM} == 0 ]; then
               fi
             done
             # choose install methods
-            if [[ "${db_option}" =~ ^[1-9]$|^1[0-2]$ ]]; then
+            if [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
               while :; do echo
                 echo "Please choose installation of the database:"
                 echo -e "\t${CMSG}1${CEND}. Install database from binary package."
@@ -946,6 +947,10 @@ fi
 
 # Database
 case "${db_option}" in
+  0)
+    . include/mysql-8.2.sh
+    Install_MySQL82 2>&1 | tee -a ${oneinstack_dir}/install.log
+    ;;
   1)
     . include/mysql-8.0.sh
     Install_MySQL80 2>&1 | tee -a ${oneinstack_dir}/install.log
