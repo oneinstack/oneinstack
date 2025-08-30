@@ -51,10 +51,10 @@ php72_ver=7.2.34
 php73_ver=7.3.33
 php74_ver=7.4.33
 php80_ver=8.0.30
-php81_ver=8.1.27
-php82_ver=8.2.14
-php83_ver=8.3.2
-php84_ver=8.4.4
+php81_ver=8.1.33
+php82_ver=8.2.29
+php83_ver=8.3.24
+php84_ver=8.4.11
 
 # Nodejs
 nodejs_ver=20.10.0
