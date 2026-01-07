@@ -33,8 +33,9 @@ Install_Caddy() {
   # [ ! -L "/usr/local/bin/caddy" ] && ln -s ${caddy_install_dir}/bin/caddy /usr/local/bin/caddy
 
   #move caddyfile to /usr/local/caddy/conf
-  [ ! -d "${caddy_install_dir}/conf" ] && mkdir -p ${caddy_install_dir}/conf
+  [ ! -d "${caddy_install_dir}/conf/vhost" ] && mkdir -p ${caddy_install_dir}/conf/vhost
   /bin/cp ../config/Caddyfile ${caddy_install_dir}/conf/
+  sed -i "s@/usr/local/caddy@${caddy_install_dir}@g" ${caddy_install_dir}/conf/Caddyfile
 
   #move caddy.service to /lib/systemd/system
   /bin/cp ../init.d/caddy.service /lib/systemd/system/
