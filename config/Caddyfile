@@ -24,3 +24,5 @@
 
 # Refer to the Caddy docs for more information:
 # https://caddyserver.com/docs/caddyfile
+
+import /usr/local/caddy/conf/vhost/*.conf

@@ -63,7 +63,7 @@ while :; do
       ;;
     --mphp_ver)
       mphp_ver=$2; mphp_flag=y; shift 2
-      [[ ! "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-1]$ ]] && { echo "${CWARNING}mphp_ver input error! Please only input number 53~81${CEND}"; unset mphp_ver mphp_flag; }
+      [[ ! "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-5]$ ]] && { echo "${CWARNING}mphp_ver input error! Please only input number 53~85${CEND}"; unset mphp_ver mphp_flag; }
       ;;
     --proxy)
       proxy_flag=y; shift 1
@@ -160,7 +160,7 @@ If you enter '.', the field will be left blank.
     read -e -p "Country Name (2 letter code) [CN]: " SELFSIGNEDSSL_C
     SELFSIGNEDSSL_C=${SELFSIGNEDSSL_C:-CN}
     # shellcheck disable=SC2104
-    [ ${#SELFSIGNEDSSL_C} != 2 ] && { echo "${CWARNING}input error, You must input 2 letter code country name${CEND}"; continue; }
+    [ ${#SELFSIGNEDSSL_C} != 2 ] && { echo "${CWARNING}input error, You must input 2 letter code country name${CEND}"; return 1; }
     echo
     read -e -p "State or Province Name (full name) [Shanghai]: " SELFSIGNEDSSL_ST
     SELFSIGNEDSSL_ST=${SELFSIGNEDSSL_ST:-Shanghai}
@@ -239,6 +239,11 @@ If you enter '.', the field will be left blank.
         fi
         ${web_install_dir}/sbin/nginx -s reload
       fi
+      if [ "${caddy_ssl_flag}" == 'y' ]; then
+        [ ! -d ${caddy_install_dir}/conf/vhost ] && mkdir -p ${caddy_install_dir}/conf/vhost
+        echo "${domain}${moredomainame} {  root * ${vhostdir}; file_server }" > ${caddy_install_dir}/conf/vhost/${domain}.conf
+        Reload_Caddy
+      fi
       if [ "${apache_ssl_flag}" == 'y' ]; then
         [ ! -d ${apache_install_dir}/conf/vhost ] && mkdir ${apache_install_dir}/conf/vhost
         cat > ${apache_install_dir}/conf/vhost/${domain}.conf << EOF
@@ -274,12 +279,15 @@ EOF
       [ -e "${PATH_SSL}/${domain}.crt" ] && rm -f ${PATH_SSL}/${domain}.{crt,key}
       Nginx_cmd="/bin/systemctl restart nginx"
       Apache_cmd="${apache_install_dir}/bin/apachectl -k graceful"
+      [ -e /usr/bin/systemctl ] && Caddy_cmd="systemctl reload caddy" || Caddy_cmd="service caddy reload"
       if [ -e "${web_install_dir}/sbin/nginx" -a -e "${apache_install_dir}/bin/httpd" ]; then
         Command="${Nginx_cmd};${Apache_cmd}"
       elif [ -e "${web_install_dir}/sbin/nginx" -a ! -e "${apache_install_dir}/bin/httpd" ]; then
         Command="${Nginx_cmd}"
       elif [ ! -e "${web_install_dir}/sbin/nginx" -a -e "${apache_install_dir}/bin/httpd" ]; then
         Command="${Apache_cmd}"
+      elif [ -e "${caddy_install_dir}/bin/caddy" ]; then
+        Command="${Caddy_cmd}"
       fi
     if [ -s ~/.acme.sh/${domain}/fullchain.cer ] && [[ "${CERT_KEYLENGTH}" =~ ^2048$|^3072$|^4096$|^8192$ ]]; then
       ~/.acme.sh/acme.sh --force --install-cert -d ${domain} --fullchain-file ${PATH_SSL}/${domain}.crt --key-file ${PATH_SSL}/${domain}.key --reloadcmd "${Command}" > /dev/null
@@ -289,6 +297,7 @@ EOF
       echo "${CFAILURE}Error: Create Let's Encrypt SSL Certificate failed! ${CEND}"
       [ -e "${web_install_dir}/conf/vhost/${domain}.conf" ] && rm -f ${web_install_dir}/conf/vhost/${domain}.conf
       [ -e "${apache_install_dir}/conf/vhost/${domain}.conf" ] && rm -f ${apache_install_dir}/conf/vhost/${domain}.conf
+      [ -e "${caddy_install_dir}/conf/vhost/${domain}.conf" ] && rm -f ${caddy_install_dir}/conf/vhost/${domain}.conf
       exit 1
     fi
   fi
@@ -337,7 +346,7 @@ What Are You Doing?
   fi
 
   #Multiple_PHP
-  if [ $(ls /dev/shm/php*-cgi.sock 2> /dev/null | wc -l) -ge 2 ]; then
+  if [ -e "${php_install_dir}/bin/php-config" ] && [ $(ls /dev/shm/php*-cgi.sock 2> /dev/shm/php_err | wc -l) -ge 2 ]; then
     if [ "${mphp_flag}" != 'y' ]; then
       PHP_detail_ver=`${php_install_dir}/bin/php-config --version`
       PHP_main_ver=${PHP_detail_ver%.*}
@@ -357,10 +366,12 @@ What Are You Doing?
         [ -e "/dev/shm/php81-cgi.sock" ] && echo -e "\t${CMSG}11${CEND}. PHP 8.1"
         [ -e "/dev/shm/php82-cgi.sock" ] && echo -e "\t${CMSG}12${CEND}. PHP 8.2"
         [ -e "/dev/shm/php83-cgi.sock" ] && echo -e "\t${CMSG}13${CEND}. PHP 8.3"
+        [ -e "/dev/shm/php84-cgi.sock" ] && echo -e "\t${CMSG}14${CEND}. PHP 8.4"
+        [ -e "/dev/shm/php85-cgi.sock" ] && echo -e "\t${CMSG}15${CEND}. PHP 8.5"
         read -e -p "Please input a number:(Default 0 press Enter) " php_option
         php_option=${php_option:-0}
-        if [[ ! ${php_option} =~ ^[0-9]$|^1[0-2]$ ]]; then
-          echo "${CWARNING}input error! Please only input number 1~12${CEND}"
+        if [[ ! ${php_option} =~ ^[0-9]$|^1[0-5]$ ]]; then
+          echo "${CWARNING}input error! Please only input number 0~15${CEND}"
         else
           break
         fi
@@ -379,6 +390,8 @@ What Are You Doing?
     [ "${php_option}" == '11' ] && mphp_ver=81
     [ "${php_option}" == '12' ] && mphp_ver=82
     [ "${php_option}" == '13' ] && mphp_ver=83
+    [ "${php_option}" == '14' ] && mphp_ver=84
+    [ "${php_option}" == '15' ] && mphp_ver=85
     [ ! -e "/dev/shm/php${mphp_ver}-cgi.sock" ] && unset mphp_ver
   fi
 
@@ -405,11 +418,15 @@ What Are You Doing?
     if [ -e "${web_install_dir}/sbin/nginx" ]; then
       nginx_ssl_flag=y
       PATH_SSL=${web_install_dir}/conf/ssl
-      [ ! -d "${PATH_SSL}" ] && mkdir ${PATH_SSL}
-    elif [ ! -e "${web_install_dir}/sbin/nginx" -a -e "${apache_install_dir}/bin/httpd" ]; then
+      [ ! -d "${PATH_SSL}" ] && mkdir -p ${PATH_SSL}
+    elif [ -e "${caddy_install_dir}/bin/caddy" ]; then
+      caddy_ssl_flag=y
+      PATH_SSL=${caddy_install_dir}/conf/ssl
+      [ ! -d "${PATH_SSL}" ] && mkdir -p ${PATH_SSL}
+    elif [ -e "${apache_install_dir}/bin/httpd" ]; then
       apache_ssl_flag=y
       PATH_SSL=${apache_install_dir}/conf/ssl
-      [ ! -d "${PATH_SSL}" ] && mkdir ${PATH_SSL}
+      [ ! -d "${PATH_SSL}" ] && mkdir -p ${PATH_SSL}
     fi
   elif [ "${Domian_Mode}" == 'q' ]; then
     exit 1
@@ -468,7 +485,7 @@ What Are You Doing?
       if [ -z "$(echo ${moredomain} | grep '.*\..*')" ]; then
         echo "${CWARNING}Your ${domain} is invalid! ${CEND}"
       else
-        [ "${moredomain}" == "${domain}" ] && echo "${CWARNING}Domain name already exists! ${CND}" && continue
+        [ "${moredomain}" == "${domain}" ] && echo "${CWARNING}Domain name already exists! ${CEND}" && continue
         echo domain list="$moredomain"
         moredomainame=" $moredomain"
         break
@@ -490,7 +507,7 @@ What Are You Doing?
     fi
   fi
 
-  if [ "${nginx_ssl_flag}" == 'y' ]; then
+  if [ "${nginx_ssl_flag}" == 'y' -o "${caddy_ssl_flag}" == 'y' -o "${apache_ssl_flag}" == 'y' ]; then
     while :; do echo
       read -e -p "Do you want to redirect all HTTP requests to HTTPS? [y/n]: " https_flag
       if [[ ! ${https_flag} =~ ^[y,n]$ ]]; then
@@ -617,6 +634,25 @@ Nginx_log() {
   else
     Nginx_log="access_log ${wwwlogs_dir}/${domain}_nginx.log combined;"
     echo "You access log file=${CMSG}${wwwlogs_dir}/${domain}_nginx.log${CEND}"
+  fi
+}
+
+Caddy_log() {
+  while :; do echo
+    read -e -p "Allow Caddy access_log? [y/n]: " access_flag
+    if [[ ! "${access_flag}" =~ ^[y,n]$ ]]; then
+      echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
+    else
+      break
+    fi
+  done
+  if [ "${access_flag}" == 'n' ]; then
+    Caddy_log=""
+  else
+    Caddy_log="log {
+        output file ${wwwlogs_dir}/${domain}_caddy.log
+    }"
+    echo "You access log file=${CMSG}${wwwlogs_dir}/${domain}_caddy.log${CEND}"
   fi
 }
 
@@ -892,6 +928,117 @@ EOF
   Print_SSL
 }
 
+Reload_Caddy() {
+  if [ -e /usr/bin/systemctl ]; then
+    systemctl reload caddy
+  else
+    service caddy reload
+  fi
+}
+
+Create_caddy_php_conf() {
+  [ ! -d ${caddy_install_dir}/conf/vhost ] && mkdir -p ${caddy_install_dir}/conf/vhost
+  if [ "${https_flag}" == 'y' ]; then
+    cat > ${caddy_install_dir}/conf/vhost/${domain}.conf << EOF
+http://${domain}, http://${moredomainame} {
+  redir https://{host}{uri}
+}
+
+https://${domain}, https://${moredomainame} {
+  root * ${vhostdir}
+  php_fastcgi unix:/dev/shm/php${mphp_ver}-cgi.sock
+  file_server
+  ${Caddy_log}
+  tls ${PATH_SSL}/${domain}.crt ${PATH_SSL}/${domain}.key
+  handle_errors {
+    rewrite * /{err.status_code}.html
+    file_server
+  }
+}
+EOF
+  else
+    cat > ${caddy_install_dir}/conf/vhost/${domain}.conf << EOF
+${domain}${moredomainame} {
+  root * ${vhostdir}
+  php_fastcgi unix:/dev/shm/php${mphp_ver}-cgi.sock
+  file_server
+  ${Caddy_log}
+  [ -e "${PATH_SSL}/${domain}.crt" ] && tls ${PATH_SSL}/${domain}.crt ${PATH_SSL}/${domain}.key
+  handle_errors {
+    rewrite * /{err.status_code}.html
+    file_server
+  }
+}
+EOF
+  fi
+
+  echo
+  ${caddy_install_dir}/bin/caddy validate --config ${caddy_install_dir}/conf/Caddyfile
+  if [ $? == 0 ]; then
+    echo "Reload Caddy......"
+    systemctl reload caddy
+  else
+    rm -f ${caddy_install_dir}/conf/vhost/${domain}.conf
+    echo "Create virtualhost ... [${CFAILURE}FAILED${CEND}]"
+    exit 1
+  fi
+
+  printf "
+#######################################################################
+#       OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+      #
+#       For more information please visit https://oneinstack.com      #
+#######################################################################
+"
+  echo "$(printf "%-30s" "Your domain:")${CMSG}${domain}${CEND}"
+  echo "$(printf "%-30s" "Caddy Virtualhost conf:")${CMSG}${caddy_install_dir}/conf/vhost/${domain}.conf${CEND}"
+  echo "$(printf "%-30s" "Directory of:")${CMSG}${vhostdir}${CEND}"
+}
+
+Create_caddy_proxy_conf() {
+  [ ! -d ${caddy_install_dir}/conf/vhost ] && mkdir -p ${caddy_install_dir}/conf/vhost
+  if [ "${https_flag}" == 'y' ]; then
+    cat > ${caddy_install_dir}/conf/vhost/${domain}.conf << EOF
+http://${domain}, http://${moredomainame} {
+  redir https://{host}{uri}
+}
+
+https://${domain}, https://${moredomainame} {
+  reverse_proxy ${Proxy_Pass}
+  ${Caddy_log}
+  tls ${PATH_SSL}/${domain}.crt ${PATH_SSL}/${domain}.key
+}
+EOF
+  else
+    cat > ${caddy_install_dir}/conf/vhost/${domain}.conf << EOF
+${domain}${moredomainame} {
+  reverse_proxy ${Proxy_Pass}
+  ${Caddy_log}
+  [ -e "${PATH_SSL}/${domain}.crt" ] && tls ${PATH_SSL}/${domain}.crt ${PATH_SSL}/${domain}.key
+}
+EOF
+  fi
+
+  echo
+  ${caddy_install_dir}/bin/caddy validate --config ${caddy_install_dir}/conf/Caddyfile
+  if [ $? == 0 ]; then
+    echo "Reload Caddy......"
+    Reload_Caddy
+  else
+    rm -f ${caddy_install_dir}/conf/vhost/${domain}.conf
+    echo "Create virtualhost ... [${CFAILURE}FAILED${CEND}]"
+    exit 1
+  fi
+
+  printf "
+#######################################################################
+#       OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+      #
+#       For more information please visit https://oneinstack.com      #
+#######################################################################
+"
+  echo "$(printf "%-30s" "Your domain:")${CMSG}${domain}${CEND}"
+  echo "$(printf "%-30s" "Caddy Virtualhost conf:")${CMSG}${caddy_install_dir}/conf/vhost/${domain}.conf${CEND}"
+}
+
 Apache_log() {
   while :; do echo
     read -e -p "Allow Apache access_log? [y/n]: " access_flag
@@ -1087,7 +1234,18 @@ EOF
 }
 
 Add_Vhost() {
-  if [ -e "${web_install_dir}/sbin/nginx" -a ! -e "${apache_install_dir}/bin/httpd" ]; then
+  if [ -e "${caddy_install_dir}/bin/caddy" ] && [[ "${web_install_dir}" =~ caddy || ! -e "${web_install_dir}/sbin/nginx" ]]; then
+    Choose_ENV
+    Input_Add_domain
+    if [ "${proxy_flag}" == "y" ]; then
+      Input_Add_proxy
+      Caddy_log
+      Create_caddy_proxy_conf
+    else
+      Caddy_log
+      Create_caddy_php_conf
+    fi
+  elif [ -e "${web_install_dir}/sbin/nginx" -a ! -e "${apache_install_dir}/bin/httpd" ]; then
     Choose_ENV
     Input_Add_domain
     Nginx_anti_hotlinking
@@ -1125,6 +1283,17 @@ Add_Vhost() {
       Nginx_log
       Apache_log
       Create_nginx_apache_modphp_conf
+    fi
+  elif [ -e "${caddy_install_dir}/bin/caddy" ]; then
+    Choose_ENV
+    Input_Add_domain
+    if [ "${proxy_flag}" == "y" ]; then
+      Input_Add_proxy
+      Caddy_log
+      Create_caddy_proxy_conf
+    else
+      Caddy_log
+      Create_caddy_php_conf
     fi
   else
     echo "Error! ${CFAILURE}Web server${CEND} not found!"
@@ -1176,6 +1345,55 @@ Del_NGX_Vhost() {
         done
     else
       echo "${CWARNING}Virtualhost was not exist! ${CEND}"
+    fi
+  fi
+}
+
+Del_Caddy_Vhost() {
+  if [ -e "${caddy_install_dir}/bin/caddy" ]; then
+    [ -d "${caddy_install_dir}/conf/vhost" ] && Domain_List=$(ls ${caddy_install_dir}/conf/vhost | sed "s@.conf@@g")
+    if [ -n "${Domain_List}" ]; then
+      echo
+      echo "Virtualhost list:"
+      echo ${CMSG}${Domain_List}${CEND}
+      while :; do echo
+        read -e -p "Please input a domain you want to delete: " domain
+        if [ -z "$(echo ${domain} | grep '.*\..*')" ]; then
+          echo "${CWARNING}Your ${domain} is invalid! ${CEND}"
+        else
+          if [ -e "${caddy_install_dir}/conf/vhost/${domain}.conf" ]; then
+            Directory=$(grep 'root \*' ${caddy_install_dir}/conf/vhost/${domain}.conf | head -1 | sed 's@^.*root \* @@g')
+            rm -f ${caddy_install_dir}/conf/vhost/${domain}.conf
+            Reload_Caddy
+            if [ -n "${Directory}" -a -d "${Directory}" ]; then
+              while :; do echo
+                read -e -p "Do you want to delete Virtul Host directory? [y/n]: " Del_Vhost_wwwroot_flag
+                if [[ ! ${Del_Vhost_wwwroot_flag} =~ ^[y,n]$ ]]; then
+                  echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
+                else
+                  break
+                fi
+              done
+
+              if [ "${Del_Vhost_wwwroot_flag}" == 'y' ]; then
+                if [ "${quiet_flag}" != 'y' ]; then
+                  echo "Press Ctrl+c to cancel or Press any key to continue..."
+                  char=$(get_char)
+                fi
+                rm -rf ${Directory}
+              fi
+            fi
+            echo
+            [ -d ~/.acme.sh/${domain} ] && ~/.acme.sh/acme.sh --force --remove -d ${domain} > /dev/null 2>&1
+            [ -d ~/.acme.sh/${domain}_ecc ] && ~/.acme.sh/acme.sh --force --remove --ecc -d ${domain} > /dev/null 2>&1
+            echo "${CSUCCESS}Domain: ${domain} has been deleted.${CEND}"
+            echo
+          else
+            echo "${CWARNING}Virtualhost: ${domain} was not exist! ${CEND}"
+          fi
+          break
+        fi
+      done
     fi
   fi
 }
@@ -1289,9 +1507,13 @@ Del_Tomcat_Vhost() {
 }
 
 List_Vhost() {
-  [ -e "${tomcat_install_dir}/conf/server.xml" -a ! -d "${web_install_dir}/sbin/nginx" ] && Domain_List=$(ls ${tomcat_install_dir}/conf/vhost | grep -v 'localhost.xml' | sed "s@.xml@@g")
-  [ -d "${web_install_dir}/conf/vhost" ] && Domain_List=$(ls ${web_install_dir}/conf/vhost | sed "s@.conf@@g")
-  [ -e "${apache_install_dir}/bin/httpd" -a ! -d "${web_install_dir}/conf/vhost" ] && Domain_List=$(ls ${apache_install_dir}/conf/vhost | grep -v '0.conf' | sed "s@.conf@@g")
+  Domain_List_Nginx=$( [ -d "${web_install_dir}/conf/vhost" ] && ls ${web_install_dir}/conf/vhost | sed "s@.conf@@g" )
+  Domain_List_Caddy=$( [ -d "${caddy_install_dir}/conf/vhost" ] && ls ${caddy_install_dir}/conf/vhost | sed "s@.conf@@g" )
+  Domain_List_Apache=$( [ -e "${apache_install_dir}/bin/httpd" ] && ls ${apache_install_dir}/conf/vhost | grep -v '0.conf' | sed "s@.conf@@g" )
+  Domain_List_Tomcat=$( [ -e "${tomcat_install_dir}/conf/server.xml" ] && ls ${tomcat_install_dir}/conf/vhost | grep -v 'localhost.xml' | sed "s@.xml@@g" )
+  
+  Domain_List=$(echo "${Domain_List_Nginx} ${Domain_List_Caddy} ${Domain_List_Apache} ${Domain_List_Tomcat}" | tr ' ' '\n' | sort | uniq | xargs)
+  
   if [ -n "${Domain_List}" ]; then
     echo
     echo "Virtualhost list:"
@@ -1307,5 +1529,5 @@ if [ ${ARG_NUM} == 0 ]; then
 else
   [ "${add_flag}" == 'y' -o "${proxy_flag}" == 'y' -o "${sslquiet_flag}" == 'y' ] && Add_Vhost
   [ "${list_flag}" == 'y' ] && List_Vhost
-  [ "${delete_flag}" == 'y' ] && { Del_NGX_Vhost; Del_Apache_Vhost; Del_Tomcat_Vhost; }
+  [ "${delete_flag}" == 'y' ] && { Del_NGX_Vhost; Del_Apache_Vhost; Del_Tomcat_Vhost; Del_Caddy_Vhost; }
 fi

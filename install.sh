@@ -36,8 +36,8 @@ xcachepwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbinstallmethod=1
 
 version() {
-  echo "version: 2.6"
-  echo "updated date: 2023-02-04"
+  echo "version: 2.7"
+  echo "updated date: 2026-01-07"
 }
 
 Show_Help() {
@@ -49,8 +49,8 @@ Show_Help() {
   --apache                    Install Apache
   --apache_mode_option [1-2]  Apache2.4 mode, 1(default): php-fpm, 2: mod_php
   --apache_mpm_option [1-3]   Apache2.4 MPM, 1(default): event, 2: prefork, 3: worker
-  --php_option [1-14]         Install PHP version
-  --mphp_ver [53~84]          Install another PHP version (PATH: ${php_install_dir}\${mphp_ver})
+  --php_option [1-15]         Install PHP version
+  --mphp_ver [53~85]          Install another PHP version (PATH: ${php_install_dir}\${mphp_ver})
   --mphp_addons               Only install another PHP addons
   --phpcache_option [1-4]     Install PHP opcode cache, default: 1 opcache
   --php_extensions [ext name] Install PHP extensions, include zendguardloader,ioncube,
@@ -59,7 +59,7 @@ Show_Help() {
   --nodejs                    Install Nodejs
   --tomcat_option [1-6]       Install Tomcat version
   --jdk_option [1-3]          Install JDK version
-  --db_option [1-14]          Install DB version
+  --db_option [1-15]          Install DB version
   --dbinstallmethod [1-2]     DB install method, default: 1 binary install
   --dbrootpwd [password]      DB super password
   --pureftpd                  Install Pure-Ftpd
@@ -138,8 +138,8 @@ while :; do
   --php_option)
     php_option=$2
     shift 2
-    [[ ! ${php_option} =~ ^[1-9]$|^1[0-4]$ ]] && {
-      echo "${CWARNING}php_option input error! Please only input number 1~14${CEND}"
+    [[ ! ${php_option} =~ ^[1-9]$|^1[0-5]$ ]] && {
+      echo "${CWARNING}php_option input error! Please only input number 1~15${CEND}"
       exit 1
     }
     [ -e "${php_install_dir}/bin/phpize" ] && {
@@ -151,8 +151,8 @@ while :; do
     mphp_ver=$2
     mphp_flag=y
     shift 2
-    [[ ! "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-4]$ ]] && {
-      echo "${CWARNING}mphp_ver input error! Please only input number 53~84${CEND}"
+    [[ ! "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-5]$ ]] && {
+      echo "${CWARNING}mphp_ver input error! Please only input number 53~85${CEND}"
       exit 1
     }
     ;;
@@ -227,13 +227,13 @@ while :; do
         echo "${CWARNING}PostgreSQL already installed! ${CEND}"
         unset db_option
       }
-    elif [ "${db_option}" == '14' ]; then
+    elif [ "${db_option}" == '15' ]; then
       [ -e "${mongo_install_dir}/bin/mongo" ] && {
         echo "${CWARNING}MongoDB already installed! ${CEND}"
         unset db_option
       }
     else
-      echo "${CWARNING}db_option input error! Please only input number 1~14${CEND}"
+      echo "${CWARNING}db_option input error! Please only input number 1~15${CEND}"
       exit 1
     fi
     ;;
@@ -555,7 +555,7 @@ if [ ${ARG_NUM} == 0 ]; then
         while :; do
           echo
           echo 'Please select a version of the Database:'
-          echo -e "\t${CMSG} 0${CEND}. Install MySQL-8.2"
+          echo -e "\t${CMSG} 0${CEND}. Install MySQL-8.4 (LTS)"
           echo -e "\t${CMSG} 1${CEND}. Install MySQL-8.0"
           echo -e "\t${CMSG} 2${CEND}. Install MySQL-5.7"
           echo -e "\t${CMSG} 3${CEND}. Install MySQL-5.6"
@@ -570,8 +570,8 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG}12${CEND}. Install Percona-5.5"
           echo -e "\t${CMSG}13${CEND}. Install PostgreSQL"
           echo -e "\t${CMSG}14${CEND}. Install MongoDB"
-          read -e -p "Please input a number:(Default 2 press Enter) " db_option
-          db_option=${db_option:-2}
+          read -e -p "Please input a number:(Default 0 press Enter) " db_option
+          db_option=${db_option:-0}
           if [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
             if [ "${db_option}" == '13' ]; then
               [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; unset db_option; break; }
@@ -654,9 +654,10 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG}12${CEND}. Install php-8.2"
           echo -e "\t${CMSG}13${CEND}. Install php-8.3"
           echo -e "\t${CMSG}14${CEND}. Install php-8.4"
-          read -e -p "Please input a number:(Default 7 press Enter) " php_option
-          php_option=${php_option:-7}
-          if [[ ! ${php_option} =~ ^[1-9]$|^1[0-4]$ ]]; then
+          echo -e "\t${CMSG}15${CEND}. Install php-8.5"
+          read -e -p "Please input a number:(Default 15 press Enter) " php_option
+          php_option=${php_option:-15}
+          if [[ ! ${php_option} =~ ^[1-9]$|^1[0-5]$ ]]; then
             echo "${CWARNING}input error! Please only input number 1~14${CEND}"
           else
             break
@@ -743,7 +744,7 @@ if [ ${ARG_NUM} == 0 ]; then
               fi
             done
           fi
-          if [[ ${php_option} =~ ^[5-9]$|^1[0-3]$ ]] || [[ "${PHP_main_ver}" =~ ^7.[0-4]$|^8.[0-3]$ ]]; then
+          if [[ ${php_option} =~ ^[5-9]$|^1[0-4]$ ]] || [[ "${PHP_main_ver}" =~ ^7.[0-4]$|^8.[0-4]$ ]]; then
             while :; do
               echo 'Please select a opcode cache of the PHP:'
               echo -e "\t${CMSG}1${CEND}. Install Zend OPcache"
