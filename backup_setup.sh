@@ -358,10 +358,10 @@ fi
 if [ -n "`echo ${desc_bk} | grep -w 5`" ]; then
   if [ ! -e "/usr/local/bin/upx" ]; then
     if [ "${armplatform}" == 'y' ]; then
-      wget -qc http://collection.b0.upaiyun.com/softwares/upx/upx_0.4.3_linux_arm64.tar.gz -O /tmp/upx_0.4.3_linux_arm64.tar.gz
+      wget -qc https://collection.b0.upaiyun.com/softwares/upx/upx_0.4.3_linux_arm64.tar.gz -O /tmp/upx_0.4.3_linux_arm64.tar.gz
       tar xzf /tmp/upx_0.4.3_linux_arm64.tar.gz -C /tmp/
     else
-      wget -qc http://collection.b0.upaiyun.com/softwares/upx/upx_0.4.3_linux_x86_64.tar.gz -O /tmp/upx_0.4.3_linux_x86_64.tar.gz
+      wget -qc https://collection.b0.upaiyun.com/softwares/upx/upx_0.4.3_linux_x86_64.tar.gz -O /tmp/upx_0.4.3_linux_x86_64.tar.gz
       tar xzf /tmp/upx_0.4.3_linux_x86_64.tar.gz -C /tmp/
     fi
     /bin/mv /tmp/upx /usr/local/bin/upx

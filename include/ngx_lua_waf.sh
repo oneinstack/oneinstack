@@ -51,7 +51,7 @@ Nginx_lua_waf() {
   rm -rf $$
   nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@--with-openssl=../openssl-\w.\w.\w\+ @--with-openssl=../openssl-${openssl11_ver} @" | sed "s@--with-pcre=../pcre-\w.\w\+ @--with-pcre=../pcre-${pcre_ver} @"`
   if [ -z "`echo ${nginx_configure_args} | grep lua-nginx-module`" ]; then
-    src_url=http://nginx.org/download/nginx-${nginx_ver}.tar.gz && Download_src
+    src_url=https://nginx.org/download/nginx-${nginx_ver}.tar.gz && Download_src
     src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/ngx_devel_kit.tar.gz && Download_src
@@ -112,7 +112,7 @@ Tengine_lua_waf() {
   rm -rf $$
   tengine_configure_args=`echo ${tengine_configure_args_tmp} | sed "s@--with-openssl=../openssl-\w.\w.\w\+ @--with-openssl=../openssl-${openssl11_ver} @" | sed "s@--with-pcre=../pcre-\w.\w\+ @--with-pcre=../pcre-${pcre_ver} @"`
   if [ -z "`echo ${tengine_configure_args} | grep lua`" ]; then
-    src_url=http://tengine.taobao.org/download/tengine-${tengine_ver}.tar.gz && Download_src
+    src_url=https://tengine.taobao.org/download/tengine-${tengine_ver}.tar.gz && Download_src
     src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/ngx_devel_kit.tar.gz && Download_src

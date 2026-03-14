@@ -49,7 +49,7 @@ checkDownload() {
       ;;
     2)
       echo "Download tengine..."
-      #src_url=http://tengine.taobao.org/download/tengine-${tengine_ver}.tar.gz && Download_src
+      #src_url=https://tengine.taobao.org/download/tengine-${tengine_ver}.tar.gz && Download_src
       src_url=${mirror_link}/oneinstack/src/tengine-${tengine_ver}.tar.gz && Download_src
       ;;
     3)
@@ -73,9 +73,9 @@ checkDownload() {
   # apache
   if [ "${apache_flag}" == 'y' ]; then
     echo "Download apache 2.4..."
-    src_url=http://archive.apache.org/dist/httpd/httpd-${apache_ver}.tar.gz && Download_src
-    src_url=http://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
-    src_url=http://archive.apache.org/dist/apr/apr-util-${apr_util_ver}.tar.gz && Download_src
+    src_url=https://archive.apache.org/dist/httpd/httpd-${apache_ver}.tar.gz && Download_src
+    src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
+    src_url=https://archive.apache.org/dist/apr/apr-util-${apr_util_ver}.tar.gz && Download_src
     src_url=${mirror_link}/apache/httpd/nghttp2-${nghttp2_ver}.tar.gz && Download_src
   fi
 
@@ -107,7 +107,7 @@ checkDownload() {
   # jdk apr
   if [[ "${jdk_option}"  =~ ^[1-2]$ ]]; then
     echo "Download apr..."
-    src_url=http://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
+    src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
   fi
 
   if [[ "${db_option}" =~ ^[1-9]$|^1[0-4]$ ]]; then
@@ -581,7 +581,7 @@ checkDownload() {
       if [[ "${php_option}" =~ ^[1-4]$ ]]; then
         # php 5.3 5.4 5.5 5.6
         echo "Download xcache..."
-        src_url=http://xcache.lighttpd.net/pub/Releases/${xcache_ver}/xcache-${xcache_ver}.tar.gz && Download_src
+        src_url=https://xcache.lighttpd.net/pub/Releases/${xcache_ver}/xcache-${xcache_ver}.tar.gz && Download_src
       fi
       ;;
     4)
@@ -658,7 +658,7 @@ checkDownload() {
   # redis-server
   if [ "${redis_flag}" == 'y' ]; then
     echo "Download redis-server..."
-    src_url=http://download.redis.io/releases/redis-${redis_ver}.tar.gz && Download_src
+    src_url=https://download.redis.io/releases/redis-${redis_ver}.tar.gz && Download_src
   fi
 
   # pecl_redis
