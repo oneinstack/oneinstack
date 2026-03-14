@@ -76,7 +76,7 @@ while :; do
       tengine_flag=y; NEW_tengine_ver=$2; shift 2
       ;;
     --openresty)
-      openresty_flag=y; NEW_openresy_ver=$2; shift 2
+      openresty_flag=y; NEW_openresty_ver=$2; shift 2
       ;;
     --apache)
       apache_flag=y; NEW_apache_ver=$2; shift 2
@@ -166,7 +166,17 @@ What Are You Doing?
           Upgrade_OneinStack
           ;;
         10)
-          [ -e ~/.acme.sh/acme.sh ] && { ~/.acme.sh/acme.sh --force --upgrade; ~/.acme.sh/acme.sh --version; }
+          if [ -e ~/.acme.sh/acme.sh ]; then
+            ~/.acme.sh/acme.sh --force --upgrade; ~/.acme.sh/acme.sh --version;
+          elif [ -e /usr/local/acme.sh/acme.sh ]; then
+            /usr/local/acme.sh/acme.sh --force --upgrade; /usr/local/acme.sh/acme.sh --version;
+          elif [ -e /opt/acme.sh/acme.sh ]; then
+            /opt/acme.sh/acme.sh --force --upgrade; /opt/acme.sh/acme.sh --version;
+          elif command -v acme.sh >/dev/null 2>&1; then
+            acme.sh --force --upgrade; acme.sh --version;
+          else
+            echo "${CWARNING}acme.sh not found!${CEND}"
+          fi
           ;;
         q)
           exit
@@ -190,5 +200,17 @@ else
   [ "${memcached_flag}" == 'y' ] && Upgrade_Memcached
   [ "${phpmyadmin_flag}" == 'y' ] && Upgrade_phpMyAdmin
   [ "${NEW_oneinstack_ver}" == 'latest' ] && Upgrade_OneinStack
-  [ "${NEW_acme_ver}" == 'latest' ] && [ -e ~/.acme.sh/acme.sh ] && { ~/.acme.sh/acme.sh --force --upgrade; ~/.acme.sh/acme.sh --version; }
+  if [ "${NEW_acme_ver}" == 'latest' ]; then
+    if [ -e ~/.acme.sh/acme.sh ]; then
+      ~/.acme.sh/acme.sh --force --upgrade; ~/.acme.sh/acme.sh --version;
+    elif [ -e /usr/local/acme.sh/acme.sh ]; then
+      /usr/local/acme.sh/acme.sh --force --upgrade; /usr/local/acme.sh/acme.sh --version;
+    elif [ -e /opt/acme.sh/acme.sh ]; then
+      /opt/acme.sh/acme.sh --force --upgrade; /opt/acme.sh/acme.sh --version;
+    elif command -v acme.sh >/dev/null 2>&1; then
+      acme.sh --force --upgrade; acme.sh --version;
+    else
+      echo "${CWARNING}acme.sh not found!${CEND}"
+    fi
+  fi
 fi

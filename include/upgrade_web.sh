@@ -13,8 +13,8 @@ Upgrade_Nginx() {
   [ ! -e "${nginx_install_dir}/sbin/nginx" ] && echo "${CWARNING}Nginx is not installed on your system! ${CEND}" && exit 1
   OLD_nginx_ver_tmp=`${nginx_install_dir}/sbin/nginx -v 2>&1`
   OLD_nginx_ver=${OLD_nginx_ver_tmp##*/}
-  Latest_nginx_ver=`curl --connect-timeout 2 -m 3 -s http://nginx.org/en/CHANGES-1.22 | awk '/Changes with nginx/{print$0}' | awk '{print $4}' | head -1`
-  [ -z "${Latest_nginx_ver}" ] && Latest_nginx_ver=`curl --connect-timeout 2 -m 3 -s http://nginx.org/en/CHANGES | awk '/Changes with nginx/{print$0}' | awk '{print $4}' | head -1`
+  Latest_nginx_ver=`curl -s http://nginx.org/en/download.html | grep -o 'nginx-[0-9\.]*\.tar\.gz' | head -n 1 | sed 's/nginx-\(.*\)\.tar\.gz/\1/'`
+  [ -z "${Latest_nginx_ver}" ] && Latest_nginx_ver=`curl -s http://nginx.org/en/download.html | grep -o 'nginx-[0-9\.]*\.tar\.gz' | head -n 1 | sed 's/nginx-\(.*\)\.tar\.gz/\1/'`
   echo
   echo "Current Nginx Version: ${CMSG}${OLD_nginx_ver}${CEND}"
   while :; do echo
@@ -105,7 +105,7 @@ Upgrade_Tengine() {
   [ ! -e "${tengine_install_dir}/sbin/nginx" ] && echo "${CWARNING}Tengine is not installed on your system! ${CEND}" && exit 1
   OLD_tengine_ver_tmp=`${tengine_install_dir}/sbin/nginx -v 2>&1`
   OLD_tengine_ver="`echo ${OLD_tengine_ver_tmp#*/} | awk '{print $1}'`"
-  Latest_tengine_ver=`curl --connect-timeout 2 -m 3 -s http://tengine.taobao.org/changelog.html | grep -v generator | grep -oE "[0-9]\.[0-9]\.[0-9]+" | head -1`
+  Latest_tengine_ver=`curl --connect-timeout 2 -m 3 -s https://tengine.taobao.org/download.html | grep -oE "tengine-[0-9]\.[0-9]\.[0-9]+\.tar\.gz" | grep -oE "[0-9]\.[0-9]\.[0-9]+" | head -1`
   echo
   echo "Current Tengine Version: ${CMSG}${OLD_tengine_ver}${CEND}"
   while :; do echo
@@ -168,22 +168,22 @@ Upgrade_Tengine() {
 Upgrade_OpenResty() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "${openresty_install_dir}/nginx/sbin/nginx" ] && echo "${CWARNING}OpenResty is not installed on your system! ${CEND}" && exit 1
-  OLD_openresy_ver_tmp=`${openresty_install_dir}/nginx/sbin/nginx -v 2>&1`
-  OLD_openresy_ver="`echo ${OLD_openresy_ver_tmp#*/} | awk '{print $1}'`"
-  Latest_openresy_ver=`curl --connect-timeout 2 -m 3 -s https://openresty.org/en/download.html | awk '/download\/openresty-/{print $0}' |  grep -oE "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -1`
+  OLD_openresty_ver_tmp=`${openresty_install_dir}/nginx/sbin/nginx -v 2>&1`
+  OLD_openresty_ver="`echo ${OLD_openresty_ver_tmp#*/} | awk '{print $1}'`"
+  Latest_openresty_ver=`curl --connect-timeout 2 -m 3 -s https://openresty.org/en/download.html | awk '/download\/openresty-/{print $0}' |  grep -oE "[0-9]+\.[0-9]+\.[0-9]+\.[0-9]+" | head -1`
   echo
-  echo "Current OpenResty Version: ${CMSG}${OLD_openresy_ver}${CEND}"
+  echo "Current OpenResty Version: ${CMSG}${OLD_openresty_ver}${CEND}"
   while :; do echo
-    [ "${openresty_flag}" != 'y' ] && read -e -p "Please input upgrade OpenResty Version(default: ${Latest_openresy_ver}): " NEW_openresy_ver
-    NEW_openresy_ver=${NEW_openresy_ver:-${Latest_openresy_ver}}
-    if [ "${NEW_openresy_ver}" != "${OLD_openresy_ver}" ]; then
-      [ ! -e "openresty-${NEW_openresy_ver}.tar.gz" ] && wget --no-check-certificate -c https://openresty.org/download/openresty-${NEW_openresy_ver}.tar.gz > /dev/null 2>&1
-      if [ -e "openresty-${NEW_openresy_ver}.tar.gz" ]; then
+    [ "${openresty_flag}" != 'y' ] && read -e -p "Please input upgrade OpenResty Version(default: ${Latest_openresty_ver}): " NEW_openresty_ver
+    NEW_openresty_ver=${NEW_openresty_ver:-${Latest_openresty_ver}}
+    if [ "${NEW_openresty_ver}" != "${OLD_openresty_ver}" ]; then
+      [ ! -e "openresty-${NEW_openresty_ver}.tar.gz" ] && wget --no-check-certificate -c https://openresty.org/download/openresty-${NEW_openresty_ver}.tar.gz > /dev/null 2>&1
+      if [ -e "openresty-${NEW_openresty_ver}.tar.gz" ]; then
         src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
         src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
         tar xzf openssl-${openssl11_ver}.tar.gz
         tar xzf pcre-${pcre_ver}.tar.gz
-        echo "Download [${CMSG}openresty-${NEW_openresy_ver}.tar.gz${CEND}] successfully! "
+        echo "Download [${CMSG}openresty-${NEW_openresty_ver}.tar.gz${CEND}] successfully! "
         break
       else
         echo "${CWARNING}OpenResty version does not exist! ${CEND}"
@@ -194,28 +194,28 @@ Upgrade_OpenResty() {
     fi
   done
 
-  if [ -e "openresty-${NEW_openresy_ver}.tar.gz" ]; then
-    echo "[${CMSG}openresty-${NEW_openresy_ver}.tar.gz${CEND}] found"
+  if [ -e "openresty-${NEW_openresty_ver}.tar.gz" ]; then
+    echo "[${CMSG}openresty-${NEW_openresty_ver}.tar.gz${CEND}] found"
     if [ "${openresty_flag}" != 'y' ]; then
       echo "Press Ctrl+c to cancel or Press any key to continue..."
       char=`get_char`
     fi
-    tar xzf openresty-${NEW_openresy_ver}.tar.gz
-    pushd openresty-${NEW_openresy_ver}
+    tar xzf openresty-${NEW_openresty_ver}.tar.gz
+    pushd openresty-${NEW_openresty_ver}
     make clean
-    sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' bundle/nginx-${NEW_openresy_ver%.*}/auto/cc/gcc # close debug
+    sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' bundle/nginx-${NEW_openresty_ver%.*}/auto/cc/gcc # close debug
     ${openresty_install_dir}/nginx/sbin/nginx -V &> $$
     ./configure --prefix=${openresty_install_dir} --user=${run_user} --group=${run_user} --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=../openssl-${openssl11_ver} --with-pcre=../pcre-${pcre_ver} --with-pcre-jit --with-ld-opt='-ljemalloc -Wl,-u,pcre_version' ${nginx_modules_options}
     make -j ${THREAD}
-    if [ -f "build/nginx-${NEW_openresy_ver%.*}/objs/nginx" ]; then
+    if [ -f "build/nginx-${NEW_openresty_ver%.*}/objs/nginx" ]; then
       /bin/mv ${openresty_install_dir}/nginx/sbin/nginx{,`date +%m%d`}
       make install
       kill -USR2 `cat /var/run/nginx.pid`
       sleep 1
       kill -QUIT `cat /var/run/nginx.pid.oldbin`
       popd > /dev/null
-      echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}${OLD_openresy_ver}${CEND} to ${CWARNING}${NEW_openresy_ver}${CEND}"
-      rm -rf openresty-${NEW_openresy_ver}
+      echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}${OLD_openresty_ver}${CEND} to ${CWARNING}${NEW_openresty_ver}${CEND}"
+      rm -rf openresty-${NEW_openresty_ver}
     else
       echo "${CFAILURE}Upgrade OpenResty failed! ${CEND}"
     fi
@@ -234,7 +234,7 @@ Upgrade_Apache() {
   while :; do echo
     [ "${apache_flag}" != 'y' ] && read -e -p "Please input upgrade Apache Version(Default: ${Latest_apache_ver}): " NEW_apache_ver
     NEW_apache_ver=${NEW_apache_ver:-${Latest_apache_ver}}
-    if [ `echo ${NEW_apache_ver} | awk -F. '{print $1$2}'` == "24" ]; then
+    if [ "`echo ${NEW_apache_ver} | awk -F. '{print $1$2}'`" = "24" ]; then
       if [ "${NEW_apache_ver}" != "${OLD_apache_ver}" ]; then
         src_url=http://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
         src_url=http://archive.apache.org/dist/apr/apr-util-${apr_util_ver}.tar.gz && Download_src
