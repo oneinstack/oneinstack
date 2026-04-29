@@ -18,7 +18,7 @@ Install_MySQL84() {
 
   if [ "${dbinstallmethod}" == "1" ]; then
     tar xJf mysql-${mysql84_ver}-linux-glibc2.17-x86_64.tar.xz
-    mv mysql-${mysql84_ver}-linux-glibc2.17-x88_64/* ${mysql_install_dir}
+    mv mysql-${mysql84_ver}-linux-glibc2.17-x86_64/* ${mysql_install_dir}
     sed -i "s@/usr/local/mysql@${mysql_install_dir}@g" ${mysql_install_dir}/bin/mysqld_safe
   elif [ "${dbinstallmethod}" == "2" ]; then
     boostVersion2=$(echo ${boost_ver} | awk -F. '{print $1"_"$2"_"$3}')

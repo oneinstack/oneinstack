@@ -30,7 +30,7 @@ checkDownload() {
   fi
 
   # jemalloc
-  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[1-9]$|^1[0-2]$ ]]; then
+  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$ ]]; then
     echo "Download jemalloc..."
     src_url=${mirror_link}/oneinstack/src/jemalloc-${jemalloc_ver}.tar.bz2 && Download_src
   fi
@@ -110,8 +110,10 @@ checkDownload() {
     src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
   fi
 
-  if [[ "${db_option}" =~ ^[1-9]$|^1[0-4]$ ]]; then
-    if [[ "${db_option}" =~ ^[1,2,5,6,7,9]$|^10$ ]] && [ "${dbinstallmethod}" == "2" ]; then
+  if [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
+    if [[ "${db_option}" =~ ^[0,1,2,5,6,7,9]$|^10$ ]] && [ "${dbinstallmethod}" == "2" ]; then
+      [[ "${db_option}" =~ ^0$ ]] && boost_ver=${boost_mysql84_ver}
+      [[ "${db_option}" =~ ^1$ ]] && boost_ver=${boost_mysql80_ver}
       [[ "${db_option}" =~ ^[2,5,6,7]$|^10$ ]] && boost_ver=${boost_oldver}
       [[ "${db_option}" =~ ^9$ ]] && boost_ver=${boost_percona_ver}
       echo "Download boost..."
@@ -121,6 +123,38 @@ checkDownload() {
     fi
 
     case "${db_option}" in
+      0)
+        # MySQL 8.4
+        if [ "${OUTIP_STATE}"x == "China"x ]; then
+          DOWN_ADDR_MYSQL=https://mirrors.oneinstack.com/oneinstack/src/
+        else
+          DOWN_ADDR_MYSQL=https://mirrors.oneinstack.com/oneinstack/src/
+        fi
+
+        if [ "${dbinstallmethod}" == '1' ]; then
+          echo "Download MySQL 8.4 binary package..."
+          FILE_NAME=mysql-${mysql84_ver}-linux-glibc2.17-x86_64.tar.xz
+        elif [ "${dbinstallmethod}" == '2' ]; then
+          echo "Download MySQL 8.4 source package..."
+          FILE_NAME=mysql-${mysql84_ver}.tar.gz
+        fi
+        # start download
+        src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME} && Download_src
+        src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME}.md5 && Download_src
+        # verifying download
+        MYSQL_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
+        [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
+        tryDlCount=0
+        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
+          wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
+          let "tryDlCount++"
+          [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
+        done
+        if [ "${tryDlCount}" == '6' ]; then
+          echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
+          kill -9 $$; exit 1;
+        fi
+        ;;
       1)
         # MySQL 8.0
         if [ "${OUTIP_STATE}"x == "China"x ]; then
@@ -131,7 +165,7 @@ checkDownload() {
 
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download MySQL 8.0 binary package..."
-          FILE_NAME=mysql-${mysql80_ver}-linux-glibc2.12-x86_64.tar.xz
+          FILE_NAME=mysql-${mysql80_ver}-linux-glibc2.17-x86_64.tar.xz
         elif [ "${dbinstallmethod}" == '2' ]; then
           echo "Download MySQL 8.0 source package..."
           FILE_NAME=mysql-${mysql80_ver}.tar.gz
