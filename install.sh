@@ -949,8 +949,8 @@ fi
 # Database
 case "${db_option}" in
   0)
-    . include/mysql-8.2.sh
-    Install_MySQL82 2>&1 | tee -a ${oneinstack_dir}/install.log
+    . include/mysql-8.4.sh
+    Install_MySQL84 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   1)
     . include/mysql-8.0.sh
