@@ -39,6 +39,7 @@ percona55_ver=5.5.62-38.14
 pgsql_ver=18.1
 
 mongodb_ver=8.0.17
+mongosh_ver=2.3.1
 
 # PHP
 php53_ver=5.3.29

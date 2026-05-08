@@ -16,8 +16,7 @@ Install_Caddy() {
   id -u ${run_user} >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -g ${run_group} -M -s /sbin/nologin ${run_user}
 
-  #unzip caddy_${caddy_ver}_linux_amd64.zip
-  tar xzf caddy-${caddy_ver}.tar.gz
+  tar xzf caddy_${caddy_ver}_linux_amd64.tar.gz
 
   #move caddy to /usr/local/caddy/bin
   [ ! -d "${caddy_install_dir}/bin" ] && mkdir -p ${caddy_install_dir}/bin

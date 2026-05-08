@@ -61,13 +61,13 @@ checkDownload() {
   # if nginx_option=4 download caddy
   if [ "${nginx_option}" == '4' ]; then
     echo "Download caddy ${caddy_ver}"
-    src_url=${mirror_link}/caddy/v${caddy_ver}/caddy-${caddy_ver}.tar.gz  && Download_src
+    src_url=https://github.com/caddyserver/caddy/releases/download/v${caddy_ver}/caddy_${caddy_ver}_linux_amd64.tar.gz  && Download_src
   fi
 
   # caddy
   if [ "${caddy_flag}" == 'y' ]; then
     echo "Download caddy ${caddy_ver}"
-    src_url=${mirror_link}/caddy/v${caddy_ver}/caddy-${caddy_ver}.tar.gz  && Download_src
+    src_url=https://github.com/caddyserver/caddy/releases/download/v${caddy_ver}/caddy_${caddy_ver}_linux_amd64.tar.gz  && Download_src
   fi
 
   # apache
@@ -484,16 +484,21 @@ checkDownload() {
           DOWN_ADDR_PGSQL=https://ftp.postgresql.org/pub/source/v${pgsql_ver}
           DOWN_ADDR_PGSQL_BK=https://ftp.heanet.ie/mirrors/postgresql/source/v${pgsql_ver}
         fi
-        src_url=${DOWN_ADDR_PGSQL}/${FILE_NAME} && Download_src
-        src_url=${DOWN_ADDR_PGSQL}/${FILE_NAME}.md5 && Download_src
-        PGSQL_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
+        
+        src_url=${DOWN_ADDR_PGSQL}/${FILE_NAME} && Download_src no_kill
+        src_url=${DOWN_ADDR_PGSQL}/${FILE_NAME}.md5 && Download_src no_kill
+        
+        PGSQL_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5 2>/dev/null)
         [ -z "${PGSQL_TAR_MD5}" ] && PGSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_PGSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
+        
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PGSQL_TAR_MD5}" ]; do
+        while [ "$(md5sum ${FILE_NAME} 2>/dev/null | awk '{print $1}')" != "${PGSQL_TAR_MD5}" ]; do
+          # Download_src internally falls back, but if it still fails MD5, we fallback here
           wget -c --no-check-certificate ${DOWN_ADDR_PGSQL_BK}/${FILE_NAME};sleep 1
           let "tryDlCount++"
-          [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${PGSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
+          [ "$(md5sum ${FILE_NAME} 2>/dev/null | awk '{print $1}')" == "${PGSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
+        
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$; exit 1;
@@ -522,6 +527,8 @@ checkDownload() {
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$; exit 1;
         fi
+        echo "Download MongoDB Shell (mongosh)..."
+        src_url=https://downloads.mongodb.com/compass/mongosh-${mongosh_ver}-linux-x64.tgz && Download_src
         ;;
     esac
   fi
@@ -767,7 +774,7 @@ checkDownload() {
   # phpMyAdmin
   if [ "${phpmyadmin_flag}" == 'y' ]; then
     echo "Download phpMyAdmin..."
-    if [[ "${php_option}" =~ ^[1-5]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^70$ ]]; then
+    if [[ "${php_option}" =~ ^[1-6]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-1]$ ]]; then
       src_url=https://files.phpmyadmin.net/phpMyAdmin/${phpmyadmin_oldver}/phpMyAdmin-${phpmyadmin_oldver}-all-languages.tar.gz && Download_src
     else
       src_url=https://files.phpmyadmin.net/phpMyAdmin/${phpmyadmin_ver}/phpMyAdmin-${phpmyadmin_ver}-all-languages.tar.gz && Download_src
