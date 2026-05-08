@@ -15,11 +15,7 @@ Download_src() {
   if [ -e "${filename}" ]; then
     local sz=$(wc -c < "${filename}" 2>/dev/null | tr -d ' ')
     if [ -n "$sz" ] && [ "$sz" -lt 1000 ]; then
-      if [[ "${filename}" == *.md5 ]]; then
-        if grep -qi "<html>" "${filename}" 2>/dev/null; then
-          rm -f "${filename}"
-        fi
-      else
+      if grep -qi "<html>\|404 Not Found\|301 Moved" "${filename}" 2>/dev/null; then
         rm -f "${filename}"
       fi
     fi
@@ -60,12 +56,7 @@ Download_src() {
     if [ -e "${filename}" ]; then
       local sz=$(wc -c < "${filename}" 2>/dev/null | tr -d ' ')
       if [ -n "$sz" ] && [ "$sz" -lt 1000 ]; then
-        if [[ "${filename}" == *.md5 ]]; then
-          if grep -qi "<html>" "${filename}" 2>/dev/null; then
-            rm -f "${filename}"
-            continue
-          fi
-        else
+        if grep -qi "<html>\|404 Not Found\|301 Moved" "${filename}" 2>/dev/null; then
           rm -f "${filename}"
           continue
         fi
