@@ -15,6 +15,11 @@ Install_MongoDB() {
   mkdir -p ${mongo_data_dir};chown mongod.mongod -R ${mongo_data_dir}
   tar xzf mongodb-linux-x86_64-${mongodb_ver}.tgz
   /bin/mv mongodb-linux-x86_64-${mongodb_ver} ${mongo_install_dir}
+
+  # Extract and install mongosh
+  tar xzf mongosh-${mongosh_ver}-linux-x64.tgz
+  /bin/cp mongosh-${mongosh_ver}-linux-x64/bin/mongosh ${mongo_install_dir}/bin/
+  [ -f "mongosh-${mongosh_ver}-linux-x64/bin/mongosh_crypt_v1.so" ] && /bin/cp mongosh-${mongosh_ver}-linux-x64/bin/mongosh_crypt_v1.so ${mongo_install_dir}/bin/
   /bin/cp ${oneinstack_dir}/init.d/mongod.service /lib/systemd/system/
   sed -i "s@=/usr/local/mongodb@=${mongo_install_dir}@g" /lib/systemd/system/mongod.service
   systemctl enable mongod
@@ -60,13 +65,13 @@ net:
 #sharding:
 EOF
   systemctl start mongod
-  echo ${mongo_install_dir}/bin/mongo 127.0.0.1/admin --eval \"db.createUser\(\{user:\'root\',pwd:\'$dbmongopwd\',roles:[\'userAdminAnyDatabase\']\}\)\" | bash
+  echo ${mongo_install_dir}/bin/mongosh 127.0.0.1/admin --eval \"db.createUser\(\{user:\'root\',pwd:\'$dbmongopwd\',roles:[\'userAdminAnyDatabase\']\}\)\" | bash
   sed -i 's@^#security:@security:@' /etc/mongod.conf
   sed -i 's@^#  authorization:@  authorization:@' /etc/mongod.conf
-  if [ -e "${mongo_install_dir}/bin/mongo" ]; then
+  if [ -e "${mongo_install_dir}/bin/mongosh" ]; then
     sed -i "s+^dbmongopwd.*+dbmongopwd='$dbmongopwd'+" ../options.conf
     echo "${CSUCCESS}MongoDB installed successfully! ${CEND}"
-    rm -rf mongodb-linux-x86_64-${mongodb_ver}
+    rm -rf mongodb-linux-x86_64-${mongodb_ver} mongosh-${mongosh_ver}-linux-x64
   else
     rm -rf ${mongo_install_dir} ${mongo_data_dir}
     echo "${CFAILURE}MongoDB install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release

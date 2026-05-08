@@ -1,1 +1,14 @@
 install.log
+src/*.tar.gz
+src/*.tar.xz
+src/*.tar.bz2
+src/*.tgz
+src/*.md5
+src/*.log
+src/redis-*/
+src/*.patch
+src/*.jar
+src/download_deps.py
+src/download_mirrors.sh
+src/download_mysql.sh
+src/download_mysql_for_mirror.sh

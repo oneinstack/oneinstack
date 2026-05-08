@@ -369,7 +369,7 @@ What Are You Doing?
         [ -e "/dev/shm/php85-cgi.sock" ] && echo -e "\t${CMSG}15${CEND}. PHP 8.5"
         read -e -p "Please input a number:(Default 0 press Enter) " php_option
         php_option=${php_option:-0}
-        if [[ ! ${php_option} =~ ^[0-9]$|^1[0-5]$ ]]; then
+        if [[ ! ${php_option} =~ ^[0-9]$|^1[0-4]$ ]]; then
           echo "${CWARNING}input error! Please only input number 0~15${CEND}"
         else
           break
