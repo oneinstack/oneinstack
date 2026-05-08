@@ -240,7 +240,12 @@ If you enter '.', the field will be left blank.
       fi
       if [ "${caddy_ssl_flag}" == 'y' ]; then
         [ ! -d ${caddy_install_dir}/conf/vhost ] && mkdir -p ${caddy_install_dir}/conf/vhost
-        echo "${domain}${moredomainame} {  root * ${vhostdir}; file_server }" > ${caddy_install_dir}/conf/vhost/${domain}.conf
+        cat > ${caddy_install_dir}/conf/vhost/${domain}.conf << EOF
+${domain}${moredomainame} {
+  root * ${vhostdir}
+  file_server
+}
+EOF
         Reload_Caddy
       fi
       if [ "${apache_ssl_flag}" == 'y' ]; then
@@ -369,7 +374,7 @@ What Are You Doing?
         [ -e "/dev/shm/php85-cgi.sock" ] && echo -e "\t${CMSG}15${CEND}. PHP 8.5"
         read -e -p "Please input a number:(Default 0 press Enter) " php_option
         php_option=${php_option:-0}
-        if [[ ! ${php_option} =~ ^[0-9]$|^1[0-4]$ ]]; then
+        if [[ ! ${php_option} =~ ^[0-9]$|^1[0-5]$ ]]; then
           echo "${CWARNING}input error! Please only input number 0~15${CEND}"
         else
           break
@@ -963,7 +968,7 @@ ${domain}${moredomainame} {
   php_fastcgi unix:/dev/shm/php${mphp_ver}-cgi.sock
   file_server
   ${Caddy_log}
-  [ -e "${PATH_SSL}/${domain}.crt" ] && tls ${PATH_SSL}/${domain}.crt ${PATH_SSL}/${domain}.key
+  $( [ -e "${PATH_SSL}/${domain}.crt" ] && echo "tls ${PATH_SSL}/${domain}.crt ${PATH_SSL}/${domain}.key" )
   handle_errors {
     rewrite * /{err.status_code}.html
     file_server
@@ -1013,7 +1018,7 @@ EOF
 ${domain}${moredomainame} {
   reverse_proxy ${Proxy_Pass}
   ${Caddy_log}
-  [ -e "${PATH_SSL}/${domain}.crt" ] && tls ${PATH_SSL}/${domain}.crt ${PATH_SSL}/${domain}.key
+  $( [ -e "${PATH_SSL}/${domain}.crt" ] && echo "tls ${PATH_SSL}/${domain}.crt ${PATH_SSL}/${domain}.key" )
 }
 EOF
   fi
