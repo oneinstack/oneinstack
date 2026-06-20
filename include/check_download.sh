@@ -147,7 +147,7 @@ checkDownload() {
         MYSQL_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
         [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
           wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
@@ -181,7 +181,7 @@ checkDownload() {
         MYSQL_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
         [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
           wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
@@ -216,7 +216,7 @@ checkDownload() {
         MYSQL_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
         [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
           wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
@@ -251,7 +251,7 @@ checkDownload() {
         MYSQL_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
         [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
           wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
@@ -287,7 +287,7 @@ checkDownload() {
         MYSQL_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
         [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
           wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
@@ -339,7 +339,7 @@ checkDownload() {
         MARAIDB_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
         [ -z "${MARAIDB_TAR_MD5}" ] && MARAIDB_TAR_MD5=$(curl -s ${DOWN_ADDR_MARIADB_BK}/md5sums.txt | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MARAIDB_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MARAIDB_TAR_MD5}" ]; do
           wget -c --no-check-certificate ${DOWN_ADDR_MARIADB_BK}/${FILE_NAME};sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MARAIDB_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
@@ -371,7 +371,7 @@ checkDownload() {
         PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5sum)
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${mirror_link}/oneinstack/src/${FILE_NAME}.md5sum | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
           wget -c --no-check-certificate ${DOWN_ADDR_PERCONA}/${FILE_NAME}; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${PERCONA_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
@@ -403,7 +403,7 @@ checkDownload() {
         PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5sum)
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${mirror_link}/oneinstack/src/${FILE_NAME}.md5sum | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
           wget -c --no-check-certificate ${DOWN_ADDR_PERCONA}/${FILE_NAME}; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${PERCONA_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
@@ -436,7 +436,7 @@ checkDownload() {
         PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5sum)
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${mirror_link}/oneinstack/src/${FILE_NAME}.md5sum | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
           wget -c --no-check-certificate ${DOWN_ADDR_PERCONA}/${FILE_NAME}; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${PERCONA_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
@@ -469,7 +469,7 @@ checkDownload() {
         PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5sum)
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${mirror_link}/oneinstack/src/${FILE_NAME}.md5sum | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
           wget -c --no-check-certificate ${DOWN_ADDR_PERCONA}/${FILE_NAME}; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${PERCONA_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
@@ -496,7 +496,7 @@ checkDownload() {
         [ -z "${PGSQL_TAR_MD5}" ] && PGSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_PGSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} 2>/dev/null | awk '{print $1}')" != "${PGSQL_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} 2>/dev/null | awk '{print $1}')" != "${PGSQL_TAR_MD5}" ]; do
           # Download_src internally falls back, but if it still fails MD5, we fallback here
           wget -c --no-check-certificate ${DOWN_ADDR_PGSQL_BK}/${FILE_NAME};sleep 1
           let "tryDlCount++"
@@ -522,7 +522,7 @@ checkDownload() {
         MongoDB_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
         [ -z "${MongoDB_TAR_MD5}" ] && MongoDB_TAR_MD5=$(curl -s ${DOWN_ADDR_MongoDB}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
-        while [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MongoDB_TAR_MD5}" ]; do
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MongoDB_TAR_MD5}" ]; do
           wget -c --no-check-certificate ${DOWN_ADDR_MongoDB}/${FILE_NAME};sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MongoDB_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
