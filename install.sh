@@ -935,6 +935,13 @@ if [ ! -e ~/.oneinstack ]; then
   installDepsBySrc 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
+# Debian 13+ / Ubuntu 24.04+ renamed/removed libaio1 and libncurses5; ensure the compat libraries
+# exist for prebuilt DB binaries even when the dependency stage above was skipped (~/.oneinstack exists)
+if [[ "${Family}" =~ ^debian$|^ubuntu$ ]]; then
+  . ./include/check_sw.sh
+  fixDebianCompatLibs 2>&1 | tee -a ${oneinstack_dir}/install.log
+fi
+
 # start Time
 startTime=`date +%s`
 
