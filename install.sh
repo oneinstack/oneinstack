@@ -59,7 +59,7 @@ Show_Help() {
   --nodejs                    Install Nodejs
   --tomcat_option [1-6]       Install Tomcat version
   --jdk_option [1-3]          Install JDK version
-  --db_option [1-15]          Install DB version
+  --db_option [0-14]          Install DB version
   --dbinstallmethod [1-2]     DB install method, default: 1 binary install
   --dbrootpwd [password]      DB super password
   --pureftpd                  Install Pure-Ftpd
@@ -217,23 +217,25 @@ while :; do
   --db_option)
     db_option=$2
     shift 2
-    if [[ "${db_option}" =~ ^[1-9]$|^1[0-4]$ ]]; then
-      [ -d "${db_install_dir}/support-files" ] && {
-        echo "${CWARNING}MySQL already installed! ${CEND}"
-        unset db_option
-      }
-    elif [ "${db_option}" == '13' ]; then
-      [ -e "${pgsql_install_dir}/bin/psql" ] && {
-        echo "${CWARNING}PostgreSQL already installed! ${CEND}"
-        unset db_option
-      }
-    elif [ "${db_option}" == '15' ]; then
-      [ -e "${mongo_install_dir}/bin/mongo" ] && {
-        echo "${CWARNING}MongoDB already installed! ${CEND}"
-        unset db_option
-      }
+    if [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
+      if [ "${db_option}" == '13' ]; then
+        [ -e "${pgsql_install_dir}/bin/psql" ] && {
+          echo "${CWARNING}PostgreSQL already installed! ${CEND}"
+          unset db_option
+        }
+      elif [ "${db_option}" == '14' ]; then
+        [ -e "${mongo_install_dir}/bin/mongo" ] && {
+          echo "${CWARNING}MongoDB already installed! ${CEND}"
+          unset db_option
+        }
+      else
+        [ -d "${db_install_dir}/support-files" ] && {
+          echo "${CWARNING}MySQL already installed! ${CEND}"
+          unset db_option
+        }
+      fi
     else
-      echo "${CWARNING}db_option input error! Please only input number 1~15${CEND}"
+      echo "${CWARNING}db_option input error! Please only input number 0~14${CEND}"
       exit 1
     fi
     ;;
@@ -940,7 +942,7 @@ startTime=`date +%s`
 Install_openSSL | tee -a ${oneinstack_dir}/install.log
 
 # Jemalloc
-if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[1-9]$|^1[0-4]$ ]]; then
+if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
   . include/jemalloc.sh
   Install_Jemalloc | tee -a ${oneinstack_dir}/install.log
 fi
@@ -1349,10 +1351,10 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${apache_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Apache install dir":)${CMSG}${apache_install_dir}${CEND}"
 [ "${caddy_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Caddy install dir":)${CMSG}${caddy_install_dir}${CEND}"
 [[ "${tomcat_option}" =~ ^[1-6]$ ]] && echo -e "\n$(printf "%-32s" "Tomcat install dir":)${CMSG}${tomcat_install_dir}${CEND}"
-[[ "${db_option}" =~ ^[1-9]$|^1[0-4]$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
-[[ "${db_option}" =~ ^[1-9]$|^1[0-4]$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
-[[ "${db_option}" =~ ^[1-9]$|^1[0-4]$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
-[[ "${db_option}" =~ ^[1-9]$|^1[0-4]$ ]] && echo "$(printf "%-32s" "Database password:")${CMSG}${dbrootpwd}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]] && echo "$(printf "%-32s" "Database password:")${CMSG}${dbrootpwd}${CEND}"
 [ "${db_option}" == '13' ] && echo -e "\n$(printf "%-32s" "PostgreSQL install dir:")${CMSG}${pgsql_install_dir}${CEND}"
 [ "${db_option}" == '13' ] && echo "$(printf "%-32s" "PostgreSQL data dir:")${CMSG}${pgsql_data_dir}${CEND}"
 [ "${db_option}" == '13' ] && echo "$(printf "%-32s" "PostgreSQL user:")${CMSG}postgres${CEND}"
