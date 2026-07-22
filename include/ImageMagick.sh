@@ -44,6 +44,9 @@ Install_pecl_imagick() {
     if [[ "${PHP_main_ver}" =~ ^5.3$ ]]; then
       tar xzf imagick-${imagick_oldver}.tgz
       pushd imagick-${imagick_oldver} > /dev/null
+    elif [[ "${PHP_main_ver}" =~ ^8.5$ ]]; then
+      tar xzf imagick-${imagick_php85_ver}.tgz
+      pushd imagick-${imagick_php85_ver} > /dev/null
     else
       tar xzf imagick-${imagick_ver}.tgz
       pushd imagick-${imagick_ver} > /dev/null
@@ -56,7 +59,7 @@ Install_pecl_imagick() {
     if [ -f "${phpExtensionDir}/imagick.so" ]; then
       echo 'extension=imagick.so' > ${php_install_dir}/etc/php.d/03-imagick.ini
       echo "${CSUCCESS}PHP imagick module installed successfully! ${CEND}"
-      rm -rf imagick-${imagick_ver} imagick-${imagick_oldver}
+      rm -rf imagick-${imagick_ver} imagick-${imagick_oldver} imagick-${imagick_php85_ver}
     else
       echo "${CFAILURE}PHP imagick module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     fi

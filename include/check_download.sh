@@ -538,7 +538,7 @@ checkDownload() {
   fi
 
   # PHP
-  if [[ "${php_option}" =~ ^[1-9]$|^1[0-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-4]$ ]]; then
+  if [[ "${php_option}" =~ ^[1-9]$|^1[0-5]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-5]$ ]]; then
     echo "PHP common..."
     src_url=${mirror_link}/oneinstack/src/libiconv-${libiconv_ver}.tar.gz && Download_src
     src_url=https://curl.haxx.se/download/curl-${curl_ver}.tar.gz && Download_src
@@ -600,6 +600,11 @@ checkDownload() {
     src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
   elif [ "${php_option}" == '14' ] || [ "${mphp_ver}" == '84' ]; then
     src_url=${mirror_link}/oneinstack/src/php-${php84_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_up_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
+  elif [ "${php_option}" == '15' ] || [ "${mphp_ver}" == '85' ]; then
+    src_url=${mirror_link}/oneinstack/src/php-${php85_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_up_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
@@ -682,6 +687,8 @@ checkDownload() {
     echo "Download imagick..."
     if [[ "${php_option}" =~ ^1$ ]]; then
       src_url=https://pecl.php.net/get/imagick-${imagick_oldver}.tgz && Download_src
+    elif [[ "${php_option}" =~ ^15$ ]] || [[ "${mphp_ver}" =~ ^85$ ]]; then
+      src_url=https://pecl.php.net/get/imagick-${imagick_php85_ver}.tgz && Download_src
     else
       src_url=https://pecl.php.net/get/imagick-${imagick_ver}.tgz && Download_src
     fi

@@ -49,13 +49,15 @@ for tomcat_option in 1 2 3 4 5; do
   checkDownload 2>&1
 done
 
-# 3. 下载所有数据库 (二进制 + 源码编译 双版本) - 注释掉以防止官方镜像 MD5 损坏导致的无限重试循环
-# for db_option in 1 2 3 4 5 6 7 8 9 10 11 12 13 14; do
-#   dbinstallmethod=1
-#   checkDownload 2>&1
-#   dbinstallmethod=2
-#   checkDownload 2>&1
-# done
+# 3. 下载所有数据库 (二进制 + 源码编译 双版本)
+for db_option in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14; do
+  dbinstallmethod=1
+  checkDownload 2>&1
+  if [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$ ]]; then
+    dbinstallmethod=2
+    checkDownload 2>&1
+  fi
+done
 
 # 4. 下载所有 PHP 版本 (5.3 - 8.5)
 for php_option in 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
