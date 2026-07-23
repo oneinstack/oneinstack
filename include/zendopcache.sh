@@ -14,6 +14,28 @@ Install_ZendOPcache() {
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
+    if [ "${PHP_main_ver}" == '8.5' ]; then
+      # OPcache is always built into PHP 8.5 and must not be loaded as opcache.so.
+      # PHP 8.5 始终内置 OPcache，不能再通过 opcache.so 重复加载。
+      cat > ${php_install_dir}/etc/php.d/02-opcache.ini << EOF
+[opcache]
+opcache.enable=1
+opcache.enable_cli=1
+opcache.memory_consumption=${Memory_limit}
+opcache.interned_strings_buffer=8
+opcache.max_accelerated_files=100000
+opcache.max_wasted_percentage=5
+opcache.use_cwd=1
+opcache.validate_timestamps=1
+opcache.revalidate_freq=60
+;opcache.save_comments=0
+opcache.consistency_checks=0
+;opcache.optimization_level=0
+EOF
+      echo "${CSUCCESS}PHP opcache configured successfully! ${CEND}"
+      popd > /dev/null
+      return 0
+    fi
     if [[ "${PHP_main_ver}" =~ ^5.[3-4]$ ]]; then
       tar xzf zendopcache-${zendopcache_ver}.tgz
       pushd zendopcache-${zendopcache_ver} > /dev/null

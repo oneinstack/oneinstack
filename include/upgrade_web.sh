@@ -21,7 +21,10 @@ Upgrade_Nginx() {
     [ "${nginx_flag}" != 'y' ] && read -e -p "Please input upgrade Nginx Version(default: ${Latest_nginx_ver}): " NEW_nginx_ver
     NEW_nginx_ver=${NEW_nginx_ver:-${Latest_nginx_ver}}
     if [ "${NEW_nginx_ver}" != "${OLD_nginx_ver}" ]; then
-      [ ! -e "nginx-${NEW_nginx_ver}.tar.gz" ] && wget --no-check-certificate -c https://nginx.org/download/nginx-${NEW_nginx_ver}.tar.gz > /dev/null 2>&1
+      if [ ! -e "nginx-${NEW_nginx_ver}.tar.gz" ]; then
+        src_url=https://nginx.org/download/nginx-${NEW_nginx_ver}.tar.gz
+        Download_src no_kill
+      fi
       if [ -e "nginx-${NEW_nginx_ver}.tar.gz" ]; then
         src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
         src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
@@ -112,7 +115,10 @@ Upgrade_Tengine() {
     [ "${tengine_flag}" != 'y' ] && read -e -p "Please input upgrade Tengine Version(default: ${Latest_tengine_ver}): " NEW_tengine_ver
     NEW_tengine_ver=${NEW_tengine_ver:-${Latest_tengine_ver}}
     if [ "${NEW_tengine_ver}" != "${OLD_tengine_ver}" ]; then
-      [ ! -e "tengine-${NEW_tengine_ver}.tar.gz" ] && wget --no-check-certificate -c https://tengine.taobao.org/download/tengine-${NEW_tengine_ver}.tar.gz > /dev/null 2>&1
+      if [ ! -e "tengine-${NEW_tengine_ver}.tar.gz" ]; then
+        src_url=https://tengine.taobao.org/download/tengine-${NEW_tengine_ver}.tar.gz
+        Download_src no_kill
+      fi
       if [ -e "tengine-${NEW_tengine_ver}.tar.gz" ]; then
         src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
         src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
@@ -177,7 +183,10 @@ Upgrade_OpenResty() {
     [ "${openresty_flag}" != 'y' ] && read -e -p "Please input upgrade OpenResty Version(default: ${Latest_openresty_ver}): " NEW_openresty_ver
     NEW_openresty_ver=${NEW_openresty_ver:-${Latest_openresty_ver}}
     if [ "${NEW_openresty_ver}" != "${OLD_openresty_ver}" ]; then
-      [ ! -e "openresty-${NEW_openresty_ver}.tar.gz" ] && wget --no-check-certificate -c https://openresty.org/download/openresty-${NEW_openresty_ver}.tar.gz > /dev/null 2>&1
+      if [ ! -e "openresty-${NEW_openresty_ver}.tar.gz" ]; then
+        src_url=https://openresty.org/download/openresty-${NEW_openresty_ver}.tar.gz
+        Download_src no_kill
+      fi
       if [ -e "openresty-${NEW_openresty_ver}.tar.gz" ]; then
         src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
         src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
@@ -227,7 +236,7 @@ Upgrade_Apache() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "${apache_install_dir}/bin/httpd" ] && echo "${CWARNING}Apache is not installed on your system! ${CEND}" && exit 1
   OLD_apache_ver="`${apache_install_dir}/bin/httpd -v | grep version | awk -F'/| ' '{print $4}'`"
-  Latest_apache_ver=`curl --connect-timeout 2 -m 3 -s http://httpd.apache.org/download.cgi | awk "/#apache24/{print $2}" | head -1 | grep -oE "2\.[24]\.[0-9]+"`
+  Latest_apache_ver=`curl --connect-timeout 2 -m 3 -s https://httpd.apache.org/download.cgi | awk "/#apache24/{print $2}" | head -1 | grep -oE "2\.[24]\.[0-9]+"`
   Latest_apache_ver=${Latest_apache_ver:-${apache22_ver}}
   echo
   echo "Current Apache Version: ${CMSG}${OLD_apache_ver}${CEND}"
@@ -238,7 +247,10 @@ Upgrade_Apache() {
       if [ "${NEW_apache_ver}" != "${OLD_apache_ver}" ]; then
         src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
         src_url=https://archive.apache.org/dist/apr/apr-util-${apr_util_ver}.tar.gz && Download_src
-        [ ! -e "httpd-${NEW_apache_ver}.tar.gz" ] && wget --no-check-certificate -c https://archive.apache.org/dist/httpd/httpd-${NEW_apache_ver}.tar.gz > /dev/null 2>&1
+        if [ ! -e "httpd-${NEW_apache_ver}.tar.gz" ]; then
+          src_url=https://archive.apache.org/dist/httpd/httpd-${NEW_apache_ver}.tar.gz
+          Download_src no_kill
+        fi
         if [ -e "httpd-${NEW_apache_ver}.tar.gz" ]; then
           echo "Download [${CMSG}apache-${NEW_apache_ver}.tar.gz${CEND}] successfully! "
           break
@@ -316,10 +328,16 @@ Upgrade_Tomcat() {
       rm -f catalina-jmx-remote.jar
       echo "Download tomcat-${NEW_tomcat_ver}..."
       src_url=${mirror_link}/apache/tomcat/v${NEW_tomcat_ver}/apache-tomcat-${NEW_tomcat_ver}.tar.gz && Download_src
-      [ ! -e "apache-tomcat-${NEW_tomcat_ver}.tar.gz" ] && wget --no-check-certificate -c https://archive.apache.org/dist/tomcat-${OLD_tomcat_ver}/v${NEW_tomcat_ver}/bin/apache-tomcat-${NEW_tomcat_ver}.tar.gz > /dev/null 2>&1
+      if [ ! -e "apache-tomcat-${NEW_tomcat_ver}.tar.gz" ]; then
+        src_url=https://archive.apache.org/dist/tomcat-${OLD_tomcat_ver}/v${NEW_tomcat_ver}/bin/apache-tomcat-${NEW_tomcat_ver}.tar.gz
+        Download_src no_kill
+      fi
       if [ -e "${tomcat_install_dir}/lib/catalina-jmx-remote.jar" ]; then
         src_url=${mirror_link}/apache/tomcat/v${NEW_tomcat_ver}/catalina-jmx-remote.jar && Download_src
-        [ ! -e "catalina-jmx-remote.jar" ] && wget --no-check-certificate -c https://archive.apache.org/dist/tomcat-${OLD_tomcat_ver}/v${NEW_tomcat_ver}/bin/extras/catalina-jmx-remote.jar > /dev/null 2>&1
+        if [ ! -e "catalina-jmx-remote.jar" ]; then
+          src_url=https://archive.apache.org/dist/tomcat-${OLD_tomcat_ver}/v${NEW_tomcat_ver}/bin/extras/catalina-jmx-remote.jar
+          Download_src no_kill
+        fi
       fi
       if [ -e "apache-tomcat-${NEW_tomcat_ver}.tar.gz" ]; then
         echo "Download [${CMSG}apache-tomcat-${NEW_tomcat_ver}.tar.gz${CEND}] successfully! "

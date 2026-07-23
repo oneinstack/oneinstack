@@ -14,9 +14,10 @@ Install_OpenJDK17() {
       cat > /etc/yum.repos.d/adoptium.repo << EOF
 [Adoptium]
 name=Adoptium
-baseurl=https://mirrors.tuna.tsinghua.edu.cn/Adoptium/rpm/rhel\$releasever-\$basearch/
+baseurl=https://packages.adoptium.net/artifactory/rpm/rhel/\$releasever/\$basearch
 enabled=1
-gpgcheck=0
+gpgcheck=1
+gpgkey=https://packages.adoptium.net/artifactory/api/gpg/key/public
 EOF
       yum -y install temurin-17-jdk
       JAVA_HOME=/usr/lib/jvm/temurin-17-jdk

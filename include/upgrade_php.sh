@@ -22,7 +22,10 @@ Upgrade_PHP() {
     read -e -p "Please input upgrade PHP Version(Default: $Latest_php_ver): " NEW_php_ver
     NEW_php_ver=${NEW_php_ver:-${Latest_php_ver}}
     if [ "${NEW_php_ver%.*}" == "${OLD_php_ver%.*}" ]; then
-      [ ! -e "php-${NEW_php_ver}.tar.gz" ] && wget --no-check-certificate -c https://secure.php.net/distributions/php-${NEW_php_ver}.tar.gz > /dev/null 2>&1
+      if [ ! -e "php-${NEW_php_ver}.tar.gz" ]; then
+        src_url=https://www.php.net/distributions/php-${NEW_php_ver}.tar.gz
+        Download_src no_kill
+      fi
       if [ -e "php-${NEW_php_ver}.tar.gz" ]; then
         echo "Download [${CMSG}php-${NEW_php_ver}.tar.gz${CEND}] successfully! "
       else
@@ -52,7 +55,11 @@ Upgrade_PHP() {
     make clean
     export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/:$PKG_CONFIG_PATH
     ${php_install_dir}/bin/php -i |grep 'Configure Command' | awk -F'=>' '{print $2}' | bash
-    make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
+    if [ "${OLD_php_ver%.*}" == '8.5' ]; then
+      make -j ${THREAD}
+    else
+      make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
+    fi
     if [ -e "${apache_install_dir}/bin/httpd" ]; then
       echo "Stoping apache..."
       service httpd stop

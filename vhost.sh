@@ -28,6 +28,15 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/get_char.sh
 . ./include/openssl.sh
 
+Require_Acme_Client() {
+  if [ ! -x "${HOME}/.acme.sh/acme.sh" ]; then
+    echo "${CFAILURE}acme.sh is not installed.${CEND}"
+    echo "For supply-chain safety, OneinStack no longer downloads and executes an unpinned master archive as root."
+    echo "Install a reviewed release from https://github.com/acmesh-official/acme.sh and rerun this command."
+    return 1
+  fi
+}
+
 Show_Help() {
   echo
   echo "Usage: $0  command ...[parameters]....
@@ -193,15 +202,9 @@ If you enter '.', the field will be left blank.
         fi
       done
   if [ "${Domian_Mode}" == '3' -o "${dnsapi_flag}" == 'y' ] && [ ! -e ~/.acme.sh/acme.sh ]; then
-    pushd ${oneinstack_dir}/src > /dev/null
-    [ ! -e acme.sh-master.tar.gz ] && wget -qc ${mirror_link}/oneinstack/src/acme.sh-master.tar.gz
-    tar xzf acme.sh-master.tar.gz
-    pushd acme.sh-master > /dev/null
-    ./acme.sh --install > /dev/null 2>&1
-    popd > /dev/null
-    popd > /dev/null
-    ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt > /dev/null 2>&1
+    Require_Acme_Client || exit 1
   fi
+  [ -x ~/.acme.sh/acme.sh ] && ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt > /dev/null 2>&1
   [ -e ~/.acme.sh/account.conf ] && sed -i '/^CERT_HOME=/d' ~/.acme.sh/account.conf
     if [ "${moredomain}" == "*.${domain}" -o "${dnsapi_flag}" == 'y' ]; then
       while :; do echo
@@ -409,15 +412,9 @@ What Are You Doing?
   esac
 
   if [ "${Domian_Mode}" == '3' -o "${dnsapi_flag}" == 'y' ] && [ ! -e ~/.acme.sh/acme.sh ]; then
-    pushd ${oneinstack_dir}/src > /dev/null
-    [ ! -e acme.sh-master.tar.gz ] && wget -qc ${mirror_link}/oneinstack/src/acme.sh-master.tar.gz
-    tar xzf acme.sh-master.tar.gz
-    pushd acme.sh-master > /dev/null
-    ./acme.sh --install > /dev/null 2>&1
-    popd > /dev/null
-    popd > /dev/null
-    ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt > /dev/null 2>&1
+    Require_Acme_Client || exit 1
   fi
+  [ -x ~/.acme.sh/acme.sh ] && ~/.acme.sh/acme.sh --set-default-ca --server letsencrypt > /dev/null 2>&1
   [ -e ~/.acme.sh/account.conf ] && sed -i '/^CERT_HOME=/d' ~/.acme.sh/account.conf
   if [[ "${Domian_Mode}" =~ ^[2-3]$ ]] || [ "${dnsapi_flag}" == 'y' ]; then
     if [ -e "${web_install_dir}/sbin/nginx" ]; then

@@ -37,6 +37,8 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/upgrade_phpmyadmin.sh
 . ./include/upgrade_oneinstack.sh
 
+Require_Trusted_Mirror || exit 1
+
 # get the out ip country
 OUTIP_STATE=$(./include/ois.${ARCH} ip_state)
 
@@ -49,7 +51,7 @@ Show_Help() {
   --openresty    [version]    Upgrade OpenResty
   --apache       [version]    Upgrade Apache
   --tomcat       [version]    Upgrade Tomcat
-  --db           [version]    Upgrade MySQL/MariaDB/Percona
+  --db           [version]    Upgrade MySQL/MariaDB/Percona (MySQL 8.4/9.7 to latest 9.7 LTS)
   --php          [version]    Upgrade PHP
   --redis        [version]    Upgrade Redis
   --memcached    [version]    Upgrade Memcached

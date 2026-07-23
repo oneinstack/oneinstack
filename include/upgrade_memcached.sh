@@ -19,8 +19,11 @@ Upgrade_Memcached() {
     [ "${memcached_flag}" != 'y' ] && read -e -p "Please input upgrade Memcached Version(default: ${Latest_memcached_ver}): " NEW_memcached_ver
     NEW_memcached_ver=${NEW_memcached_ver:-${Latest_memcached_ver}}
     if [ "${NEW_memcached_ver}" != "${OLD_memcached_ver}" ]; then
-      [ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR=${mirror_link}/oneinstack/src || DOWN_ADDR=http://www.memcached.org/files
-      [ ! -e "memcached-${NEW_memcached_ver}.tar.gz" ] && wget --no-check-certificate -c ${DOWN_ADDR}/memcached-${NEW_memcached_ver}.tar.gz > /dev/null 2>&1
+      [ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR=${mirror_link}/oneinstack/src || DOWN_ADDR=https://www.memcached.org/files
+      if [ ! -e "memcached-${NEW_memcached_ver}.tar.gz" ]; then
+        src_url=${DOWN_ADDR}/memcached-${NEW_memcached_ver}.tar.gz
+        Download_src no_kill
+      fi
       if [ -e "memcached-${NEW_memcached_ver}.tar.gz" ]; then
         echo "Download [${CMSG}memcached-${NEW_memcached_ver}.tar.gz${CEND}] successfully! "
         break

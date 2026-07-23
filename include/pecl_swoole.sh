@@ -32,6 +32,12 @@ Install_pecl_swoole() {
       pushd swoole-${swoole_oldver} > /dev/null
       ${php_install_dir}/bin/phpize
       ./configure --with-php-config=${php_install_dir}/bin/php-config --enable-openssl --with-openssl-dir=${openssl_install_dir} --enable-http2 --enable-swoole-json --enable-swoole-curl
+    elif [ "${PHP_main_ver}" == '8.5' ]; then
+      src_url=https://pecl.php.net/get/swoole-${swoole_up_ver}.tgz && Download_src
+      tar xzf swoole-${swoole_up_ver}.tgz
+      pushd swoole-${swoole_up_ver} > /dev/null
+      ${php_install_dir}/bin/phpize
+      ./configure --with-php-config=${php_install_dir}/bin/php-config --enable-openssl --with-openssl-dir=${openssl_install_dir} --enable-http2 --enable-swoole-json --enable-swoole-curl
     else
       src_url=https://pecl.php.net/get/swoole-${swoole_ver}.tgz && Download_src
       tar xzf swoole-${swoole_ver}.tgz
@@ -44,7 +50,7 @@ Install_pecl_swoole() {
     if [ -f "${phpExtensionDir}/swoole.so" ]; then
       echo 'extension=swoole.so' > ${php_install_dir}/etc/php.d/06-swoole.ini
       echo "${CSUCCESS}PHP swoole module installed successfully! ${CEND}"
-      rm -rf swoole-${swoole_ver} swoole-${swoole_oldver} swoole-1.10.5 swoole-4.5.2
+      rm -rf swoole-${swoole_up_ver} swoole-${swoole_ver} swoole-${swoole_oldver} swoole-1.10.5 swoole-4.5.2
     else
       echo "${CFAILURE}PHP swoole module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     fi

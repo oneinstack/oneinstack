@@ -6,8 +6,8 @@
 - 持续更新，提供交互式安装和自动安装
 - 源码编译安装，采用最新稳定版本，并从官方站点下载
 - 提供多重安全优化
-- 提供多个数据库版本（MySQL-8.0、MySQL-5.7、MySQL-5.6、MySQL-5.5、MariaDB-10.11、MariaDB-10.5、MariaDB-10.4、MariaDB-5.5、Percona-8.0、Percona-5.7、Percona-5.6、Percona-5.5、PostgreSQL、MongoDB）
-- 提供多个PHP版本（PHP-8.3、PHP-8.2、PHP-8.1、PHP-8.0、PHP-7.4、PHP-7.3、PHP-7.2、PHP-7.1、PHP-7.0、PHP-5.6、PHP-5.5、PHP-5.4、PHP-5.3）
+- 提供多个数据库版本（MySQL-9.7 LTS、MySQL-8.4 LTS、MySQL-8.0、MySQL-5.7、MySQL-5.6、MySQL-5.5、MariaDB-10.11、MariaDB-10.5、MariaDB-10.4、MariaDB-5.5、Percona-8.0、Percona-5.7、Percona-5.6、Percona-5.5、PostgreSQL、MongoDB）
+- 提供多个PHP版本（PHP-8.5、PHP-8.4、PHP-8.3、PHP-8.2、PHP-8.1、PHP-8.0、PHP-7.4、PHP-7.3、PHP-7.2、PHP-7.1、PHP-7.0、PHP-5.6、PHP-5.5、PHP-5.4、PHP-5.3）
 - 提供Nginx、Tengine、OpenResty、Caddy、Apache和ngx_lua_waf
 - 提供多个Tomcat版本（Tomcat-10、Tomcat-9、Tomcat-8、Tomcat-7）
 - 提供多个JDK版本（OpenJDK-8、OpenJDK-11、OpenJDK-17）
@@ -51,6 +51,35 @@ screen -S oneinstack
 如果需要修改目录（安装、数据存储、Nginx日志），请在运行install.sh之前修改`options.conf`文件
 ```bash
 ./install.sh
+```
+
+### MySQL 9.7 LTS
+
+MySQL 9.7 使用官方 x86_64 二进制包，要求 RHEL 8+、Debian 12+ 或 Ubuntu 22+。
+
+```bash
+./install.sh --db_option 15 --dbinstallmethod 1 --dbrootpwd 'change-this-password'
+```
+
+支持从 MySQL 8.4 LTS 原地升级到 MySQL 9.7 LTS。生产升级前请额外备份并验证应用兼容性。
+
+```bash
+./upgrade.sh --db 9.7.1
+```
+
+### PHP 8.5
+
+PHP 8.5 支持作为主 PHP 安装，也支持作为多版本 PHP 并存安装。RHEL 系发行版要求 RHEL 8 或更新版本。
+
+```bash
+./install.sh --php_option 15 --phpcache_option 1 --php_extensions imagick,redis,memcached,mongodb,swoole,xdebug
+./install.sh --mphp_ver 85
+```
+
+已安装 PHP 8.5 时，可在 8.5 系列内升级：
+
+```bash
+./upgrade.sh --php 8.5.8
 ```
 
 ## 如何安装其他PHP版本
@@ -134,6 +163,13 @@ Memcached:
 ```bash
 systemctl {start|stop|status|restart|reload} memcached
 ```
+
+## 供应链安全
+
+- 保持 `mirror_link=https://mirrors.oneinstack.com`，程序会拒绝第三方镜像域名。
+- 下载必须使用 HTTPS，并以组件明确指定的地址为准；文件通过内容和压缩包检查后才会移入 `src/`。PHP 8.5 会校验固定的 SHA-256，MySQL 9.7 必须通过固定 Oracle 构建密钥指纹的 GPG 签名验证。
+- 已禁用旧的压缩包覆盖式 OneinStack 自更新。请从官方 Git 仓库更新，并在以 root 运行新脚本前审查差异。
+- `acme.sh` 和备份服务 CLI 需按厂商的可验证安装流程预先安装，OneinStack 不再以 root 自动下载未校验的可执行文件。
 
 ## 如何升级
 

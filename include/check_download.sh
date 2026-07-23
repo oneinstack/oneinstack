@@ -30,7 +30,7 @@ checkDownload() {
   fi
 
   # jemalloc
-  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$ ]]; then
+  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
     echo "Download jemalloc..."
     src_url=${mirror_link}/oneinstack/src/jemalloc-${jemalloc_ver}.tar.bz2 && Download_src
   fi
@@ -110,7 +110,7 @@ checkDownload() {
     src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
   fi
 
-  if [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
+  if [[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]]; then
     if [[ "${db_option}" =~ ^[0,1,2,5,6,7,9]$|^10$ ]] && [ "${dbinstallmethod}" == "2" ]; then
       [[ "${db_option}" =~ ^0$ ]] && boost_ver=${boost_mysql84_ver}
       [[ "${db_option}" =~ ^1$ ]] && boost_ver=${boost_mysql80_ver}
@@ -123,6 +123,35 @@ checkDownload() {
     fi
 
     case "${db_option}" in
+      15)
+        # MySQL 9.7 LTS (binary installation only)
+        DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-9.7
+        FILE_NAME=mysql-${mysql97_ver}-linux-glibc2.28-x86_64.tar.xz
+        echo "Download MySQL 9.7 LTS binary package..."
+        src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME} && Download_src
+        src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME}.asc && Download_src
+        Verify_GPG_Signature "${FILE_NAME}" "${FILE_NAME}.asc" \
+          "${mysql_gpg_key_url}" "${mysql_gpg_fingerprint}" || {
+          echo "${CFAILURE}${FILE_NAME} signature verification failed.${CEND}"
+          exit 1
+        }
+
+        # Pin the checksum published on Oracle's download page; do not trust a checksum
+        # fetched from the same endpoint as the archive.
+        # 固定 Oracle 下载页公布的摘要，避免压缩包与摘要同时被同一来源替换。
+        MYSQL_TAR_MD5=${mysql97_md5}
+        tryDlCount=0
+        while [[ "${MYSQL_TAR_MD5}" =~ ^[[:xdigit:]]{32}$ ]] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
+          rm -f ${FILE_NAME}
+          src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME} && Download_src
+          let "tryDlCount++"
+          [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
+        done
+        if [[ ! "${MYSQL_TAR_MD5}" =~ ^[[:xdigit:]]{32}$ ]] || [ "${tryDlCount}" == '6' ]; then
+          echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
+          kill -9 $$; exit 1
+        fi
+        ;;
       0)
         # MySQL 8.4
         if [ "${OUTIP_STATE}"x == "China"x ]; then
@@ -148,7 +177,7 @@ checkDownload() {
         [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
-          wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
+          src_url=${DOWN_ADDR_MYSQL_BK}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -182,7 +211,7 @@ checkDownload() {
         [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
-          wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
+          src_url=${DOWN_ADDR_MYSQL_BK}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -196,7 +225,7 @@ checkDownload() {
         if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.7
           DOWN_ADDR_MYSQL_BK=https://mirrors.aliyun.com/mysql/MySQL-5.7
-          DOWN_ADDR_MYSQL_BK2=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
+          DOWN_ADDR_MYSQL_BK2=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
         else
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.7
           DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-5.7
@@ -217,7 +246,7 @@ checkDownload() {
         [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
-          wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
+          src_url=${DOWN_ADDR_MYSQL_BK}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -229,8 +258,8 @@ checkDownload() {
       3)
         # MySQL 5.6
         if [ "${OUTIP_STATE}"x == "China"x ]; then
-          DOWN_ADDR_MYSQL=http://mirrors.aliyun.com/mysql/MySQL-5.6
-          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.6
+          DOWN_ADDR_MYSQL=https://mirrors.aliyun.com/mysql/MySQL-5.6
+          DOWN_ADDR_MYSQL_BK=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.6
           DOWN_ADDR_MYSQL_BK2=https://mirrors.aliyun.com/mysql/MySQL-5.6
         else
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.6
@@ -252,7 +281,7 @@ checkDownload() {
         [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
-          wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
+          src_url=${DOWN_ADDR_MYSQL_BK}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -264,8 +293,8 @@ checkDownload() {
       4)
         # MySQL 5.5
         if [ "${OUTIP_STATE}"x == "China"x ]; then
-          DOWN_ADDR_MYSQL=http://mirrors.aliyun.com/mysql/MySQL-5.5
-          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.5
+          DOWN_ADDR_MYSQL=https://mirrors.aliyun.com/mysql/MySQL-5.5
+          DOWN_ADDR_MYSQL_BK=https://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.5
           DOWN_ADDR_MYSQL_BK2=https://mirrors.aliyun.com/mysql/MySQL-5.5
         else
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.5
@@ -288,7 +317,7 @@ checkDownload() {
         [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5=$(curl -s ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
-          wget -c --no-check-certificate ${DOWN_ADDR_MYSQL_BK}/${FILE_NAME};sleep 1
+          src_url=${DOWN_ADDR_MYSQL_BK}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -335,12 +364,14 @@ checkDownload() {
 
         echo "Download MariaDB ${FILE_NAME} package..."
         src_url=${DOWN_ADDR_MARIADB}/${FILE_NAME} && Download_src
-        wget --tries=6 -c --no-check-certificate ${DOWN_ADDR_MARIADB}/md5sums.txt -O ${FILE_NAME}.md5
-        MARAIDB_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5)
-        [ -z "${MARAIDB_TAR_MD5}" ] && MARAIDB_TAR_MD5=$(curl -s ${DOWN_ADDR_MARIADB_BK}/md5sums.txt | grep ${FILE_NAME} | awk '{print $1}')
+        rm -f md5sums.txt ${FILE_NAME}.md5
+        src_url=${DOWN_ADDR_MARIADB}/md5sums.txt && Download_src no_kill
+        [ -s md5sums.txt ] && mv -f md5sums.txt ${FILE_NAME}.md5
+        MARAIDB_TAR_MD5=$(awk -v file="${FILE_NAME}" '$2 == file {print $1; exit}' ${FILE_NAME}.md5 2>/dev/null)
+        [ -z "${MARAIDB_TAR_MD5}" ] && MARAIDB_TAR_MD5=$(curl -fsSL ${DOWN_ADDR_MARIADB_BK}/md5sums.txt | awk -v file="${FILE_NAME}" '$2 == file {print $1; exit}')
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MARAIDB_TAR_MD5}" ]; do
-          wget -c --no-check-certificate ${DOWN_ADDR_MARIADB_BK}/${FILE_NAME};sleep 1
+          src_url=${DOWN_ADDR_MARIADB_BK}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MARAIDB_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -372,7 +403,7 @@ checkDownload() {
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${mirror_link}/oneinstack/src/${FILE_NAME}.md5sum | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
-          wget -c --no-check-certificate ${DOWN_ADDR_PERCONA}/${FILE_NAME}; sleep 1
+          src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${PERCONA_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -404,7 +435,7 @@ checkDownload() {
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${mirror_link}/oneinstack/src/${FILE_NAME}.md5sum | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
-          wget -c --no-check-certificate ${DOWN_ADDR_PERCONA}/${FILE_NAME}; sleep 1
+          src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${PERCONA_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -437,7 +468,7 @@ checkDownload() {
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${mirror_link}/oneinstack/src/${FILE_NAME}.md5sum | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
-          wget -c --no-check-certificate ${DOWN_ADDR_PERCONA}/${FILE_NAME}; sleep 1
+          src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${PERCONA_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -470,7 +501,7 @@ checkDownload() {
         [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${mirror_link}/oneinstack/src/${FILE_NAME}.md5sum | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
-          wget -c --no-check-certificate ${DOWN_ADDR_PERCONA}/${FILE_NAME}; sleep 1
+          src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${PERCONA_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -498,7 +529,7 @@ checkDownload() {
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} 2>/dev/null | awk '{print $1}')" != "${PGSQL_TAR_MD5}" ]; do
           # Download_src internally falls back, but if it still fails MD5, we fallback here
-          wget -c --no-check-certificate ${DOWN_ADDR_PGSQL_BK}/${FILE_NAME};sleep 1
+          src_url=${DOWN_ADDR_PGSQL_BK}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} 2>/dev/null | awk '{print $1}')" == "${PGSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -523,7 +554,7 @@ checkDownload() {
         [ -z "${MongoDB_TAR_MD5}" ] && MongoDB_TAR_MD5=$(curl -s ${DOWN_ADDR_MongoDB}/${FILE_NAME}.md5 | grep ${FILE_NAME} | awk '{print $1}')
         tryDlCount=0
         while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MongoDB_TAR_MD5}" ]; do
-          wget -c --no-check-certificate ${DOWN_ADDR_MongoDB}/${FILE_NAME};sleep 1
+          src_url=${DOWN_ADDR_MongoDB}/${FILE_NAME} && Download_src no_kill; sleep 1
           let "tryDlCount++"
           [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MongoDB_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
         done
@@ -538,9 +569,11 @@ checkDownload() {
   fi
 
   # PHP
-  if [[ "${php_option}" =~ ^[1-9]$|^1[0-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-4]$ ]]; then
+  if [[ "${php_option}" =~ ^[1-9]$|^1[0-5]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-5]$ ]]; then
     echo "PHP common..."
-    src_url=${mirror_link}/oneinstack/src/libiconv-${libiconv_ver}.tar.gz && Download_src
+    if { [ -n "${php_option}" ] && [ "${php_option}" != '15' ]; } || { [ -n "${mphp_ver}" ] && [ "${mphp_ver}" != '85' ]; }; then
+      src_url=${mirror_link}/oneinstack/src/libiconv-${libiconv_ver}.tar.gz && Download_src
+    fi
     src_url=https://curl.haxx.se/download/curl-${curl_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/mhash-${mhash_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libmcrypt-${libmcrypt_ver}.tar.gz && Download_src
@@ -600,6 +633,13 @@ checkDownload() {
     src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
   elif [ "${php_option}" == '14' ] || [ "${mphp_ver}" == '84' ]; then
     src_url=${mirror_link}/oneinstack/src/php-${php84_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_up_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
+  elif [ "${php_option}" == '15' ] || [ "${mphp_ver}" == '85' ]; then
+    src_url=https://www.php.net/distributions/php-${php85_ver}.tar.gz &&
+      src_sha256=${php85_sha256} &&
+      Download_src
     src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_up_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
@@ -723,7 +763,7 @@ checkDownload() {
   # memcached-server
   if [ "${memcached_flag}" == 'y' ]; then
     echo "Download memcached-server..."
-    [ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR=${mirror_link}/oneinstack/src || DOWN_ADDR=http://www.memcached.org/files
+    [ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR=${mirror_link}/oneinstack/src || DOWN_ADDR=https://www.memcached.org/files
     src_url=${DOWN_ADDR}/memcached-${memcached_ver}.tar.gz && Download_src
   fi
 
@@ -758,6 +798,8 @@ checkDownload() {
   if [ "${pecl_mongodb}" == '1' ]; then
     echo "Download pecl mongo for php..."
     src_url=https://pecl.php.net/get/mongo-${pecl_mongo_ver}.tgz && Download_src
+    echo "Download legacy pecl mongodb for php 7.x and php 8.0..."
+    src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_oldver}.tgz && Download_src
     echo "Download pecl mongodb for php..."
     src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_ver}.tgz && Download_src
   fi

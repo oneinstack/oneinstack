@@ -18,7 +18,7 @@ installDepsDebian() {
     dpkg -l | grep ^rc | awk '{print $2}' | xargs dpkg -P
   fi
 
-  if [[ "${db_option}" =~ ^[1-9]$|^1[0-2]$ ]]; then
+  if [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
     pkgList="mysql-client mysql-server mysql-common libsodium-dev mysql-server-core-5.5 mysql-client-5.5 mariadb-client mariadb-server mariadb-common"
     for Package in ${pkgList};do
       apt-get -y purge ${Package}
@@ -92,11 +92,11 @@ installDepsRHEL() {
 
   echo "${CMSG}Installing dependencies packages...${CEND}"
   # Install needed packages
-  pkgList="perl-FindBin deltarpm libsodium-dev drpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-dev libjpeg-devel libbz2-dev libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel libzip libzip-devel glibc glibc-devel krb5-devel libcurl4-openssl-dev libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel ncurses-compat-libs libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel net-tools libxslt-devel libssl-dev libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre-devel libmcrypt libsqlite3-dev libmcrypt-devel mhash mhash-devel mcrypt zip unzip chrony oniguruma-devel rpcgen sqlite-devel sysstat patch bc expect expat-devel perl-devel oniguruma oniguruma-devel libtirpc-devel nss libnsl rsync rsyslog git lsof lrzsz psmisc wget which libatomic tmux chkconfig firewalld"
+  pkgList="perl-FindBin deltarpm libsodium-dev drpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-dev libjpeg-devel libbz2-dev libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel libzip libzip-devel glibc glibc-devel krb5-devel libcurl4-openssl-dev libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel ncurses-compat-libs libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel net-tools libxslt-devel libssl-dev libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre-devel libmcrypt libsqlite3-dev libmcrypt-devel mhash mhash-devel mcrypt zip unzip chrony oniguruma-devel rpcgen sqlite-devel sysstat patch bc expect expat-devel perl-devel oniguruma oniguruma-devel libtirpc-devel nss libnsl rsync rsyslog git lsof lrzsz psmisc wget which libatomic tmux chkconfig firewalld gnupg2"
   for Package in ${pkgList}; do
     yum -y install ${Package}
   done
-  [ ${RHEL_ver} -lt 8 >/dev/null 2>&1 ] && yum -y install cmake3
+  [ "${RHEL_ver}" -lt 8 ] && yum -y install cmake3
 
   yum -y update bash openssl glibc
 }
@@ -113,7 +113,7 @@ installDepsUbuntu() {
     dpkg -l | grep ^rc | awk '{print $2}' | xargs dpkg -P
   fi
 
-  if [[ "${db_option}" =~ ^[1-9]$|^1[0-2]$ ]]; then
+  if [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
     pkgList="mysql-client mysql-server mysql-common mysql-server-core-5.5 mysql-client-5.5 mariadb-client mariadb-server mariadb-common"
     for Package in ${pkgList};do
       apt-get -y purge ${Package}

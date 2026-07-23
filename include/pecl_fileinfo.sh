@@ -13,12 +13,15 @@ Install_pecl_fileinfo() {
     pushd ${oneinstack_dir}/src > /dev/null
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
+    PHP_main_ver=${PHP_detail_ver%.*}
     src_url=https://secure.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
     tar xzf php-${PHP_detail_ver}.tar.gz
     pushd php-${PHP_detail_ver}/ext/fileinfo > /dev/null
     ${php_install_dir}/bin/phpize
     ./configure --with-php-config=${php_install_dir}/bin/php-config
-    sed -i 's@^CFLAGS =.*@CFLAGS = -std=c99 -g@' Makefile
+    # PHP 8.4+ requires a C11 compiler; retain the legacy C99 workaround only for older PHP.
+    # PHP 8.4+ 要求 C11 编译器，仅对旧版 PHP 保留 C99 兼容处理。
+    [[ ! "${PHP_main_ver}" =~ ^8\.[4-5]$ ]] && sed -i 's@^CFLAGS =.*@CFLAGS = -std=c99 -g@' Makefile
     make -j ${THREAD} && make install
     popd > /dev/null
     if [ -f "${phpExtensionDir}/fileinfo.so" ]; then

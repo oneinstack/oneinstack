@@ -19,7 +19,10 @@ Upgrade_Redis() {
     [ "${redis_flag}" != 'y' ] && read -e -p "Please input upgrade Redis Version(default: ${Latest_redis_ver}): " NEW_redis_ver
     NEW_redis_ver=${NEW_redis_ver:-${Latest_redis_ver}}
     if [ "$NEW_redis_ver" != "$OLD_redis_ver" ]; then
-      [ ! -e "redis-$NEW_redis_ver.tar.gz" ] && wget --no-check-certificate -c https://download.redis.io/releases/redis-$NEW_redis_ver.tar.gz > /dev/null 2>&1
+      if [ ! -e "redis-$NEW_redis_ver.tar.gz" ]; then
+        src_url=https://download.redis.io/releases/redis-$NEW_redis_ver.tar.gz
+        Download_src no_kill
+      fi
       if [ -e "redis-$NEW_redis_ver.tar.gz" ]; then
         echo "Download [${CMSG}redis-$NEW_redis_ver.tar.gz${CEND}] successfully! "
         break

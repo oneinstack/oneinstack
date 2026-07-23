@@ -20,6 +20,10 @@ apr_util_ver=1.6.3
 nghttp2_ver=1.64.0
 
 # DB
+mysql97_ver=9.7.1
+mysql97_md5=18abe52f40af534e611ce02ee8ecaa8d
+mysql_gpg_key_url=https://repo.mysql.com/RPM-GPG-KEY-mysql-2025
+mysql_gpg_fingerprint=BCA43417C3B485DD128EC6D4B7B3B788A8D3785C
 mysql84_ver=8.4.0
 mysql80_ver=8.0.39
 mysql57_ver=5.7.44
@@ -56,7 +60,8 @@ php81_ver=8.1.34
 php82_ver=8.2.30
 php83_ver=8.3.29
 php84_ver=8.4.16
-php85_ver=8.5.1
+php85_ver=8.5.8
+php85_sha256=6ebc55e52af4396385e689f7af0f28944fbbf966843433b573e9dc1dc03df539
 
 # Nodejs
 nodejs_ver=22.12.0
@@ -73,23 +78,26 @@ libsodium_up_ver=1.0.21
 libzip_ver=1.11.4
 argon2_ver=20171227
 imagemagick_ver=7.1.2-12
-imagick_ver=3.7.0
+imagick_ver=3.8.1
 imagick_oldver=3.4.4
+pecl_imap_ver=1.0.3
 graphicsmagick_ver=1.3.46
 gmagick_ver=2.0.6RC1
 gmagick_oldver=1.1.7RC3
 zendopcache_ver=7.0.5
-apcu_ver=5.1.21
+apcu_ver=5.1.28
 apcu_oldver=4.0.11
 xcache_ver=3.2.0
 eaccelerator_ver=0.9.6.1
 phalcon_ver=5.4.0
+phalcon_up_ver=5.17.0
 phalcon_oldver=3.4.5
-yaf_ver=3.3.2
-yar_ver=2.2.0
+yaf_ver=3.3.7
+yar_ver=2.3.4
 swoole_ver=6.1.6
+swoole_up_ver=6.2.2
 swoole_oldver=5.1.5
-xdebug_ver=3.5.0
+xdebug_ver=3.5.3
 xdebug_oldver=3.1.6
 
 # Ftp
@@ -109,7 +117,7 @@ pecl_memcache_ver=8.2
 pecl_memcache_oldver=4.0.5.2
 
 # MongoDB
-pecl_mongodb_ver=2.1.4
+pecl_mongodb_ver=2.3.3
 pecl_mongodb_oldver=1.19.1
 pecl_mongo_ver=1.6.16
 

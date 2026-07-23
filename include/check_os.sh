@@ -79,7 +79,9 @@ else
 fi
 
 # Check OS Version
-if [ ${RHEL_ver} -lt 7 >/dev/null 2>&1 ] || [ ${Debian_ver} -lt 9 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -lt 16 >/dev/null 2>&1 ]; then
+if { [ -n "${RHEL_ver}" ] && [ "${RHEL_ver}" -lt 7 ]; } || \
+  { [ -n "${Debian_ver}" ] && [ "${Debian_ver}" -lt 9 ]; } || \
+  { [ -n "${Ubuntu_ver}" ] && [ "${Ubuntu_ver}" -lt 16 ]; }; then
   echo "${CFAILURE}Does not support this OS, Please install CentOS 7+,Debian 9+,Ubuntu 16+ ${CEND}"
   kill -9 $$; exit 1;
 fi
@@ -87,7 +89,7 @@ fi
 command -v gcc > /dev/null 2>&1 || $PM -y install gcc
 gcc_ver=$(gcc -dumpversion | awk -F. '{print $1}')
 
-[ ${gcc_ver} -lt 5 >/dev/null 2>&1 ] && redis_ver=${redis_oldver}
+[ "${gcc_ver}" -lt 5 ] 2>/dev/null && redis_ver=${redis_oldver}
 
 if uname -m | grep -Eqi "arm|aarch64"; then
   armplatform="y"
@@ -123,14 +125,36 @@ fi
 
 THREAD=$(grep 'processor' /proc/cpuinfo | sort -u | wc -l)
 
+# MySQL 9.7 generic binaries require a modern x86_64 userspace.
+# MySQL 9.7 通用二进制包要求较新的 x86_64 用户空间。
+MySQL97_OS_Supported() {
+  [ "${ARCH}" != 'x86_64' ] && return 1
+
+  case "${Family}" in
+    rhel)
+      [ "${RHEL_ver:-0}" -ge 8 ]
+      ;;
+    debian)
+      [ "${Debian_ver:-0}" -ge 12 ]
+      ;;
+    ubuntu)
+      [ "${Ubuntu_ver:-0}" -ge 22 ]
+      ;;
+    *)
+      return 1
+      ;;
+  esac
+}
+
 # Percona binary: https://docs.percona.com/percona-server/5.7/installation/binary-tarball.html
-if [ ${Debian_ver} -lt 9 >/dev/null 2>&1 ]; then
+if [ -n "${Debian_ver}" ] && [ "${Debian_ver}" -lt 9 ]; then
   sslLibVer=ssl100
 elif [ "${RHEL_ver}" == '7' ] && [ "${Platform}" != 'fedora' ]; then
   sslLibVer=ssl101
-elif [ ${Debian_ver} -ge 9 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -ge 16 >/dev/null 2>&1 ]; then
+elif { [ -n "${Debian_ver}" ] && [ "${Debian_ver}" -ge 9 ]; } || \
+  { [ -n "${Ubuntu_ver}" ] && [ "${Ubuntu_ver}" -ge 16 ]; }; then
   sslLibVer=ssl102
-elif [ ${Fedora_ver} -ge 27 >/dev/null 2>&1 ]; then
+elif [ -n "${Fedora_ver}" ] && [ "${Fedora_ver}" -ge 27 ]; then
   sslLibVer=ssl102
 elif [ "${RHEL_ver}" == '8' ]; then
   sslLibVer=ssl1:111

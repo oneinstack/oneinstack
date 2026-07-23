@@ -13,14 +13,10 @@ Install_pecl_imap() {
     pushd ${oneinstack_dir}/src > /dev/null
     if [ "${PM}" == 'yum' ]; then
       if [ "${RHEL_ver}" == '9' ]; then
-        cat > /etc/yum.repos.d/remi.repo << EOF
-[remi]
-name=Remi's RPM repository for Enterprise Linux 9 - \$basearch
-mirrorlist=http://cdn.remirepo.net/enterprise/9/remi/\$basearch/mirror
-enabled=0
-gpgcheck=0
-EOF
-        dnf -y --enablerepo=remi install uw-imap-devel
+        # The official release package installs the signed repository configuration and GPG key.
+        # 官方 release 包负责安装带签名校验的仓库配置和 GPG 密钥。
+        dnf -y install https://rpms.remirepo.net/enterprise/remi-release-9.rpm &&
+          dnf -y --enablerepo=remi install uw-imap-devel || return 1
       else
         yum -y install libc-client-devel
         [ ! -e /usr/lib/libc-client.so ] && ln -s /usr/lib64/libc-client.so /usr/lib/libc-client.so
@@ -30,9 +26,18 @@ EOF
     fi
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
-    src_url=https://secure.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
-    tar xzf php-${PHP_detail_ver}.tar.gz
-    pushd php-${PHP_detail_ver}/ext/imap > /dev/null
+    PHP_main_ver=${PHP_detail_ver%.*}
+    if [[ "${PHP_main_ver}" =~ ^8\.[4-5]$ ]]; then
+      # IMAP was unbundled from PHP 8.4 and is maintained as a PECL extension.
+      # IMAP 从 PHP 8.4 起移出主源码，改用 PECL 扩展。
+      src_url=https://pecl.php.net/get/imap-${pecl_imap_ver}.tgz && Download_src
+      tar xzf imap-${pecl_imap_ver}.tgz
+      pushd imap-${pecl_imap_ver} > /dev/null
+    else
+      src_url=https://secure.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
+      tar xzf php-${PHP_detail_ver}.tar.gz
+      pushd php-${PHP_detail_ver}/ext/imap > /dev/null
+    fi
     ${php_install_dir}/bin/phpize
     ./configure --with-php-config=${php_install_dir}/bin/php-config --with-kerberos --with-imap --with-imap-ssl
     make -j ${THREAD} && make install
@@ -40,7 +45,7 @@ EOF
     if [ -f "${phpExtensionDir}/imap.so" ]; then
       echo 'extension=imap.so' > ${php_install_dir}/etc/php.d/04-imap.ini
       echo "${CSUCCESS}PHP imap module installed successfully! ${CEND}"
-      rm -rf php-${PHP_detail_ver}
+      rm -rf php-${PHP_detail_ver} imap-${pecl_imap_ver}
     else
       echo "${CFAILURE}PHP imap module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     fi

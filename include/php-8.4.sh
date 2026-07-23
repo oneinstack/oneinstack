@@ -9,21 +9,61 @@
 #       https://github.com/oneinstack/oneinstack
 
 Install_PHP84() {
+  # PHP 8.5 reuses this maintained modern-PHP build path with version-specific parameters.
+  # PHP 8.5 通过版本参数复用这条现代 PHP 构建链路，避免安装逻辑分叉。
+  local php_build_ver="${PHP_MODERN_VERSION:-${php84_ver}}"
+  local php_build_with_ssl="${PHP_MODERN_WITH_SSL:-${php84_with_ssl}}"
+  local php_build_with_curl="${PHP_MODERN_WITH_CURL:-${php84_with_curl}}"
+  local php_build_with_openssl="${PHP_MODERN_WITH_OPENSSL:-${php84_with_openssl}}"
+  local php_is_85=0
+  local php_use_gnu_iconv=1
+  local phpcache_arg php_iconv_arg php_xml_arg php_mbregex_arg opcache_extension_line
+
+  if [[ "${php_build_ver}" =~ ^8\.5\. ]]; then
+    php_is_85=1
+    # OPcache is mandatory in PHP 8.5, so its former build switch must be omitted.
+    # PHP 8.5 强制内置 OPcache，因此必须省略旧的编译开关。
+    phpcache_arg=''
+    # XML and mbregex are enabled by default in PHP 8.5.
+    # PHP 8.5 默认启用 XML 和 mbregex，无需重复传参。
+    php_xml_arg=''
+    php_mbregex_arg=''
+    if [ "${PHP_MODERN_FORCE_GNU_ICONV:-n}" == 'y' ]; then
+      php_use_gnu_iconv=1
+      php_iconv_arg='--with-iconv=/usr/local'
+    else
+      php_use_gnu_iconv=0
+      php_iconv_arg=''
+    fi
+  else
+    [ "${phpcache_option}" == '1' ] && phpcache_arg='--enable-opcache' || phpcache_arg='--disable-opcache'
+    php_iconv_arg='--with-iconv=/usr/local'
+    php_xml_arg='--enable-xml'
+    php_mbregex_arg='--enable-mbregex'
+  fi
+
   pushd ${oneinstack_dir}/src > /dev/null
-  if [ ! -e "/usr/local/lib/libiconv.la" ]; then
+  if [ "${php_use_gnu_iconv}" == '1' ] && [ ! -e "/usr/local/lib/libiconv.la" ]; then
+    if [ ! -e "libiconv-${libiconv_ver}.tar.gz" ]; then
+      src_url=${mirror_link}/oneinstack/src/libiconv-${libiconv_ver}.tar.gz && Download_src
+    fi
     tar xzf libiconv-${libiconv_ver}.tar.gz
     pushd libiconv-${libiconv_ver} > /dev/null
     ./configure
     make -j ${THREAD} && make install
     popd > /dev/null
     rm -rf libiconv-${libiconv_ver}
+    if [ ! -e "/usr/local/lib/libiconv.la" ]; then
+      echo "${CFAILURE}GNU libiconv fallback installation failed.${CEND}"
+      return 1
+    fi
   fi
 
   if [ ! -e "${curl_install_dir}/lib/libcurl.la" ]; then
     tar xzf curl-${curl_ver}.tar.gz
     pushd curl-${curl_ver} > /dev/null
     [ -e "/usr/local/lib/libnghttp2.so" ] && with_nghttp2='--with-nghttp2=/usr/local'
-    ./configure --prefix=${curl_install_dir} ${php84_with_ssl} ${with_nghttp2}
+    ./configure --prefix=${curl_install_dir} ${php_build_with_ssl} ${with_nghttp2}
     make -j ${THREAD} && make install
     popd > /dev/null
     rm -rf curl-${curl_ver}
@@ -90,21 +130,20 @@ Install_PHP84() {
   id -u ${run_user} >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -g ${run_group} -M -s /sbin/nologin ${run_user}
 
-  tar xzf php-${php84_ver}.tar.gz
-  pushd php-${php84_ver} > /dev/null
+  tar xzf php-${php_build_ver}.tar.gz
+  pushd php-${php_build_ver} > /dev/null
   make clean
   export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/:$PKG_CONFIG_PATH
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}
-  [ "${phpcache_option}" == '1' ] && phpcache_arg='--enable-opcache' || phpcache_arg='--disable-opcache'
   if [ "${apache_mode_option}" == '2' ]; then
     ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
     --with-apxs2=${apache_install_dir}/bin/apxs ${phpcache_arg} --disable-fileinfo \
     --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
-    --with-iconv=/usr/local --with-freetype --with-jpeg --with-zlib \
-    --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
-    --enable-sysvsem ${php84_with_curl} --enable-mbregex \
-    --enable-mbstring --with-password-argon2 --with-sodium=/usr/local --enable-gd ${php84_with_openssl} \
+    ${php_iconv_arg} --with-freetype --with-jpeg --with-zlib \
+    ${php_xml_arg} --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
+    --enable-sysvsem ${php_build_with_curl} ${php_mbregex_arg} \
+    --enable-mbstring --with-password-argon2 --with-sodium=/usr/local --enable-gd ${php_build_with_openssl} \
     --with-mhash --enable-pcntl --enable-sockets --enable-ftp --enable-intl --with-xsl \
     --with-gettext --with-zip=/usr/local --enable-soap --disable-debug ${php_modules_options}
   else
@@ -112,14 +151,18 @@ Install_PHP84() {
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
     --with-fpm-user=${run_user} --with-fpm-group=${run_group} --enable-fpm ${phpcache_arg} --disable-fileinfo \
     --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
-    --with-iconv=/usr/local --with-freetype --with-jpeg --with-zlib \
-    --enable-xml --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
-    --enable-sysvsem ${php84_with_curl} --enable-mbregex \
-    --enable-mbstring --with-password-argon2 --with-sodium=/usr/local --enable-gd ${php84_with_openssl} \
+    ${php_iconv_arg} --with-freetype --with-jpeg --with-zlib \
+    ${php_xml_arg} --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
+    --enable-sysvsem ${php_build_with_curl} ${php_mbregex_arg} \
+    --enable-mbstring --with-password-argon2 --with-sodium=/usr/local --enable-gd ${php_build_with_openssl} \
     --with-mhash --enable-pcntl --enable-sockets --enable-ftp --enable-intl --with-xsl \
     --with-gettext --with-zip=/usr/local --enable-soap --disable-debug ${php_modules_options}
   fi
-  make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
+  if [ "${php_use_gnu_iconv}" == '1' ]; then
+    make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
+  else
+    make -j ${THREAD}
+  fi
   make install
 
   if [ -e "${php_install_dir}/bin/phpize" ]; then
@@ -159,9 +202,11 @@ Install_PHP84() {
     sed -i "s@^;openssl.capath.*@openssl.capath = \"${openssl_install_dir}/cert.pem\"@" ${php_install_dir}/etc/php.ini
   fi
 
-  [ "${phpcache_option}" == '1' ] && cat > ${php_install_dir}/etc/php.d/02-opcache.ini << EOF
+  if [ "${phpcache_option}" == '1' ]; then
+    [ "${php_is_85}" == '1' ] && opcache_extension_line='' || opcache_extension_line='zend_extension=opcache.so'
+    cat > ${php_install_dir}/etc/php.d/02-opcache.ini << EOF
 [opcache]
-zend_extension=opcache.so
+${opcache_extension_line}
 opcache.enable=1
 opcache.enable_cli=1
 opcache.memory_consumption=${Memory_limit}
@@ -175,6 +220,15 @@ opcache.revalidate_freq=60
 opcache.consistency_checks=0
 ;opcache.optimization_level=0
 EOF
+  elif [ "${php_is_85}" == '1' ]; then
+    # PHP 8.5 cannot be built without OPcache, so disable it through configuration.
+    # PHP 8.5 无法在编译时移除 OPcache，因此通过配置关闭。
+    cat > ${php_install_dir}/etc/php.d/02-opcache.ini << EOF
+[opcache]
+opcache.enable=0
+opcache.enable_cli=0
+EOF
+  fi
 
   if [ "${apache_mode_option}" != '2' ]; then
     # php-fpm Init Script
@@ -271,6 +325,6 @@ EOF
     systemctl restart httpd
   fi
   popd > /dev/null
-  [ -e "${php_install_dir}/bin/phpize" ] && rm -rf php-${php84_ver}
+  [ -e "${php_install_dir}/bin/phpize" ] && rm -rf php-${php_build_ver}
   popd > /dev/null
 }
