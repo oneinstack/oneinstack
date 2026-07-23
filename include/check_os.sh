@@ -68,10 +68,12 @@ elif [[ "${Platform}" =~ ^ubuntu$|^linuxmint$|^elementary$ ]]; then
     [[ "${VERSION_MAIN_ID}" =~ ^19$ ]] && Ubuntu_ver=18
     [[ "${VERSION_MAIN_ID}" =~ ^20$ ]] && Ubuntu_ver=20
     [[ "${VERSION_MAIN_ID}" =~ ^21$ ]] && Ubuntu_ver=22
+    [[ "${VERSION_MAIN_ID}" =~ ^22$ ]] && Ubuntu_ver=24
   elif [[ "${Platform}" =~ ^elementary$ ]]; then
     [[ "${VERSION_MAIN_ID}" =~ ^5$ ]] && Ubuntu_ver=18
     [[ "${VERSION_MAIN_ID}" =~ ^6$ ]] && Ubuntu_ver=20
     [[ "${VERSION_MAIN_ID}" =~ ^7$ ]] && Ubuntu_ver=22
+    [[ "${VERSION_MAIN_ID}" =~ ^8$ ]] && Ubuntu_ver=24
   fi
 else
   echo "${CFAILURE}Does not support this OS ${CEND}"

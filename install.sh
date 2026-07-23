@@ -963,6 +963,14 @@ if [ ! -e ~/.oneinstack ]; then
   installDepsBySrc 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
+# Recheck renamed apt runtime packages when adding a binary database to an
+# existing OneinStack host; the initial dependency stage may already be skipped.
+if [[ "${Family}" =~ ^debian$|^ubuntu$ ]]; then
+  . ./include/check_sw.sh
+  ensureAptDatabaseCompat 2>&1 | tee -a ${oneinstack_dir}/install.log
+  [ "${PIPESTATUS[0]}" -ne 0 ] && exit 1
+fi
+
 # start Time
 startTime=`date +%s`
 

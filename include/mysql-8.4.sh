@@ -194,7 +194,11 @@ EOF
     sed -i 's@^table_open_cache.*@table_open_cache = 1024@' /etc/my.cnf
   fi
 
-  ${mysql_install_dir}/bin/mysqld --initialize-insecure --user=mysql --basedir=${mysql_install_dir} --datadir=${mysql_data_dir}
+  ${mysql_install_dir}/bin/mysqld --initialize-insecure --user=mysql --basedir=${mysql_install_dir} --datadir=${mysql_data_dir} || {
+    echo "${CFAILURE}MySQL initialize failed! Missing shared libraries:${CEND}"
+    ldd "${mysql_install_dir}/bin/mysqld" 2>/dev/null | grep 'not found' || true
+    kill -9 $$; exit 1
+  }
 
   [ "${Wsl}" == true ] && chmod 600 /etc/my.cnf
   chown mysql:mysql -R ${mysql_data_dir}
@@ -208,7 +212,8 @@ EOF
   ${mysql_install_dir}/bin/mysql -uroot -hlocalhost -e "grant all privileges on *.* to root@'127.0.0.1' with grant option;"
   ${mysql_install_dir}/bin/mysql -uroot -hlocalhost -e "grant all privileges on *.* to root@'localhost' with grant option;"
   ${mysql_install_dir}/bin/mysql -uroot -hlocalhost -e "alter user root@'localhost' identified by \"${dbrootpwd}\";"
-  ${mysql_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "reset master;"
+  # RESET MASTER was removed in MySQL 8.4.
+  ${mysql_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "reset binary logs and gtids;"
   rm -rf /etc/ld.so.conf.d/{mysql,mariadb,percona}*.conf
   [ -e "${mysql_install_dir}/my.cnf" ] && rm -f ${mysql_install_dir}/my.cnf
   echo "${mysql_install_dir}/lib" > /etc/ld.so.conf.d/z-mysql.conf

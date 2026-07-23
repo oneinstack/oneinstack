@@ -38,17 +38,59 @@ installDepsDebian() {
 
   # Install needed packages
   case "${Debian_ver}" in
-    9|10|11|12|13)
-      pkgList="debian-keyring libsodium-dev debian-archive-keyring libxpm-dev build-essential gcc g++ make cmake autoconf libbz2-dev libjpeg62-turbo-dev libjpeg-dev libpng-dev libgd-dev libxml2 libxml2-dev zlib1g zlib1g-dev libc6 libc6-dev libc-client2007e-dev libglib2.0-0 libglib2.0-dev bzip2 libzip-dev libbz2-1.0 libncurses5 libncurses5-dev libaio1 libaio-dev numactl libreadline-dev curl libcurl3-gnutls libcurl4-openssl-dev e2fsprogs libkrb5-3 libkrb5-dev libltdl-dev libidn11 libidn11-dev openssl net-tools libssl-dev libtool libevent-dev bison re2c libsasl2-dev libxslt1-dev libicu-dev locales patch vim zip unzip tmux htop bc dc expect libexpat1-dev libonig-dev libtirpc-dev rsync git lsof lrzsz rsyslog cron logrotate chrony libsqlite3-dev psmisc wget sysv-rc apt-transport-https ca-certificates software-properties-common gnupg ufw"
+    9|10|11|12)
+      pkgCompatList="libncurses5 libncurses5-dev libaio1 libidn11 libidn11-dev"
+      ;;
+    13)
+      # Debian 13 renamed libaio1 and removed the ncurses5/libidn11 packages.
+      pkgCompatList="libncurses6 libtinfo6 libncurses-dev libaio1t64 libidn2-dev"
       ;;
     *)
       echo "${CFAILURE}Your system Debian ${Debian_ver} are not supported!${CEND}"
       kill -9 $$; exit 1;
       ;;
   esac
+  pkgList="debian-keyring libsodium-dev debian-archive-keyring libxpm-dev build-essential gcc g++ make cmake autoconf libbz2-dev libjpeg62-turbo-dev libjpeg-dev libpng-dev libgd-dev libxml2 libxml2-dev zlib1g zlib1g-dev libc6 libc6-dev libc-client2007e-dev libglib2.0-0 libglib2.0-dev bzip2 libzip-dev libbz2-1.0 ${pkgCompatList} libaio-dev numactl libreadline-dev curl libcurl3-gnutls libcurl4-openssl-dev e2fsprogs libkrb5-3 libkrb5-dev libltdl-dev openssl net-tools libssl-dev libtool libevent-dev bison re2c libsasl2-dev libxslt1-dev libicu-dev locales patch vim zip unzip tmux htop bc dc expect libexpat1-dev libonig-dev libtirpc-dev rsync git lsof lrzsz rsyslog cron logrotate chrony libsqlite3-dev psmisc wget sysv-rc apt-transport-https ca-certificates software-properties-common gnupg ufw"
   for Package in ${pkgList}; do
     apt-get --no-install-recommends -y install ${Package}
   done
+}
+
+# Install renamed runtime packages for binary database installs on current apt
+# distributions. On 64-bit ABIs, time_t was already 64-bit, so libaio's t64
+# transition only changed its SONAME. Do not alias ncurses/tinfo across major
+# SONAMEs; those ABIs are not interchangeable.
+# 为新版 apt 系统补齐二进制数据库运行库；仅在 64 位系统兼容 libaio 的 t64
+# 改名，绝不把 ncurses/tinfo 的新主版本伪装成旧 ABI。
+ensureAptDatabaseCompat() {
+  local Package Deb_Multiarch Deb_LibDir
+
+  [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] || return 0
+  [ "${dbinstallmethod}" == '1' ] || return 0
+
+  if { [ "${Family}" == 'debian' ] && [ "${Debian_ver:-0}" -ge 13 ]; } || \
+    { [ "${Family}" == 'ubuntu' ] && [ "${Ubuntu_ver:-0}" -ge 24 ]; }; then
+    export DEBIAN_FRONTEND=noninteractive
+    for Package in libncurses6 libtinfo6 libaio1t64 libaio-dev; do
+      dpkg -s "${Package}" > /dev/null 2>&1 || \
+        apt-get --no-install-recommends -y install "${Package}" || {
+          echo "${CFAILURE}Unable to install required compatibility package: ${Package}${CEND}"
+          return 1
+        }
+    done
+
+    if [ "$(getconf LONG_BIT 2>/dev/null)" == '64' ]; then
+      Deb_Multiarch=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
+      [ -z "${Deb_Multiarch}" ] && Deb_Multiarch=$(gcc -print-multiarch 2>/dev/null)
+      Deb_LibDir=/usr/lib/${Deb_Multiarch}
+      if [ -n "${Deb_Multiarch}" ] && [ -d "${Deb_LibDir}" ] && \
+        [ -e "${Deb_LibDir}/libaio.so.1t64" ] && \
+        [ ! -e "${Deb_LibDir}/libaio.so.1" ] && [ ! -L "${Deb_LibDir}/libaio.so.1" ]; then
+        ln -s libaio.so.1t64 "${Deb_LibDir}/libaio.so.1"
+        ldconfig
+      fi
+    fi
+  fi
 }
 
 installDepsRHEL() {
@@ -133,7 +175,20 @@ installDepsUbuntu() {
   apt-get -y upgrade -o Dir::Etc::SourceList=/tmp/security.sources.list
 
   # Install needed packages
-  pkgList="libperl-dev pkg-config libsodium-dev libbz2-dev libxslt-dev libjpeg-dev libxml2-dev libxpm-dev libfreetype-dev debian-keyring debian-archive-keyring build-essential gcc g++ make cmake autoconf libjpeg8 libjpeg8-dev libpng-dev libpng12-0 libpng12-dev libpng3 libxml2 libxml2-dev zlib1g zlib1g-dev libc6 libc6-dev libc-client2007e-dev libglib2.0-0 libglib2.0-dev bzip2 libzip-dev libbz2-1.0 libncurses5 libncurses5-dev libaio1 libaio-dev numactl libreadline-dev curl libcurl3-gnutls libcurl4-gnutls-dev libcurl4-openssl-dev e2fsprogs libkrb5-3 libkrb5-dev libltdl-dev libidn11 libidn11-dev openssl net-tools libssl-dev libtool libevent-dev re2c libsasl2-dev libxslt1-dev libicu-dev libsqlite3-dev libcloog-ppl1 bison patch vim zip unzip tmux htop bc dc expect libexpat1-dev rsyslog libonig-dev libtirpc-dev libnss3 rsync git lsof lrzsz chrony psmisc wget sysv-rc apt-transport-https ca-certificates software-properties-common gnupg ufw libiconv-dev libfreetype6-dev libexif-dev gettext-dev libgmp-dev"
+  case "${Ubuntu_ver}" in
+    16|17|18|19|20|21|22|23)
+      pkgCompatList="libncurses5 libncurses5-dev libaio1 libidn11 libidn11-dev libpng12-0 libpng12-dev libpng3 libcloog-ppl1"
+      ;;
+    24|25|26)
+      # Ubuntu 24.04+ uses the t64 libaio package and no longer ships the legacy packages.
+      pkgCompatList="libncurses6 libtinfo6 libncurses-dev libaio1t64 libidn2-dev"
+      ;;
+    *)
+      echo "${CFAILURE}Your system Ubuntu ${Ubuntu_ver} are not supported!${CEND}"
+      kill -9 $$; exit 1;
+      ;;
+  esac
+  pkgList="libperl-dev pkg-config libsodium-dev libbz2-dev libxslt-dev libjpeg-dev libxml2-dev libxpm-dev libfreetype-dev debian-keyring debian-archive-keyring build-essential gcc g++ make cmake autoconf libjpeg8 libjpeg8-dev libpng-dev libxml2 libxml2-dev zlib1g zlib1g-dev libc6 libc6-dev libc-client2007e-dev libglib2.0-0 libglib2.0-dev bzip2 libzip-dev libbz2-1.0 ${pkgCompatList} libaio-dev numactl libreadline-dev curl libcurl3-gnutls libcurl4-gnutls-dev libcurl4-openssl-dev e2fsprogs libkrb5-3 libkrb5-dev libltdl-dev openssl net-tools libssl-dev libtool libevent-dev re2c libsasl2-dev libxslt1-dev libicu-dev libsqlite3-dev bison patch vim zip unzip tmux htop bc dc expect libexpat1-dev rsyslog libonig-dev libtirpc-dev libnss3 rsync git lsof lrzsz chrony psmisc wget sysv-rc apt-transport-https ca-certificates software-properties-common gnupg ufw libiconv-dev libfreetype6-dev libexif-dev gettext-dev libgmp-dev"
   export DEBIAN_FRONTEND=noninteractive
   for Package in ${pkgList}; do
     apt-get --no-install-recommends -y install ${Package}
