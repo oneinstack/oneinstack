@@ -104,7 +104,7 @@ xdebug_oldver=3.1.6
 pureftpd_ver=1.0.51
 
 # Redis
-redis_ver=8.4.0
+redis_ver=8.8.0
 redis_oldver=7.4.2
 pecl_redis_ver=6.3.0
 
