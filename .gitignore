@@ -7,6 +7,7 @@ src/*.md5
 src/*.log
 src/redis-*/
 src/*.patch
+!src/uw-imap-gcc14.patch
 src/*.jar
 src/download_deps.py
 src/download_mirrors.sh

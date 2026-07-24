@@ -12,6 +12,7 @@ Install_UW_IMAP_From_Debian_Source() {
   local uw_imap_prefix=/usr/local/uw-imap
   local uw_imap_upstream_ver=${uw_imap_debian_ver%-*}
   local uw_imap_source_dir=uw-imap-${uw_imap_upstream_ver}
+  local uw_imap_gcc14_patch=${oneinstack_dir}/src/uw-imap-gcc14.patch
 
   if [ -f "${uw_imap_prefix}/lib/libc-client.a" ] &&
     [ -f "${uw_imap_prefix}/include/c-client/c-client.h" ]; then
@@ -37,6 +38,14 @@ Install_UW_IMAP_From_Debian_Source() {
 
   rm -rf "${uw_imap_source_dir}"
   dpkg-source -x "uw-imap_${uw_imap_debian_ver}.dsc" || return 1
+  # Debian 7 predates GCC 14's strict C diagnostics. Apply the complete fix
+  # later shipped as Debian/Ubuntu 7.1, rather than suppressing compiler errors.
+  # Debian 7 源码早于 GCC 14；应用发行版完整修复，不能用降级警告掩盖类型问题。
+  if [ "$(File_SHA256 "${uw_imap_gcc14_patch}")" != "${uw_imap_gcc14_patch_sha256}" ]; then
+    echo "${CFAILURE}UW-IMAP GCC 14 patch verification failed.${CEND}"
+    return 1
+  fi
+  patch --batch --forward -d "${uw_imap_source_dir}" -p1 < "${uw_imap_gcc14_patch}" || return 1
   pushd "${uw_imap_source_dir}" > /dev/null || return 1
   touch ip6
   # UW-IMAP's build target mutates shared files (OSTYPE, osdepbas.c, and

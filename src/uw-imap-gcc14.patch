@@ -1,0 +1,401 @@
+From: Chris Hofstaedtler <zeha@debian.org>
+Date: Tue, 31 Dec 2024 08:00:53 +0100
+X-Dgit-Generated: 8:2007f~dfsg-7.1 2e6f7847a9cd0e08e6a7b0a84a8e2d98329cffd3
+Subject: Fix FTBFS with gcc-14
+
+Include necessary headers, use sys4 utime wrapper on both Linux
+platforms, replace gets with fgets, et al.
+
+Closes: #1075612
+
+---
+
+diff --git a/src/mlock/mlock.c b/src/mlock/mlock.c
+index 1dca40e..b686bf0 100644
+--- a/src/mlock/mlock.c
++++ b/src/mlock/mlock.c
+@@ -40,6 +40,9 @@
+ #include <netdb.h>
+ #include <ctype.h>
+ #include <string.h>
++#include <unistd.h>
++#include <sys/time.h>
++#include <time.h>
+ 
+ #define LOCKTIMEOUT 5		/* lock timeout in minutes */
+ #define LOCKPROTECTION 0664
+diff --git a/src/mtest/mtest.c b/src/mtest/mtest.c
+index 675aac7..5926c35 100644
+--- a/src/mtest/mtest.c
++++ b/src/mtest/mtest.c
+@@ -38,6 +38,7 @@
+ #include <signal.h>
+ #include "c-client.h"
+ #include "imap4r1.h"
++#include <stdio.h>
+ 
+ /* Excellent reasons to hate ifdefs, and why my real code never uses them */
+ 
+@@ -81,7 +82,7 @@ void overview_header (MAILSTREAM *stream,unsigned long uid,OVERVIEW *ov,
+ void header (MAILSTREAM *stream,long msgno);
+ void display_body (BODY *body,char *pfx,long i);
+ void status (MAILSTREAM *stream);
+-void prompt (char *msg,char *txt);
++void prompt (const char *msg,char *txt);
+ void smtptest (long debug);
+ 
+ /* Main program - initialization */
+@@ -616,10 +617,10 @@ void status (MAILSTREAM *stream)
+  *          pointer to input buffer
+  */
+ 
+-void prompt (char *msg,char *txt)
++void prompt (const char *msg,char *txt)
+ {
+   printf ("%s",msg);
+-  gets (txt);
++  fgets (txt, MAILTMPLEN-1, stdin);
+ }
+ 
+ /* Interfaces to C-client */
+@@ -815,7 +816,7 @@ void smtptest (long debug)
+   puts (" Msg (end with a line with only a '.'):");
+   body->type = TYPETEXT;
+   *text = '\0';
+-  while (gets (line)) {
++  while (fgets (line, MAILTMPLEN-1, stdin)) {
+     if (line[0] == '.') {
+       if (line[1] == '\0') break;
+       else strcat (text,".");
+diff --git a/src/osdep/unix/mh.c b/src/osdep/unix/mh.c
+index 0226b7a..a23d5d5 100644
+--- a/src/osdep/unix/mh.c
++++ b/src/osdep/unix/mh.c
+@@ -103,8 +103,8 @@ long mh_copy (MAILSTREAM *stream,char *sequence,char *mailbox,
+ 	      long options);
+ long mh_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data);
+ 
+-int mh_select (struct direct *name);
+-int mh_numsort (const void *d1,const void *d2);
++int mh_select (const struct direct *name);
++int mh_numsort (const struct dirent** d1, const struct dirent** d2);
+ char *mh_file (char *dst,char *name);
+ long mh_canonicalize (char *pattern,char *ref,char *pat);
+ void mh_setdate (char *file,MESSAGECACHE *elt);
+@@ -1194,10 +1194,10 @@ long mh_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data)
+  * Returns: T to use file name, NIL to skip it
+  */
+ 
+-int mh_select (struct direct *name)
++int mh_select (const struct direct *name)
+ {
+   char c;
+-  char *s = name->d_name;
++  const char *s = name->d_name;
+   while (c = *s++) if (!isdigit (c)) return NIL;
+   return T;
+ }
+@@ -1209,13 +1209,14 @@ int mh_select (struct direct *name)
+  * Returns: negative if d1 < d2, 0 if d1 == d2, postive if d1 > d2
+  */
+ 
+-int mh_numsort (const void *d1,const void *d2)
++int mh_numsort (const struct dirent** d1, const struct dirent** d2)
+ {
+-  return atoi ((*(struct direct **) d1)->d_name) -
+-    atoi ((*(struct direct **) d2)->d_name);
++  return atoi ((*d1)->d_name) -
++    atoi ((*d2)->d_name);
+ }
+ 
+ 
++
+ /* MH mail build file name
+  * Accepts: destination string
+  *          source
+diff --git a/src/osdep/unix/mix.c b/src/osdep/unix/mix.c
+index fbf4a02..b798981 100644
+--- a/src/osdep/unix/mix.c
++++ b/src/osdep/unix/mix.c
+@@ -114,7 +114,7 @@ MIXBURP {
+ DRIVER *mix_valid (char *name);
+ long mix_isvalid (char *name,char *meta);
+ void *mix_parameters (long function,void *value);
+-long mix_dirfmttest (char *name);
++long mix_dirfmttest (const char *name);
+ void mix_scan (MAILSTREAM *stream,char *ref,char *pat,char *contents);
+ long mix_scan_contents (char *name,char *contents,unsigned long csiz,
+ 			unsigned long fsiz);
+@@ -125,7 +125,7 @@ long mix_unsubscribe (MAILSTREAM *stream,char *mailbox);
+ long mix_create (MAILSTREAM *stream,char *mailbox);
+ long mix_delete (MAILSTREAM *stream,char *mailbox);
+ long mix_rename (MAILSTREAM *stream,char *old,char *newname);
+-int mix_rselect (struct direct *name);
++int mix_rselect (const struct direct *name);
+ MAILSTREAM *mix_open (MAILSTREAM *stream);
+ void mix_close (MAILSTREAM *stream,long options);
+ void mix_abort (MAILSTREAM *stream);
+@@ -140,8 +140,8 @@ THREADNODE *mix_thread (MAILSTREAM *stream,char *type,char *charset,
+ long mix_ping (MAILSTREAM *stream);
+ void mix_check (MAILSTREAM *stream);
+ long mix_expunge (MAILSTREAM *stream,char *sequence,long options);
+-int mix_select (struct direct *name);
+-int mix_msgfsort (const void *d1,const void *d2);
++int mix_select (const struct direct *name);
++int mix_msgfsort (const struct dirent **d1,const struct dirent **d2);
+ long mix_addset (SEARCHSET **set,unsigned long start,unsigned long size);
+ long mix_burp (MAILSTREAM *stream,MIXBURP *burp,unsigned long *reclaimed);
+ long mix_burp_check (SEARCHSET *set,size_t size,char *file);
+@@ -284,7 +284,7 @@ void *mix_parameters (long function,void *value)
+  * Returns: T if internal name, NIL otherwise
+  */
+ 
+-long mix_dirfmttest (char *name)
++long mix_dirfmttest (const char *name)
+ {
+ 				/* belongs to MIX if starts with .mix */
+   return strncmp (name,MIXNAME,sizeof (MIXNAME) - 1) ? NIL : LONGT;
+@@ -587,7 +587,7 @@ long mix_rename (MAILSTREAM *stream,char *old,char *newname)
+  * Returns: T if mix file name, NIL otherwise
+  */
+ 
+-int mix_rselect (struct direct *name)
++int mix_rselect (const struct direct *name)
+ {
+   return mix_dirfmttest (name->d_name);
+ }
+@@ -1146,7 +1146,7 @@ long mix_expunge (MAILSTREAM *stream,char *sequence,long options)
+  * ".mix" with no suffix was used by experimental versions
+  */
+ 
+-int mix_select (struct direct *name)
++int mix_select (const struct direct *name)
+ {
+   char c,*s;
+ 				/* make sure name has prefix */
+@@ -1165,10 +1165,10 @@ int mix_select (struct direct *name)
+  * Returns: -1 if d1 < d2, 0 if d1 == d2, 1 d1 > d2
+  */
+ 
+-int mix_msgfsort (const void *d1,const void *d2)
++int mix_msgfsort (const struct dirent **d1,const struct dirent **d2)
+ {
+-  char *n1 = (*(struct direct **) d1)->d_name + sizeof (MIXNAME) - 1;
+-  char *n2 = (*(struct direct **) d2)->d_name + sizeof (MIXNAME) - 1;
++  const char *n1 = (*(const struct direct **) d1)->d_name + sizeof (MIXNAME) - 1;
++  const char *n2 = (*(const struct direct **) d2)->d_name + sizeof (MIXNAME) - 1;
+   return compare_ulong (*n1 ? strtoul (n1,NIL,16) : 0,
+ 			*n2 ? strtoul (n2,NIL,16) : 0);
+ }
+diff --git a/src/osdep/unix/mx.c b/src/osdep/unix/mx.c
+index 4549527..1a5d04d 100644
+--- a/src/osdep/unix/mx.c
++++ b/src/osdep/unix/mx.c
+@@ -98,8 +98,8 @@ long mx_append (MAILSTREAM *stream,char *mailbox,append_t af,void *data);
+ long mx_append_msg (MAILSTREAM *stream,char *flags,MESSAGECACHE *elt,
+ 		    STRING *st,SEARCHSET *set);
+ 
+-int mx_select (struct direct *name);
+-int mx_numsort (const void *d1,const void *d2);
++int mx_select (const struct direct *name);
++int mx_numsort (const struct dirent** d1, const struct dirent** d2);
+ char *mx_file (char *dst,char *name);
+ long mx_lockindex (MAILSTREAM *stream);
+ void mx_unlockindex (MAILSTREAM *stream);
+@@ -1110,10 +1110,10 @@ long mx_append_msg (MAILSTREAM *stream,char *flags,MESSAGECACHE *elt,
+  * Returns: T to use file name, NIL to skip it
+  */
+ 
+-int mx_select (struct direct *name)
++int mx_select (const struct direct *name)
+ {
+   char c;
+-  char *s = name->d_name;
++  const char *s = name->d_name;
+   while (c = *s++) if (!isdigit (c)) return NIL;
+   return T;
+ }
+@@ -1125,13 +1125,14 @@ int mx_select (struct direct *name)
+  * Returns: negative if d1 < d2, 0 if d1 == d2, postive if d1 > d2
+  */
+ 
+-int mx_numsort (const void *d1,const void *d2)
++int mx_numsort (const struct dirent** d1, const struct dirent** d2)
+ {
+-  return atoi ((*(struct direct **) d1)->d_name) -
+-    atoi ((*(struct direct **) d2)->d_name);
++  return atoi ((*d1)->d_name) -
++    atoi ((*d2)->d_name);
+ }
+ 
+ 
++
+ /* MX mail build file name
+  * Accepts: destination string
+  *          source
+diff --git a/src/osdep/unix/news.c b/src/osdep/unix/news.c
+index 4cf5bb7..536ca50 100644
+--- a/src/osdep/unix/news.c
++++ b/src/osdep/unix/news.c
+@@ -76,8 +76,8 @@ long news_create (MAILSTREAM *stream,char *mailbox);
+ long news_delete (MAILSTREAM *stream,char *mailbox);
+ long news_rename (MAILSTREAM *stream,char *old,char *newname);
+ MAILSTREAM *news_open (MAILSTREAM *stream);
+-int news_select (struct direct *name);
+-int news_numsort (const void *d1,const void *d2);
++int news_select (const struct direct *name);
++int news_numsort (const struct dirent **d1,const struct dirent **d2);
+ void news_close (MAILSTREAM *stream,long options);
+ void news_fast (MAILSTREAM *stream,char *sequence,long flags);
+ void news_flags (MAILSTREAM *stream,char *sequence,long flags);
+@@ -402,10 +402,10 @@ MAILSTREAM *news_open (MAILSTREAM *stream)
+  * Returns: T to use file name, NIL to skip it
+  */
+ 
+-int news_select (struct direct *name)
++int news_select (const struct direct *name)
+ {
+   char c;
+-  char *s = name->d_name;
++  const char *s = name->d_name;
+   while (c = *s++) if (!isdigit (c)) return NIL;
+   return T;
+ }
+@@ -417,10 +417,10 @@ int news_select (struct direct *name)
+  * Returns: negative if d1 < d2, 0 if d1 == d2, postive if d1 > d2
+  */
+ 
+-int news_numsort (const void *d1,const void *d2)
++int news_numsort (const struct dirent** d1, const struct dirent** d2)
+ {
+-  return atoi ((*(struct direct **) d1)->d_name) -
+-    atoi ((*(struct direct **) d2)->d_name);
++  return atoi ((*d1)->d_name) -
++    atoi ((*d2)->d_name);
+ }
+ 
+ 
+diff --git a/src/osdep/unix/os_lnx.c b/src/osdep/unix/os_lnx.c
+index 671bbd6..df87d7d 100644
+--- a/src/osdep/unix/os_lnx.c
++++ b/src/osdep/unix/os_lnx.c
+@@ -53,3 +53,4 @@ extern int errno;		/* just in case */
+ #include "gr_waitp.c"
+ #include "tz_sv4.c"
+ #include "flocklnx.c"
++#include "utime.c"
+diff --git a/src/osdep/unix/os_lnx.h b/src/osdep/unix/os_lnx.h
+index b5f39ff..31e7bda 100644
+--- a/src/osdep/unix/os_lnx.h
++++ b/src/osdep/unix/os_lnx.h
+@@ -12,7 +12,7 @@
+  */
+ 
+ /*
+- * Program:	Operating-system dependent routines -- Linux version
++ * Program:	Operating-system dependent routines -- Linux version [lnx]
+  *
+  * Author:	Mark Crispin
+  *		Networks and Distributed Computing
+@@ -31,12 +31,7 @@
+  *** Alpha.
+  */
+ 
+-#ifndef _XOPEN_SOURCE
+-#define _XOPEN_SOURCE 1
+-#endif /* _XOPEN_SOURCE */
+-#ifndef _BSD_SOURCE
+-#define _BSD_SOURCE 1
+-#endif /* _BSD_SOURCE */
++#define _DEFAULT_SOURCE 1
+ 
+ /* end Debian Linux on Alpha strangeness */
+ 
+@@ -49,7 +44,9 @@
+ #include <fcntl.h>
+ #include <syslog.h>
+ #include <sys/file.h>
+-
++#include <utime.h>
++#include <sys/time.h>
++#include <ctype.h>
+ 
+ /* Linux gets this wrong */
+ 
+@@ -57,8 +54,14 @@
+ 
+ #define direct dirent
+ 
++/* in flocklnx.c */
++int safe_flock (int fd,int op);
++
+ #define flock safe_flock
+ 
++#define utime portable_utime
++int portable_utime (char *file,time_t timep[2]);
++
+ 
+ #include "env_unix.h"
+ #include "fs.h"
+diff --git a/src/osdep/unix/os_slx.c b/src/osdep/unix/os_slx.c
+index f6bf27d..44b10be 100644
+--- a/src/osdep/unix/os_slx.c
++++ b/src/osdep/unix/os_slx.c
+@@ -55,3 +55,4 @@ extern int errno;		/* just in case */
+ #include "gr_waitp.c"
+ #include "tz_sv4.c"
+ #include "flocklnx.c"
++#include "utime.c"
+diff --git a/src/osdep/unix/os_slx.h b/src/osdep/unix/os_slx.h
+index b5f39ff..80c306e 100644
+--- a/src/osdep/unix/os_slx.h
++++ b/src/osdep/unix/os_slx.h
+@@ -12,7 +12,7 @@
+  */
+ 
+ /*
+- * Program:	Operating-system dependent routines -- Linux version
++ * Program:	Operating-system dependent routines -- Linux version [slx]
+  *
+  * Author:	Mark Crispin
+  *		Networks and Distributed Computing
+@@ -31,12 +31,7 @@
+  *** Alpha.
+  */
+ 
+-#ifndef _XOPEN_SOURCE
+-#define _XOPEN_SOURCE 1
+-#endif /* _XOPEN_SOURCE */
+-#ifndef _BSD_SOURCE
+-#define _BSD_SOURCE 1
+-#endif /* _BSD_SOURCE */
++#define _DEFAULT_SOURCE 1
+ 
+ /* end Debian Linux on Alpha strangeness */
+ 
+@@ -49,7 +44,9 @@
+ #include <fcntl.h>
+ #include <syslog.h>
+ #include <sys/file.h>
+-
++#include <utime.h>
++#include <sys/time.h>
++#include <ctype.h>
+ 
+ /* Linux gets this wrong */
+ 
+@@ -57,8 +54,14 @@
+ 
+ #define direct dirent
+ 
++/* in flocklnx.c */
++int safe_flock (int fd,int op);
++
+ #define flock safe_flock
+ 
++#define utime portable_utime
++int portable_utime (char *file,time_t timep[2]);
++
+ 
+ #include "env_unix.h"
+ #include "fs.h"
