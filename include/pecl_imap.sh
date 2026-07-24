@@ -39,7 +39,12 @@ Install_UW_IMAP_From_Debian_Source() {
   dpkg-source -x "uw-imap_${uw_imap_debian_ver}.dsc" || return 1
   pushd "${uw_imap_source_dir}" > /dev/null || return 1
   touch ip6
-  make -j "${THREAD}" VERSION=2007e EXTRAAUTHENTICATORS=gss \
+  # UW-IMAP's build target mutates shared files (OSTYPE, osdepbas.c, and
+  # symlinks) across several prerequisites and recursive make processes. It is
+  # not parallel-safe; inherited jobserver flags reproduce "Already built" and
+  # "osdepbas.c not found" races. Force the complete c-client build serially.
+  # UW-IMAP 多个目标会并发改写同一批文件，必须清除外部并行参数并全程串行。
+  MAKEFLAGS= make -j1 VERSION=2007e EXTRAAUTHENTICATORS=gss \
     EXTRACFLAGS='-fPIC -D_REENTRANT -DDISABLE_POP_PROXY' ldb || return 1
 
   install -d "${uw_imap_prefix}/lib" "${uw_imap_prefix}/include/c-client" || return 1
