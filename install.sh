@@ -75,6 +75,29 @@ Show_Help() {
   "
 }
 ARG_NUM=$#
+
+# GNU getopt requires a value for options declared with a trailing colon.
+# Normalize a bare --phpcache_option to its documented default while retaining
+# support for the existing "--phpcache_option 2" and "=2" forms.
+# GNU getopt 对冒号参数强制要求值；先将无编号形式规范为默认值 1，
+# 同时保留原有的空格传值和等号传值方式。
+normalized_args=()
+while [ "$#" -gt 0 ]; do
+  if [ "$1" = '--phpcache_option' ] &&
+    { [ "$#" -eq 1 ] || [[ "$2" == -* ]]; }; then
+    normalized_args+=('--phpcache_option' '1')
+    shift
+  elif [ "$1" = '--phpcache_option=' ]; then
+    normalized_args+=('--phpcache_option=1')
+    shift
+  else
+    normalized_args+=("$1")
+    shift
+  fi
+done
+set -- "${normalized_args[@]}"
+unset normalized_args
+
 TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,phpmyadmin,ssh_port:,firewall,md5sum,reboot -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
@@ -164,7 +187,12 @@ while :; do
     ;;
   --phpcache_option)
     phpcache_option=$2
+    phpcache_option_set=y
     shift 2
+    [[ ! ${phpcache_option} =~ ^[1-4]$ ]] && {
+      echo "${CWARNING}phpcache_option input error! Please only input number 1~4${CEND}"
+      exit 1
+    }
     ;;
   --php_extensions)
     php_extensions=$2
@@ -308,6 +336,15 @@ while :; do
     ;;
   esac
 done
+
+# Keep the documented CLI default without changing the interactive workflow:
+# command-line PHP installs enable OPcache unless another cache was selected.
+# 保持命令行参数与帮助文档一致；交互安装仍由用户决定是否启用缓存。
+if [ "${ARG_NUM}" -gt 0 ] &&
+  { [ -n "${php_option}" ] || [ -n "${mphp_ver}" ]; } &&
+  [ "${phpcache_option_set}" != 'y' ]; then
+  phpcache_option=1
+fi
 
 if { [ "${php_option}" == '15' ] || [ "${mphp_ver}" == '85' ]; } && [ "${Family}" == 'rhel' ] && [ "${RHEL_ver:-0}" -lt 8 ]; then
   echo "${CWARNING}PHP 8.5 requires RHEL 8 or newer on RHEL-family systems.${CEND}"
