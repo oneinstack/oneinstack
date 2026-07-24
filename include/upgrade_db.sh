@@ -17,8 +17,6 @@ Upgrade_MySQL_To_97() {
   local prepared_config="${oneinstack_dir}/src/my.cnf.mysql97.${upgrade_stamp}"
   local native_accounts
   local redo_capacity
-  local expected_md5
-  local actual_md5
   local mysql_ready=0
   local running_version
 
@@ -49,17 +47,12 @@ Upgrade_MySQL_To_97() {
   [[ ! "${redo_capacity}" =~ ^[0-9]+$ ]] && redo_capacity=''
 
   echo "Downloading MySQL ${mysql97_ver} LTS..."
-  src_url=${mysql97_url} && Download_src
+  src_url=${mysql97_url}
+  src_checksum=${mysql97_checksum:-}
+  Download_src
   src_url=${mysql97_url}.asc && Download_src
   Verify_GPG_Signature "${mysql97_package}.tar.xz" "${mysql97_package}.tar.xz.asc" \
-    "${mysql_gpg_key_url}" "${mysql_gpg_fingerprint}" || return 1
-  expected_md5=${mysql97_md5}
-  actual_md5=$(md5sum ${mysql97_package}.tar.xz | awk '{print $1}')
-  if [[ ! "${expected_md5}" =~ ^[[:xdigit:]]{32}$ ]] || [ "${actual_md5}" != "${expected_md5}" ]; then
-    rm -f ${mysql97_package}.tar.xz
-    echo "${CFAILURE}MySQL 9.7 package checksum verification failed. ${CEND}"
-    return 1
-  fi
+    "${mysql97_gpg_key}" "${mysql97_gpg_finger}" || return 1
 
   rm -rf ${mysql97_package}
   tar xJf ${mysql97_package}.tar.xz || return 1

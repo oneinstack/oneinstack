@@ -11,19 +11,14 @@
 Parse_Version_Spec() {
   local variable_name="$1"
   local spec="${!variable_name}"
-  local version checksum algorithm digest checksum_name
+  local version metadata_name metadata_value checksum_name
+  local md5_digest sha256_digest gpg_key gpg_finger
+  local metadata=()
 
   case "${spec}" in
-    *,sha256=*|*,md5=*)
-      version=${spec%%,*}
-      checksum=${spec#*,}
-      algorithm=${checksum%%=*}
-      digest=${checksum#*=}
-      ;;
     *,*)
-      version=${spec%%,*}
-      digest=${spec#*,}
-      [ "${#digest}" -eq 32 ] && algorithm=md5 || algorithm=sha256
+      IFS=',' read -r -a metadata <<< "${spec}"
+      version=${metadata[0]}
       ;;
     *)
       return 0
@@ -34,26 +29,99 @@ Parse_Version_Spec() {
     echo "Missing version in specification: ${variable_name}=${spec}"
     return 1
   }
-  case "${algorithm}" in
-    sha256)
-      [[ "${digest}" =~ ^[[:xdigit:]]{64}$ ]] || {
-        echo "Invalid SHA-256 in specification: ${variable_name}=${spec}"
-        return 1
-      }
-      ;;
-    md5)
-      [[ "${digest}" =~ ^[[:xdigit:]]{32}$ ]] || {
-        echo "Invalid MD5 in specification: ${variable_name}=${spec}"
-        return 1
-      }
-      ;;
-  esac
 
   checksum_name=${variable_name%_ver}
-  checksum="${algorithm}=${digest}"
+  unset "${checksum_name}_checksum" "${checksum_name}_md5" \
+    "${checksum_name}_sha256" "${checksum_name}_gpg_key" \
+    "${checksum_name}_gpg_finger"
+
+  for metadata_value in "${metadata[@]:1}"; do
+    if [[ "${metadata_value}" != *=* ]]; then
+      echo "Metadata must use an explicit prefix: ${variable_name}=${spec}"
+      return 1
+    fi
+    metadata_name=${metadata_value%%=*}
+    metadata_value=${metadata_value#*=}
+    [ -n "${metadata_value}" ] || {
+      echo "Empty ${metadata_name} metadata: ${variable_name}=${spec}"
+      return 1
+    }
+
+    case "${metadata_name}" in
+      md5)
+        [ -z "${md5_digest}" ] || {
+          echo "Duplicate MD5 metadata: ${variable_name}=${spec}"
+          return 1
+        }
+        [[ "${metadata_value}" =~ ^[[:xdigit:]]{32}$ ]] || {
+          echo "Invalid MD5 in specification: ${variable_name}=${spec}"
+          return 1
+        }
+        md5_digest=$(printf '%s' "${metadata_value}" | tr '[:upper:]' '[:lower:]')
+        ;;
+      sha256)
+        [ -z "${sha256_digest}" ] || {
+          echo "Duplicate SHA-256 metadata: ${variable_name}=${spec}"
+          return 1
+        }
+        [[ "${metadata_value}" =~ ^[[:xdigit:]]{64}$ ]] || {
+          echo "Invalid SHA-256 in specification: ${variable_name}=${spec}"
+          return 1
+        }
+        sha256_digest=$(printf '%s' "${metadata_value}" | tr '[:upper:]' '[:lower:]')
+        ;;
+      gpg_key)
+        [ -z "${gpg_key}" ] || {
+          echo "Duplicate GPG key metadata: ${variable_name}=${spec}"
+          return 1
+        }
+        [[ "${metadata_value}" == https://* ]] || {
+          echo "GPG key URL must use HTTPS: ${variable_name}=${spec}"
+          return 1
+        }
+        gpg_key=${metadata_value}
+        ;;
+      gpg_finger)
+        [ -z "${gpg_finger}" ] || {
+          echo "Duplicate GPG fingerprint metadata: ${variable_name}=${spec}"
+          return 1
+        }
+        [[ "${metadata_value}" =~ ^[[:xdigit:]]{40}$|^[[:xdigit:]]{64}$ ]] || {
+          echo "Invalid GPG fingerprint: ${variable_name}=${spec}"
+          return 1
+        }
+        gpg_finger=$(printf '%s' "${metadata_value}" | tr '[:lower:]' '[:upper:]')
+        ;;
+      *)
+        echo "Unsupported metadata '${metadata_name}': ${variable_name}=${spec}"
+        return 1
+        ;;
+    esac
+  done
+
+  if [ -n "${md5_digest}" ] && [ -n "${sha256_digest}" ]; then
+    echo "Specify only one checksum algorithm: ${variable_name}=${spec}"
+    return 1
+  fi
+  if { [ -n "${gpg_key}" ] && [ -z "${gpg_finger}" ]; } ||
+    { [ -z "${gpg_key}" ] && [ -n "${gpg_finger}" ]; }; then
+    echo "gpg_key and gpg_finger must be specified together: ${variable_name}=${spec}"
+    return 1
+  fi
+
   printf -v "${variable_name}" '%s' "${version}"
-  printf -v "${checksum_name}_checksum" '%s' "${checksum}"
-  printf -v "${checksum_name}_${algorithm}" '%s' "${digest}"
+  if [ -n "${sha256_digest}" ]; then
+    printf -v "${checksum_name}_checksum" 'sha256=%s' "${sha256_digest}"
+    printf -v "${checksum_name}_sha256" '%s' "${sha256_digest}"
+  elif [ -n "${md5_digest}" ]; then
+    printf -v "${checksum_name}_checksum" 'md5=%s' "${md5_digest}"
+    printf -v "${checksum_name}_md5" '%s' "${md5_digest}"
+  fi
+  [ -n "${gpg_key}" ] &&
+    printf -v "${checksum_name}_gpg_key" '%s' "${gpg_key}"
+  [ -n "${gpg_finger}" ] &&
+    printf -v "${checksum_name}_gpg_finger" '%s' "${gpg_finger}"
+  return 0
 }
 
 Parse_Version_Specs() {
@@ -233,6 +301,7 @@ Download_src() {
   local expected_sha256 expected_md5
   local download_mode="${1:-}"
   local part_file="${filename}.part.$$"
+  local mirror_url
   local url
   local urls=()
 
@@ -294,9 +363,20 @@ Download_src() {
     rm -f "${filename}"
   fi
 
-  # The requested upstream is authoritative. Only use equivalent mirrors for known projects.
-  # 调用方指定的上游为权威来源，仅对已知项目添加等价镜像，不再全局劫持到 OneinStack 镜像。
-  urls+=("${requested_url}")
+  # mirror_link is the preferred download source. For external upstream URLs,
+  # first try the official OneinStack source cache using the same filename,
+  # then fall back to the caller-provided upstream. Explicit OneinStack mirror
+  # paths (for example Apache/Tomcat layouts) are already authoritative.
+  # mirror_link 表示优先下载源：外部上游先尝试 OneinStack 官方文件缓存，
+  # 失败后回退原始上游；调用方给出的 OneinStack 专用镜像路径则直接优先。
+  mirror_url="${mirror_link%/}/oneinstack/src/${filename}"
+  if [[ "${requested_url}" == "${mirror_link%/}/"* ]]; then
+    urls+=("${requested_url}")
+  else
+    urls+=("${mirror_url}")
+    [ "${requested_url}" != "${mirror_url}" ] && urls+=("${requested_url}")
+  fi
+
   if [[ "${requested_url}" == *"mirrors.tuna.tsinghua.edu.cn"* ]]; then
     urls+=("${requested_url/mirrors.tuna.tsinghua.edu.cn/mirrors.ustc.edu.cn}")
   elif [[ "${requested_url}" == *"ftp.postgresql.org/pub"* ]]; then

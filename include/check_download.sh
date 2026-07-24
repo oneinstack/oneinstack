@@ -128,29 +128,15 @@ checkDownload() {
         DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-9.7
         FILE_NAME=mysql-${mysql97_ver}-linux-glibc2.28-x86_64.tar.xz
         echo "Download MySQL 9.7 LTS binary package..."
-        src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME} && Download_src
+        src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME}
+        src_checksum=${mysql97_checksum:-}
+        Download_src
         src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME}.asc && Download_src
         Verify_GPG_Signature "${FILE_NAME}" "${FILE_NAME}.asc" \
-          "${mysql_gpg_key_url}" "${mysql_gpg_fingerprint}" || {
+          "${mysql97_gpg_key}" "${mysql97_gpg_finger}" || {
           echo "${CFAILURE}${FILE_NAME} signature verification failed.${CEND}"
           exit 1
         }
-
-        # Pin the checksum published on Oracle's download page; do not trust a checksum
-        # fetched from the same endpoint as the archive.
-        # 固定 Oracle 下载页公布的摘要，避免压缩包与摘要同时被同一来源替换。
-        MYSQL_TAR_MD5=${mysql97_md5}
-        tryDlCount=0
-        while [[ "${MYSQL_TAR_MD5}" =~ ^[[:xdigit:]]{32}$ ]] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; do
-          rm -f ${FILE_NAME}
-          src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME} && Download_src
-          let "tryDlCount++"
-          [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${MYSQL_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
-        done
-        if [[ ! "${MYSQL_TAR_MD5}" =~ ^[[:xdigit:]]{32}$ ]] || [ "${tryDlCount}" == '6' ]; then
-          echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
-          kill -9 $$; exit 1
-        fi
         ;;
       0)
         # MySQL 8.4
