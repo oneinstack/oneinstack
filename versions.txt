@@ -1,4 +1,9 @@
 # newest software version
+# Optional integrity pin: name_ver=version,hex. A 32-character digest means
+# MD5; other lengths mean SHA-256 and must contain exactly 64 hex characters.
+# Explicit version,md5=hex and version,sha256=hex forms are also accepted.
+# A plain version skips the cryptographic digest.
+# 摘要与版本写在同一行：32 位按 MD5，其余按 SHA-256 并要求正好 64 位。
 # Web
 nginx_ver=1.31.0
 caddy_ver=2.10.2
@@ -20,8 +25,7 @@ apr_util_ver=1.6.3
 nghttp2_ver=1.64.0
 
 # DB
-mysql97_ver=9.7.1
-mysql97_md5=18abe52f40af534e611ce02ee8ecaa8d
+mysql97_ver=9.7.1,18abe52f40af534e611ce02ee8ecaa8d
 mysql_gpg_key_url=https://repo.mysql.com/RPM-GPG-KEY-mysql-2025
 mysql_gpg_fingerprint=BCA43417C3B485DD128EC6D4B7B3B788A8D3785C
 mysql84_ver=8.4.0
@@ -60,8 +64,7 @@ php81_ver=8.1.34
 php82_ver=8.2.30
 php83_ver=8.3.29
 php84_ver=8.4.16
-php85_ver=8.5.8
-php85_sha256=6ebc55e52af4396385e689f7af0f28944fbbf966843433b573e9dc1dc03df539
+php85_ver=8.5.8,6ebc55e52af4396385e689f7af0f28944fbbf966843433b573e9dc1dc03df539
 
 # Nodejs
 nodejs_ver=22.12.0
@@ -77,10 +80,14 @@ libsodium_ver=1.0.21
 libsodium_up_ver=1.0.21
 libzip_ver=1.11.4
 argon2_ver=20171227
-imagemagick_ver=7.1.2-12
-imagick_ver=3.8.1
+imagemagick_ver=7.1.2-27,aae3a01bfc0fc068883649f8f7a4f4ac383e3ae9651d424d8d56ac6701f8c242
+imagick_ver=3.8.1,3a3587c0a524c17d0dad9673a160b90cd776e836838474e173b549ed864352ee
 imagick_oldver=3.4.4
-pecl_imap_ver=1.0.3
+pecl_imap_ver=1.0.3,0c2c0b1f94f299004be996b85a424e3d11ff65ac0a3c980db3213289a4a3faaf
+uw_imap_debian_ver=2007f~dfsg-7
+uw_imap_dsc_sha256=86a0c3a178101a682ef3f594ef2829413a81e906d7f5b26ffadc7cfd91bac200
+uw_imap_orig_sha256=4fdec0b5a085a7269db87214276e14ce79afdf7efec2ca8d431ab176b9062a8a
+uw_imap_debian_sha256=9d778c6de093abf9d07164d6ad074bfe4c2ab38934283741b006f9537f6e896c
 graphicsmagick_ver=1.3.46
 gmagick_ver=2.0.6RC1
 gmagick_oldver=1.1.7RC3
@@ -95,9 +102,9 @@ phalcon_oldver=3.4.5
 yaf_ver=3.3.7
 yar_ver=2.3.4
 swoole_ver=6.1.6
-swoole_up_ver=6.2.2
+swoole_up_ver=6.2.2,fb17fc898d02ee0f2b22f5e4dcb0ff96cd35fe8ef7a6d2c5af6cb365f3f9b438
 swoole_oldver=5.1.5
-xdebug_ver=3.5.3
+xdebug_ver=3.5.3,f073de91bea046106abf4d6071c963ea71e58571df6ce58948ceca89d121cb2d
 xdebug_oldver=3.1.6
 
 # Ftp
@@ -106,18 +113,18 @@ pureftpd_ver=1.0.51
 # Redis
 redis_ver=8.8.0
 redis_oldver=7.4.2
-pecl_redis_ver=6.3.0
+pecl_redis_ver=6.3.0,0d5141f634bd1db6c1ddcda053d25ecf2c4fc1c395430d534fd3f8d51dd7f0b5
 
 # Memcached
 memcached_ver=1.6.40
-libmemcached_ver=1.0.18
-pecl_memcached_ver=3.3.0
+libmemcached_ver=1.1.4,c477e1f6510e1dc698e84f3717ce690a8f65b94c616ecaa62306cce0f5e3116a
+pecl_memcached_ver=3.4.0,c163434eb0da97c8f45c7ad41d979d381f8b81c49402b1b90b063987fb37972e
 pecl_memcached_oldver=2.2.0
 pecl_memcache_ver=8.2
 pecl_memcache_oldver=4.0.5.2
 
 # MongoDB
-pecl_mongodb_ver=2.3.3
+pecl_mongodb_ver=2.3.3,370ff9c06932139c69f6b4c57b1a97c95b0278d3baf23fa42b8fb571ddb92bbf
 pecl_mongodb_oldver=1.19.1
 pecl_mongo_ver=1.6.16
 

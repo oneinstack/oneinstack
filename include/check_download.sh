@@ -638,7 +638,7 @@ checkDownload() {
     src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
   elif [ "${php_option}" == '15' ] || [ "${mphp_ver}" == '85' ]; then
     src_url=https://www.php.net/distributions/php-${php85_ver}.tar.gz &&
-      src_sha256=${php85_sha256} &&
+      src_checksum=${php85_checksum:-} &&
       Download_src
     src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_up_ver}.tar.gz && Download_src
@@ -718,12 +718,16 @@ checkDownload() {
   # imageMagick
   if [ "${pecl_imagick}" == '1' ]; then
     echo "Download ImageMagick..."
-    src_url=${mirror_link}/oneinstack/src/ImageMagick-${imagemagick_ver}.tar.gz && Download_src
+    src_url=https://download.imagemagick.org/archive/releases/ImageMagick-${imagemagick_ver}.tar.gz &&
+      src_checksum=${imagemagick_checksum:-} &&
+      Download_src
     echo "Download imagick..."
     if [[ "${php_option}" =~ ^1$ ]]; then
       src_url=https://pecl.php.net/get/imagick-${imagick_oldver}.tgz && Download_src
     else
-      src_url=https://pecl.php.net/get/imagick-${imagick_ver}.tgz && Download_src
+      src_url=https://pecl.php.net/get/imagick-${imagick_ver}.tgz &&
+        src_checksum=${imagick_checksum:-} &&
+        Download_src
     fi
   fi
 
@@ -756,7 +760,9 @@ checkDownload() {
       src_url=https://pecl.php.net/get/redis-5.3.7.tgz && Download_src
     else
       echo "Download pecl_redis for php 7.2+..."
-      src_url=https://pecl.php.net/get/redis-${pecl_redis_ver}.tgz && Download_src
+      src_url=https://pecl.php.net/get/redis-${pecl_redis_ver}.tgz &&
+        src_checksum=${pecl_redis_checksum:-} &&
+        Download_src
     fi
   fi
 
@@ -770,13 +776,18 @@ checkDownload() {
   # pecl_memcached
   if [ "${pecl_memcached}" == '1' ]; then
     echo "Download libmemcached..."
-    src_url=${mirror_link}/oneinstack/src/libmemcached-${libmemcached_ver}.tar.gz && Download_src
+    src_url=https://github.com/awesomized/libmemcached/archive/refs/tags/${libmemcached_ver}.tar.gz &&
+      src_name=libmemcached-${libmemcached_ver}.tar.gz &&
+      src_checksum=${libmemcached_checksum:-} &&
+      Download_src
     if [[ "${php_option}" =~ ^[1-4]$ ]]; then
       echo "Download pecl_memcached for php..."
       src_url=https://pecl.php.net/get/memcached-${pecl_memcached_oldver}.tgz && Download_src
     else
       echo "Download pecl_memcached for php 7.x..."
-      src_url=https://pecl.php.net/get/memcached-${pecl_memcached_ver}.tgz && Download_src
+      src_url=https://pecl.php.net/get/memcached-${pecl_memcached_ver}.tgz &&
+        src_checksum=${pecl_memcached_checksum:-} &&
+        Download_src
     fi
   fi
 
@@ -801,7 +812,9 @@ checkDownload() {
     echo "Download legacy pecl mongodb for php 7.x and php 8.0..."
     src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_oldver}.tgz && Download_src
     echo "Download pecl mongodb for php..."
-    src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_ver}.tgz && Download_src
+    src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_ver}.tgz &&
+      src_checksum=${pecl_mongodb_checksum:-} &&
+      Download_src
   fi
 
   # nodejs

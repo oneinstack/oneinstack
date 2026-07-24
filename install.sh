@@ -822,33 +822,33 @@ if [ ${ARG_NUM} == 0 ]; then
       read -e -p "Please input numbers:(Default '4 11 12' press Enter) " phpext_option
       phpext_option=${phpext_option:-'4 11 12'}
       [ "${phpext_option}" == '0' ] && break
-      array_phpext=(${phpext_option})
+      read -r -a array_phpext <<< "${phpext_option}"
       array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16)
-      for v in ${array_phpext[@]}
+      for v in "${array_phpext[@]}"
       do
-        [ -z "`echo ${array_all[@]} | grep -w ${v}`" ] && phpext_flag=1
+        [[ ! " ${array_all[*]} " == *" ${v} "* ]] && phpext_flag=1
       done
       if [ "${phpext_flag}" == '1' ]; then
         unset phpext_flag
         echo; echo "${CWARNING}input error! Please only input number 4 11 12 and so on${CEND}"; echo
         continue
       else
-        [ -n "`echo ${array_phpext[@]} | grep -w 1`" ] && pecl_zendguardloader=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 2`" ] && pecl_ioncube=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 3`" ] && pecl_sourceguardian=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 4`" ] && pecl_imagick=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 5`" ] && pecl_gmagick=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 6`" ] && pecl_fileinfo=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 7`" ] && pecl_imap=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 8`" ] && pecl_ldap=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 9`" ] && pecl_phalcon=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 10`" ] && pecl_yaf=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 11`" ] && pecl_redis=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 12`" ] && pecl_memcached=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 13`" ] && pecl_memcache=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 14`" ] && pecl_mongodb=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 15`" ] && pecl_swoole=1
-        [ -n "`echo ${array_phpext[@]} | grep -w 16`" ] && pecl_xdebug=1
+        [[ " ${array_phpext[*]} " == *" 1 "* ]] && pecl_zendguardloader=1
+        [[ " ${array_phpext[*]} " == *" 2 "* ]] && pecl_ioncube=1
+        [[ " ${array_phpext[*]} " == *" 3 "* ]] && pecl_sourceguardian=1
+        [[ " ${array_phpext[*]} " == *" 4 "* ]] && pecl_imagick=1
+        [[ " ${array_phpext[*]} " == *" 5 "* ]] && pecl_gmagick=1
+        [[ " ${array_phpext[*]} " == *" 6 "* ]] && pecl_fileinfo=1
+        [[ " ${array_phpext[*]} " == *" 7 "* ]] && pecl_imap=1
+        [[ " ${array_phpext[*]} " == *" 8 "* ]] && pecl_ldap=1
+        [[ " ${array_phpext[*]} " == *" 9 "* ]] && pecl_phalcon=1
+        [[ " ${array_phpext[*]} " == *" 10 "* ]] && pecl_yaf=1
+        [[ " ${array_phpext[*]} " == *" 11 "* ]] && pecl_redis=1
+        [[ " ${array_phpext[*]} " == *" 12 "* ]] && pecl_memcached=1
+        [[ " ${array_phpext[*]} " == *" 13 "* ]] && pecl_memcache=1
+        [[ " ${array_phpext[*]} " == *" 14 "* ]] && pecl_mongodb=1
+        [[ " ${array_phpext[*]} " == *" 15 "* ]] && pecl_swoole=1
+        [[ " ${array_phpext[*]} " == *" 16 "* ]] && pecl_xdebug=1
         break
       fi
     done
@@ -1146,6 +1146,48 @@ case "${php_option}" in
     ;;
 esac
 
+Run_Logged_Command() {
+  local command_name="$1"
+  local command_status
+
+  shift
+  "${command_name}" "$@" 2>&1 | tee -a "${oneinstack_dir}/install.log"
+  command_status=${PIPESTATUS[0]}
+  if [ "${command_status}" -ne 0 ]; then
+    echo "${CFAILURE}${command_name} failed with status ${command_status}.${CEND}" |
+      tee -a "${oneinstack_dir}/install.log"
+    return "${command_status}"
+  fi
+}
+
+Verify_PHP_Extension() {
+  local extension_name="$1"
+  local verify_status
+
+  "${php_install_dir}/bin/php" -d display_errors=stderr -r \
+    "exit(extension_loaded('${extension_name}') ? 0 : 1);" 2>&1 |
+    tee -a "${oneinstack_dir}/install.log"
+  verify_status=${PIPESTATUS[0]}
+  if [ "${verify_status}" -ne 0 ]; then
+    echo "${CFAILURE}PHP extension ${extension_name} was built but is not loadable.${CEND}" |
+      tee -a "${oneinstack_dir}/install.log"
+    "${php_install_dir}/bin/php" --ini 2>&1 | tee -a "${oneinstack_dir}/install.log"
+    return 1
+  fi
+
+  echo "${CSUCCESS}PHP extension ${extension_name} load check passed.${CEND}" |
+    tee -a "${oneinstack_dir}/install.log"
+}
+
+Run_PHP_Extension_Installer() {
+  local extension_name="$1"
+  local installer_name="$2"
+
+  shift 2
+  Run_Logged_Command "${installer_name}" "$@" || return 1
+  Verify_PHP_Extension "${extension_name}"
+}
+
 PHP_addons() {
   # PHP opcode cache
   case "${phpcache_option}" in
@@ -1188,8 +1230,8 @@ PHP_addons() {
   # imagick
   if [ "${pecl_imagick}" == '1' ]; then
     . include/ImageMagick.sh
-    Install_ImageMagick 2>&1 | tee -a ${oneinstack_dir}/install.log
-    Install_pecl_imagick 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Run_Logged_Command Install_ImageMagick || return 1
+    Run_PHP_Extension_Installer imagick Install_pecl_imagick || return 1
   fi
 
   # gmagick
@@ -1202,19 +1244,19 @@ PHP_addons() {
   # fileinfo
   if [ "${pecl_fileinfo}" == '1' ]; then
     . include/pecl_fileinfo.sh
-    Install_pecl_fileinfo 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Run_PHP_Extension_Installer fileinfo Install_pecl_fileinfo || return 1
   fi
 
   # imap
   if [ "${pecl_imap}" == '1' ]; then
     . include/pecl_imap.sh
-    Install_pecl_imap 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Run_PHP_Extension_Installer imap Install_pecl_imap || return 1
   fi
 
   # ldap
   if [ "${pecl_ldap}" == '1' ]; then
     . include/pecl_ldap.sh
-    Install_pecl_ldap 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Run_PHP_Extension_Installer ldap Install_pecl_ldap || return 1
   fi
 
   # calendar
@@ -1244,7 +1286,7 @@ PHP_addons() {
   # pecl_memcached
   if [ "${pecl_memcached}" == '1' ]; then
     . include/memcached.sh
-    Install_pecl_memcached 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Run_PHP_Extension_Installer memcached Install_pecl_memcached || return 1
   fi
 
   # pecl_memcache
@@ -1256,25 +1298,25 @@ PHP_addons() {
   # pecl_redis
   if [ "${pecl_redis}" == '1' ]; then
     . include/redis.sh
-    Install_pecl_redis 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Run_PHP_Extension_Installer redis Install_pecl_redis || return 1
   fi
 
   # pecl_mongodb
   if [ "${pecl_mongodb}" == '1' ]; then
     . include/pecl_mongodb.sh
-    Install_pecl_mongodb 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Run_PHP_Extension_Installer mongodb Install_pecl_mongodb || return 1
   fi
 
   # swoole
   if [ "${pecl_swoole}" == '1' ]; then
     . include/pecl_swoole.sh
-    Install_pecl_swoole 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Run_PHP_Extension_Installer swoole Install_pecl_swoole || return 1
   fi
 
   # xdebug
   if [ "${pecl_xdebug}" == '1' ]; then
     . include/pecl_xdebug.sh
-    Install_pecl_xdebug 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Run_PHP_Extension_Installer xdebug Install_pecl_xdebug || return 1
   fi
 
   # pecl_pgsql
@@ -1284,14 +1326,16 @@ PHP_addons() {
   fi
 }
 
-[ "${mphp_addons_flag}" != 'y' ] && PHP_addons
+if [ "${mphp_addons_flag}" != 'y' ]; then
+  PHP_addons || exit 1
+fi
 
 if [ "${mphp_flag}" == 'y' ]; then
   . include/mphp.sh
   Install_MPHP 2>&1 | tee -a ${oneinstack_dir}/install.log
   [ "${PIPESTATUS[0]}" -ne 0 ] && exit 1
   php_install_dir=${php_install_dir}${mphp_ver}
-  PHP_addons
+  PHP_addons || exit 1
 fi
 
 # JDK

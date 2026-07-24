@@ -9,34 +9,34 @@
 #       https://github.com/oneinstack/oneinstack
 
 Install_pecl_xdebug() {
-  if [ -e "${php_install_dir}/bin/phpize" ]; then
-    pushd ${oneinstack_dir}/src > /dev/null
+  if [ ! -e "${php_install_dir}/bin/phpize" ]; then
+    echo "${CFAILURE}PHP phpize is required to install xdebug.${CEND}"
+    return 1
+  fi
+
+    pushd ${oneinstack_dir}/src > /dev/null || return 1
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
     if [[ "${PHP_main_ver}" =~ ^7\.[0-4]$|^8\.[0-5]$ ]]; then
       if [[ "${PHP_main_ver}" =~ ^7\.[0-1]$ ]]; then
-        src_url=https://pecl.php.net/get/xdebug-${xdebug_oldver}.tgz && Download_src
-        tar xzf xdebug-${xdebug_oldver}.tgz
-        pushd xdebug-${xdebug_oldver} > /dev/null
+        src_url=https://pecl.php.net/get/xdebug-${xdebug_oldver}.tgz
+        Download_src no_kill || return 1
+        tar xzf xdebug-${xdebug_oldver}.tgz || return 1
+        pushd xdebug-${xdebug_oldver} > /dev/null || return 1
       else
-        src_url=https://pecl.php.net/get/xdebug-${xdebug_ver}.tgz && Download_src
-        tar xzf xdebug-${xdebug_ver}.tgz
-        pushd xdebug-${xdebug_ver} > /dev/null
+        src_url=https://pecl.php.net/get/xdebug-${xdebug_ver}.tgz
+        src_checksum=${xdebug_checksum:-}
+        Download_src no_kill || return 1
+        tar xzf xdebug-${xdebug_ver}.tgz || return 1
+        pushd xdebug-${xdebug_ver} > /dev/null || return 1
       fi
-      ${php_install_dir}/bin/phpize
-      ./configure --with-php-config=${php_install_dir}/bin/php-config
-      make -j ${THREAD} && make install
+      ${php_install_dir}/bin/phpize || return 1
+      ./configure --with-php-config=${php_install_dir}/bin/php-config || return 1
+      make -j ${THREAD} && make install || return 1
       popd > /dev/null
       if [ -f "${phpExtensionDir}/xdebug.so" ]; then
-        src_url=${mirror_link}/oneinstack/src/webgrind-master.zip && Download_src
-        unzip -q webgrind-master.zip
-        /bin/mv webgrind-master ${wwwroot_dir}/default/webgrind
         [ ! -e /tmp/xdebug ] && { mkdir /tmp/xdebug; chown ${run_user}:${run_group} /tmp/xdebug; }
-        [ ! -e /tmp/webgrind ] && { mkdir /tmp/webgrind; chown ${run_user}:${run_group} /tmp/webgrind; }
-        chown -R ${run_user}:${run_group} ${wwwroot_dir}/default/webgrind
-        sed -i 's@static $storageDir.*@static $storageDir = "/tmp/webgrind";@' ${wwwroot_dir}/default/webgrind/config.php
-        sed -i 's@static $profilerDir.*@static $profilerDir = "/tmp/xdebug";@' ${wwwroot_dir}/default/webgrind/config.php
         if [[ "${PHP_main_ver}" =~ ^7\.[0-1]$ ]]; then
           cat > ${php_install_dir}/etc/php.d/08-xdebug.ini << EOF
 [xdebug]
@@ -56,16 +56,17 @@ xdebug.start_with_request=trigger
 EOF
         fi
         echo "${CSUCCESS}PHP xdebug module installed successfully! ${CEND}"
-        echo; echo "Webgrind URL: ${CMSG}http://{Public IP}/webgrind ${CEND}"
         rm -rf xdebug-${xdebug_ver} xdebug-${xdebug_oldver}
       else
-        echo "${CFAILURE}PHP xdebug module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
+        echo "${CFAILURE}PHP xdebug module install failed, Please contact the author! ${CEND}"
+        grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
+        return 1
       fi
     else
-      echo "${CWARNING}Your php ${PHP_detail_ver} does not support xdebug! ${CEND}";
+      echo "${CWARNING}Your php ${PHP_detail_ver} does not support xdebug! ${CEND}"
+      return 1
     fi
     popd > /dev/null
-  fi
 }
 
 Uninstall_pecl_xdebug() {

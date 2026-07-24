@@ -8,6 +8,70 @@
 #       https://oneinstack.com
 #       https://github.com/oneinstack/oneinstack
 
+Parse_Version_Spec() {
+  local variable_name="$1"
+  local spec="${!variable_name}"
+  local version checksum algorithm digest checksum_name
+
+  case "${spec}" in
+    *,sha256=*|*,md5=*)
+      version=${spec%%,*}
+      checksum=${spec#*,}
+      algorithm=${checksum%%=*}
+      digest=${checksum#*=}
+      ;;
+    *,*)
+      version=${spec%%,*}
+      digest=${spec#*,}
+      [ "${#digest}" -eq 32 ] && algorithm=md5 || algorithm=sha256
+      ;;
+    *)
+      return 0
+      ;;
+  esac
+
+  [ -n "${version}" ] || {
+    echo "Missing version in specification: ${variable_name}=${spec}"
+    return 1
+  }
+  case "${algorithm}" in
+    sha256)
+      [[ "${digest}" =~ ^[[:xdigit:]]{64}$ ]] || {
+        echo "Invalid SHA-256 in specification: ${variable_name}=${spec}"
+        return 1
+      }
+      ;;
+    md5)
+      [[ "${digest}" =~ ^[[:xdigit:]]{32}$ ]] || {
+        echo "Invalid MD5 in specification: ${variable_name}=${spec}"
+        return 1
+      }
+      ;;
+  esac
+
+  checksum_name=${variable_name%_ver}
+  checksum="${algorithm}=${digest}"
+  printf -v "${variable_name}" '%s' "${version}"
+  printf -v "${checksum_name}_checksum" '%s' "${checksum}"
+  printf -v "${checksum_name}_${algorithm}" '%s' "${digest}"
+}
+
+Parse_Version_Specs() {
+  local variable_name
+
+  while IFS= read -r variable_name; do
+    case "${variable_name}" in
+      *_ver)
+        Parse_Version_Spec "${variable_name}" || return 1
+        ;;
+    esac
+  done < <(compgen -A variable)
+}
+
+if ! Parse_Version_Specs; then
+  return 1 2>/dev/null || exit 1
+fi
+
 Trusted_Mirror_Link() {
   # Only the mirror explicitly published by the official oneinstack.com site is trusted.
   # 仅信任 oneinstack.com 官网明确公布的镜像，拒绝同名第三方及公共托管域名。
@@ -27,6 +91,16 @@ File_SHA256() {
     sha256sum "$1" | awk '{print $1}'
   elif command -v shasum >/dev/null 2>&1; then
     shasum -a 256 "$1" | awk '{print $1}'
+  else
+    return 1
+  fi
+}
+
+File_MD5() {
+  if command -v md5sum >/dev/null 2>&1; then
+    md5sum "$1" | awk '{print $1}'
+  elif command -v md5 >/dev/null 2>&1; then
+    md5 -q "$1"
   else
     return 1
   fi
@@ -74,22 +148,54 @@ Validate_Downloaded_File() {
   local file="$1"
   local expected_sha256="$2"
   local content_name="${3:-$1}"
-  local actual_sha256 normalized_expected_sha256
+  local expected_md5="$4"
+  local actual_sha256 normalized_expected_sha256 actual_md5 normalized_expected_md5
+  local php_bin
 
   [ -s "${file}" ] || return 1
 
-  # Error pages can be much larger than 1 KB. Never accept HTML as source or executable data.
-  # 错误页可能远大于 1 KB，源码包和可执行文件一律拒绝 HTML 内容。
-  if LC_ALL=C head -c 4096 "${file}" 2>/dev/null |
-    LC_ALL=C grep -aEiq '<!doctype[[:space:]]+html|<html([[:space:]>])|<head([[:space:]>])|<body([[:space:]>])|404[[:space:]]+not[[:space:]]+found|access[[:space:]]+denied'; then
-    return 1
-  fi
+  case "${content_name}" in
+    *.php)
+      # PHP diagnostics legitimately contain HTML templates. Require an actual
+      # PHP source prefix and lint the script instead of treating HTML markup as
+      # an error page.
+      # PHP 探针本身会包含 HTML；必须以 PHP 源码开头并通过语法检查，不能因
+      # 正常的 HTML 模板而误判。
+      LC_ALL=C head -c 512 "${file}" 2>/dev/null |
+        LC_ALL=C grep -aEq '^[[:space:]]*<\?php([[:space:]]|$)' || return 1
+      if [ -x "${php_install_dir:-}/bin/php" ]; then
+        php_bin="${php_install_dir}/bin/php"
+      elif command -v php >/dev/null 2>&1; then
+        php_bin=$(command -v php)
+      else
+        echo "${CFAILURE}PHP CLI is required to validate ${content_name}.${CEND}"
+        return 1
+      fi
+      "${php_bin}" -n -l "${file}" >/dev/null 2>&1 || return 1
+      ;;
+    *)
+      # Error pages can be much larger than 1 KB. Never accept HTML as source
+      # archives, patches, signatures, or executable data.
+      # 错误页可能远大于 1 KB，源码归档、补丁、签名和可执行文件一律拒绝
+      # HTML 内容。
+      if LC_ALL=C head -c 4096 "${file}" 2>/dev/null |
+        LC_ALL=C grep -aEiq '<!doctype[[:space:]]+html|<html([[:space:]>])|<head([[:space:]>])|<body([[:space:]>])|404[[:space:]]+not[[:space:]]+found|access[[:space:]]+denied'; then
+        return 1
+      fi
+      ;;
+  esac
 
   if [ -n "${expected_sha256}" ]; then
     [[ "${expected_sha256}" =~ ^[[:xdigit:]]{64}$ ]] || return 1
     actual_sha256=$(File_SHA256 "${file}") || return 1
     normalized_expected_sha256=$(printf '%s' "${expected_sha256}" | tr '[:upper:]' '[:lower:]')
     [ "${actual_sha256}" = "${normalized_expected_sha256}" ] || return 1
+  fi
+  if [ -n "${expected_md5}" ]; then
+    [[ "${expected_md5}" =~ ^[[:xdigit:]]{32}$ ]] || return 1
+    actual_md5=$(File_MD5 "${file}") || return 1
+    normalized_expected_md5=$(printf '%s' "${expected_md5}" | tr '[:upper:]' '[:lower:]')
+    [ "${actual_md5}" = "${normalized_expected_md5}" ] || return 1
   fi
 
   case "${content_name}" in
@@ -121,15 +227,41 @@ Validate_Downloaded_File() {
 Download_src() {
   local requested_url="${src_url}"
   local clean_url="${requested_url%%\?*}"
-  local filename="${clean_url##*/}"
-  local expected_sha256="${src_sha256:-}"
+  local requested_name="${src_name:-}"
+  local filename="${requested_name:-${clean_url##*/}}"
+  local checksum_spec="${src_checksum:-}"
+  local expected_sha256 expected_md5
   local download_mode="${1:-}"
   local part_file="${filename}.part.$$"
   local url
   local urls=()
 
-  # A checksum applies to exactly one Download_src call and must never leak to the next file.
-  unset src_sha256
+  # A checksum and an explicit filename apply to exactly one Download_src call
+  # and must never leak to the next file.
+  unset src_checksum src_name
+
+  if [ -n "${checksum_spec}" ]; then
+    case "${checksum_spec}" in
+      sha256=*)
+        expected_sha256=${checksum_spec#*=}
+        ;;
+      md5=*)
+        expected_md5=${checksum_spec#*=}
+        ;;
+      *)
+        echo "${CFAILURE}Unsupported checksum specification: ${checksum_spec}${CEND}"
+        [ "${download_mode}" = 'no_kill' ] && return 1
+        exit 1
+        ;;
+    esac
+  fi
+  if { [ -n "${expected_sha256}" ] && [ -n "${expected_md5}" ]; } ||
+    { [ -n "${expected_sha256}" ] && [[ ! "${expected_sha256}" =~ ^[[:xdigit:]]{64}$ ]]; } ||
+    { [ -n "${expected_md5}" ] && [[ ! "${expected_md5}" =~ ^[[:xdigit:]]{32}$ ]]; }; then
+    echo "${CFAILURE}Invalid checksum for ${requested_url}.${CEND}"
+    [ "${download_mode}" = 'no_kill' ] && return 1
+    exit 1
+  fi
 
   if ! Require_Trusted_Mirror; then
     [ "${download_mode}" = 'no_kill' ] && return 1
@@ -146,14 +278,15 @@ Download_src() {
       ;;
   esac
 
-  if [ -z "${filename}" ]; then
+  if [ -z "${filename}" ] || [ "${filename}" != "${filename##*/}" ] ||
+    [ "${filename}" = '.' ] || [ "${filename}" = '..' ]; then
     echo "${CFAILURE}Unable to determine the download filename: ${requested_url}${CEND}"
     [ "${download_mode}" = 'no_kill' ] && return 1
     exit 1
   fi
 
   if [ -e "${filename}" ]; then
-    if Validate_Downloaded_File "${filename}" "${expected_sha256}"; then
+    if Validate_Downloaded_File "${filename}" "${expected_sha256}" "${filename}" "${expected_md5}"; then
       echo "[${CMSG}${filename}${CEND}] found and verified"
       return 0
     fi
@@ -174,7 +307,7 @@ Download_src() {
   for url in "${urls[@]}"; do
     echo "Downloading ${url}"
     if wget --https-only --limit-rate=100M --tries=3 --timeout=30 -O "${part_file}" "${url}" &&
-      Validate_Downloaded_File "${part_file}" "${expected_sha256}" "${filename}"; then
+      Validate_Downloaded_File "${part_file}" "${expected_sha256}" "${filename}" "${expected_md5}"; then
       mv -f "${part_file}" "${filename}"
       echo "[${CMSG}${filename}${CEND}] downloaded and verified"
       return 0

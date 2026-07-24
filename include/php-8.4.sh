@@ -17,7 +17,11 @@ Install_PHP84() {
   local php_build_with_openssl="${PHP_MODERN_WITH_OPENSSL:-${php84_with_openssl}}"
   local php_is_85=0
   local php_use_gnu_iconv=1
-  local phpcache_arg php_iconv_arg php_xml_arg php_mbregex_arg opcache_extension_line
+  local phpcache_arg php_fileinfo_arg php_iconv_arg php_xml_arg php_mbregex_arg opcache_extension_line
+
+  # Keep fileinfo in the PHP core build when it was explicitly requested.
+  # 请求 fileinfo 时直接随 PHP 编译，避免安装完成后再次拆出 ext/fileinfo 构建。
+  [ "${pecl_fileinfo:-0}" == '1' ] && php_fileinfo_arg='' || php_fileinfo_arg='--disable-fileinfo'
 
   if [[ "${php_build_ver}" =~ ^8\.5\. ]]; then
     php_is_85=1
@@ -138,7 +142,7 @@ Install_PHP84() {
   if [ "${apache_mode_option}" == '2' ]; then
     ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-    --with-apxs2=${apache_install_dir}/bin/apxs ${phpcache_arg} --disable-fileinfo \
+    --with-apxs2=${apache_install_dir}/bin/apxs ${phpcache_arg} ${php_fileinfo_arg} \
     --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
     ${php_iconv_arg} --with-freetype --with-jpeg --with-zlib \
     ${php_xml_arg} --disable-rpath --enable-bcmath --enable-shmop --enable-exif \
@@ -149,7 +153,7 @@ Install_PHP84() {
   else
     ./configure --prefix=${php_install_dir} --with-config-file-path=${php_install_dir}/etc \
     --with-config-file-scan-dir=${php_install_dir}/etc/php.d \
-    --with-fpm-user=${run_user} --with-fpm-group=${run_group} --enable-fpm ${phpcache_arg} --disable-fileinfo \
+    --with-fpm-user=${run_user} --with-fpm-group=${run_group} --enable-fpm ${phpcache_arg} ${php_fileinfo_arg} \
     --enable-mysqlnd --with-mysqli=mysqlnd --with-pdo-mysql=mysqlnd \
     ${php_iconv_arg} --with-freetype --with-jpeg --with-zlib \
     ${php_xml_arg} --disable-rpath --enable-bcmath --enable-shmop --enable-exif \

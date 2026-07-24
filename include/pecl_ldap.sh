@@ -9,37 +9,51 @@
 #       https://github.com/oneinstack/oneinstack
 
 Install_pecl_ldap() {
-  if [ -e "${php_install_dir}/bin/phpize" ]; then
-    pushd ${oneinstack_dir}/src > /dev/null
+  local deb_multiarch
+
+  if [ ! -e "${php_install_dir}/bin/phpize" ]; then
+    echo "${CFAILURE}PHP phpize is required to install ldap.${CEND}"
+    return 1
+  fi
+
+    pushd ${oneinstack_dir}/src > /dev/null || return 1
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
-    src_url=https://secure.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
-    tar xzf php-${PHP_detail_ver}.tar.gz
-    pushd php-${PHP_detail_ver}/ext/ldap > /dev/null
+    src_url=https://www.php.net/distributions/php-${PHP_detail_ver}.tar.gz
+    [ "${PHP_detail_ver}" = "${php85_ver}" ] && src_checksum=${php85_checksum:-}
+    Download_src no_kill || return 1
+    tar xzf php-${PHP_detail_ver}.tar.gz || return 1
+    pushd php-${PHP_detail_ver}/ext/ldap > /dev/null || return 1
     if [ "${PM}" == 'yum' ]; then
-      yum -y install openldap-devel
+      yum -y install openldap-devel || return 1
     else
-      apt-get -y install libldap2-dev
-      ln -s /usr/lib/${ARCH}-linux-gnu/libldap.so /usr/lib/
-      ln -s /usr/lib/${ARCH}-linux-gnu/liblber.so /usr/lib/
+      apt-get --no-install-recommends -y install libldap2-dev || return 1
+      deb_multiarch=$(dpkg-architecture -qDEB_HOST_MULTIARCH 2>/dev/null)
+      [ -z "${deb_multiarch}" ] && deb_multiarch=$(gcc -print-multiarch 2>/dev/null)
+      if [ -z "${deb_multiarch}" ] || [ ! -d "/usr/lib/${deb_multiarch}" ]; then
+        echo "${CFAILURE}Unable to determine the Debian multiarch LDAP library directory.${CEND}"
+        return 1
+      fi
     fi
-    ${php_install_dir}/bin/phpize
+    ${php_install_dir}/bin/phpize || return 1
     if [ "${PM}" == 'yum' ]; then
-      ./configure --with-php-config=${php_install_dir}/bin/php-config --with-ldap --with-libdir=lib64
+      ./configure --with-php-config=${php_install_dir}/bin/php-config --with-ldap --with-libdir=lib64 || return 1
     else
-      ./configure --with-php-config=${php_install_dir}/bin/php-config --with-ldap --with-libdir=lib/x86_64-linux-gnu
+      ./configure --with-php-config=${php_install_dir}/bin/php-config \
+        --with-ldap=/usr --with-libdir="lib/${deb_multiarch}" || return 1
     fi
-    make -j ${THREAD} && make install
+    make -j ${THREAD} && make install || return 1
     popd > /dev/null
     if [ -f "${phpExtensionDir}/ldap.so" ]; then
       echo 'extension=ldap.so' > ${php_install_dir}/etc/php.d/04-ldap.ini
       echo "${CSUCCESS}PHP ldap module installed successfully! ${CEND}"
       rm -rf php-${PHP_detail_ver}
     else
-      echo "${CFAILURE}PHP ldap module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
+      echo "${CFAILURE}PHP ldap module install failed, Please contact the author! ${CEND}"
+      grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
+      return 1
     fi
     popd > /dev/null
-  fi
 }
 
 Uninstall_pecl_ldap() {

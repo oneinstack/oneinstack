@@ -69,30 +69,90 @@ Install_pecl_memcache() {
 }
 
 Install_pecl_memcached() {
-  if [ -e "${php_install_dir}/bin/phpize" ]; then
-    pushd ${oneinstack_dir}/src > /dev/null
+  local libmemcached_dir
+  local cmake_bin=cmake
+  local cmake_version cmake_major cmake_minor
+
+  if [ ! -e "${php_install_dir}/bin/phpize" ]; then
+    echo "${CFAILURE}PHP phpize is required to install memcached.${CEND}"
+    return 1
+  fi
+
+    pushd ${oneinstack_dir}/src > /dev/null || return 1
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
-    # php memcached extension
-    tar xzf libmemcached-${libmemcached_ver}.tar.gz
-    patch -d libmemcached-${libmemcached_ver} -p0 < libmemcached-build.patch
-    pushd libmemcached-${libmemcached_ver} > /dev/null
-    [ "${PM}" == 'yum' ] && yum -y install cyrus-sasl-devel
-    [ "${PM}" == 'apt-get' ] && sed -i "s@lthread -pthread -pthreads@lthread -lpthread -pthreads@" ./configure
-    ./configure --with-memcached=${memcached_install_dir}
-    make -j ${THREAD} && make install
+    libmemcached_dir=/usr/local/libmemcached
+
+    # php-memcached is distributed by PECL, but it still needs the native
+    # libmemcached library. Build the tagged upstream replacement locally
+    # instead of trusting an opaque binary or a third-party source mirror.
+    # php-memcached 本体使用 PECL；其原生依赖则固定官方标签源码并在本地编译，
+    # 不使用不透明二进制包或第三方源码镜像。
+    if [ "${PM}" == 'apt-get' ]; then
+      apt-get --no-install-recommends -y install \
+        cmake g++ pkg-config flex bison libsasl2-dev libevent-dev || return 1
+    else
+      yum -y install cmake gcc-c++ pkgconfig flex bison \
+        cyrus-sasl-devel libevent-devel || return 1
+      command -v cmake3 >/dev/null 2>&1 && cmake_bin=cmake3
+    fi
+    command -v "${cmake_bin}" >/dev/null 2>&1 || {
+      echo "${CFAILURE}CMake is required to build libmemcached.${CEND}"
+      return 1
+    }
+    cmake_version=$("${cmake_bin}" --version | awk 'NR == 1 {print $3}')
+    cmake_major=${cmake_version%%.*}
+    cmake_minor=${cmake_version#*.}
+    cmake_minor=${cmake_minor%%.*}
+    if [ -z "${cmake_major}" ] || [ -z "${cmake_minor}" ] ||
+      [ "${cmake_major}" -lt 3 ] ||
+      { [ "${cmake_major}" -eq 3 ] && [ "${cmake_minor}" -lt 9 ]; }; then
+      echo "${CFAILURE}libmemcached ${libmemcached_ver} requires CMake 3.9 or newer.${CEND}"
+      return 1
+    fi
+
+    src_url=https://github.com/awesomized/libmemcached/archive/refs/tags/${libmemcached_ver}.tar.gz
+    src_name=libmemcached-${libmemcached_ver}.tar.gz
+    src_checksum=${libmemcached_checksum:-}
+    Download_src no_kill || return 1
+    rm -rf libmemcached-${libmemcached_ver}
+    tar xzf libmemcached-${libmemcached_ver}.tar.gz || return 1
+    mkdir -p "libmemcached-${libmemcached_ver}/build" || return 1
+    pushd "libmemcached-${libmemcached_ver}/build" > /dev/null || return 1
+    "${cmake_bin}" .. \
+      -DCMAKE_BUILD_TYPE=Release \
+      -DCMAKE_INSTALL_PREFIX="${libmemcached_dir}" \
+      -DBUILD_SHARED_LIBS=ON \
+      -DBUILD_TESTING=OFF \
+      -DBUILD_DOCS=OFF \
+      -DENABLE_SASL=ON || return 1
+    make -j "${THREAD}" && make install || return 1
     popd > /dev/null
     rm -rf libmemcached-${libmemcached_ver}
 
-    if [ "$(${php_install_dir}/bin/php-config --version | awk -F. '{print $1}')" == '5' ]; then
-      tar xzf memcached-${pecl_memcached_oldver}.tgz
-      pushd memcached-${pecl_memcached_oldver} > /dev/null
-    else
-      tar xzf memcached-${pecl_memcached_ver}.tgz
-      pushd memcached-${pecl_memcached_ver} > /dev/null
+    if [ -d /etc/ld.so.conf.d ]; then
+      {
+        [ -d "${libmemcached_dir}/lib" ] && echo "${libmemcached_dir}/lib"
+        [ -d "${libmemcached_dir}/lib64" ] && echo "${libmemcached_dir}/lib64"
+      } > /etc/ld.so.conf.d/oneinstack-libmemcached.conf
+      ldconfig || return 1
     fi
-    ${php_install_dir}/bin/phpize
-    ./configure --with-php-config=${php_install_dir}/bin/php-config
-    make -j ${THREAD} && make install
+
+    if [ "$(${php_install_dir}/bin/php-config --version | awk -F. '{print $1}')" == '5' ]; then
+      src_url=https://pecl.php.net/get/memcached-${pecl_memcached_oldver}.tgz
+      Download_src no_kill || return 1
+      tar xzf memcached-${pecl_memcached_oldver}.tgz || return 1
+      pushd memcached-${pecl_memcached_oldver} > /dev/null || return 1
+    else
+      src_url=https://pecl.php.net/get/memcached-${pecl_memcached_ver}.tgz
+      src_checksum=${pecl_memcached_checksum:-}
+      Download_src no_kill || return 1
+      tar xzf memcached-${pecl_memcached_ver}.tgz || return 1
+      pushd memcached-${pecl_memcached_ver} > /dev/null || return 1
+    fi
+    ${php_install_dir}/bin/phpize || return 1
+    ./configure --with-php-config=${php_install_dir}/bin/php-config \
+      --with-libmemcached-dir="${libmemcached_dir}" --enable-memcached-sasl || return 1
+    make -j ${THREAD} && make install || return 1
     popd > /dev/null
     if [ -f "${phpExtensionDir}/memcached.so" ]; then
       cat > ${php_install_dir}/etc/php.d/05-memcached.ini << EOF
@@ -102,10 +162,11 @@ EOF
       echo "${CSUCCESS}PHP memcached module installed successfully! ${CEND}"
       rm -rf memcached-${pecl_memcached_oldver} memcached-${pecl_memcached_ver}
     else
-      echo "${CFAILURE}PHP memcached module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
+      echo "${CFAILURE}PHP memcached module install failed, Please contact the author! ${CEND}"
+      grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
+      return 1
     fi
     popd > /dev/null
-  fi
 }
 
 Uninstall_pecl_memcache() {

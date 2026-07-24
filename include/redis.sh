@@ -47,32 +47,44 @@ Install_redis_server() {
 }
 
 Install_pecl_redis() {
-  if [ -e "${php_install_dir}/bin/phpize" ]; then
-    pushd ${oneinstack_dir}/src > /dev/null
+  if [ ! -e "${php_install_dir}/bin/phpize" ]; then
+    echo "${CFAILURE}PHP phpize is required to install redis.${CEND}"
+    return 1
+  fi
+
+    pushd ${oneinstack_dir}/src > /dev/null || return 1
     phpExtensionDir=`${php_install_dir}/bin/php-config --extension-dir`
     if [ "$(${php_install_dir}/bin/php-config --version | awk -F. '{print $1}')" == '5' ]; then
-      tar xzf redis-4.3.0.tgz
-      pushd redis-4.3.0 > /dev/null
+      src_url=https://pecl.php.net/get/redis-4.3.0.tgz
+      Download_src no_kill || return 1
+      tar xzf redis-4.3.0.tgz || return 1
+      pushd redis-4.3.0 > /dev/null || return 1
     elif [[ "$(${php_install_dir}/bin/php-config --version | awk -F. '{print $1$2}')" =~ ^7[0-1]$ ]]; then
-      tar xzf redis-5.3.7.tgz
-      pushd redis-5.3.7 > /dev/null
+      src_url=https://pecl.php.net/get/redis-5.3.7.tgz
+      Download_src no_kill || return 1
+      tar xzf redis-5.3.7.tgz || return 1
+      pushd redis-5.3.7 > /dev/null || return 1
     else
-      tar xzf redis-${pecl_redis_ver}.tgz
-      pushd redis-${pecl_redis_ver} > /dev/null
+      src_url=https://pecl.php.net/get/redis-${pecl_redis_ver}.tgz
+      src_checksum=${pecl_redis_checksum:-}
+      Download_src no_kill || return 1
+      tar xzf redis-${pecl_redis_ver}.tgz || return 1
+      pushd redis-${pecl_redis_ver} > /dev/null || return 1
     fi
-    ${php_install_dir}/bin/phpize
-    ./configure --with-php-config=${php_install_dir}/bin/php-config
-    make -j ${THREAD} && make install
+    ${php_install_dir}/bin/phpize || return 1
+    ./configure --with-php-config=${php_install_dir}/bin/php-config || return 1
+    make -j ${THREAD} && make install || return 1
     popd > /dev/null
     if [ -f "${phpExtensionDir}/redis.so" ]; then
       echo 'extension=redis.so' > ${php_install_dir}/etc/php.d/05-redis.ini
       echo "${CSUCCESS}PHP Redis module installed successfully! ${CEND}"
       rm -rf redis-${pecl_redis_ver} redis-4.3.0 redis-5.3.7
     else
-      echo "${CFAILURE}PHP Redis module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
+      echo "${CFAILURE}PHP Redis module install failed, Please contact the author! ${CEND}"
+      grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
+      return 1
     fi
     popd > /dev/null
-  fi
 }
 
 Uninstall_pecl_redis() {
