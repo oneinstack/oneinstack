@@ -300,6 +300,7 @@ Download_src() {
   local checksum_spec="${src_checksum:-}"
   local expected_sha256 expected_md5
   local download_mode="${1:-}"
+  local refresh_upstream=false
   local part_file="${filename}.part.$$"
   local mirror_url
   local url
@@ -308,6 +309,7 @@ Download_src() {
   # A checksum and an explicit filename apply to exactly one Download_src call
   # and must never leak to the next file.
   unset src_checksum src_name
+  [ "${download_mode}" = 'refresh' ] && refresh_upstream=true
 
   if [ -n "${checksum_spec}" ]; then
     case "${checksum_spec}" in
@@ -354,7 +356,7 @@ Download_src() {
     exit 1
   fi
 
-  if [ -e "${filename}" ]; then
+  if [ "${refresh_upstream}" != true ] && [ -e "${filename}" ]; then
     if Validate_Downloaded_File "${filename}" "${expected_sha256}" "${filename}" "${expected_md5}"; then
       echo "[${CMSG}${filename}${CEND}] found and verified"
       return 0
@@ -370,7 +372,14 @@ Download_src() {
   # mirror_link 表示优先下载源：外部上游先尝试 OneinStack 官方文件缓存，
   # 失败后回退原始上游；调用方给出的 OneinStack 专用镜像路径则直接优先。
   mirror_url="${mirror_link%/}/oneinstack/src/${filename}"
-  if [[ "${requested_url}" == "${mirror_link%/}/"* ]]; then
+  if [ "${refresh_upstream}" = true ]; then
+    # Mutable upstream files must bypass both the local cache and OneinStack
+    # mirror. Keep the old file until the refreshed download is validated and
+    # atomically replaces it.
+    # 对持续更新的上游文件跳过本地缓存和 OneinStack 镜像；旧文件保留到
+    # 新文件完成校验并原子替换，避免下载中断留下半成品。
+    urls+=("${requested_url}")
+  elif [[ "${requested_url}" == "${mirror_link%/}/"* ]]; then
     urls+=("${requested_url}")
   else
     urls+=("${mirror_url}")

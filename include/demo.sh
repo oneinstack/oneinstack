@@ -15,7 +15,11 @@ DEMO() {
   fi
 
   if [ -e "${php_install_dir}/bin/php" ]; then
-    src_url=${mirror_link}/oneinstack/src/xprober.php && Download_src
+    # Follow X-Prober's latest stable GitHub Release asset on every install
+    # instead of using a development build or a cached OneinStack mirror copy.
+    src_url=https://github.com/kmvan/x-prober/releases/latest/download/prober.php
+    src_name=xprober.php
+    Download_src refresh
     /bin/cp xprober.php ${wwwroot_dir}/default
 
     echo "<?php phpinfo() ?>" > ${wwwroot_dir}/default/phpinfo.php
