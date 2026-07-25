@@ -10,8 +10,8 @@ Script properties:
 - Providing multiple PHP versions (PHP-8.5, PHP-8.4, PHP-8.3, PHP-8.2, PHP-8.1, PHP-8.0, PHP-7.4, PHP-7.3, PHP-7.2, PHP-7.1, PHP-7.0, PHP-5.6, PHP-5.5, PHP-5.4, PHP-5.3)
 - Provide Nginx, Tengine, OpenResty, Caddy, Apache and ngx_lua_waf
 - Providing a plurality of Tomcat version (Tomcat-10, Tomcat-9, Tomcat-8, Tomcat-7)
-- Providing a plurality of JDK version (OpenJDK-8, OpenJDK-11, OpenJDK-17)
-- According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php extensions,include ZendGuardLoader,ionCube,SourceGuardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug
+- Providing OpenJDK 8, 11 (legacy), 17, 18 (legacy/EOL), 21 and 25
+- According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php extensions,include ZendGuardLoader,ionCube,SourceGuardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,yaf,yar,redis,memcached,memcache,mongodb,pgsql,sqlsrv,swoole,xdebug
 - Installation Nodejs, Pureftpd, phpMyAdmin according to their needs
 - Install memcached, redis according to their needs
 - Jemalloc optimize MySQL, Nginx
@@ -81,6 +81,36 @@ Upgrade an existing PHP 8.5 installation within the same release series:
 ```bash
 ./upgrade.sh --php 8.5.8
 ```
+
+### Optional database client extensions
+
+LDAP, PostgreSQL and Microsoft SQL Server support can be installed independently
+for an existing PHP runtime. `pgsql` installs both `pgsql` and `pdo_pgsql`
+using client libraries only. `sqlsrv` installs both `sqlsrv` and `pdo_sqlsrv`
+and is supported on PHP 8.3 or newer.
+
+```bash
+./install.sh --php_extensions ldap,pgsql,sqlsrv
+```
+
+The SQL Server option does not install a database server. It installs Microsoft
+ODBC Driver 18 from the official signed Microsoft repository after checking the
+repository key fingerprint. This option is limited to official Debian, Ubuntu
+and RHEL repository targets.
+
+### JDK support and licensing
+
+New Tomcat installations use OpenJDK 21 by default. OpenJDK 8 remains supported
+for Java EE 8 and other legacy applications; OpenJDK 11 and the end-of-life
+OpenJDK 18 are deprecated compatibility options whose existing option numbers
+remain unchanged. They will stay available for a deprecation cycle before being
+removed, and are never silently remapped. OpenJDK 17 and 25 are the other
+supported LTS lines.
+
+OneinStack installs only operating-system OpenJDK packages or Eclipse Temurin,
+which are GPLv2 with the Classpath Exception. It does not download Oracle JDK.
+When Temurin is required, the complete Adoptium repository signing-key
+fingerprint is checked before the repository is enabled.
 
 ## How to install another PHP version
 

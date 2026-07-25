@@ -10,8 +10,8 @@
 - 提供多个PHP版本（PHP-8.5、PHP-8.4、PHP-8.3、PHP-8.2、PHP-8.1、PHP-8.0、PHP-7.4、PHP-7.3、PHP-7.2、PHP-7.1、PHP-7.0、PHP-5.6、PHP-5.5、PHP-5.4、PHP-5.3）
 - 提供Nginx、Tengine、OpenResty、Caddy、Apache和ngx_lua_waf
 - 提供多个Tomcat版本（Tomcat-10、Tomcat-9、Tomcat-8、Tomcat-7）
-- 提供多个JDK版本（OpenJDK-8、OpenJDK-11、OpenJDK-17）
-- 根据需求安装PHP缓存加速器（ZendOPcache、xcache、apcu、eAccelerator）和PHP扩展，包括ZendGuardLoader、ionCube、SourceGuardian、imagick、gmagick、fileinfo、imap、ldap、calendar、phalcon、yaf、yar、redis、memcached、memcache、mongodb、swoole、xdebug
+- 提供 OpenJDK 8、11（legacy）、17、18（legacy/EOL）、21 和 25
+- 根据需求安装PHP缓存加速器（ZendOPcache、xcache、apcu、eAccelerator）和PHP扩展，包括ZendGuardLoader、ionCube、SourceGuardian、imagick、gmagick、fileinfo、imap、ldap、calendar、phalcon、yaf、yar、redis、memcached、memcache、mongodb、pgsql、sqlsrv、swoole、xdebug
 - 可选安装Nodejs、Pureftpd、phpMyAdmin
 - 可选安装memcached、redis
 - 使用Jemalloc优化MySQL、Nginx
@@ -81,6 +81,32 @@ PHP 8.5 支持作为主 PHP 安装，也支持作为多版本 PHP 并存安装�
 ```bash
 ./upgrade.sh --php 8.5.8
 ```
+
+### 可选数据库客户端扩展
+
+现有 PHP 可按需、独立安装 LDAP、PostgreSQL 和 Microsoft SQL Server
+支持。`pgsql` 会同时安装 `pgsql` 与 `pdo_pgsql`，且仅依赖 PostgreSQL
+客户端库；`sqlsrv` 会同时安装 `sqlsrv` 与 `pdo_sqlsrv`，要求 PHP 8.3
+或更新版本。
+
+```bash
+./install.sh --php_extensions ldap,pgsql,sqlsrv
+```
+
+SQL Server 选项不会在本机安装数据库服务端。它会在校验仓库签名密钥完整
+指纹后，从 Microsoft 官方签名仓库安装 ODBC Driver 18；该选项仅支持
+Microsoft 提供官方仓库的 Debian、Ubuntu 与 RHEL。
+
+### JDK 支持与许可
+
+新的 Tomcat 安装默认使用 OpenJDK 21。OpenJDK 8 为 Java EE 8 和其他
+旧应用继续保留；OpenJDK 11 与已经停止维护的 OpenJDK 18 暂退为兼容选项，
+原有选项编号保持不变。它们至少保留一个弃用周期后再移除，且不会被静默
+映射到其他版本。OpenJDK 17 与 25 是另外两条受支持的 LTS 版本线。
+
+OneinStack 只安装操作系统提供的 OpenJDK 或采用 GPLv2 + Classpath
+Exception 的 Eclipse Temurin，不会下载 Oracle JDK。需要启用 Temurin
+仓库时，会先校验 Adoptium 仓库签名密钥的完整指纹。
 
 ## 如何安装其他PHP版本
 

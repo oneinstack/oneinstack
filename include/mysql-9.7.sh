@@ -3,39 +3,55 @@
 # 面向现代 x86_64 Linux 发行版的 MySQL 9.7 LTS 安装脚本。
 
 Install_MySQL97() {
+  local mysql97_package="mysql-${mysql97_ver}-linux-glibc2.28-x86_64"
+  local existing_entry mysql_ready=0
+
   MySQL97_OS_Supported || {
     echo "${CFAILURE}MySQL 9.7 requires x86_64 with RHEL 8+, Debian 12+, or Ubuntu 22+. ${CEND}"
-    exit 1
+    return 1
   }
 
   [ "${dbinstallmethod}" != '1' ] && {
     echo "${CFAILURE}MySQL 9.7 currently supports binary installation only. ${CEND}"
-    exit 1
+    return 1
   }
 
-  pushd ${oneinstack_dir}/src > /dev/null
-  local mysql97_package="mysql-${mysql97_ver}-linux-glibc2.28-x86_64"
+  existing_entry=$(find "${mysql_install_dir}" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)
+  [ -n "${existing_entry}" ] && {
+    echo "${CFAILURE}MySQL 9.7 program directory is not empty: ${mysql_install_dir}${CEND}"
+    echo "Existing entry: ${existing_entry}"
+    echo "OneinStack will not overwrite a complete or partial installation."
+    return 1
+  }
+  existing_entry=$(find "${mysql_data_dir}" -mindepth 1 -maxdepth 1 -print -quit 2>/dev/null)
+  [ -n "${existing_entry}" ] && {
+    echo "${CFAILURE}MySQL 9.7 data directory is not empty: ${mysql_data_dir}${CEND}"
+    echo "Existing entry: ${existing_entry}"
+    echo "Preserve or rename the directory before installing a new instance."
+    return 1
+  }
+
+  pushd "${oneinstack_dir}/src" > /dev/null || return 1
 
   id -u mysql > /dev/null 2>&1
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin mysql
 
-  [ ! -d "${mysql_install_dir}" ] && mkdir -p ${mysql_install_dir}
-  mkdir -p ${mysql_data_dir}
-  chown mysql:mysql -R ${mysql_data_dir}
+  [ ! -d "${mysql_install_dir}" ] && mkdir -p "${mysql_install_dir}"
+  mkdir -p "${mysql_data_dir}"
+  chown mysql:mysql -R "${mysql_data_dir}"
 
-  tar xJf ${mysql97_package}.tar.xz || {
+  tar xJf "${mysql97_package}.tar.xz" || {
     echo "${CFAILURE}Unable to extract the MySQL 9.7 package. ${CEND}"
-    kill -9 $$; exit 1
+    return 1
   }
-  mv ${mysql97_package}/* ${mysql_install_dir}/ || {
+  mv "${mysql97_package}"/* "${mysql_install_dir}/" || {
     echo "${CFAILURE}Unable to place the MySQL 9.7 installation files. ${CEND}"
-    kill -9 $$; exit 1
+    return 1
   }
 
   if [ ! -d "${mysql_install_dir}/support-files" ]; then
-    rm -rf ${mysql97_package} ${mysql_install_dir}
     echo "${CFAILURE}MySQL 9.7 installation files are incomplete. ${CEND}"
-    kill -9 $$; exit 1
+    return 1
   fi
 
   [ -e "${mysql_install_dir}/bin/mysqld_safe" ] && {
@@ -89,7 +105,6 @@ tmp_table_size = 16M
 thread_cache_size = 8
 
 log_bin = mysql-bin
-binlog_format = ROW
 binlog_expire_logs_seconds = 604800
 log_error = ${mysql_data_dir}/mysql-error.log
 slow_query_log = 1
@@ -129,21 +144,35 @@ EOF
     sed -i 's@^table_open_cache.*@table_open_cache = 1024@' /etc/my.cnf
   fi
 
-  ${mysql_install_dir}/bin/mysqld --defaults-file=/etc/my.cnf --validate-config || {
+  # Validate the runtime configuration without creating an error log inside
+  # the still-empty data directory.
+  "${mysql_install_dir}/bin/mysqld" --defaults-file=/etc/my.cnf \
+    --log-error=/dev/stderr --validate-config || {
     echo "${CFAILURE}MySQL 9.7 configuration validation failed. ${CEND}"
-    kill -9 $$; exit 1
+    return 1
   }
-  ${mysql_install_dir}/bin/mysqld --defaults-file=/etc/my.cnf --initialize-insecure --user=mysql || {
+
+  # MySQL recommends initialization with only location and user options.
+  # Loading the full runtime configuration here can create mysql-error.log
+  # before the emptiness check and make initialization reject a fresh datadir.
+  "${mysql_install_dir}/bin/mysqld" --no-defaults --initialize-insecure \
+    --user=mysql --basedir="${mysql_install_dir}" --datadir="${mysql_data_dir}" || {
     echo "${CFAILURE}MySQL 9.7 data directory initialization failed. ${CEND}"
-    kill -9 $$; exit 1
+    [ -f "${mysql_data_dir}/mysql-error.log" ] &&
+      tail -n 80 "${mysql_data_dir}/mysql-error.log"
+    return 1
   }
 
   [ "${Wsl}" == true ] && chmod 600 /etc/my.cnf
   chown mysql:mysql -R ${mysql_data_dir}
   [ -d "/etc/mysql" ] && /bin/mv /etc/mysql{,_bk}
-  service mysqld start
+  service mysqld start || {
+    echo "${CFAILURE}MySQL 9.7 service failed to start.${CEND}"
+    [ -f "${mysql_data_dir}/mysql-error.log" ] &&
+      tail -n 80 "${mysql_data_dir}/mysql-error.log"
+    return 1
+  }
 
-  local mysql_ready=0
   for mysql_wait in {1..30}; do
     ${mysql_install_dir}/bin/mysqladmin --protocol=socket -uroot ping > /dev/null 2>&1 && { mysql_ready=1; break; }
     sleep 1
@@ -161,7 +190,7 @@ ALTER USER 'root'@'localhost' IDENTIFIED BY '${dbrootpwd}';
 EOF
   then
     echo "${CFAILURE}MySQL 9.7 root account initialization failed. ${CEND}"
-    kill -9 $$; exit 1
+    return 1
   fi
 
   [ -z "$(grep ^'export PATH=' /etc/profile)" ] && echo "export PATH=${mysql_install_dir}/bin:\$PATH" >> /etc/profile
@@ -171,7 +200,10 @@ EOF
   [ -e "${mysql_install_dir}/my.cnf" ] && rm -f ${mysql_install_dir}/my.cnf
   echo "${mysql_install_dir}/lib" > /etc/ld.so.conf.d/z-mysql.conf
   ldconfig
-  service mysqld stop
+  service mysqld stop || {
+    echo "${CFAILURE}MySQL 9.7 service failed to stop after initialization.${CEND}"
+    return 1
+  }
 
   rm -rf ${mysql97_package}
   popd > /dev/null

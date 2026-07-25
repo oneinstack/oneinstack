@@ -104,8 +104,8 @@ checkDownload() {
       ;;
   esac
 
-  # jdk apr
-  if [[ "${jdk_option}"  =~ ^[1-2]$ ]]; then
+  # Tomcat 7+ installers build APR regardless of the selected JDK.
+  if [[ "${tomcat_option}" =~ ^[1-5]$ ]]; then
     echo "Download apr..."
     src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
   fi
@@ -800,6 +800,19 @@ checkDownload() {
     echo "Download pecl mongodb for php..."
     src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_ver}.tgz &&
       src_checksum=${pecl_mongodb_checksum:-} &&
+      Download_src
+  fi
+
+  # Microsoft SQL Server PECL drivers. ODBC packages and their OS-specific
+  # repository metadata are fetched only by the opt-in installer.
+  if [ "${pecl_sqlsrv}" == '1' ]; then
+    echo "Download pecl sqlsrv for php..."
+    src_url=https://pecl.php.net/get/sqlsrv-${sqlsrv_ver}.tgz &&
+      src_checksum=${sqlsrv_checksum:-} &&
+      Download_src
+    echo "Download pecl pdo_sqlsrv for php..."
+    src_url=https://pecl.php.net/get/pdo_sqlsrv-${pdo_sqlsrv_ver}.tgz &&
+      src_checksum=${pdo_sqlsrv_checksum:-} &&
       Download_src
   fi
 

@@ -43,7 +43,7 @@ Show_Help() {
   --phpcache                    Uninstall PHP opcode cache
   --php_extensions [ext name]   Uninstall PHP extensions, include zendguardloader,ioncube,
                                 sourceguardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,
-                                yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug
+                                yaf,yar,redis,memcached,memcache,mongodb,pgsql,sqlsrv,swoole,xdebug
   --pureftpd                    Uninstall PureFtpd
   --redis                       Uninstall Redis-server
   --memcached                   Uninstall Memcached-server
@@ -124,6 +124,8 @@ while :; do
       [ -n "`echo ${php_extensions} | grep -w memcached`" ] && pecl_memcached=1
       [ -n "`echo ${php_extensions} | grep -w memcache`" ] && pecl_memcache=1
       [ -n "`echo ${php_extensions} | grep -w mongodb`" ] && pecl_mongodb=1
+      [ -n "`echo ${php_extensions} | grep -w pgsql`" ] && pecl_pgsql=1
+      [ -n "`echo ${php_extensions} | grep -w sqlsrv`" ] && pecl_sqlsrv=1
       [ -n "`echo ${php_extensions} | grep -w swoole`" ] && pecl_swoole=1
       [ -n "`echo ${php_extensions} | grep -w xdebug`" ] && pecl_xdebug=1
       ;;
@@ -444,6 +446,18 @@ Uninstall_PHPext() {
     Uninstall_pecl_mongodb
   fi
 
+  # pgsql and pdo_pgsql
+  if [ "${pecl_pgsql}" == '1' ]; then
+    . include/pecl_pgsql.sh
+    Uninstall_pecl_pgsql
+  fi
+
+  # sqlsrv and pdo_sqlsrv
+  if [ "${pecl_sqlsrv}" == '1' ]; then
+    . include/pecl_sqlsrv.sh
+    Uninstall_pecl_sqlsrv
+  fi
+
   # swoole
   if [ "${pecl_swoole}" == '1' ]; then
     . include/pecl_swoole.sh
@@ -481,35 +495,39 @@ Menu_PHPext() {
     echo -e "\t${CMSG}13${CEND}. Uninstall mongodb"
     echo -e "\t${CMSG}14${CEND}. Uninstall swoole"
     echo -e "\t${CMSG}15${CEND}. Uninstall xdebug(PHP>=5.5)"
+    echo -e "\t${CMSG}16${CEND}. Uninstall pgsql and pdo_pgsql"
+    echo -e "\t${CMSG}17${CEND}. Uninstall sqlsrv and pdo_sqlsrv"
     read -e -p "Please input a number:(Default 0 press Enter) " phpext_option
     phpext_option=${phpext_option:-0}
     [ "${phpext_option}" == '0' ] && break
-    array_phpext=(${phpext_option})
-    array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
-    for v in ${array_phpext[@]}
+    read -r -a array_phpext <<< "${phpext_option}"
+    array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17)
+    for v in "${array_phpext[@]}"
     do
-      [ -z "`echo ${array_all[@]} | grep -w ${v}`" ] && phpext_flag=1
+      [[ ! " ${array_all[*]} " == *" ${v} "* ]] && phpext_flag=1
     done
     if [ "${phpext_flag}" == '1' ]; then
       unset phpext_flag
       echo; echo "${CWARNING}input error! Please only input number 1 2 3 14 and so on${CEND}"; echo
       continue
     else
-      [ -n "`echo ${array_phpext[@]} | grep -w 1`" ] && pecl_zendguardloader=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 2`" ] && pecl_ioncube=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 3`" ] && pecl_sourceguardian=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 4`" ] && pecl_imagick=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 5`" ] && pecl_gmagick=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 6`" ] && pecl_fileinfo=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 7`" ] && pecl_imap=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 8`" ] && pecl_ldap=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 9`" ] && pecl_phalcon=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 10`" ] && pecl_redis=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 11`" ] && pecl_memcached=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 12`" ] && pecl_memcache=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 13`" ] && pecl_mongodb=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 14`" ] && pecl_swoole=1
-      [ -n "`echo ${array_phpext[@]} | grep -w 15`" ] && pecl_xdebug=1
+      [[ " ${array_phpext[*]} " == *" 1 "* ]] && pecl_zendguardloader=1
+      [[ " ${array_phpext[*]} " == *" 2 "* ]] && pecl_ioncube=1
+      [[ " ${array_phpext[*]} " == *" 3 "* ]] && pecl_sourceguardian=1
+      [[ " ${array_phpext[*]} " == *" 4 "* ]] && pecl_imagick=1
+      [[ " ${array_phpext[*]} " == *" 5 "* ]] && pecl_gmagick=1
+      [[ " ${array_phpext[*]} " == *" 6 "* ]] && pecl_fileinfo=1
+      [[ " ${array_phpext[*]} " == *" 7 "* ]] && pecl_imap=1
+      [[ " ${array_phpext[*]} " == *" 8 "* ]] && pecl_ldap=1
+      [[ " ${array_phpext[*]} " == *" 9 "* ]] && pecl_phalcon=1
+      [[ " ${array_phpext[*]} " == *" 10 "* ]] && pecl_redis=1
+      [[ " ${array_phpext[*]} " == *" 11 "* ]] && pecl_memcached=1
+      [[ " ${array_phpext[*]} " == *" 12 "* ]] && pecl_memcache=1
+      [[ " ${array_phpext[*]} " == *" 13 "* ]] && pecl_mongodb=1
+      [[ " ${array_phpext[*]} " == *" 14 "* ]] && pecl_swoole=1
+      [[ " ${array_phpext[*]} " == *" 15 "* ]] && pecl_xdebug=1
+      [[ " ${array_phpext[*]} " == *" 16 "* ]] && pecl_pgsql=1
+      [[ " ${array_phpext[*]} " == *" 17 "* ]] && pecl_sqlsrv=1
       break
     fi
   done

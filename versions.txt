@@ -19,6 +19,9 @@ tomcat9_ver=9.0.113
 tomcat8_ver=8.5.96
 tomcat7_ver=7.0.109
 
+# JDK repository metadata. The bundled key must match this full fingerprint.
+adoptium_repo_ver=temurin,gpg_key=https://packages.adoptium.net/artifactory/api/gpg/key/public,gpg_finger=3B04D753C9050D9A5D343F39843C48A565F8F04B
+
 apache_ver=2.4.66
 pcre_ver=8.45
 apr_ver=1.7.5
@@ -127,6 +130,12 @@ pecl_memcache_oldver=4.0.5.2
 pecl_mongodb_ver=2.3.3,sha256=370ff9c06932139c69f6b4c57b1a97c95b0278d3baf23fa42b8fb571ddb92bbf
 pecl_mongodb_oldver=1.19.1
 pecl_mongo_ver=1.6.16
+
+# SQL Server
+sqlsrv_ver=5.13.1,sha256=7c4ea8f25ebbc8999084239e7e0ef75315097e013df0e290fcef76c3d977b9d8
+pdo_sqlsrv_ver=5.13.1,sha256=350a5d66a13be11fadff6eb0d7391e58c1b8af2cd0abe141263f5af1930feb69
+microsoft_repo_2025_ver=2025,gpg_key=https://packages.microsoft.com/keys/microsoft-2025.asc,gpg_finger=AA86F75E427A19DD33346403EE4D7792F748182B
+microsoft_repo_legacy_ver=legacy,gpg_key=https://packages.microsoft.com/keys/microsoft.asc,gpg_finger=BC528686B50D79E339D3721CEB3E94ADBE1229CF
 
 # phpMyadmin
 phpmyadmin_ver=5.2.3

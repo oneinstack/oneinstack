@@ -57,10 +57,11 @@ Show_Help() {
   --phpcache_option [1-4]     Install PHP opcode cache, default: 1 opcache
   --php_extensions [ext name] Install PHP extensions, include zendguardloader,ioncube,
                               sourceguardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,
-                              yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug
+                              yaf,yar,redis,memcached,memcache,mongodb,pgsql,sqlsrv,swoole,xdebug
   --nodejs                    Install Nodejs
   --tomcat_option [1-6]       Install Tomcat version
-  --jdk_option [1-3]          Install JDK version
+  --jdk_option [1-6]          Install JDK: 1=8, 2=11 legacy, 3=17,
+                              4=18 legacy, 5=21(default), 6=25
   --db_option [0-15]          Install DB version (15: MySQL 9.7 LTS)
   --dbinstallmethod [1-2]     DB install method, default: 1 binary install
   --dbrootpwd [password]      DB super password
@@ -74,6 +75,36 @@ Show_Help() {
   --reboot                    Restart the server after installation
   "
 }
+
+Validate_Tomcat_JDK() {
+  local tomcat_major
+
+  [ -n "${tomcat_option}" ] || return 0
+  case "${tomcat_option}" in
+    1)
+      [[ "${jdk_option}" =~ ^[3-6]$ ]] ||
+        { echo "${CFAILURE}Tomcat 11 requires JDK 17 or newer (option 3~6).${CEND}"; return 1; }
+      ;;
+    2)
+      [[ "${jdk_option}" =~ ^[2-6]$ ]] ||
+        { echo "${CFAILURE}Tomcat 10 requires JDK 11 or newer (option 2~6).${CEND}"; return 1; }
+      ;;
+    3)
+      [[ "${jdk_option}" =~ ^[1-6]$ ]] ||
+        { echo "${CFAILURE}Tomcat 9 requires JDK 8 or newer (option 1~6).${CEND}"; return 1; }
+      ;;
+    4 | 5 | 6)
+      case "${tomcat_option}" in
+        4) tomcat_major=8 ;;
+        5) tomcat_major=7 ;;
+        6) tomcat_major=6 ;;
+      esac
+      [ "${jdk_option}" = '1' ] ||
+        { echo "${CFAILURE}Archived Tomcat ${tomcat_major} is restricted to JDK 8 (option 1).${CEND}"; return 1; }
+      ;;
+  esac
+}
+
 ARG_NUM=$#
 
 # GNU getopt requires a value for options declared with a trailing colon.
@@ -213,6 +244,8 @@ while :; do
     [ -n "$(echo ${php_extensions} | grep -w memcached)" ] && pecl_memcached=1
     [ -n "$(echo ${php_extensions} | grep -w memcache)" ] && pecl_memcache=1
     [ -n "$(echo ${php_extensions} | grep -w mongodb)" ] && pecl_mongodb=1
+    [ -n "$(echo ${php_extensions} | grep -w pgsql)" ] && pecl_pgsql=1
+    [ -n "$(echo ${php_extensions} | grep -w sqlsrv)" ] && pecl_sqlsrv=1
     [ -n "$(echo ${php_extensions} | grep -w swoole)" ] && pecl_swoole=1
     [ -n "$(echo ${php_extensions} | grep -w xdebug)" ] && pecl_xdebug=1
     ;;
@@ -239,8 +272,8 @@ while :; do
   --jdk_option)
     jdk_option=$2
     shift 2
-    [[ ! ${jdk_option} =~ ^[1-4]$ ]] && {
-      echo "${CWARNING}jdk_option input error! Please only input number 1~4${CEND}"
+    [[ ! ${jdk_option} =~ ^[1-6]$ ]] && {
+      echo "${CWARNING}jdk_option input error! Please only input number 1~6${CEND}"
       exit 1
     }
     ;;
@@ -248,6 +281,15 @@ while :; do
     db_option=$2
     shift 2
     if [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
+      if [ "${db_option}" = '15' ] &&
+        [ -d "${db_install_dir}/support-files" ] &&
+        [ ! -d "${mysql_data_dir}/mysql" ]; then
+        echo "${CFAILURE}Incomplete MySQL 9.7 installation detected.${CEND}"
+        echo "Program directory: ${db_install_dir}"
+        echo "Data directory: ${mysql_data_dir}"
+        echo "Preserve or rename both directories before retrying; OneinStack will not overwrite them."
+        exit 1
+      fi
       [ -d "${db_install_dir}/support-files" ] && {
         echo "${CWARNING}MySQL already installed! ${CEND}"
         unset db_option
@@ -534,29 +576,49 @@ if [ ${ARG_NUM} == 0 ]; then
                 while :; do
                   echo
                   echo 'Please select JDK version:'
-                  echo -e "\t${CMSG}1${CEND}. Install openjdk-8-jdk"
-                  echo -e "\t${CMSG}2${CEND}. Install openjdk-11-jdk"
                   echo -e "\t${CMSG}3${CEND}. Install openjdk-17-jdk"
-                  echo -e "\t${CMSG}4${CEND}. Install openjdk-18-jdk"
-                  read -e -p "Please input a number:(Default 1 press Enter) " jdk_option
-                  jdk_option=${jdk_option:-1}
-                  if [[ ! ${jdk_option} =~ ^[1-4]$ ]]; then
-                    echo "${CWARNING}input error! Please only input number 1~4${CEND}"
+                  echo -e "\t${CMSG}4${CEND}. Install openjdk-18-jdk (legacy/EOL)"
+                  echo -e "\t${CMSG}5${CEND}. Install openjdk-21-jdk (default LTS)"
+                  echo -e "\t${CMSG}6${CEND}. Install openjdk-25-jdk (latest LTS)"
+                  read -e -p "Please input a number:(Default 5 press Enter) " jdk_option
+                  jdk_option=${jdk_option:-5}
+                  if [[ ! ${jdk_option} =~ ^[3-6]$ ]]; then
+                    echo "${CWARNING}input error! Please only input number 3~6${CEND}"
                   else
                     break
                   fi
                 done
-              elif [[ "${tomcat_option}" =~ ^[2-3]$ ]]; then
+              elif [ "${tomcat_option}" == '2' ]; then
                 while :; do
                   echo
                   echo 'Please select JDK version:'
-                  echo -e "\t${CMSG}1${CEND}. Install openjdk-8-jdk"
-                  echo -e "\t${CMSG}2${CEND}. Install openjdk-11-jdk"
+                  echo -e "\t${CMSG}2${CEND}. Install openjdk-11-jdk (legacy)"
                   echo -e "\t${CMSG}3${CEND}. Install openjdk-17-jdk"
-                  read -e -p "Please input a number:(Default 1 press Enter) " jdk_option
-                  jdk_option=${jdk_option:-1}
-                  if [[ ! ${jdk_option} =~ ^[1-3]$ ]]; then
-                    echo "${CWARNING}input error! Please only input number 1~3${CEND}"
+                  echo -e "\t${CMSG}4${CEND}. Install openjdk-18-jdk (legacy/EOL)"
+                  echo -e "\t${CMSG}5${CEND}. Install openjdk-21-jdk (default LTS)"
+                  echo -e "\t${CMSG}6${CEND}. Install openjdk-25-jdk (latest LTS)"
+                  read -e -p "Please input a number:(Default 5 press Enter) " jdk_option
+                  jdk_option=${jdk_option:-5}
+                  if [[ ! ${jdk_option} =~ ^[2-6]$ ]]; then
+                    echo "${CWARNING}input error! Please only input number 2~6${CEND}"
+                  else
+                    break
+                  fi
+                done
+              elif [ "${tomcat_option}" == '3' ]; then
+                while :; do
+                  echo
+                  echo 'Please select JDK version:'
+                  echo -e "\t${CMSG}1${CEND}. Install openjdk-8-jdk (legacy applications)"
+                  echo -e "\t${CMSG}2${CEND}. Install openjdk-11-jdk (legacy)"
+                  echo -e "\t${CMSG}3${CEND}. Install openjdk-17-jdk"
+                  echo -e "\t${CMSG}4${CEND}. Install openjdk-18-jdk (legacy/EOL)"
+                  echo -e "\t${CMSG}5${CEND}. Install openjdk-21-jdk (default LTS)"
+                  echo -e "\t${CMSG}6${CEND}. Install openjdk-25-jdk (latest LTS)"
+                  read -e -p "Please input a number:(Default 5 press Enter) " jdk_option
+                  jdk_option=${jdk_option:-5}
+                  if [[ ! ${jdk_option} =~ ^[1-6]$ ]]; then
+                    echo "${CWARNING}input error! Please only input number 1~6${CEND}"
                   else
                     break
                   fi
@@ -634,6 +696,14 @@ if [ ${ARG_NUM} == 0 ]; then
             elif [ "${db_option}" == '14' ]; then
               [ -e "${mongo_install_dir}/bin/mongo" ] && { echo "${CWARNING}MongoDB already installed! ${CEND}"; unset db_option; break; }
             else
+              if [ "${db_option}" = '15' ] &&
+                [ -d "${db_install_dir}/support-files" ] &&
+                [ ! -d "${mysql_data_dir}/mysql" ]; then
+                echo "${CFAILURE}Incomplete MySQL 9.7 installation detected.${CEND}"
+                echo "Preserve or rename ${db_install_dir} and ${mysql_data_dir} before retrying."
+                unset db_option
+                break
+              fi
               [ -d "${db_install_dir}/support-files" ] && { echo "${CWARNING}MySQL already installed! ${CEND}"; unset db_option; break; }
             fi
             while :; do
@@ -856,11 +926,13 @@ if [ ${ARG_NUM} == 0 ]; then
       echo -e "\t${CMSG}14${CEND}. Install mongodb"
       echo -e "\t${CMSG}15${CEND}. Install swoole"
       echo -e "\t${CMSG}16${CEND}. Install xdebug(PHP>=5.5)"
+      echo -e "\t${CMSG}17${CEND}. Install pgsql and pdo_pgsql"
+      echo -e "\t${CMSG}18${CEND}. Install sqlsrv and pdo_sqlsrv(PHP>=8.3)"
       read -e -p "Please input numbers:(Default '4 11 12' press Enter) " phpext_option
       phpext_option=${phpext_option:-'4 11 12'}
       [ "${phpext_option}" == '0' ] && break
       read -r -a array_phpext <<< "${phpext_option}"
-      array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16)
+      array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18)
       for v in "${array_phpext[@]}"
       do
         [[ ! " ${array_all[*]} " == *" ${v} "* ]] && phpext_flag=1
@@ -886,6 +958,8 @@ if [ ${ARG_NUM} == 0 ]; then
         [[ " ${array_phpext[*]} " == *" 14 "* ]] && pecl_mongodb=1
         [[ " ${array_phpext[*]} " == *" 15 "* ]] && pecl_swoole=1
         [[ " ${array_phpext[*]} " == *" 16 "* ]] && pecl_xdebug=1
+        [[ " ${array_phpext[*]} " == *" 17 "* ]] && pecl_pgsql=1
+        [[ " ${array_phpext[*]} " == *" 18 "* ]] && pecl_sqlsrv=1
         break
       fi
     done
@@ -948,6 +1022,13 @@ if [ ${ARG_NUM} == 0 ]; then
     fi
   done
 fi
+
+# Command-line Tomcat installs use Java 21 by default. Archived Tomcat lines
+# retain Java 8 to avoid silently changing their historical runtime.
+if [[ "${tomcat_option}" =~ ^[1-6]$ ]] && [ -z "${jdk_option}" ]; then
+  [[ "${tomcat_option}" =~ ^[4-6]$ ]] && jdk_option=1 || jdk_option=5
+fi
+Validate_Tomcat_JDK || exit 1
 
 if [[ ${nginx_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [ "${caddy_flag}" == 'y' ] || [[ ${tomcat_option} =~ ^[1-6]$ ]]; then
   [ ! -d ${wwwroot_dir}/default ] && mkdir -p ${wwwroot_dir}/default
@@ -1025,6 +1106,7 @@ case "${db_option}" in
   15)
     . include/mysql-9.7.sh
     Install_MySQL97 2>&1 | tee -a ${oneinstack_dir}/install.log
+    [ "${PIPESTATUS[0]}" -ne 0 ] && exit 1
     ;;
   0)
     . include/mysql-8.4.sh
@@ -1356,10 +1438,21 @@ PHP_addons() {
     Run_PHP_Extension_Installer xdebug Install_pecl_xdebug || return 1
   fi
 
-  # pecl_pgsql
-  if [ -e "${pgsql_install_dir}/bin/psql" ]; then
+  # PostgreSQL client drivers are opt-in and independent from a local server.
+  if [ "${pecl_pgsql}" == '1' ]; then
     . include/pecl_pgsql.sh
-    Install_pecl_pgsql 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Run_Logged_Command Install_pecl_pgsql || return 1
+    Verify_PHP_Extension pgsql || return 1
+    Verify_PHP_Extension pdo_pgsql || return 1
+  fi
+
+  # Microsoft SQL Server client drivers. This is always opt-in and never
+  # installs a SQL Server service locally.
+  if [ "${pecl_sqlsrv}" == '1' ]; then
+    . include/pecl_sqlsrv.sh
+    Run_Logged_Command Install_pecl_sqlsrv || return 1
+    Verify_PHP_Extension sqlsrv || return 1
+    Verify_PHP_Extension pdo_sqlsrv || return 1
   fi
 }
 
@@ -1380,20 +1473,41 @@ case "${jdk_option}" in
   1)
     . include/openjdk-8.sh
     Install_OpenJDK8 2>&1 | tee -a ${oneinstack_dir}/install.log
+    [ "${PIPESTATUS[0]}" -ne 0 ] && exit 1
     ;;
   2)
     . include/openjdk-11.sh
     Install_OpenJDK11 2>&1 | tee -a ${oneinstack_dir}/install.log
+    [ "${PIPESTATUS[0]}" -ne 0 ] && exit 1
     ;;
   3)
     . include/openjdk-17.sh
     Install_OpenJDK17 2>&1 | tee -a ${oneinstack_dir}/install.log
+    [ "${PIPESTATUS[0]}" -ne 0 ] && exit 1
     ;;
   4)
     . include/openjdk-18.sh
     Install_OpenJDK18 2>&1 | tee -a ${oneinstack_dir}/install.log
+    [ "${PIPESTATUS[0]}" -ne 0 ] && exit 1
+    ;;
+  5)
+    . include/openjdk-21.sh
+    Install_OpenJDK21 2>&1 | tee -a ${oneinstack_dir}/install.log
+    [ "${PIPESTATUS[0]}" -ne 0 ] && exit 1
+    ;;
+  6)
+    . include/openjdk-25.sh
+    Install_OpenJDK25 2>&1 | tee -a ${oneinstack_dir}/install.log
+    [ "${PIPESTATUS[0]}" -ne 0 ] && exit 1
     ;;
 esac
+if [[ "${jdk_option}" =~ ^[1-6]$ ]]; then
+  [ -r /etc/profile.d/openjdk.sh ] || {
+    echo "${CFAILURE}OpenJDK profile was not created.${CEND}"
+    exit 1
+  }
+  . /etc/profile.d/openjdk.sh
+fi
 
 case "${tomcat_option}" in
   1)
@@ -1462,8 +1576,18 @@ fi
 . include/check_dir.sh
 
 # Starting DB
-[ -d "/etc/mysql" ] && /bin/mv /etc/mysql{,_bk}
-[ -d "${db_install_dir}/support-files" ] && [ -z "`ps -ef | grep mysqld_safe | grep -v grep`" ] && service mysqld start
+if [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
+  [ -d "/etc/mysql" ] && /bin/mv /etc/mysql{,_bk}
+  if [ -d "${db_install_dir}/support-files" ] &&
+    [ -z "$(ps -ef | grep mysqld_safe | grep -v grep)" ]; then
+    service mysqld start || {
+      echo "${CFAILURE}Database service failed to start.${CEND}"
+      [ -f "${mysql_data_dir}/mysql-error.log" ] &&
+        tail -n 80 "${mysql_data_dir}/mysql-error.log"
+      exit 1
+    }
+  fi
+fi
 
 # reload php
 [ -e "${php_install_dir}/sbin/php-fpm" ] && { [ -e "/bin/systemctl" ] && systemctl reload php-fpm || service php-fpm reload; }
@@ -1478,6 +1602,7 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${apache_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Apache install dir":)${CMSG}${apache_install_dir}${CEND}"
 [ "${caddy_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Caddy install dir":)${CMSG}${caddy_install_dir}${CEND}"
 [[ "${tomcat_option}" =~ ^[1-6]$ ]] && echo -e "\n$(printf "%-32s" "Tomcat install dir":)${CMSG}${tomcat_install_dir}${CEND}"
+[ -n "${jdk_option}" ] && echo "$(printf "%-32s" "JDK home:")${CMSG}${JAVA_HOME}${CEND}"
 [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
 [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
 [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
