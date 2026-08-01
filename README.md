@@ -153,7 +153,7 @@ Memcached:
 systemctl {start|stop|status|restart|reload} memcached
 ```
 
-## Version and download metadata
+## Version management and security verification
 
 `versions.txt` is the central registry for component versions and optional
 download-integrity metadata. A normal entry contains only a version; integrity
@@ -175,11 +175,10 @@ When updating an entry, obtain checksums and signing-key fingerprints from an
 authoritative upstream source, verify that the component's download path uses
 the metadata, and review the resulting URL and filename before release.
 
-## Supply-chain security
-
-- Downloads require HTTPS, use the URL selected by the component, and are validated before being moved into `src/`. PHP 8.5 uses a pinned SHA-256 checksum, and MySQL 9.7 requires a GPG signature from the pinned Oracle build-key fingerprint.
-- The legacy tarball-based OneinStack self-updater is disabled. Update from the official Git repository and review the diff before running changed scripts as root.
-- `acme.sh` and backup-provider CLIs must be installed using their vendor's verified installation instructions; OneinStack no longer downloads unverified executables as root.
+Downloads require HTTPS, use the URL selected by the component, and are
+validated before being moved into `src/`. PHP 8.5 uses a pinned SHA-256
+checksum, and MySQL 9.7 requires a GPG signature from the pinned Oracle
+build-key fingerprint.
 
 ## How to upgrade
 

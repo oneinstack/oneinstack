@@ -31,19 +31,6 @@ pushd ${oneinstack_dir} > /dev/null
 
 Require_Valid_Mirror || exit 1
 
-Require_Backup_CLI() {
-  local cli_name="$1"
-  local install_url="$2"
-
-  if ! command -v "${cli_name}" >/dev/null 2>&1; then
-    echo "${CFAILURE}${cli_name} is not installed.${CEND}"
-    echo "For supply-chain safety, OneinStack no longer downloads unversioned or unverified backup executables as root."
-    echo "Install and verify it using the vendor's official instructions, then rerun this setup:"
-    echo "  ${install_url}"
-    return 1
-  fi
-}
-
 while :; do echo
   echo 'Please select your backup destination:'
   echo -e "\t${CMSG}1${CEND}. Localhost"
@@ -195,7 +182,14 @@ if [ -n "`echo ${desc_bk} | grep -w 2`" ]; then
 fi
 
 if [ -n "`echo ${desc_bk} | grep -w 3`" ]; then
-  Require_Backup_CLI ossutil 'https://help.aliyun.com/document_detail/120075.html' || exit 1
+  if [ ! -e "/usr/local/bin/ossutil" ]; then
+    if [ "${armplatform}" == 'y' ]; then
+      wget -qc https://gosspublic.alicdn.com/ossutil/1.7.16/ossutilarm64 -O /usr/local/bin/ossutil
+    else
+      wget -qc https://gosspublic.alicdn.com/ossutil/1.7.16/ossutil64 -O /usr/local/bin/ossutil
+    fi
+    chmod +x /usr/local/bin/ossutil
+  fi
   while :; do echo
     echo 'Please select your backup aliyun datacenter:'
     echo -e "\t ${CMSG}1${CEND}. cn-hangzhou-华东1 (杭州)          ${CMSG}2${CEND}. cn-shanghai-华东2 (上海)"
@@ -276,7 +270,10 @@ if [ -n "`echo ${desc_bk} | grep -w 3`" ]; then
 fi
 
 if [ -n "`echo ${desc_bk} | grep -w 4`" ]; then
-  Require_Backup_CLI coscli 'https://cloud.tencent.com/document/product/436/63144' || exit 1
+  if [ ! -e "/usr/local/bin/coscli" ]; then
+    wget -qc https://cosbrowser.cloud.tencent.com/software/coscli/coscli-linux -O /usr/local/bin/coscli
+    chmod +x /usr/local/bin/coscli
+  fi
 
   while :; do echo
     echo 'Please select your backup qcloud datacenter:'
@@ -361,7 +358,18 @@ EOF
 fi
 
 if [ -n "`echo ${desc_bk} | grep -w 5`" ]; then
-  Require_Backup_CLI upx 'https://help.upyun.com/knowledge-base/upx/' || exit 1
+  if [ ! -e "/usr/local/bin/upx" ]; then
+    if [ "${armplatform}" == 'y' ]; then
+      wget -qc https://collection.b0.upaiyun.com/softwares/upx/upx_0.4.3_linux_arm64.tar.gz -O /tmp/upx_0.4.3_linux_arm64.tar.gz
+      tar xzf /tmp/upx_0.4.3_linux_arm64.tar.gz -C /tmp/
+    else
+      wget -qc https://collection.b0.upaiyun.com/softwares/upx/upx_0.4.3_linux_x86_64.tar.gz -O /tmp/upx_0.4.3_linux_x86_64.tar.gz
+      tar xzf /tmp/upx_0.4.3_linux_x86_64.tar.gz -C /tmp/
+    fi
+    /bin/mv /tmp/upx /usr/local/bin/upx
+    chmod +x /usr/local/bin/upx
+    rm -f /tmp/{upx_*,LICENSE,README.md}
+  fi
   while :; do echo
     read -e -p "Please enter the upyun ServiceName: " ServiceName
     [ -z "${ServiceName}" ] && continue
@@ -384,7 +392,17 @@ if [ -n "`echo ${desc_bk} | grep -w 5`" ]; then
 fi
 
 if [ -n "`echo ${desc_bk} | grep -w 6`" ]; then
-  Require_Backup_CLI qshell 'https://developer.qiniu.com/kodo/1302/qshell' || exit 1
+  if [ ! -e "/usr/local/bin/qshell" ]; then
+    if [ "${armplatform}" == 'y' ]; then
+      wget -qc https://devtools.qiniu.com/qshell-v2.12.0-linux-arm64.tar.gz -O /tmp/qshell-v2.12.0-linux-arm64.tar.gz
+      tar xzf /tmp/qshell-v2.12.0-linux-arm64.tar.gz -C /usr/local/bin/
+    else
+      wget -qc https://devtools.qiniu.com/qshell-v2.12.0-linux-amd64.tar.gz -O /tmp/qshell-v2.12.0-linux-amd64.tar.gz
+      tar xzf /tmp/qshell-v2.12.0-linux-amd64.tar.gz -C /usr/local/bin/
+    fi
+    chmod +x /usr/local/bin/qshell
+    rm -f /tmp/qshell*
+  fi
   while :; do echo
     echo 'Please select your backup qiniu datacenter:'
     echo -e "\t ${CMSG} 1${CEND}. 华东            ${CMSG}2${CEND}. 华北"
@@ -427,7 +445,12 @@ if [ -n "`echo ${desc_bk} | grep -w 6`" ]; then
 fi
 
 if [ -n "`echo ${desc_bk} | grep -w 7`" ]; then
-  Require_Backup_CLI aws 'https://docs.aws.amazon.com/cli/latest/userguide/getting-started-install.html' || exit 1
+  if [ ! -e "/usr/local/bin/aws" ] && [ ! -e "/usr/bin/aws" ]; then
+    wget -qc https://awscli.amazonaws.com/awscli-exe-linux-$(arch).zip -O /tmp/awscliv2.zip
+    unzip /tmp/awscliv2.zip -d /tmp/
+    /tmp/aws/install
+    rm -rf /tmp/{awscliv2.zip,aws}
+  fi
   while :; do echo
     echo 'Please select your backup amazon datacenter:'
     echo -e "\t ${CMSG} 1${CEND}. us-east-2                    ${CMSG} 2${CEND}. us-east-1"
@@ -526,7 +549,14 @@ if [ -n "`echo ${desc_bk} | grep -w 7`" ]; then
 fi
 
 if [ -n "`echo ${desc_bk} | grep -w 8`" ]; then
-  Require_Backup_CLI dbxcli 'https://github.com/dropbox/dbxcli' || exit 1
+  if [ ! -e "/usr/local/bin/dbxcli" ]; then
+    if [ "${armplatform}" == 'y' ]; then
+      wget -qc ${mirror_link}/oneinstack/src/dbxcli-linux-arm -O /usr/local/bin/dbxcli
+    else
+      wget -qc ${mirror_link}/oneinstack/src/dbxcli-linux-amd64 -O /usr/local/bin/dbxcli
+    fi
+    chmod +x /usr/local/bin/dbxcli
+  fi
   while :; do echo
     if dbxcli account; then
       break
