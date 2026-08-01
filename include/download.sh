@@ -140,16 +140,18 @@ if ! Parse_Version_Specs; then
   return 1 2>/dev/null || exit 1
 fi
 
-Trusted_Mirror_Link() {
-  # Only the mirror explicitly published by the official oneinstack.com site is trusted.
-  # 仅信任 oneinstack.com 官网明确公布的镜像，拒绝同名第三方及公共托管域名。
-  [ "${mirror_link%/}" = 'https://mirrors.oneinstack.com' ]
+Valid_Mirror_Link() {
+  local configured_mirror="${mirror_link:-}"
+
+  # Custom mirrors are supported, but the base URL must remain HTTPS-only.
+  # 支持自建镜像，但基础地址必须使用 HTTPS。
+  [[ "${configured_mirror%/}" =~ ^https://[^/?\#[:space:]]+(/[^?\#[:space:]]*)?$ ]]
 }
 
-Require_Trusted_Mirror() {
-  if ! Trusted_Mirror_Link; then
-    echo "${CFAILURE}Untrusted mirror_link rejected: ${mirror_link}${CEND}"
-    echo "Use the official mirror: https://mirrors.oneinstack.com"
+Require_Valid_Mirror() {
+  if ! Valid_Mirror_Link; then
+    echo "${CFAILURE}Invalid mirror_link: ${mirror_link:-<empty>}${CEND}"
+    echo "Use a non-empty HTTPS base URL without query parameters or fragments."
     return 1
   fi
 }
@@ -334,7 +336,7 @@ Download_src() {
     exit 1
   fi
 
-  if ! Require_Trusted_Mirror; then
+  if ! Require_Valid_Mirror; then
     [ "${download_mode}" = 'no_kill' ] && return 1
     exit 1
   fi
@@ -366,11 +368,11 @@ Download_src() {
   fi
 
   # mirror_link is the preferred download source. For external upstream URLs,
-  # first try the official OneinStack source cache using the same filename,
-  # then fall back to the caller-provided upstream. Explicit OneinStack mirror
+  # first try the configured source cache using the same filename,
+  # then fall back to the caller-provided upstream. Explicit configured mirror
   # paths (for example Apache/Tomcat layouts) are already authoritative.
-  # mirror_link 表示优先下载源：外部上游先尝试 OneinStack 官方文件缓存，
-  # 失败后回退原始上游；调用方给出的 OneinStack 专用镜像路径则直接优先。
+  # mirror_link 表示优先下载源：外部上游先尝试配置的文件缓存，
+  # 失败后回退原始上游；调用方给出的配置镜像路径则直接优先。
   mirror_url="${mirror_link%/}/oneinstack/src/${filename}"
   if [ "${refresh_upstream}" = true ]; then
     # Mutable upstream files must bypass both the local cache and OneinStack

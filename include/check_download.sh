@@ -141,11 +141,11 @@ checkDownload() {
       0)
         # MySQL 8.4
         if [ "${OUTIP_STATE}"x == "China"x ]; then
-          DOWN_ADDR_MYSQL=https://mirrors.oneinstack.com/oneinstack/src
-          DOWN_ADDR_MYSQL_BK=https://mirrors.oneinstack.com/oneinstack/src
+          DOWN_ADDR_MYSQL=${mirror_link%/}/oneinstack/src
+          DOWN_ADDR_MYSQL_BK=${mirror_link%/}/oneinstack/src
         else
-          DOWN_ADDR_MYSQL=https://mirrors.oneinstack.com/oneinstack/src
-          DOWN_ADDR_MYSQL_BK=https://mirrors.oneinstack.com/oneinstack/src
+          DOWN_ADDR_MYSQL=${mirror_link%/}/oneinstack/src
+          DOWN_ADDR_MYSQL_BK=${mirror_link%/}/oneinstack/src
         fi
 
         if [ "${dbinstallmethod}" == '1' ]; then
@@ -175,11 +175,11 @@ checkDownload() {
       1)
         # MySQL 8.0
         if [ "${OUTIP_STATE}"x == "China"x ]; then
-          DOWN_ADDR_MYSQL=https://mirrors.oneinstack.com/oneinstack/src
-          DOWN_ADDR_MYSQL_BK=https://mirrors.oneinstack.com/oneinstack/src
+          DOWN_ADDR_MYSQL=${mirror_link%/}/oneinstack/src
+          DOWN_ADDR_MYSQL_BK=${mirror_link%/}/oneinstack/src
         else
-          DOWN_ADDR_MYSQL=https://mirrors.oneinstack.com/oneinstack/src
-          DOWN_ADDR_MYSQL_BK=https://mirrors.oneinstack.com/oneinstack/src
+          DOWN_ADDR_MYSQL=${mirror_link%/}/oneinstack/src
+          DOWN_ADDR_MYSQL_BK=${mirror_link%/}/oneinstack/src
         fi
 
         if [ "${dbinstallmethod}" == '1' ]; then

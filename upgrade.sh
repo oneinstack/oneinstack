@@ -37,7 +37,7 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/upgrade_phpmyadmin.sh
 . ./include/upgrade_oneinstack.sh
 
-Require_Trusted_Mirror || exit 1
+Require_Valid_Mirror || exit 1
 
 # get the out ip country
 OUTIP_STATE=$(./include/ois.${ARCH} ip_state)

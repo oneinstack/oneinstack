@@ -10,7 +10,7 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/download.sh
 . ./include/check_download.sh
 
-Require_Trusted_Mirror || exit 1
+Require_Valid_Mirror || exit 1
 
 # Mock architecture variables for x86_64 (bypassing check_os.sh for macOS compatibility)
 ARCH="x86_64"

@@ -69,20 +69,6 @@ ODBC Driver 18 from the official signed Microsoft repository after checking the
 repository key fingerprint. This option is limited to official Debian, Ubuntu
 and RHEL repository targets.
 
-### JDK support and licensing
-
-New Tomcat installations use OpenJDK 21 by default. OpenJDK 8 remains supported
-for Java EE 8 and other legacy applications; OpenJDK 11 and the end-of-life
-OpenJDK 18 are deprecated compatibility options whose existing option numbers
-remain unchanged. They will stay available for a deprecation cycle before being
-removed, and are never silently remapped. OpenJDK 17 and 25 are the other
-supported LTS lines.
-
-OneinStack installs only operating-system OpenJDK packages or Eclipse Temurin,
-which are GPLv2 with the Classpath Exception. It does not download Oracle JDK.
-When Temurin is required, the complete Adoptium repository signing-key
-fingerprint is checked before the repository is enabled.
-
 ## How to install another PHP version
 
 ```bash
@@ -191,7 +177,6 @@ the metadata, and review the resulting URL and filename before release.
 
 ## Supply-chain security
 
-- Keep `mirror_link=https://mirrors.oneinstack.com`. Third-party mirror domains are rejected.
 - Downloads require HTTPS, use the URL selected by the component, and are validated before being moved into `src/`. PHP 8.5 uses a pinned SHA-256 checksum, and MySQL 9.7 requires a GPG signature from the pinned Oracle build-key fingerprint.
 - The legacy tarball-based OneinStack self-updater is disabled. Update from the official Git repository and review the diff before running changed scripts as root.
 - `acme.sh` and backup-provider CLIs must be installed using their vendor's verified installation instructions; OneinStack no longer downloads unverified executables as root.

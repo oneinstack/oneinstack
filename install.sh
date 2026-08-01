@@ -29,7 +29,7 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/download.sh
 . ./include/get_char.sh
 
-Require_Trusted_Mirror || exit 1
+Require_Valid_Mirror || exit 1
 
 dbrootpwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbpostgrespwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`

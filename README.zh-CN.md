@@ -68,17 +68,6 @@ SQL Server 选项不会在本机安装数据库服务端。它会在校验仓库
 指纹后，从 Microsoft 官方签名仓库安装 ODBC Driver 18；该选项仅支持
 Microsoft 提供官方仓库的 Debian、Ubuntu 与 RHEL。
 
-### JDK 支持与许可
-
-新的 Tomcat 安装默认使用 OpenJDK 21。OpenJDK 8 为 Java EE 8 和其他
-旧应用继续保留；OpenJDK 11 与已经停止维护的 OpenJDK 18 暂退为兼容选项，
-原有选项编号保持不变。它们至少保留一个弃用周期后再移除，且不会被静默
-映射到其他版本。OpenJDK 17 与 25 是另外两条受支持的 LTS 版本线。
-
-OneinStack 只安装操作系统提供的 OpenJDK 或采用 GPLv2 + Classpath
-Exception 的 Eclipse Temurin，不会下载 Oracle JDK。需要启用 Temurin
-仓库时，会先校验 Adoptium 仓库签名密钥的完整指纹。
-
 ## 如何安装其他PHP版本
 
 ```bash
@@ -184,7 +173,6 @@ component_ver=1.2.3,sha256=64位十六进制摘要,gpg_key=https://example.com/k
 
 ## 供应链安全
 
-- 保持 `mirror_link=https://mirrors.oneinstack.com`，程序会拒绝第三方镜像域名。
 - 下载必须使用 HTTPS，并以组件明确指定的地址为准；文件通过内容和压缩包检查后才会移入 `src/`。PHP 8.5 会校验固定的 SHA-256，MySQL 9.7 必须通过固定 Oracle 构建密钥指纹的 GPG 签名验证。
 - 已禁用旧的压缩包覆盖式 OneinStack 自更新。请从官方 Git 仓库更新，并在以 root 运行新脚本前审查差异。
 - `acme.sh` 和备份服务 CLI 需按厂商的可验证安装流程预先安装，OneinStack 不再以 root 自动下载未校验的可执行文件。

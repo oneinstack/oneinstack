@@ -32,7 +32,7 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/download.sh
 . ./include/get_char.sh
 
-Require_Trusted_Mirror || exit 1
+Require_Valid_Mirror || exit 1
 
 . ./include/composer.sh
 

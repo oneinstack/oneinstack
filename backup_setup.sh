@@ -29,7 +29,7 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/check_dir.sh
 . ./include/download.sh
 
-Require_Trusted_Mirror || exit 1
+Require_Valid_Mirror || exit 1
 
 Require_Backup_CLI() {
   local cli_name="$1"
