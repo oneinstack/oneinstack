@@ -3,8 +3,6 @@
 # name_ver=version,sha256=64hex
 # name_ver=version,md5=32hex
 # name_ver=version,md5=32hex,gpg_key=https://...,gpg_finger=40hex
-# A plain version skips cryptographic digest and signature verification.
-# 下载元数据统一使用显式前缀；不再根据摘要长度猜测算法。
 # Web
 nginx_ver=1.31.0
 caddy_ver=2.10.2

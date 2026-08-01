@@ -53,35 +53,6 @@ If you need to modify the directory (installation, data storage, Nginx logs), mo
 ./install.sh
 ```
 
-### MySQL 9.7 LTS
-
-MySQL 9.7 uses the official x86_64 binary package and requires RHEL 8+, Debian 12+, or Ubuntu 22+.
-
-```bash
-./install.sh --db_option 15 --dbinstallmethod 1 --dbrootpwd 'change-this-password'
-```
-
-An in-place upgrade from MySQL 8.4 LTS to MySQL 9.7 LTS is supported. Back up the server and test application compatibility before upgrading.
-
-```bash
-./upgrade.sh --db 9.7.1
-```
-
-### PHP 8.5
-
-PHP 8.5 is available as the main PHP runtime or as an additional multi-PHP runtime. RHEL-family systems require RHEL 8 or newer.
-
-```bash
-./install.sh --php_option 15 --phpcache_option 1 --php_extensions imagick,redis,memcached,mongodb,swoole,xdebug
-./install.sh --mphp_ver 85
-```
-
-Upgrade an existing PHP 8.5 installation within the same release series:
-
-```bash
-./upgrade.sh --php 8.5.8
-```
-
 ### Optional database client extensions
 
 LDAP, PostgreSQL and Microsoft SQL Server support can be installed independently
@@ -195,6 +166,28 @@ Memcached:
 ```bash
 systemctl {start|stop|status|restart|reload} memcached
 ```
+
+## Version and download metadata
+
+`versions.txt` is the central registry for component versions and optional
+download-integrity metadata. A normal entry contains only a version; integrity
+and signing information is appended as explicit, comma-separated fields:
+
+```text
+component_ver=1.2.3
+component_ver=1.2.3,sha256=64_hex_characters
+component_ver=1.2.3,md5=32_hex_characters
+component_ver=1.2.3,sha256=64_hex_characters,gpg_key=https://example.com/key.asc,gpg_finger=40_or_64_hex_characters
+```
+
+Supported metadata names are `sha256`, `md5`, `gpg_key` and `gpg_finger`.
+Only one checksum algorithm may be specified. `gpg_key` and `gpg_finger` must
+appear together, and the key URL must use HTTPS. Empty, duplicate, unknown or
+malformed fields stop parsing instead of silently weakening verification.
+
+When updating an entry, obtain checksums and signing-key fingerprints from an
+authoritative upstream source, verify that the component's download path uses
+the metadata, and review the resulting URL and filename before release.
 
 ## Supply-chain security
 

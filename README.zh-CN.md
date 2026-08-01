@@ -53,35 +53,6 @@ screen -S oneinstack
 ./install.sh
 ```
 
-### MySQL 9.7 LTS
-
-MySQL 9.7 使用官方 x86_64 二进制包，要求 RHEL 8+、Debian 12+ 或 Ubuntu 22+。
-
-```bash
-./install.sh --db_option 15 --dbinstallmethod 1 --dbrootpwd 'change-this-password'
-```
-
-支持从 MySQL 8.4 LTS 原地升级到 MySQL 9.7 LTS。生产升级前请额外备份并验证应用兼容性。
-
-```bash
-./upgrade.sh --db 9.7.1
-```
-
-### PHP 8.5
-
-PHP 8.5 支持作为主 PHP 安装，也支持作为多版本 PHP 并存安装。RHEL 系发行版要求 RHEL 8 或更新版本。
-
-```bash
-./install.sh --php_option 15 --phpcache_option 1 --php_extensions imagick,redis,memcached,mongodb,swoole,xdebug
-./install.sh --mphp_ver 85
-```
-
-已安装 PHP 8.5 时，可在 8.5 系列内升级：
-
-```bash
-./upgrade.sh --php 8.5.8
-```
-
 ### 可选数据库客户端扩展
 
 现有 PHP 可按需、独立安装 LDAP、PostgreSQL 和 Microsoft SQL Server
@@ -189,6 +160,27 @@ Memcached:
 ```bash
 systemctl {start|stop|status|restart|reload} memcached
 ```
+
+## 版本与下载元数据
+
+`versions.txt` 是组件版本及可选下载完整性元数据的统一登记表。普通条目只
+包含版本号；需要固定摘要或签名身份时，在版本后使用逗号追加带明确名称的
+字段：
+
+```text
+component_ver=1.2.3
+component_ver=1.2.3,sha256=64位十六进制摘要
+component_ver=1.2.3,md5=32位十六进制摘要
+component_ver=1.2.3,sha256=64位十六进制摘要,gpg_key=https://example.com/key.asc,gpg_finger=40或64位十六进制指纹
+```
+
+支持的元数据名称为 `sha256`、`md5`、`gpg_key` 和 `gpg_finger`。每个条目
+只能指定一种摘要算法；`gpg_key` 与 `gpg_finger` 必须同时提供，且密钥地址
+必须使用 HTTPS。空字段、重复字段、未知字段及格式错误会直接终止解析，
+不会静默降低校验强度。
+
+更新条目时，应从权威上游获取摘要和签名密钥指纹，确认对应组件的下载流程
+实际使用这些元数据，并在发布前复核最终下载地址与文件名。
 
 ## 供应链安全
 
