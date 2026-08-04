@@ -50,7 +50,7 @@ for tomcat_option in 1 2 3 4 5; do
 done
 
 # 3. 下载所有数据库 (二进制 + 源码编译 双版本)
-for db_option in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14; do
+for db_option in 0 1 2 3 4 5 6 7 8 9 10 11 12 13 14 15; do
   dbinstallmethod=1
   checkDownload 2>&1
   if [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$ ]]; then

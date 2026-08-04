@@ -59,7 +59,7 @@ Show_Help() {
   --nodejs                    Install Nodejs
   --tomcat_option [1-6]       Install Tomcat version
   --jdk_option [1-3]          Install JDK version
-  --db_option [0-14]          Install DB version
+  --db_option [0-15]          Install DB version (15: MySQL 9.7 LTS)
   --dbinstallmethod [1-2]     DB install method, default: 1 binary install
   --dbrootpwd [password]      DB super password
   --pureftpd                  Install Pure-Ftpd
@@ -217,7 +217,7 @@ while :; do
   --db_option)
     db_option=$2
     shift 2
-    if [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
+    if [[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]]; then
       if [ "${db_option}" == '13' ]; then
         [ -e "${pgsql_install_dir}/bin/psql" ] && {
           echo "${CWARNING}PostgreSQL already installed! ${CEND}"
@@ -235,7 +235,7 @@ while :; do
         }
       fi
     else
-      echo "${CWARNING}db_option input error! Please only input number 0~14${CEND}"
+      echo "${CWARNING}db_option input error! Please only input number 0~15${CEND}"
       exit 1
     fi
     ;;
@@ -308,6 +308,17 @@ while :; do
     ;;
   esac
 done
+
+if [ "${db_option}" == '15' ]; then
+  [ "${dbinstallmethod}" != '1' ] && {
+    echo "${CWARNING}MySQL 9.7 supports binary installation only; use --dbinstallmethod 1.${CEND}"
+    exit 1
+  }
+  MySQL97_OS_Supported || {
+    echo "${CWARNING}MySQL 9.7 requires x86_64 with RHEL 8+, Debian 12+, or Ubuntu 22+.${CEND}"
+    exit 1
+  }
+fi
 
 # Check md5sum
 if [ ${ARG_NUM} == 0 ] && [ ! -e ~/.oneinstack ]; then
@@ -557,6 +568,7 @@ if [ ${ARG_NUM} == 0 ]; then
         while :; do
           echo
           echo 'Please select a version of the Database:'
+          echo -e "\t${CMSG}15${CEND}. Install MySQL-9.7 (LTS, modern OS only)"
           echo -e "\t${CMSG} 0${CEND}. Install MySQL-8.4 (LTS)"
           echo -e "\t${CMSG} 1${CEND}. Install MySQL-8.0"
           echo -e "\t${CMSG} 2${CEND}. Install MySQL-5.7"
@@ -574,7 +586,7 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG}14${CEND}. Install MongoDB"
           read -e -p "Please input a number:(Default 0 press Enter) " db_option
           db_option=${db_option:-0}
-          if [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
+          if [[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]]; then
             if [ "${db_option}" == '13' ]; then
               [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; unset db_option; break; }
             elif [ "${db_option}" == '14' ]; then
@@ -608,7 +620,15 @@ if [ ${ARG_NUM} == 0 ]; then
               fi
             done
             # choose install methods
-            if [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
+            if [ "${db_option}" == '15' ]; then
+              MySQL97_OS_Supported || {
+                echo "${CWARNING}MySQL 9.7 requires x86_64 with RHEL 8+, Debian 12+, or Ubuntu 22+.${CEND}"
+                unset db_option
+                break
+              }
+              dbinstallmethod=1
+              echo "MySQL 9.7 will be installed from the official binary package."
+            elif [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
               while :; do echo
                 echo "Please choose installation of the database:"
                 echo -e "\t${CMSG}1${CEND}. Install database from binary package."
@@ -911,6 +931,7 @@ OUTIP_STATE=$(./include/ois.${ARCH} ip_state)
 
 [ "${armplatform}" == "y" ] && dbinstallmethod=2
 checkDownload 2>&1 | tee -a ${oneinstack_dir}/install.log
+[ "${PIPESTATUS[0]}" -ne 0 ] && exit 1
 
 # get OS Memory
 . ./include/memory.sh
@@ -950,13 +971,18 @@ startTime=`date +%s`
 Install_openSSL | tee -a ${oneinstack_dir}/install.log
 
 # Jemalloc
-if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
+if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]]; then
   . include/jemalloc.sh
   Install_Jemalloc | tee -a ${oneinstack_dir}/install.log
 fi
 
 # Database
 case "${db_option}" in
+  15)
+    . include/mysql-9.7.sh
+    Install_MySQL97 2>&1 | tee -a ${oneinstack_dir}/install.log
+    [ "${PIPESTATUS[0]}" -ne 0 ] && exit 1
+    ;;
   0)
     . include/mysql-8.4.sh
     Install_MySQL84 2>&1 | tee -a ${oneinstack_dir}/install.log
@@ -1363,10 +1389,10 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${apache_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Apache install dir":)${CMSG}${apache_install_dir}${CEND}"
 [ "${caddy_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Caddy install dir":)${CMSG}${caddy_install_dir}${CEND}"
 [[ "${tomcat_option}" =~ ^[1-6]$ ]] && echo -e "\n$(printf "%-32s" "Tomcat install dir":)${CMSG}${tomcat_install_dir}${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]] && echo "$(printf "%-32s" "Database password:")${CMSG}${dbrootpwd}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]] && echo "$(printf "%-32s" "Database password:")${CMSG}${dbrootpwd}${CEND}"
 [ "${db_option}" == '13' ] && echo -e "\n$(printf "%-32s" "PostgreSQL install dir:")${CMSG}${pgsql_install_dir}${CEND}"
 [ "${db_option}" == '13' ] && echo "$(printf "%-32s" "PostgreSQL data dir:")${CMSG}${pgsql_data_dir}${CEND}"
 [ "${db_option}" == '13' ] && echo "$(printf "%-32s" "PostgreSQL user:")${CMSG}postgres${CEND}"

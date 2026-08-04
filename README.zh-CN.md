@@ -6,7 +6,7 @@
 - 持续更新，提供交互式安装和自动安装
 - 源码编译安装，采用最新稳定版本，并从官方站点下载
 - 提供多重安全优化
-- 提供多个数据库版本（MySQL-8.0、MySQL-5.7、MySQL-5.6、MySQL-5.5、MariaDB-10.11、MariaDB-10.5、MariaDB-10.4、MariaDB-5.5、Percona-8.0、Percona-5.7、Percona-5.6、Percona-5.5、PostgreSQL、MongoDB）
+- 提供多个数据库版本（MySQL-9.7 LTS、MySQL-8.0、MySQL-5.7、MySQL-5.6、MySQL-5.5、MariaDB-10.11、MariaDB-10.5、MariaDB-10.4、MariaDB-5.5、Percona-8.0、Percona-5.7、Percona-5.6、Percona-5.5、PostgreSQL、MongoDB）
 - 提供多个PHP版本（PHP-8.3、PHP-8.2、PHP-8.1、PHP-8.0、PHP-7.4、PHP-7.3、PHP-7.2、PHP-7.1、PHP-7.0、PHP-5.6、PHP-5.5、PHP-5.4、PHP-5.3）
 - 提供Nginx、Tengine、OpenResty、Caddy、Apache和ngx_lua_waf
 - 提供多个Tomcat版本（Tomcat-10、Tomcat-9、Tomcat-8、Tomcat-7）
