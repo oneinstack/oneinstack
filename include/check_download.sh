@@ -30,7 +30,7 @@ checkDownload() {
   fi
 
   # jemalloc
-  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$ ]]; then
+  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
     echo "Download jemalloc..."
     src_url=${mirror_link}/oneinstack/src/jemalloc-${jemalloc_ver}.tar.bz2 && Download_src
   fi
@@ -110,7 +110,7 @@ checkDownload() {
     src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
   fi
 
-  if [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
+  if [[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]]; then
     if [[ "${db_option}" =~ ^[0,1,2,5,6,7,9]$|^10$ ]] && [ "${dbinstallmethod}" == "2" ]; then
       [[ "${db_option}" =~ ^0$ ]] && boost_ver=${boost_mysql84_ver}
       [[ "${db_option}" =~ ^1$ ]] && boost_ver=${boost_mysql80_ver}
@@ -123,6 +123,21 @@ checkDownload() {
     fi
 
     case "${db_option}" in
+      15)
+        DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-9.7
+        FILE_NAME=mysql-${mysql97_ver}-linux-glibc2.28-x86_64.tar.xz
+        echo "Download MySQL 9.7 LTS binary package..."
+        src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME} && Download_src
+
+        if [ "$(md5sum "${FILE_NAME}" | awk '{print $1}')" != "${mysql97_md5}" ]; then
+          rm -f "${FILE_NAME}"
+          wget --limit-rate=100M --tries=3 -c "${DOWN_ADDR_MYSQL}/${FILE_NAME}"
+        fi
+        if [ "$(md5sum "${FILE_NAME}" | awk '{print $1}')" != "${mysql97_md5}" ]; then
+          echo "${CFAILURE}${FILE_NAME} checksum verification failed.${CEND}"
+          return 1
+        fi
+        ;;
       0)
         # MySQL 8.4
         if [ "${OUTIP_STATE}"x == "China"x ]; then

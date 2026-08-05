@@ -125,6 +125,18 @@ fi
 
 THREAD=$(grep 'processor' /proc/cpuinfo | sort -u | wc -l)
 
+# MySQL 9.7 generic binaries require a modern x86_64 userspace.
+MySQL97_OS_Supported() {
+  [ "${ARCH}" != 'x86_64' ] && return 1
+
+  case "${Family}" in
+    rhel) [ "${RHEL_ver:-0}" -ge 8 ] ;;
+    debian) [ "${Debian_ver:-0}" -ge 12 ] ;;
+    ubuntu) [ "${Ubuntu_ver:-0}" -ge 22 ] ;;
+    *) return 1 ;;
+  esac
+}
+
 # Percona binary: https://docs.percona.com/percona-server/5.7/installation/binary-tarball.html
 if [ ${Debian_ver} -lt 9 >/dev/null 2>&1 ]; then
   sslLibVer=ssl100

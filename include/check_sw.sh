@@ -18,7 +18,7 @@ installDepsDebian() {
     dpkg -l | grep ^rc | awk '{print $2}' | xargs dpkg -P
   fi
 
-  if [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$ ]]; then
+  if [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
     pkgList="mysql-client mysql-server mysql-common libsodium-dev mysql-server-core-5.5 mysql-client-5.5 mariadb-client mariadb-server mariadb-common"
     for Package in ${pkgList};do
       apt-get -y purge ${Package}
@@ -136,7 +136,7 @@ installDepsUbuntu() {
     dpkg -l | grep ^rc | awk '{print $2}' | xargs dpkg -P
   fi
 
-  if [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$ ]]; then
+  if [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
     pkgList="mysql-client mysql-server mysql-common mysql-server-core-5.5 mysql-client-5.5 mariadb-client mariadb-server mariadb-common"
     for Package in ${pkgList};do
       apt-get -y purge ${Package}
