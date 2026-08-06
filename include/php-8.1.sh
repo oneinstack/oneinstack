@@ -119,7 +119,7 @@ Install_PHP81() {
     --with-mhash --enable-pcntl --enable-sockets --enable-ftp --enable-intl --with-xsl \
     --with-gettext --with-zip=/usr/local --enable-soap --disable-debug ${php_modules_options}
   fi
-  make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
+  make EXTRA_CFLAGS="-Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
   make install
 
   if [ -e "${php_install_dir}/bin/phpize" ]; then

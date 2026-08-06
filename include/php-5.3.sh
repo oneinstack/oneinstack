@@ -119,7 +119,7 @@ Install_PHP53() {
     --with-gettext --enable-zip --enable-soap --disable-debug ${php_modules_options}
   fi
   { [ ${RHEL_ver} -ge 9 >/dev/null 2>&1 ] || [ ${Debian_ver} -ge 10 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -ge 19 >/dev/null 2>&1 ]; } || sed -i '/^BUILD_/ s/\$(CC)/\$(CXX)/g' Makefile
-  make ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
+  make EXTRA_CFLAGS="-Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
   make install
 
   if [ -e "${php_install_dir}/bin/phpize" ]; then

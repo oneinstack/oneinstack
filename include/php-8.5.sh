@@ -66,7 +66,7 @@ Install_PHP85() {
     --disable-phar \
     --disable-rpath
 
-    make -j ${THREAD} && make install
+    make EXTRA_CFLAGS="-Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers" -j ${THREAD} && make install
     
     if [ -e "${php_install_dir}/bin/phpize" ]; then
       # php.ini配置
