@@ -12,3 +12,8 @@ src/download_deps.py
 src/download_mirrors.sh
 src/download_mysql.sh
 src/download_mysql_for_mirror.sh
+updated_packages/
+md5_upload/
+.DS_Store
+src/.DS_Store
+src/cacert.pem

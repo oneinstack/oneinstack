@@ -1,11 +1,11 @@
 # newest software version
 # Web
 nginx_ver=1.31.0
-caddy_ver=2.10.2
+caddy_ver=2.11.4
 tengine_ver=3.1.0
 openresty_ver=1.27.1.2
 openssl11_ver=1.1.1w
-openssl_ver=3.2.1
+openssl_ver=3.5.8
 
 tomcat11_ver=11.0.15
 tomcat10_ver=10.1.50
@@ -13,7 +13,7 @@ tomcat9_ver=9.0.113
 tomcat8_ver=8.5.96
 tomcat7_ver=7.0.109
 
-apache_ver=2.4.66
+apache_ver=2.4.68
 pcre_ver=8.45
 apr_ver=1.7.5
 apr_util_ver=1.6.3
@@ -28,7 +28,7 @@ mysql57_ver=5.7.44
 mysql56_ver=5.6.51
 mysql55_ver=5.5.62
 
-mariadb1011_ver=10.11.15
+mariadb1011_ver=10.11.19
 mariadb105_ver=10.5.23
 mariadb104_ver=10.4.32
 mariadb55_ver=5.5.68
@@ -43,6 +43,8 @@ pgsql_ver=18.1
 mongodb_ver=8.0.17
 mongosh_ver=2.3.1
 
+clickhouse_ver=24.8.4.13
+
 # PHP
 php53_ver=5.3.29
 php54_ver=5.4.45
@@ -55,16 +57,16 @@ php73_ver=7.3.33
 php74_ver=7.4.33
 php80_ver=8.0.30
 php81_ver=8.1.34
-php82_ver=8.2.30
-php83_ver=8.3.29
-php84_ver=8.4.16
+php82_ver=8.2.33
+php83_ver=8.3.33
+php84_ver=8.4.25
 php85_ver=8.5.1
 
 # Nodejs
 nodejs_ver=22.12.0
 
 libiconv_ver=1.17
-curl_ver=8.17.0
+curl_ver=8.21.0
 libmcrypt_ver=2.5.8
 mcrypt_ver=2.6.8
 mhash_ver=0.9.9.9
@@ -96,10 +98,10 @@ xdebug_ver=3.5.0
 xdebug_oldver=3.1.6
 
 # Ftp
-pureftpd_ver=1.0.51
+pureftpd_ver=1.0.54
 
 # Redis
-redis_ver=8.4.0
+redis_ver=8.10.1
 redis_oldver=7.4.2
 pecl_redis_ver=6.3.0
 

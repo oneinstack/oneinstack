@@ -32,6 +32,7 @@ pushd ${oneinstack_dir} > /dev/null
 dbrootpwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbpostgrespwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbmongopwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
+dbclickhousepwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 xcachepwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbinstallmethod=1
 
@@ -43,10 +44,10 @@ version() {
 Show_Help() {
   version
   echo "Usage: $0  command ...[parameters]....
-  --help, -h                  Show this help message, More: https://oneinstack.com/auto
-  --version, -v               Show version info
+  --help, -h                  Show this help message, more information see install.log
+  --version, -v, -V           Show version
   --nginx_option [1-4]        Install Nginx server version
-  --apache                    Install Apache
+  --apache                    Install Apache server
   --apache_mode_option [1-2]  Apache2.4 mode, 1(default): php-fpm, 2: mod_php
   --apache_mpm_option [1-3]   Apache2.4 MPM, 1(default): event, 2: prefork, 3: worker
   --php_option [1-15]         Install PHP version
@@ -65,6 +66,7 @@ Show_Help() {
   --pureftpd                  Install Pure-Ftpd
   --redis                     Install Redis
   --memcached                 Install Memcached
+  --clickhouse                Install ClickHouse
   --phpmyadmin                Install phpMyAdmin
   --ssh_port [No.]            SSH port
   --firewall                  Enable firewall
@@ -73,7 +75,7 @@ Show_Help() {
   "
 }
 ARG_NUM=$#
-TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,phpmyadmin,ssh_port:,firewall,md5sum,reboot -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,clickhouse,phpmyadmin,ssh_port:,firewall,md5sum,reboot -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -275,6 +277,14 @@ while :; do
     [ -e "${memcached_install_dir}/bin/memcached" ] && {
       echo "${CWARNING}memcached-server already installed! ${CEND}"
       unset memcached_flag
+    }
+    ;;
+  --clickhouse)
+    clickhouse_flag=y
+    shift 1
+    [ -e "${clickhouse_install_dir}/bin/clickhouse-server" ] && {
+      echo "${CWARNING}clickhouse-server already installed! ${CEND}"
+      unset clickhouse_flag
     }
     ;;
   --phpmyadmin)
@@ -903,6 +913,17 @@ if [ ${ARG_NUM} == 0 ]; then
       break
     fi
   done
+
+  # check clickhouse
+  while :; do echo
+    read -e -p "Do you want to install clickhouse-server? [y/n]: " clickhouse_flag
+    if [[ ! ${clickhouse_flag} =~ ^[y,n]$ ]]; then
+      echo "${CWARNING}input error! Please only input 'y' or 'n'${CEND}"
+    else
+      [ "${clickhouse_flag}" == 'y' -a -e "${clickhouse_install_dir}/bin/clickhouse-server" ] && { echo "${CWARNING}clickhouse-server already installed! ${CEND}"; unset clickhouse_flag; }
+      break
+    fi
+  done
 fi
 
 if [[ ${nginx_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [ "${caddy_flag}" == 'y' ] || [[ ${tomcat_option} =~ ^[1-6]$ ]]; then
@@ -1363,6 +1384,12 @@ if [ "${memcached_flag}" == 'y' ]; then
   Install_memcached_server 2>&1 | tee -a ${oneinstack_dir}/install.log
 fi
 
+# clickhouse
+if [ "${clickhouse_flag}" == 'y' ]; then
+  . include/clickhouse.sh
+  Install_ClickHouse 2>&1 | tee -a ${oneinstack_dir}/install.log
+fi
+
 # index example
 if [ -d "${wwwroot_dir}/default" ]; then
   . include/demo.sh
@@ -1416,6 +1443,9 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${phpmyadmin_flag}" == 'y' ] && echo "$(printf "%-32s" "phpMyAdmin Control Panel URL:")${CMSG}http://${IPADDR}/phpMyAdmin${CEND}"
 [ "${redis_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "redis install dir:")${CMSG}${redis_install_dir}${CEND}"
 [ "${memcached_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "memcached install dir:")${CMSG}${memcached_install_dir}${CEND}"
+[ "${clickhouse_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "ClickHouse install dir:")${CMSG}${clickhouse_install_dir}${CEND}"
+[ "${clickhouse_flag}" == 'y' ] && echo "$(printf "%-32s" "ClickHouse data dir:")${CMSG}${clickhouse_data_dir}${CEND}"
+[ "${clickhouse_flag}" == 'y' ] && echo "$(printf "%-32s" "ClickHouse client command:")${CMSG}clickhouse-client${CEND}"
 if [[ ${nginx_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [[ ${tomcat_option} =~ ^[1-6]$ ]]; then
   echo -e "\n$(printf "%-32s" "Index URL:")${CMSG}http://${IPADDR}/${CEND}"
 fi

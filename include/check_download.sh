@@ -807,5 +807,13 @@ checkDownload() {
     fi
   fi
 
+  # clickhouse
+  if [ "${clickhouse_flag}" == 'y' ]; then
+    echo "Download ClickHouse packages..."
+    src_url=https://packages.clickhouse.com/tgz/stable/clickhouse-common-static-${clickhouse_ver}-${SYS_ARCH}.tgz && Download_src
+    src_url=https://packages.clickhouse.com/tgz/stable/clickhouse-server-${clickhouse_ver}-${SYS_ARCH}.tgz && Download_src
+    src_url=https://packages.clickhouse.com/tgz/stable/clickhouse-client-${clickhouse_ver}-${SYS_ARCH}.tgz && Download_src
+  fi
+
   popd > /dev/null
 }

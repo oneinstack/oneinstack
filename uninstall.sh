@@ -47,13 +47,14 @@ Show_Help() {
   --pureftpd                    Uninstall PureFtpd
   --redis                       Uninstall Redis-server
   --memcached                   Uninstall Memcached-server
+  --clickhouse                  Uninstall ClickHouse-server
   --phpmyadmin                  Uninstall phpMyAdmin
   --nodejs                      Uninstall Nodejs (PATH: ${nodejs_install_dir})
   "
 }
 
 ARG_NUM=$#
-TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,mphp_ver:,allphp,phpcache,php_extensions:,pureftpd,redis,memcached,phpmyadmin,nodejs -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,mphp_ver:,allphp,phpcache,php_extensions:,pureftpd,redis,memcached,clickhouse,phpmyadmin,nodejs -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -78,6 +79,7 @@ while :; do
       pureftpd_flag=y
       redis_flag=y
       memcached_flag=y
+      clickhouse_flag=y
       phpmyadmin_flag=y
       shift 1
       ;;
@@ -138,6 +140,9 @@ while :; do
       ;;
     --memcached)
       memcached_flag=y; shift 1
+      ;;
+    --clickhouse)
+      clickhouse_flag=y; shift 1
       ;;
     --phpmyadmin)
       phpmyadmin_flag=y; shift 1
@@ -547,6 +552,11 @@ Uninstall_Memcached_server() {
   [ -e "${memcached_install_dir}" ] && { service memcached stop > /dev/null 2>&1; rm -rf ${memcached_install_dir} /etc/init.d/memcached /usr/bin/memcached; echo "${CMSG}Memcached uninstall completed! ${CEND}"; }
 }
 
+Print_ClickHouse() {
+  [ -e "${clickhouse_install_dir}" ] && echo ${clickhouse_install_dir}
+  [ -e "/lib/systemd/system/clickhouse-server.service" ] && echo /lib/systemd/system/clickhouse-server.service
+}
+
 Print_phpMyAdmin() {
   [ -d "${wwwroot_dir}/default/phpMyAdmin" ] && echo ${wwwroot_dir}/default/phpMyAdmin
 }
@@ -585,12 +595,13 @@ What Are You Doing?
 \t${CMSG}10${CEND}. Uninstall Memcached
 \t${CMSG}11${CEND}. Uninstall phpMyAdmin
 \t${CMSG}12${CEND}. Uninstall Nodejs (PATH: ${nodejs_install_dir})
+\t${CMSG}13${CEND}. Uninstall ClickHouse
 \t${CMSG} q${CEND}. Exit
 "
   echo
   read -e -p "Please input the correct option: " Number
   if [[ ! "${Number}" =~ ^[0-9,q]$|^1[0-3]$ ]]; then
-    echo "${CWARNING}input error! Please only input 0~12 and q${CEND}"
+    echo "${CWARNING}input error! Please only input 0~13 and q${CEND}"
   else
     case "$Number" in
     0)
@@ -603,6 +614,7 @@ What Are You Doing?
       Print_PureFtpd
       Print_Redis_server
       Print_Memcached_server
+      Print_ClickHouse
       Print_openssl
       Print_phpMyAdmin
       Print_Nodejs
@@ -616,6 +628,7 @@ What Are You Doing?
         Uninstall_PureFtpd
         Uninstall_Redis_server
         Uninstall_Memcached_server
+        . include/clickhouse.sh; Uninstall_ClickHouse
         Uninstall_openssl
         Uninstall_phpMyAdmin
         . include/nodejs.sh; Uninstall_Nodejs
@@ -686,6 +699,11 @@ What Are You Doing?
       Uninstall_status
       [ "${uninstall_flag}" == 'y' ] && { . include/nodejs.sh; Uninstall_Nodejs; } || exit
       ;;
+    13)
+      Print_ClickHouse
+      Uninstall_status
+      [ "${uninstall_flag}" == 'y' ] && { . include/clickhouse.sh; Uninstall_ClickHouse; } || exit
+      ;;
     q)
       exit
       ;;
@@ -710,6 +728,7 @@ else
   [ "${pureftpd_flag}" == 'y' ] && Print_PureFtpd
   [ "${redis_flag}" == 'y' ] && Print_Redis_server
   [ "${memcached_flag}" == 'y' ] && Print_Memcached_server
+  [ "${clickhouse_flag}" == 'y' ] && Print_ClickHouse
   [ "${phpmyadmin_flag}" == 'y' ] && Print_phpMyAdmin
   [ "${nodejs_flag}" == 'y' ] && Print_Nodejs
   [ "${all_flag}" == 'y' ] && Print_openssl
@@ -732,6 +751,7 @@ else
     [ "${pureftpd_flag}" == 'y' ] && Uninstall_PureFtpd
     [ "${redis_flag}" == 'y' ] && Uninstall_Redis_server
     [ "${memcached_flag}" == 'y' ] && Uninstall_Memcached_server
+    [ "${clickhouse_flag}" == 'y' ] && { . include/clickhouse.sh; Uninstall_ClickHouse; }
     [ "${phpmyadmin_flag}" == 'y' ] && Uninstall_phpMyAdmin
     [ "${nodejs_flag}" == 'y' ] && { . include/nodejs.sh; Uninstall_Nodejs; }
     [ "${all_flag}" == 'y' ] && Uninstall_openssl
