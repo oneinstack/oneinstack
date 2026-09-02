@@ -63,6 +63,7 @@ Show_Help() {
   --db_option [0-15]          Install DB version (15: MySQL 9.7 LTS)
   --dbinstallmethod [1-2]     DB install method, default: 1 binary install
   --dbrootpwd [password]      DB super password
+  --dbclickhousepwd [password] ClickHouse password
   --pureftpd                  Install Pure-Ftpd
   --redis                     Install Redis
   --memcached                 Install Memcached
@@ -75,7 +76,7 @@ Show_Help() {
   "
 }
 ARG_NUM=$#
-TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbinstallmethod:,pureftpd,redis,memcached,clickhouse,phpmyadmin,ssh_port:,firewall,md5sum,reboot -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbclickhousepwd:,dbinstallmethod:,pureftpd,redis,memcached,clickhouse,phpmyadmin,ssh_port:,firewall,md5sum,reboot -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -246,6 +247,10 @@ while :; do
     shift 2
     dbpostgrespwd="${dbrootpwd}"
     dbmongopwd="${dbrootpwd}"
+    ;;
+  --dbclickhousepwd)
+    dbclickhousepwd=$2
+    shift 2
     ;;
   --dbinstallmethod)
     dbinstallmethod=$2
