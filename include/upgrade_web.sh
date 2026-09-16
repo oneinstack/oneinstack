@@ -23,11 +23,15 @@ Upgrade_Nginx() {
     if [ "${NEW_nginx_ver}" != "${OLD_nginx_ver}" ]; then
       [ ! -e "nginx-${NEW_nginx_ver}.tar.gz" ] && wget --no-check-certificate -c https://nginx.org/download/nginx-${NEW_nginx_ver}.tar.gz > /dev/null 2>&1
       if [ -e "nginx-${NEW_nginx_ver}.tar.gz" ]; then
-        src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
+        nginx_target_openssl_ver=${openssl11_ver}
+        if [[ "${NEW_nginx_ver}" =~ ^1\.(2[5-9]|[3-9][0-9]) ]]; then
+          nginx_target_openssl_ver=${openssl_ver}
+        fi
+        src_url=https://www.openssl.org/source/openssl-${nginx_target_openssl_ver}.tar.gz && Download_src
         src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
         src_url=${mirror_link}/oneinstack/src/ngx_devel_kit.tar.gz && Download_src
         src_url=${mirror_link}/oneinstack/src/lua-nginx-module-${lua_nginx_module_ver}.tar.gz && Download_src
-        tar xzf openssl-${openssl11_ver}.tar.gz
+        tar xzf openssl-${nginx_target_openssl_ver}.tar.gz
         tar xzf pcre-${pcre_ver}.tar.gz
         tar xzf ngx_devel_kit.tar.gz
         tar xzf lua-nginx-module-${lua_nginx_module_ver}.tar.gz
@@ -51,7 +55,15 @@ Upgrade_Nginx() {
     ${nginx_install_dir}/sbin/nginx -V &> $$
     nginx_configure_args_tmp=`cat $$ | grep 'configure arguments:' | awk -F: '{print $2}'`
     rm -rf $$
-    nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@lua-nginx-module-\w.\w\+.\w\+ @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@lua-nginx-module @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@--with-openssl=../openssl-\w.\w.\w\+ @--with-openssl=../openssl-${openssl11_ver} @" | sed "s@--with-pcre=../pcre-\w.\w\+ @--with-pcre=../pcre-${pcre_ver} @"`
+    nginx_target_openssl_ver=${openssl11_ver}
+    if [[ "${NEW_nginx_ver}" =~ ^1\.(2[5-9]|[3-9][0-9]) ]]; then
+      nginx_target_openssl_ver=${openssl_ver}
+    fi
+    nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@lua-nginx-module-[^ ]\+ @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@lua-nginx-module @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@--with-openssl=[^ ]\+ @--with-openssl=../openssl-${nginx_target_openssl_ver} @" | sed "s@--with-pcre=[^ ]\+ @--with-pcre=../pcre-${pcre_ver} @"`
+    if [[ "${NEW_nginx_ver}" =~ ^1\.(2[5-9]|[3-9][0-9]) ]] && [ -z "`echo $nginx_configure_args | grep -- '--with-http_v3_module'`" ]; then
+      nginx_configure_args="${nginx_configure_args} --with-http_v3_module"
+    fi
+
     if [ -n "`echo $nginx_configure_args | grep lua-nginx-module`" ]; then
       ${oneinstack_dir}/upgrade.sh --oneinstack > /dev/null
       src_url=${mirror_link}/oneinstack/src/luajit2-${luajit2_ver}.tar.gz && Download_src

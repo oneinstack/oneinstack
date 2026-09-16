@@ -17,3 +17,5 @@ md5_upload/
 .DS_Store
 src/.DS_Store
 src/cacert.pem
+tools/webhook/oneinstack-webhook
+

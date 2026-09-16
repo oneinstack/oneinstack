@@ -38,14 +38,16 @@ Show_Help() {
   --postgresql                  Uninstall PostgreSQL
   --mongodb                     Uninstall MongoDB
   --php                         Uninstall PHP (PATH: ${php_install_dir})
-  --mphp_ver [53~83]            Uninstall another PHP version (PATH: ${php_install_dir}\${mphp_ver})
+  --mphp_ver [53~85]            Uninstall another PHP version (PATH: ${php_install_dir}\${mphp_ver})
   --allphp                      Uninstall all PHP
+
   --phpcache                    Uninstall PHP opcode cache
   --php_extensions [ext name]   Uninstall PHP extensions, include zendguardloader,ioncube,
                                 sourceguardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,
-                                yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug
+                                yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug,xlswriter,grpc
   --pureftpd                    Uninstall PureFtpd
   --redis                       Uninstall Redis-server
+  --valkey                      Uninstall Valkey-server
   --memcached                   Uninstall Memcached-server
   --clickhouse                  Uninstall ClickHouse-server
   --phpmyadmin                  Uninstall phpMyAdmin
@@ -54,7 +56,8 @@ Show_Help() {
 }
 
 ARG_NUM=$#
-TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,mphp_ver:,allphp,phpcache,php_extensions:,pureftpd,redis,memcached,clickhouse,phpmyadmin,nodejs -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvVq --long help,version,quiet,all,web,mysql,postgresql,mongodb,php,mphp_ver:,allphp,phpcache,php_extensions:,pureftpd,redis,valkey,memcached,clickhouse,phpmyadmin,nodejs -- "$@" 2>/dev/null`
+
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -78,6 +81,7 @@ while :; do
       nodejs_flag=y
       pureftpd_flag=y
       redis_flag=y
+      valkey_flag=y
       memcached_flag=y
       clickhouse_flag=y
       phpmyadmin_flag=y
@@ -100,7 +104,7 @@ while :; do
       ;;
     --mphp_ver)
       mphp_ver=$2; mphp_flag=y; shift 2
-      [[ ! "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-1]$ ]] && { echo "${CWARNING}mphp_ver input error! Please only input number 53~81${CEND}"; exit 1; }
+      [[ ! "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-5]$ ]] && { echo "${CWARNING}mphp_ver input error! Please only input number 53~85${CEND}"; exit 1; }
       ;;
     --allphp)
       allphp_flag=y; shift 1
@@ -128,6 +132,8 @@ while :; do
       [ -n "`echo ${php_extensions} | grep -w mongodb`" ] && pecl_mongodb=1
       [ -n "`echo ${php_extensions} | grep -w swoole`" ] && pecl_swoole=1
       [ -n "`echo ${php_extensions} | grep -w xdebug`" ] && pecl_xdebug=1
+      [ -n "`echo ${php_extensions} | grep -w xlswriter`" ] && pecl_xlswriter=1
+      [ -n "`echo ${php_extensions} | grep -w grpc`" ] && pecl_grpc=1
       ;;
     --nodejs)
       nodejs_flag=y; shift 1
@@ -138,6 +144,10 @@ while :; do
     --redis)
       redis_flag=y; shift 1
       ;;
+    --valkey)
+      valkey_flag=y; shift 1
+      ;;
+
     --memcached)
       memcached_flag=y; shift 1
       ;;
@@ -293,7 +303,7 @@ Print_ALLPHP() {
   [ -e "${php_install_dir}" ] && echo ${php_install_dir}
   [ -e "/etc/init.d/php-fpm" ] && echo /etc/init.d/php-fpm
   [ -e "/lib/systemd/system/php-fpm.service" ] && echo /lib/systemd/system/php-fpm.service
-  for php_ver in 53 54 55 56 70 71 72 73 74 80 81; do
+  for php_ver in 53 54 55 56 70 71 72 73 74 80 81 82 83 84 85; do
     [ -e "${php_install_dir}${php_ver}" ] && echo ${php_install_dir}${php_ver}
     [ -e "/etc/init.d/php${php_ver}-fpm" ] && echo /etc/init.d/php${php_ver}-fpm
     [ -e "/lib/systemd/system/php${php_ver}-fpm.service" ] && echo /lib/systemd/system/php${php_ver}-fpm.service
@@ -324,11 +334,12 @@ Uninstall_ALLPHP() {
   [ -e "${apache_install_dir}/conf/httpd.conf" ] && [ -n "`grep libphp ${apache_install_dir}/conf/httpd.conf`" ] && sed -i '/libphp/d' ${apache_install_dir}/conf/httpd.conf
   [ -e "${php_install_dir}" ] && { rm -rf ${php_install_dir}; echo "${CMSG}PHP uninstall completed! ${CEND}"; }
   sed -i "s@${php_install_dir}/bin:@@" /etc/profile
-  for php_ver in 53 54 55 56 70 71 72 73 74 80 81 82 83; do
+  for php_ver in 53 54 55 56 70 71 72 73 74 80 81 82 83 84 85; do
     [ -e "/etc/init.d/php${php_ver}-fpm" ] && { service php${php_ver}-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php${php_ver}-fpm; }
     [ -e "/lib/systemd/system/php${php_ver}-fpm.service" ] && { systemctl stop php${php_ver}-fpm > /dev/null 2>&1; systemctl disable php${php_ver}-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php${php_ver}-fpm.service; }
     [ -e "${php_install_dir}${php_ver}" ] && { rm -rf ${php_install_dir}${php_ver}; echo "${CMSG}PHP${php_ver} uninstall completed! ${CEND}"; }
   done
+
   [ -e "${imagick_install_dir}" ] && rm -rf ${imagick_install_dir}
   [ -e "${gmagick_install_dir}" ] && rm -rf ${gmagick_install_dir}
   [ -e "${curl_install_dir}" ] && rm -rf ${curl_install_dir}
@@ -461,6 +472,20 @@ Uninstall_PHPext() {
     Uninstall_pecl_xdebug
   fi
 
+  # xlswriter
+  if [ "${pecl_xlswriter}" == '1' ]; then
+    rm -f ${php_install_dir}/etc/php.d/0*xlswriter.ini
+    [ -n "${mphp_ver}" ] && rm -f ${php_install_dir}${mphp_ver}/etc/php.d/0*xlswriter.ini
+    echo "${CMSG}PHP xlswriter extension uninstall completed! ${CEND}"
+  fi
+
+  # grpc
+  if [ "${pecl_grpc}" == '1' ]; then
+    rm -f ${php_install_dir}/etc/php.d/0*grpc.ini
+    [ -n "${mphp_ver}" ] && rm -f ${php_install_dir}${mphp_ver}/etc/php.d/0*grpc.ini
+    echo "${CMSG}PHP grpc extension uninstall completed! ${CEND}"
+  fi
+
   # reload php
   [ -e "${php_install_dir}/sbin/php-fpm" ] && { [ -e "/bin/systemctl" ] && systemctl reload php-fpm || service php-fpm reload; }
   [ -n "${mphp_ver}" -a -e "${php_install_dir}${mphp_ver}/sbin/php-fpm" ] && { [ -e "/bin/systemctl" ] && systemctl reload php${mphp_ver}-fpm || service php${mphp_ver}-fpm reload; }
@@ -486,11 +511,13 @@ Menu_PHPext() {
     echo -e "\t${CMSG}13${CEND}. Uninstall mongodb"
     echo -e "\t${CMSG}14${CEND}. Uninstall swoole"
     echo -e "\t${CMSG}15${CEND}. Uninstall xdebug(PHP>=5.5)"
+    echo -e "\t${CMSG}16${CEND}. Uninstall xlswriter"
+    echo -e "\t${CMSG}17${CEND}. Uninstall grpc"
     read -e -p "Please input a number:(Default 0 press Enter) " phpext_option
     phpext_option=${phpext_option:-0}
     [ "${phpext_option}" == '0' ] && break
     array_phpext=(${phpext_option})
-    array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15)
+    array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17)
     for v in ${array_phpext[@]}
     do
       [ -z "`echo ${array_all[@]} | grep -w ${v}`" ] && phpext_flag=1
@@ -515,10 +542,13 @@ Menu_PHPext() {
       [ -n "`echo ${array_phpext[@]} | grep -w 13`" ] && pecl_mongodb=1
       [ -n "`echo ${array_phpext[@]} | grep -w 14`" ] && pecl_swoole=1
       [ -n "`echo ${array_phpext[@]} | grep -w 15`" ] && pecl_xdebug=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 16`" ] && pecl_xlswriter=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 17`" ] && pecl_grpc=1
       break
     fi
   done
 }
+
 
 Print_PureFtpd() {
   [ -e "${pureftpd_install_dir}" ] && echo ${pureftpd_install_dir}
@@ -541,6 +571,18 @@ Uninstall_Redis_server() {
   [ -e "${redis_install_dir}" ] && { service redis-server stop > /dev/null 2>&1; rm -rf ${redis_install_dir} /etc/init.d/redis-server /usr/local/bin/redis-*; echo "${CMSG}Redis uninstall completed! ${CEND}"; }
   [ -e "/lib/systemd/system/redis-server.service" ] && { systemctl disable redis-server > /dev/null 2>&1; rm -f /lib/systemd/system/redis-server.service; }
 }
+
+Print_Valkey_server() {
+  [ -e "${valkey_install_dir}" ] && echo ${valkey_install_dir}
+  [ -e "/etc/init.d/valkey-server" ] && echo /etc/init.d/valkey-server
+  [ -e "/lib/systemd/system/valkey-server.service" ] && echo /lib/systemd/system/valkey-server.service
+}
+
+Uninstall_Valkey_server() {
+  [ -e "${valkey_install_dir}" ] && { service valkey-server stop > /dev/null 2>&1; rm -rf ${valkey_install_dir} /etc/init.d/valkey-server /usr/local/bin/valkey-*; echo "${CMSG}Valkey uninstall completed! ${CEND}"; }
+  [ -e "/lib/systemd/system/valkey-server.service" ] && { systemctl disable valkey-server > /dev/null 2>&1; rm -f /lib/systemd/system/valkey-server.service; }
+}
+
 
 Print_Memcached_server() {
   [ -e "${memcached_install_dir}" ] && echo ${memcached_install_dir}
@@ -592,16 +634,17 @@ What Are You Doing?
 \t${CMSG} 7${CEND}. Uninstall PHP extensions
 \t${CMSG} 8${CEND}. Uninstall PureFtpd
 \t${CMSG} 9${CEND}. Uninstall Redis
-\t${CMSG}10${CEND}. Uninstall Memcached
-\t${CMSG}11${CEND}. Uninstall phpMyAdmin
-\t${CMSG}12${CEND}. Uninstall Nodejs (PATH: ${nodejs_install_dir})
-\t${CMSG}13${CEND}. Uninstall ClickHouse
+\t${CMSG}10${CEND}. Uninstall Valkey
+\t${CMSG}11${CEND}. Uninstall Memcached
+\t${CMSG}12${CEND}. Uninstall phpMyAdmin
+\t${CMSG}13${CEND}. Uninstall Nodejs (PATH: ${nodejs_install_dir})
+\t${CMSG}14${CEND}. Uninstall ClickHouse
 \t${CMSG} q${CEND}. Exit
 "
   echo
   read -e -p "Please input the correct option: " Number
-  if [[ ! "${Number}" =~ ^[0-9,q]$|^1[0-3]$ ]]; then
-    echo "${CWARNING}input error! Please only input 0~13 and q${CEND}"
+  if [[ ! "${Number}" =~ ^[0-9,q]$|^1[0-4]$ ]]; then
+    echo "${CWARNING}input error! Please only input 0~14 and q${CEND}"
   else
     case "$Number" in
     0)
@@ -613,6 +656,7 @@ What Are You Doing?
       Print_ALLPHP
       Print_PureFtpd
       Print_Redis_server
+      Print_Valkey_server
       Print_Memcached_server
       Print_ClickHouse
       Print_openssl
@@ -627,6 +671,7 @@ What Are You Doing?
         Uninstall_ALLPHP
         Uninstall_PureFtpd
         Uninstall_Redis_server
+        Uninstall_Valkey_server
         Uninstall_Memcached_server
         . include/clickhouse.sh; Uninstall_ClickHouse
         Uninstall_openssl
@@ -685,25 +730,31 @@ What Are You Doing?
       [ "${uninstall_flag}" == 'y' ] && Uninstall_Redis_server || exit
       ;;
     10)
+      Print_Valkey_server
+      Uninstall_status
+      [ "${uninstall_flag}" == 'y' ] && Uninstall_Valkey_server || exit
+      ;;
+    11)
       Print_Memcached_server
       Uninstall_status
       [ "${uninstall_flag}" == 'y' ] && Uninstall_Memcached_server || exit
       ;;
-    11)
+    12)
       Print_phpMyAdmin
       Uninstall_status
       [ "${uninstall_flag}" == 'y' ] && Uninstall_phpMyAdmin || exit
       ;;
-    12)
+    13)
       Print_Nodejs
       Uninstall_status
       [ "${uninstall_flag}" == 'y' ] && { . include/nodejs.sh; Uninstall_Nodejs; } || exit
       ;;
-    13)
+    14)
       Print_ClickHouse
       Uninstall_status
       [ "${uninstall_flag}" == 'y' ] && { . include/clickhouse.sh; Uninstall_ClickHouse; } || exit
       ;;
+
     q)
       exit
       ;;
@@ -727,6 +778,7 @@ else
   fi
   [ "${pureftpd_flag}" == 'y' ] && Print_PureFtpd
   [ "${redis_flag}" == 'y' ] && Print_Redis_server
+  [ "${valkey_flag}" == 'y' ] && Print_Valkey_server
   [ "${memcached_flag}" == 'y' ] && Print_Memcached_server
   [ "${clickhouse_flag}" == 'y' ] && Print_ClickHouse
   [ "${phpmyadmin_flag}" == 'y' ] && Print_phpMyAdmin
@@ -750,10 +802,12 @@ else
     fi
     [ "${pureftpd_flag}" == 'y' ] && Uninstall_PureFtpd
     [ "${redis_flag}" == 'y' ] && Uninstall_Redis_server
+    [ "${valkey_flag}" == 'y' ] && Uninstall_Valkey_server
     [ "${memcached_flag}" == 'y' ] && Uninstall_Memcached_server
     [ "${clickhouse_flag}" == 'y' ] && { . include/clickhouse.sh; Uninstall_ClickHouse; }
     [ "${phpmyadmin_flag}" == 'y' ] && Uninstall_phpMyAdmin
     [ "${nodejs_flag}" == 'y' ] && { . include/nodejs.sh; Uninstall_Nodejs; }
     [ "${all_flag}" == 'y' ] && Uninstall_openssl
   fi
+
 fi
