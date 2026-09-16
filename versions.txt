@@ -3,7 +3,7 @@
 nginx_ver=1.30.5
 caddy_ver=2.11.4
 tengine_ver=3.1.0
-openresty_ver=1.27.1.2
+openresty_ver=1.31.1.1
 openssl11_ver=1.1.1w
 openssl_ver=3.5.8
 
@@ -20,14 +20,15 @@ apr_util_ver=1.6.3
 nghttp2_ver=1.64.0
 
 # DB
-mysql97_ver=9.7.1
-mysql97_md5=18abe52f40af534e611ce02ee8ecaa8d
+mysql97_ver=9.7.2
+mysql97_md5=
 mysql84_ver=8.4.0
 mysql80_ver=8.0.39
 mysql57_ver=5.7.44
 mysql56_ver=5.6.51
 mysql55_ver=5.5.62
 
+mariadb130_ver=13.0.2
 mariadb1011_ver=10.11.19
 mariadb105_ver=10.5.23
 mariadb104_ver=10.4.32
@@ -38,7 +39,7 @@ percona57_ver=5.7.42-46
 percona56_ver=5.6.51-91.0
 percona55_ver=5.5.62-38.14
 
-pgsql_ver=18.1
+pgsql_ver=18.6
 
 mongodb_ver=8.0.17
 mongosh_ver=2.3.1
@@ -60,7 +61,7 @@ php81_ver=8.1.34
 php82_ver=8.2.33
 php83_ver=8.3.33
 php84_ver=8.4.25
-php85_ver=8.5.1
+php85_ver=8.5.10
 
 # Nodejs
 nodejs_ver=22.12.0

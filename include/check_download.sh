@@ -129,11 +129,11 @@ checkDownload() {
         echo "Download MySQL 9.7 LTS binary package..."
         src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME} && Download_src
 
-        if [ "$(md5sum "${FILE_NAME}" | awk '{print $1}')" != "${mysql97_md5}" ]; then
+        if [ -n "${mysql97_md5}" ] && [ "$(md5sum "${FILE_NAME}" | awk '{print $1}')" != "${mysql97_md5}" ]; then
           rm -f "${FILE_NAME}"
           wget --limit-rate=100M --tries=3 -c "${DOWN_ADDR_MYSQL}/${FILE_NAME}"
         fi
-        if [ "$(md5sum "${FILE_NAME}" | awk '{print $1}')" != "${mysql97_md5}" ]; then
+        if [ -n "${mysql97_md5}" ] && [ "$(md5sum "${FILE_NAME}" | awk '{print $1}')" != "${mysql97_md5}" ]; then
           echo "${CFAILURE}${FILE_NAME} checksum verification failed.${CEND}"
           return 1
         fi
