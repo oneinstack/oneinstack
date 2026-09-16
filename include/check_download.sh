@@ -124,16 +124,20 @@ checkDownload() {
 
     case "${db_option}" in
       15)
-        DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-9.7
+        DOWN_ADDR_MYSQL=${mirror_link}/oneinstack/src
+        DOWN_ADDR_MYSQL_BK=https://cdn.mysql.com/Downloads/MySQL-9.7
         FILE_NAME=mysql-${mysql97_ver}-linux-glibc2.28-x86_64.tar.xz
         echo "Download MySQL 9.7 LTS binary package..."
         src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME} && Download_src
+        src_url=${DOWN_ADDR_MYSQL}/${FILE_NAME}.md5 && Download_src
 
-        if [ -n "${mysql97_md5}" ] && [ "$(md5sum "${FILE_NAME}" | awk '{print $1}')" != "${mysql97_md5}" ]; then
+        MYSQL_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5 2>/dev/null)
+        [ -z "${MYSQL_TAR_MD5}" ] && MYSQL_TAR_MD5="${mysql97_md5}"
+        if [ -n "${MYSQL_TAR_MD5}" ] && [ "$(md5sum "${FILE_NAME}" | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; then
           rm -f "${FILE_NAME}"
-          wget --limit-rate=100M --tries=3 -c "${DOWN_ADDR_MYSQL}/${FILE_NAME}"
+          wget --limit-rate=100M --tries=3 -c "${DOWN_ADDR_MYSQL_BK}/${FILE_NAME}"
         fi
-        if [ -n "${mysql97_md5}" ] && [ "$(md5sum "${FILE_NAME}" | awk '{print $1}')" != "${mysql97_md5}" ]; then
+        if [ -n "${MYSQL_TAR_MD5}" ] && [ "$(md5sum "${FILE_NAME}" | awk '{print $1}')" != "${MYSQL_TAR_MD5}" ]; then
           echo "${CFAILURE}${FILE_NAME} checksum verification failed.${CEND}"
           return 1
         fi
@@ -312,8 +316,11 @@ checkDownload() {
           kill -9 $$; exit 1;
         fi
         ;;
-      [5-8])
+      [5-8]|16)
 	case "${db_option}" in
+          16)
+            mariadb_ver=${mariadb130_ver}
+	    ;;
           5)
             mariadb_ver=${mariadb1011_ver}
 	    ;;
@@ -336,17 +343,8 @@ checkDownload() {
 	  FILE_TYPE=source
         fi
 
-        if [ "${OUTIP_STATE}"x == "China"x ]; then
-          DOWN_ADDR_MARIADB=${mirror_link}/oneinstack/src/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
-        else
-          DOWN_ADDR_MARIADB=${mirror_link}/oneinstack/src/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
-          DOWN_ADDR_MARIADB_BK=${mirror_link}/oneinstack/src/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
-        fi
-
-        if [ "${db_option}" == '8' ]; then
-          DOWN_ADDR_MARIADB=https://archive.mariadb.org/mariadb-${mariadb_ver}/${FILE_TYPE}
-          DOWN_ADDR_MARIADB_BK=${DOWN_ADDR_MARIADB}
-        fi
+        DOWN_ADDR_MARIADB=${mirror_link}/oneinstack/src/mariadb/mariadb-${mariadb_ver}/${FILE_TYPE}
+        DOWN_ADDR_MARIADB_BK=https://archive.mariadb.org/mariadb-${mariadb_ver}/${FILE_TYPE}
 
         echo "Download MariaDB ${FILE_NAME} package..."
         src_url=${DOWN_ADDR_MARIADB}/${FILE_NAME} && Download_src
@@ -496,12 +494,11 @@ checkDownload() {
         ;;
       13)
         FILE_NAME=postgresql-${pgsql_ver}.tar.gz
+        DOWN_ADDR_PGSQL=${mirror_link}/oneinstack/src
         if [ "${OUTIP_STATE}"x == "China"x ]; then
-          DOWN_ADDR_PGSQL=https://mirrors.tuna.tsinghua.edu.cn/postgresql/source/v${pgsql_ver}
-          DOWN_ADDR_PGSQL_BK=https://mirrors.ustc.edu.cn/postgresql/source/v${pgsql_ver}
+          DOWN_ADDR_PGSQL_BK=https://mirrors.tuna.tsinghua.edu.cn/postgresql/source/v${pgsql_ver}
         else
-          DOWN_ADDR_PGSQL=https://ftp.postgresql.org/pub/source/v${pgsql_ver}
-          DOWN_ADDR_PGSQL_BK=https://ftp.heanet.ie/mirrors/postgresql/source/v${pgsql_ver}
+          DOWN_ADDR_PGSQL_BK=https://ftp.postgresql.org/pub/source/v${pgsql_ver}
         fi
         
         src_url=${DOWN_ADDR_PGSQL}/${FILE_NAME} && Download_src no_kill
@@ -556,7 +553,7 @@ checkDownload() {
   if [[ "${php_option}" =~ ^[1-9]$|^1[0-5]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-5]$ ]]; then
     echo "PHP common..."
     src_url=${mirror_link}/oneinstack/src/libiconv-${libiconv_ver}.tar.gz && Download_src
-    src_url=https://curl.haxx.se/download/curl-${curl_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/curl-${curl_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/mhash-${mhash_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libmcrypt-${libmcrypt_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/mcrypt-${mcrypt_ver}.tar.gz && Download_src
@@ -725,7 +722,7 @@ checkDownload() {
   # redis-server
   if [ "${redis_flag}" == 'y' ]; then
     echo "Download redis-server..."
-    src_url=https://download.redis.io/releases/redis-${redis_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/redis-${redis_ver}.tar.gz && Download_src
   fi
 
   # pecl_redis
