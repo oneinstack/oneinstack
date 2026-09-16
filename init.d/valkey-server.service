@@ -1,0 +1,23 @@
+[Unit]
+Description=Valkey In-Memory Data Store
+After=network.target
+
+[Service]
+Type=forking
+PIDFile=/var/run/valkey/valkey.pid
+User=valkey
+Group=valkey
+
+Environment=statedir=/var/run/valkey
+PermissionsStartOnly=true
+ExecStartPre=/bin/mkdir -p ${statedir}
+ExecStartPre=/bin/chown -R valkey:valkey ${statedir}
+ExecStart=/usr/local/valkey/bin/valkey-server /usr/local/valkey/etc/valkey.conf
+ExecStop=/bin/kill -s TERM $MAINPID
+Restart=always
+LimitNOFILE=1000000
+LimitNPROC=1000000
+LimitCORE=1000000
+
+[Install]
+WantedBy=multi-user.target

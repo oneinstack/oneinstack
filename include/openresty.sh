@@ -17,14 +17,14 @@ Install_OpenResty() {
 
   tar xzf pcre-${pcre_ver}.tar.gz
   tar xzf openresty-${openresty_ver}.tar.gz
-  tar xzf openssl-${openssl11_ver}.tar.gz
+  tar xzf openssl-${openssl_ver}.tar.gz
   pushd openresty-${openresty_ver} > /dev/null
 
   # close debug
   sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' bundle/nginx-${openresty_ver%.*}/auto/cc/gcc # close debug
 
   [ ! -d "${openresty_install_dir}" ] && mkdir -p ${openresty_install_dir}
-  ./configure --prefix=${openresty_install_dir} --user=${run_user} --group=${run_group} --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=../openssl-${openssl11_ver} --with-pcre=../pcre-${pcre_ver} --with-pcre-jit --with-ld-opt='-ljemalloc -Wl,-u,pcre_version' ${nginx_modules_options}
+  ./configure --prefix=${openresty_install_dir} --user=${run_user} --group=${run_group} --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=../openssl-${openssl_ver} --with-pcre=../pcre-${pcre_ver} --with-pcre-jit --with-ld-opt='-ljemalloc -Wl,-u,pcre_version' ${nginx_modules_options}
   make -j ${THREAD} && make install
   if [ -e "${openresty_install_dir}/nginx/conf/nginx.conf" ]; then
     popd > /dev/null

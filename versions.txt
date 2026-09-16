@@ -97,6 +97,8 @@ swoole_ver=6.1.6
 swoole_oldver=5.1.5
 xdebug_ver=3.5.0
 xdebug_oldver=3.1.6
+xlswriter_ver=1.5.8
+grpc_ver=1.70.0
 
 # Ftp
 pureftpd_ver=1.0.54
@@ -105,6 +107,9 @@ pureftpd_ver=1.0.54
 redis_ver=8.10.1
 redis_oldver=7.4.2
 pecl_redis_ver=6.3.0
+
+# Valkey
+valkey_ver=8.0.2
 
 # Memcached
 memcached_ver=1.6.40

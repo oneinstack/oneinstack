@@ -33,10 +33,10 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/get_char.sh
 
 . ./include/composer.sh
-
 . ./include/fail2ban.sh
-
 . ./include/ngx_lua_waf.sh
+. ./include/pecl_xlswriter.sh
+. ./include/pecl_grpc.sh
 
 # get the out ip country
 OUTIP_STATE=$(./include/ois.${ARCH} ip_state)
@@ -51,11 +51,13 @@ Show_Help() {
   --composer                  Composer
   --fail2ban                  Fail2ban
   --ngx_lua_waf               Ngx_lua_waf
+  --xlswriter                 PHP xlswriter
+  --grpc                      PHP gRPC
   "
 }
 
 ARG_NUM=$#
-TEMP=`getopt -o hiu --long help,install,uninstall,composer,fail2ban,ngx_lua_waf -- "$@" 2>/dev/null`
+TEMP=`getopt -o hiu --long help,install,uninstall,composer,fail2ban,ngx_lua_waf,xlswriter,grpc -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -78,6 +80,12 @@ while :; do
       ;;
     --ngx_lua_waf)
       ngx_lua_waf_flag=y; shift 1
+      ;;
+    --xlswriter)
+      xlswriter_flag=y; shift 1
+      ;;
+    --grpc)
+      grpc_flag=y; shift 1
       ;;
     --)
       shift
@@ -113,11 +121,13 @@ What Are You Doing?
 \t${CMSG}1${CEND}. Install/Uninstall PHP Composer
 \t${CMSG}2${CEND}. Install/Uninstall fail2ban
 \t${CMSG}3${CEND}. Install/Uninstall ngx_lua_waf
+\t${CMSG}4${CEND}. Install/Uninstall PHP xlswriter
+\t${CMSG}5${CEND}. Install/Uninstall PHP gRPC
 \t${CMSG}q${CEND}. Exit
 "
     read -e -p "Please input the correct option: " Number
-    if [[ ! "${Number}" =~ ^[1-3,q]$ ]]; then
-      echo "${CFAILURE}input error! Please only input 1~3 and q${CEND}"
+    if [[ ! "${Number}" =~ ^[1-5,q]$ ]]; then
+      echo "${CFAILURE}input error! Please only input 1~5 and q${CEND}"
     else
       case "${Number}" in
         1)
@@ -146,6 +156,22 @@ What Are You Doing?
             enable_lua_waf
           elif [ "${uninstall_flag}" = 'y' ]; then
             disable_lua_waf
+          fi
+          ;;
+        4)
+          ACTION_FUN
+          if [ "${install_flag}" = 'y' ]; then
+            Install_pecl_xlswriter
+          elif [ "${uninstall_flag}" = 'y' ]; then
+            Uninstall_pecl_xlswriter
+          fi
+          ;;
+        5)
+          ACTION_FUN
+          if [ "${install_flag}" = 'y' ]; then
+            Install_pecl_grpc
+          elif [ "${uninstall_flag}" = 'y' ]; then
+            Uninstall_pecl_grpc
           fi
           ;;
         q)
@@ -180,6 +206,20 @@ else
       enable_lua_waf
     elif [ "${uninstall_flag}" = 'y' ]; then
       disable_lua_waf
+    fi
+  fi
+  if [ "${xlswriter_flag}" == 'y' ]; then
+    if [ "${install_flag}" = 'y' ]; then
+      Install_pecl_xlswriter
+    elif [ "${uninstall_flag}" = 'y' ]; then
+      Uninstall_pecl_xlswriter
+    fi
+  fi
+  if [ "${grpc_flag}" == 'y' ]; then
+    if [ "${install_flag}" = 'y' ]; then
+      Install_pecl_grpc
+    elif [ "${uninstall_flag}" = 'y' ]; then
+      Uninstall_pecl_grpc
     fi
   fi
 fi

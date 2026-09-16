@@ -205,29 +205,88 @@ If you enter '.', the field will be left blank.
   [ -e ~/.acme.sh/account.conf ] && sed -i '/^CERT_HOME=/d' ~/.acme.sh/account.conf
     if [ "${moredomain}" == "*.${domain}" -o "${dnsapi_flag}" == 'y' ]; then
       while :; do echo
-        echo 'Please select DNS provider:'
-        echo "${CMSG}dp${CEND},${CMSG}cx${CEND},${CMSG}ali${CEND},${CMSG}cf${CEND},${CMSG}aws${CEND},${CMSG}linode${CEND},${CMSG}he${CEND},${CMSG}namesilo${CEND},${CMSG}dgon${CEND},${CMSG}freedns${CEND},${CMSG}gd${CEND},${CMSG}namecom${CEND} and so on."
-        echo "${CMSG}More: https://oneinstack.com/faq/letsencrypt${CEND}"
-        read -e -p "Please enter your DNS provider: " DNS_PRO
-        if [ -e ~/.acme.sh/dnsapi/dns_${DNS_PRO}.sh ]; then
-          break
-        else
-          echo "${CWARNING}You DNS api mode is not supported${CEND}"
-        fi
+        echo "Please select your DNS Provider for DNS-01 API verification (Wildcard SSL):"
+        echo -e "\t${CMSG}1${CEND}. Cloudflare (API Token or Global Key)"
+        echo -e "\t${CMSG}2${CEND}. 阿里云 DNS / Alibaba Cloud DNS (Ali_Key & Ali_Secret)"
+        echo -e "\t${CMSG}3${CEND}. 腾讯云 / DNSPod (DP_Id & DP_Key)"
+        echo -e "\t${CMSG}4${CEND}. Other DNS provider (Manual provider name & parameters)"
+        read -e -p "Please enter your choice [1-4]: " DNS_CHOICE
+        case "${DNS_CHOICE}" in
+          1)
+            DNS_PRO="cf"
+            echo
+            echo "Cloudflare authentication method:"
+            echo -e "\t${CMSG}1${CEND}. API Token (Recommended with Zone:DNS:Edit permission)"
+            echo -e "\t${CMSG}2${CEND}. Global API Key + Account Email"
+            read -e -p "Please select [1-2] (default 1): " CF_AUTH_TYPE
+            CF_AUTH_TYPE=${CF_AUTH_TYPE:-1}
+            if [ "${CF_AUTH_TYPE}" == "2" ]; then
+              read -e -p "Please enter your Cloudflare Global API Key: " CF_Key
+              read -e -p "Please enter your Cloudflare Email: " CF_Email
+              export CF_Key="${CF_Key}"
+              export CF_Email="${CF_Email}"
+              [ -e ~/.acme.sh/account.conf ] && sed -i '/^SAVED_CF_Key=/d;/^SAVED_CF_Email=/d' ~/.acme.sh/account.conf
+              echo "SAVED_CF_Key='${CF_Key}'" >> ~/.acme.sh/account.conf
+              echo "SAVED_CF_Email='${CF_Email}'" >> ~/.acme.sh/account.conf
+            else
+              read -e -p "Please enter your Cloudflare API Token: " CF_Token
+              export CF_Token="${CF_Token}"
+              [ -e ~/.acme.sh/account.conf ] && sed -i '/^SAVED_CF_Token=/d' ~/.acme.sh/account.conf
+              echo "SAVED_CF_Token='${CF_Token}'" >> ~/.acme.sh/account.conf
+            fi
+            break
+            ;;
+          2)
+            DNS_PRO="ali"
+            echo
+            read -e -p "Please enter your Alibaba Cloud AccessKey ID (Ali_Key): " Ali_Key
+            read -e -p "Please enter your Alibaba Cloud AccessKey Secret (Ali_Secret): " Ali_Secret
+            export Ali_Key="${Ali_Key}"
+            export Ali_Secret="${Ali_Secret}"
+            [ -e ~/.acme.sh/account.conf ] && sed -i '/^SAVED_Ali_Key=/d;/^SAVED_Ali_Secret=/d' ~/.acme.sh/account.conf
+            echo "SAVED_Ali_Key='${Ali_Key}'" >> ~/.acme.sh/account.conf
+            echo "SAVED_Ali_Secret='${Ali_Secret}'" >> ~/.acme.sh/account.conf
+            break
+            ;;
+          3)
+            DNS_PRO="dp"
+            echo
+            read -e -p "Please enter your DNSPod / Tencent Cloud API ID (DP_Id): " DP_Id
+            read -e -p "Please enter your DNSPod / Tencent Cloud API Token / Key (DP_Key): " DP_Key
+            export DP_Id="${DP_Id}"
+            export DP_Key="${DP_Key}"
+            [ -e ~/.acme.sh/account.conf ] && sed -i '/^SAVED_DP_Id=/d;/^SAVED_DP_Key=/d' ~/.acme.sh/account.conf
+            echo "SAVED_DP_Id='${DP_Id}'" >> ~/.acme.sh/account.conf
+            echo "SAVED_DP_Key='${DP_Key}'" >> ~/.acme.sh/account.conf
+            break
+            ;;
+          4)
+            echo
+            echo 'Available DNS providers:'
+            echo "${CMSG}dp,cx,ali,cf,aws,linode,he,namesilo,dgon,freedns,gd,namecom${CEND} and so on."
+            echo "${CMSG}More: https://oneinstack.com/faq/letsencrypt${CEND}"
+            read -e -p "Please enter your DNS provider: " DNS_PRO
+            if [ ! -e ~/.acme.sh/dnsapi/dns_${DNS_PRO}.sh ]; then
+              echo "${CWARNING}Your DNS api mode is not supported${CEND}"
+              continue
+            fi
+            echo "Syntax: export Key1=Value1 ; export Key2=Value2"
+            read -e -p "Please enter your dnsapi parameters: " DNS_PAR
+            eval ${DNS_PAR}
+            break
+            ;;
+          *)
+            echo "${CWARNING}input error! Please input number 1~4${CEND}"
+            ;;
+        esac
       done
-      while :; do echo
-        echo "Syntax: export Key1=Value1 ; export Key2=Value1"
-        read -e -p "Please enter your dnsapi parameters: " DNS_PAR
-        echo
-        eval ${DNS_PAR}
-        if [ $? == 0 ]; then
-          break
-        else
-          echo "${CWARNING}Syntax error! PS: export Ali_Key=LTq ; export Ali_Secret=0q5E${CEND}"
-        fi
-      done
+
       [ "${moredomainame_flag}" == 'y' ] && moredomainame_D="$(for D in ${moredomainame}; do echo -d ${D}; done)"
-      ~/.acme.sh/acme.sh --force --issue -k ${CERT_KEYLENGTH} --dns dns_${DNS_PRO} -d ${domain} ${moredomainame_D}
+      if [ "${moredomain}" == "*.${domain}" ]; then
+        ~/.acme.sh/acme.sh --force --issue -k ${CERT_KEYLENGTH} --dns dns_${DNS_PRO} -d ${domain} -d "*.${domain}" ${moredomainame_D}
+      else
+        ~/.acme.sh/acme.sh --force --issue -k ${CERT_KEYLENGTH} --dns dns_${DNS_PRO} -d ${domain} ${moredomainame_D}
+      fi
     else
       if [ "${nginx_ssl_flag}" == 'y' ]; then
         [ ! -d ${web_install_dir}/conf/vhost ] && mkdir ${web_install_dir}/conf/vhost
@@ -541,11 +600,22 @@ What Are You Doing?
       LISTENOPT="443 ssl spdy"
       HTTP2OPT=""
     fi
+
+    if [[ "$(${web_install_dir}/sbin/nginx -V 2>&1 | grep -Eo 'with-http_v3_module')" = 'with-http_v3_module' ]]; then
+      HTTP3OPT_V4="listen 443 quic;\n  "
+      HTTP3OPT_V6="listen [::]:443 quic;\n  "
+      HTTP3_HEADER="add_header Alt-Svc 'h3=\":443\"; ma=86400';\n  "
+    else
+      HTTP3OPT_V4=""
+      HTTP3OPT_V6=""
+      HTTP3_HEADER=""
+    fi
+
     Create_SSL
     if [ -n "`ifconfig | grep inet6`" ]; then
-      Nginx_conf=$(echo -e "listen 80;\n  listen [::]:80;\n  listen ${LISTENOPT};\n  listen [::]:${LISTENOPT};\n  ${HTTP2OPT}\n  ssl_certificate ${PATH_SSL}/${domain}.crt;\n  ssl_certificate_key ${PATH_SSL}/${domain}.key;\n  ssl_protocols TLSv1.2 TLSv1.3;\n  ssl_ecdh_curve X25519:prime256v1:secp384r1:secp521r1;\n  ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256;\n  ssl_conf_command Ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256;\n  ssl_conf_command Options PrioritizeChaCha;\n  ssl_prefer_server_ciphers on;\n  ssl_session_timeout 10m;\n  ssl_session_cache shared:SSL:10m;\n  ssl_buffer_size 2k;\n  add_header Strict-Transport-Security max-age=15768000;\n  ssl_stapling on;\n  ssl_stapling_verify on;\n")
+      Nginx_conf=$(echo -e "listen 80;\n  listen [::]:80;\n  listen ${LISTENOPT};\n  listen [::]:${LISTENOPT};\n  ${HTTP3OPT_V4}${HTTP3OPT_V6}${HTTP2OPT}\n  ssl_certificate ${PATH_SSL}/${domain}.crt;\n  ssl_certificate_key ${PATH_SSL}/${domain}.key;\n  ssl_protocols TLSv1.2 TLSv1.3;\n  ssl_ecdh_curve X25519:prime256v1:secp384r1:secp521r1;\n  ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256;\n  ssl_conf_command Ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256;\n  ssl_conf_command Options PrioritizeChaCha;\n  ssl_prefer_server_ciphers on;\n  ssl_session_timeout 10m;\n  ssl_session_cache shared:SSL:10m;\n  ssl_buffer_size 2k;\n  add_header Strict-Transport-Security max-age=15768000;\n  ${HTTP3_HEADER}ssl_stapling on;\n  ssl_stapling_verify on;\n")
     else
-      Nginx_conf=$(echo -e "listen 80;\n  listen ${LISTENOPT};\n  ${HTTP2OPT}\n  ssl_certificate ${PATH_SSL}/${domain}.crt;\n  ssl_certificate_key ${PATH_SSL}/${domain}.key;\n  ssl_protocols TLSv1.2 TLSv1.3;\n  ssl_ecdh_curve X25519:prime256v1:secp384r1:secp521r1;\n  ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256;\n  ssl_conf_command Ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256;\n  ssl_conf_command Options PrioritizeChaCha;\n  ssl_prefer_server_ciphers on;\n  ssl_session_timeout 10m;\n  ssl_session_cache shared:SSL:10m;\n  ssl_buffer_size 2k;\n  add_header Strict-Transport-Security max-age=15768000;\n  ssl_stapling on;\n  ssl_stapling_verify on;\n")
+      Nginx_conf=$(echo -e "listen 80;\n  listen ${LISTENOPT};\n  ${HTTP3OPT_V4}${HTTP2OPT}\n  ssl_certificate ${PATH_SSL}/${domain}.crt;\n  ssl_certificate_key ${PATH_SSL}/${domain}.key;\n  ssl_protocols TLSv1.2 TLSv1.3;\n  ssl_ecdh_curve X25519:prime256v1:secp384r1:secp521r1;\n  ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256;\n  ssl_conf_command Ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256;\n  ssl_conf_command Options PrioritizeChaCha;\n  ssl_prefer_server_ciphers on;\n  ssl_session_timeout 10m;\n  ssl_session_cache shared:SSL:10m;\n  ssl_buffer_size 2k;\n  add_header Strict-Transport-Security max-age=15768000;\n  ${HTTP3_HEADER}ssl_stapling on;\n  ssl_stapling_verify on;\n")
     fi
     Apache_SSL=$(echo -e "SSLEngine on\n  SSLCertificateFile \"${PATH_SSL}/${domain}.crt\"\n  SSLCertificateKeyFile \"${PATH_SSL}/${domain}.key\"")
   elif [ "${apache_ssl_flag}" == 'y' ]; then

@@ -23,10 +23,10 @@ checkDownload() {
     src_url=https://curl.se/ca/cacert.pem && Download_src
   fi
 
-  # openssl1.1
+  # openssl
   if [[ ${nginx_option} =~ ^[1-3]$ ]]; then
-      echo "Download openSSL1.1..."
-      src_url=${mirror_link}/oneinstack/src/openssl-${openssl11_ver}.tar.gz && Download_src
+      echo "Download openSSL..."
+      src_url=${mirror_link}/oneinstack/src/openssl-${openssl_ver}.tar.gz && Download_src
   fi
 
   # jemalloc
@@ -725,6 +725,12 @@ checkDownload() {
     src_url=${mirror_link}/oneinstack/src/redis-${redis_ver}.tar.gz && Download_src
   fi
 
+  # valkey-server
+  if [ "${valkey_flag}" == 'y' ]; then
+    echo "Download valkey-server..."
+    src_url=${mirror_link}/oneinstack/src/valkey-${valkey_ver}.tar.gz && Download_src
+  fi
+
   # pecl_redis
   if [ "${pecl_redis}" == '1' ]; then
     if [[ "${php_option}" =~ ^[1-4]$ ]]; then
@@ -779,6 +785,18 @@ checkDownload() {
     src_url=https://pecl.php.net/get/mongo-${pecl_mongo_ver}.tgz && Download_src
     echo "Download pecl mongodb for php..."
     src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_ver}.tgz && Download_src
+  fi
+
+  # pecl_xlswriter
+  if [ "${pecl_xlswriter}" == '1' ]; then
+    echo "Download pecl xlswriter for php..."
+    src_url=https://pecl.php.net/get/xlswriter-${xlswriter_ver}.tgz && Download_src
+  fi
+
+  # pecl_grpc
+  if [ "${pecl_grpc}" == '1' ]; then
+    echo "Download pecl grpc for php..."
+    src_url=https://pecl.php.net/get/grpc-${grpc_ver}.tgz && Download_src
   fi
 
   # nodejs
