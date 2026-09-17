@@ -37,9 +37,10 @@ xcachepwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbinstallmethod=1
 
 version() {
-  echo "version: 2.7"
-  echo "updated date: 2026-01-07"
+  echo "version: 2.8"
+  echo "updated date: 2026-09-17"
 }
+
 
 Show_Help() {
   version
