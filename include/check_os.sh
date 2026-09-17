@@ -33,7 +33,8 @@ if [[ "${Platform}" =~ ^centos$|^rhel$|^almalinux$|^rocky$|^fedora$|^amzn$|^ol$|
     Fedora_ver=${VERSION_MAIN_ID}
     [ ${VERSION_MAIN_ID} -ge 19 ] && [ ${VERSION_MAIN_ID} -lt 28 ] && RHEL_ver=7
     [ ${VERSION_MAIN_ID} -ge 28 ] && [ ${VERSION_MAIN_ID} -lt 34 ] && RHEL_ver=8
-    [ ${VERSION_MAIN_ID} -ge 34 ] && RHEL_ver=9
+    [ ${VERSION_MAIN_ID} -ge 34 ] && [ ${VERSION_MAIN_ID} -lt 40 ] && RHEL_ver=9
+    [ ${VERSION_MAIN_ID} -ge 40 ] && RHEL_ver=10
   elif [[ "${Platform}" =~ ^amzn$|^alinux$|^tencentos$|^euleros$ ]]; then
     [[ "${VERSION_MAIN_ID}" =~ ^2$ ]] && RHEL_ver=7
     [[ "${VERSION_MAIN_ID}" =~ ^3$ ]] && RHEL_ver=8

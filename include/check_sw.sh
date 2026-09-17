@@ -76,16 +76,17 @@ fixDebianCompatLibs() {
 
 installDepsRHEL() {
   [ -e '/etc/yum.conf' ] && sed -i 's@^exclude@#exclude@' /etc/yum.conf
-  if [ "${RHEL_ver}" == '9' ]; then
+  if [ "${RHEL_ver}" -ge 9 >/dev/null 2>&1 ] || [ "${RHEL_ver}" == '9' ] || [ "${RHEL_ver}" == '10' ]; then
     if [[ "${Platform}" =~ "rhel" ]]; then
-      subscription-manager repos --enable codeready-builder-for-rhel-9-${ARCH}-rpms
+      subscription-manager repos --enable codeready-builder-for-rhel-${RHEL_ver}-${ARCH}-rpms
       dnf -y install chrony oniguruma-devel rpcgen
     elif [[ "${Platform}" =~ "ol" ]]; then
-      dnf config-manager --set-enabled ol9_codeready_builder
+      dnf config-manager --set-enabled ol${RHEL_ver}_codeready_builder
       dnf -y install chrony oniguruma-devel rpcgen
     else
       dnf -y --enablerepo=crb install chrony oniguruma-devel rpcgen
     fi
+    [ -z "`grep -w epel /etc/yum.repos.d/*.repo 2>/dev/null`" ] && dnf -y install epel-release
     systemctl enable chronyd
   elif [ "${RHEL_ver}" == '8' ]; then
     if [[ "${Platform}" =~ "rhel" ]]; then
@@ -95,27 +96,27 @@ installDepsRHEL() {
       dnf config-manager --set-enabled ol8_codeready_builder
       dnf -y install chrony oniguruma-devel rpcgen
     else
-      [ -z "`grep -w epel /etc/yum.repos.d/*.repo`" ] && yum -y install epel-release
-      if grep -qw "^\[PowerTools\]" /etc/yum.repos.d/*.repo; then
+      [ -z "`grep -w epel /etc/yum.repos.d/*.repo 2>/dev/null`" ] && yum -y install epel-release
+      if grep -qw "^\[PowerTools\]" /etc/yum.repos.d/*.repo 2>/dev/null; then
         dnf -y --enablerepo=PowerTools install chrony oniguruma-devel rpcgen
-      elif grep -qw "^\[powertools\]" /etc/yum.repos.d/*.repo; then
+      elif grep -qw "^\[powertools\]" /etc/yum.repos.d/*.repo 2>/dev/null; then
         dnf -y --enablerepo=powertools install chrony oniguruma-devel rpcgen
       fi
     fi
     systemctl enable chronyd
   elif [ "${RHEL_ver}" == '7' ]; then
-    [ -z "`grep -w epel /etc/yum.repos.d/*.repo`" ] && yum -y install epel-release
+    [ -z "`grep -w epel /etc/yum.repos.d/*.repo 2>/dev/null`" ] && yum -y install epel-release
     yum -y groupremove "Basic Web Server" "MySQL Database server" "MySQL Database client"
   fi
 
-  if [ "${RHEL_ver}" == '9' ]; then
+  if [ "${RHEL_ver}" -ge 9 >/dev/null 2>&1 ] || [ "${RHEL_ver}" == '9' ] || [ "${RHEL_ver}" == '10' ]; then
     [ ! -e "/usr/lib64/libtinfo.so.5" ] && ln -s /usr/lib64/libtinfo.so.6 /usr/lib64/libtinfo.so.5
     [ ! -e "/usr/lib64/libncurses.so.5" ] && ln -s /usr/lib64/libncurses.so.6 /usr/lib64/libncurses.so.5
   fi
 
   echo "${CMSG}Installing dependencies packages...${CEND}"
   # Install needed packages
-  pkgList="perl-FindBin deltarpm libsodium-dev drpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-dev libjpeg-devel libbz2-dev libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel libzip libzip-devel glibc glibc-devel krb5-devel libcurl4-openssl-dev libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel ncurses-compat-libs libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel net-tools libxslt-devel libssl-dev libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre-devel libmcrypt libsqlite3-dev libmcrypt-devel mhash mhash-devel mcrypt zip unzip chrony oniguruma-devel rpcgen sqlite-devel sysstat patch bc expect expat-devel perl-devel oniguruma oniguruma-devel libtirpc-devel nss libnsl rsync rsyslog git lsof lrzsz psmisc wget which libatomic tmux chkconfig firewalld"
+  pkgList="perl perl-core perl-IPC-Cmd perl-FindBin deltarpm libsodium libsodium-devel drpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-dev libjpeg-devel libbz2-dev libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel libzip libzip-devel glibc glibc-devel krb5-devel libcurl4-openssl-dev libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel ncurses-compat-libs libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel net-tools libxslt-devel libssl-dev libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre-devel libmcrypt libsqlite3-dev libmcrypt-devel mhash mhash-devel mcrypt zip unzip chrony oniguruma-devel rpcgen sqlite-devel sysstat patch bc expect expat-devel perl-devel oniguruma oniguruma-devel libtirpc-devel nss libnsl rsync rsyslog git lsof lrzsz psmisc wget which libatomic libquadmath-devel tmux chkconfig firewalld"
   for Package in ${pkgList}; do
     yum -y install ${Package}
   done
