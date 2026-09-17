@@ -1,0 +1,156 @@
+name: Bug 报告 / 安装问题
+description: 报告 Bug 或安装失败问题
+title: "[Bug] "
+labels: ["bug"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        感谢您提交 Bug 报告！请尽可能详细地填写以下信息，以便我们快速定位和解决问题。
+
+  - type: input
+    id: summary
+    attributes:
+      label: 问题摘要
+      description: 用一句话简要描述问题
+      placeholder: 例如：安装 PHP 8.4 时编译失败
+    validations:
+      required: true
+
+  - type: dropdown
+    id: os
+    attributes:
+      label: 操作系统
+      description: 选择您的操作系统发行版
+      options:
+        - CentOS 7
+        - CentOS 8
+        - CentOS 9
+        - RHEL 7
+        - RHEL 8
+        - RHEL 9
+        - AlmaLinux 8
+        - AlmaLinux 9
+        - Rocky Linux 8
+        - Rocky Linux 9
+        - Anolis OS
+        - Ubuntu 16.04
+        - Ubuntu 18.04
+        - Ubuntu 20.04
+        - Ubuntu 22.04
+        - Ubuntu 24.04
+        - Debian 9
+        - Debian 10
+        - Debian 11
+        - Debian 12
+        - Debian 13
+        - TencentOS 3
+        - TencentOS 4
+        - openEuler
+        - Kylin
+        - Fedora
+        - 其他 (请在下方说明)
+    validations:
+      required: true
+
+  - type: dropdown
+    id: arch
+    attributes:
+      label: 系统架构
+      description: 选择您的 CPU 架构
+      options:
+        - x86_64 (AMD64)
+        - aarch64 (ARM64)
+        - 其他
+    validations:
+      required: true
+
+  - type: dropdown
+    id: fresh_install
+    attributes:
+      label: 是否全新安装
+      description: 是在全新系统上安装，还是已有其他软件/环境？
+      options:
+        - 是，全新系统
+        - 否，已有其他环境
+    validations:
+      required: true
+
+  - type: textarea
+    id: versions
+    attributes:
+      label: OneinStack 及组件版本
+      description: |
+        请提供相关版本信息，能填多少填多少
+      placeholder: |
+        OneinStack: master / 某个 commit
+        Nginx: 1.27.x
+        PHP: 8.4.x
+        MySQL: 8.0.x
+        ...
+    validations:
+      required: false
+
+  - type: textarea
+    id: steps
+    attributes:
+      label: 复现步骤
+      description: 请详细描述如何复现此问题
+      placeholder: |
+        1. 下载 OneinStack
+        2. 执行 ./install.sh
+        3. 选择安装 ...
+        4. 出现错误
+    validations:
+      required: true
+
+  - type: textarea
+    id: actual
+    attributes:
+      label: 实际结果
+      description: 发生了什么？可贴 install.log 关键片段
+      placeholder: 安装中断，报错信息如下...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected
+    attributes:
+      label: 期望结果
+      description: 您期望的正确行为是什么？
+      placeholder: 安装顺利完成，服务正常启动
+    validations:
+      required: true
+
+  - type: textarea
+    id: logs
+    attributes:
+      label: 相关日志/报错
+      description: |
+        请粘贴完整的错误日志或截图。日志文件通常位于：
+        - ~/oneinstack/install.log
+        - /var/log/nginx/error.log
+        - /var/log/php-fpm/error.log
+      render: shell
+    validations:
+      required: false
+
+  - type: dropdown
+    id: mirror
+    attributes:
+      label: 是否使用 OneinStack 镜像
+      description: 是否使用 mirrors.oneinstack.com 下载源码包？
+      options:
+        - 是
+        - 否
+        - 不确定
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: 其他信息
+      description: 任何其他可能相关的信息
+    validations:
+      required: false

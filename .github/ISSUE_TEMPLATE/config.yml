@@ -1,0 +1,8 @@
+blank_issues_enabled: true
+contact_links:
+  - name: OneinStack 官网
+    url: https://oneinstack.com/
+    about: 访问官方网站获取文档和更多信息
+  - name: Telegram 群组
+    url: https://t.me/oneinstackn
+    about: 加入 Telegram 群组讨论和获取帮助
