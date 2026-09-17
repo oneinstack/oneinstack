@@ -1,23 +1,24 @@
 [English](README.md) | [中文](README.zh-CN.md)
 
-此脚本使用shell编写，用于快速部署`LEMP`/`LAMP`/`LNMP`/`LNMPA`/`LTMP`（Linux、Nginx/Tengine/OpenResty、MySQL/MariaDB/Percona、PHP、JAVA）环境，适用于64位的RHEL 7、8、9（包括CentOS、RedHat、AlmaLinux、Rocky）、Debian 9、10、11、12、Ubuntu 16、18、20、22和Fedora 27+。
+此脚本使用shell编写，用于快速部署`LEMP`/`LAMP`/`LNMP`/`LNMPA`/`LTMP`（Linux、Nginx/Tengine/OpenResty/Caddy、MySQL/MariaDB/Percona/PostgreSQL/ClickHouse/MongoDB、PHP、JAVA、Valkey/Redis）环境，适用于64位的RHEL 7、8、9（包括CentOS、RedHat、AlmaLinux、Rocky、Anolis）、Debian 9、10、11、12、13、Ubuntu 16、18、20、22、24、TencentOS 3~4.4、openEuler、Kylin和Fedora 27+。
 
 脚本特点：
 - 持续更新，提供交互式安装和自动安装
-- 源码编译安装，采用最新稳定版本，并从官方站点下载
+- 源码编译安装，采用最新稳定版本，并从官方或高速镜像站点下载
 - 提供多重安全优化
-- 提供多个数据库版本（MySQL-9.7 LTS、MySQL-8.0、MySQL-5.7、MySQL-5.6、MySQL-5.5、MariaDB-10.11、MariaDB-10.5、MariaDB-10.4、MariaDB-5.5、Percona-8.0、Percona-5.7、Percona-5.6、Percona-5.5、PostgreSQL、MongoDB）
-- 提供多个PHP版本（PHP-8.3、PHP-8.2、PHP-8.1、PHP-8.0、PHP-7.4、PHP-7.3、PHP-7.2、PHP-7.1、PHP-7.0、PHP-5.6、PHP-5.5、PHP-5.4、PHP-5.3）
-- 提供Nginx、Tengine、OpenResty、Caddy、Apache和ngx_lua_waf
-- 提供多个Tomcat版本（Tomcat-10、Tomcat-9、Tomcat-8、Tomcat-7）
-- 提供多个JDK版本（OpenJDK-8、OpenJDK-11、OpenJDK-17）
-- 根据需求安装PHP缓存加速器（ZendOPcache、xcache、apcu、eAccelerator）和PHP扩展，包括ZendGuardLoader、ionCube、SourceGuardian、imagick、gmagick、fileinfo、imap、ldap、calendar、phalcon、yaf、yar、redis、memcached、memcache、mongodb、swoole、xdebug
+- 提供多个数据库版本（MySQL-9.7 LTS、MySQL-8.4 LTS、MySQL-8.2、MySQL-8.0、MySQL-5.7、MySQL-5.6、MySQL-5.5、MariaDB-13.0、MariaDB-10.11、MariaDB-10.5、MariaDB-10.4、MariaDB-5.5、Percona-8.0、Percona-5.7、Percona-5.6、Percona-5.5、PostgreSQL-18.6、ClickHouse、MongoDB）
+- 提供多个PHP版本（PHP-8.5、PHP-8.4、PHP-8.3、PHP-8.2、PHP-8.1、PHP-8.0、PHP-7.4、PHP-7.3、PHP-7.2、PHP-7.1、PHP-7.0、PHP-5.6、PHP-5.5、PHP-5.4、PHP-5.3）
+- 提供Nginx（原生支持 HTTP/3 & QUIC、OpenSSL 3.5.8）、Tengine、OpenResty、Caddy、Apache和ngx_lua_waf
+- 提供多个Tomcat版本（Tomcat-11、Tomcat-10、Tomcat-9、Tomcat-8、Tomcat-7）
+- 提供多个JDK版本（OpenJDK-8、OpenJDK-11、OpenJDK-17、OpenJDK-18）
+- 根据需求安装PHP缓存加速器（ZendOPcache、xcache、apcu、eAccelerator）和PHP扩展，包括ZendGuardLoader、ionCube、SourceGuardian、imagick、gmagick、fileinfo、imap、ldap、calendar、phalcon、yaf、yar、redis、memcached、memcache、mongodb、swoole、xdebug、xlswriter、grpc
 - 可选安装Nodejs、Pureftpd、phpMyAdmin
-- 可选安装memcached、redis
+- 可选安装Valkey（开源Redis替代版）、Redis、Memcached
 - 使用Jemalloc优化MySQL、Nginx
-- 提供添加虚拟主机脚本，包括Let's Encrypt SSL证书
-- 提供Nginx/Tengine/OpenResty/Apache/Tomcat、MySQL/MariaDB/Percona、PHP、Redis、Memcached、phpMyAdmin升级脚本
+- 提供虚拟主机管理脚本，包含Let's Encrypt SSL与主流DNS服务商（Cloudflare、阿里云DNS、DNSPod）DNS-01泛域名证书自动化申请与续期
+- 提供Nginx/Tengine/OpenResty/Apache/Tomcat、MySQL/MariaDB/Percona、PHP、Valkey、Redis、Memcached、phpMyAdmin升级脚本
 - 提供本地、远程（服务器间rsync）、阿里云OSS、腾讯云COS、又拍云、七牛云、亚马逊S3、Google Drive和Dropbox备份脚本
+- 内置轻量级Golang Webhook常驻服务，支持GitHub自动触发持续部署与镜像打包
 
 ## 安装
 
@@ -126,6 +127,10 @@ Pure-FTPd:
 ```bash
 systemctl {start|stop|restart|status} pureftpd
 ```
+Valkey:
+```bash
+systemctl {start|stop|status|restart} valkey-server
+```
 Redis:
 ```bash
 systemctl {start|stop|status|restart|reload} redis-server
@@ -133,6 +138,10 @@ systemctl {start|stop|status|restart|reload} redis-server
 Memcached:
 ```bash
 systemctl {start|stop|status|restart|reload} memcached
+```
+ClickHouse:
+```bash
+systemctl {start|stop|status|restart} clickhouse-server
 ```
 
 ## 如何升级

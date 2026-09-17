@@ -1,23 +1,25 @@
 [English](README.md) | [中文](README.zh-CN.md)
 
-This script is written using the shell, in order to quickly deploy `LEMP`/`LAMP`/`LNMP`/`LNMPA`/`LTMP`(Linux, Nginx/Tengine/OpenResty, MySQL in a production environment/MariaDB/Percona, PHP, JAVA), applicable to RHEL 7, 8, 9(including CentOS,RedHat,AlmaLinux,Rocky), Debian 9, 10, 11, 12, Ubuntu 16, 18, 20, 22 and Fedora 27+ of 64.
+This script is written using the shell, in order to quickly deploy `LEMP`/`LAMP`/`LNMP`/`LNMPA`/`LTMP`(Linux, Nginx/Tengine/OpenResty/Caddy, MySQL in a production environment/MariaDB/Percona/PostgreSQL/ClickHouse/MongoDB, PHP, JAVA, Valkey/Redis), applicable to 64-bit RHEL 7, 8, 9 (including CentOS, RedHat, AlmaLinux, Rocky, Anolis), Debian 9, 10, 11, 12, 13, Ubuntu 16, 18, 20, 22, 24, TencentOS 3~4.4, openEuler, Kylin, and Fedora 27+.
 
 Script properties:
 - Continually updated, Provide Shell Interaction and Autoinstall
-- Source compiler installation, most stable source is the latest version, and download from the official site
+- Source compiler installation, most stable source is the latest version, and download from the official or high-speed mirrors
 - Some security optimization
-- Providing a plurality of database versions (MySQL-9.7 LTS, MySQL-8.0, MySQL-5.7, MySQL-5.6, MySQL-5.5, MariaDB-10.11, MariaDB-10.5, MariaDB-10.4, MariaDB-5.5, Percona-8.0, Percona-5.7, Percona-5.6, Percona-5.5, PostgreSQL, MongoDB)
-- Providing multiple PHP versions (PHP-8.3, PHP-8.2, PHP-8.1, PHP-8.0, PHP-7.4, PHP-7.3, PHP-7.2, PHP-7.1, PHP-7.0, PHP-5.6, PHP-5.5, PHP-5.4, PHP-5.3)
-- Provide Nginx, Tengine, OpenResty, Caddy, Apache and ngx_lua_waf
-- Providing a plurality of Tomcat version (Tomcat-10, Tomcat-9, Tomcat-8, Tomcat-7)
-- Providing a plurality of JDK version (OpenJDK-8, OpenJDK-11, OpenJDK-17)
-- According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php extensions,include ZendGuardLoader,ionCube,SourceGuardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug
+- Providing a plurality of database versions (MySQL-9.7 LTS, MySQL-8.4 LTS, MySQL-8.2, MySQL-8.0, MySQL-5.7, MySQL-5.6, MySQL-5.5, MariaDB-13.0, MariaDB-10.11, MariaDB-10.5, MariaDB-10.4, MariaDB-5.5, Percona-8.0, Percona-5.7, Percona-5.6, Percona-5.5, PostgreSQL-18.6, ClickHouse, MongoDB)
+- Providing multiple PHP versions (PHP-8.5, PHP-8.4, PHP-8.3, PHP-8.2, PHP-8.1, PHP-8.0, PHP-7.4, PHP-7.3, PHP-7.2, PHP-7.1, PHP-7.0, PHP-5.6, PHP-5.5, PHP-5.4, PHP-5.3)
+- Provide Nginx (with native HTTP/3 & QUIC, OpenSSL 3.5.8), Tengine, OpenResty, Caddy, Apache and ngx_lua_waf
+- Providing a plurality of Tomcat version (Tomcat-11, Tomcat-10, Tomcat-9, Tomcat-8, Tomcat-7)
+- Providing a plurality of JDK version (OpenJDK-8, OpenJDK-11, OpenJDK-17, OpenJDK-18)
+- According to their needs to install PHP Cache Accelerator provides ZendOPcache, xcache, apcu, eAccelerator. And php extensions, include ZendGuardLoader, ionCube, SourceGuardian, imagick, gmagick, fileinfo, imap, ldap, calendar, phalcon, yaf, yar, redis, memcached, memcache, mongodb, swoole, xdebug, xlswriter, grpc
 - Installation Nodejs, Pureftpd, phpMyAdmin according to their needs
-- Install memcached, redis according to their needs
+- Install Valkey (open-source Redis alternative) or Redis, Memcached according to their needs
 - Jemalloc optimize MySQL, Nginx
-- Providing add a virtual host script, include Let's Encrypt SSL certificate
-- Provide Nginx/Tengine/OpenResty/Apache/Tomcat, MySQL/MariaDB/Percona, PHP, Redis, Memcached, phpMyAdmin upgrade script
-- Provide local,remote(rsync between servers),Aliyun OSS,Qcloud COS,UPYUN,QINIU,Amazon S3,Google Drive and Dropbox backup script
+- Providing virtual host management script, including Let's Encrypt SSL and DNS-01 wildcard certificates (Cloudflare, Aliyun DNS, DNSPod API automated renewal)
+- Provide Nginx/Tengine/OpenResty/Apache/Tomcat, MySQL/MariaDB/Percona, PHP, Valkey, Redis, Memcached, phpMyAdmin upgrade script
+- Provide local, remote (rsync between servers), Aliyun OSS, Qcloud COS, UPYUN, QINIU, Amazon S3, Google Drive and Dropbox backup script
+- Built-in lightweight Golang Webhook daemon for automated continuous integration and mirror packaging
+
 
 ## Installation
 
@@ -128,6 +130,10 @@ Pure-FTPd:
 ```bash
 systemctl {start|stop|restart|status} pureftpd
 ```
+Valkey:
+```bash
+systemctl {start|stop|status|restart} valkey-server
+```
 Redis:
 ```bash
 systemctl {start|stop|status|restart|reload} redis-server
@@ -135,6 +141,10 @@ systemctl {start|stop|status|restart|reload} redis-server
 Memcached:
 ```bash
 systemctl {start|stop|status|restart|reload} memcached
+```
+ClickHouse:
+```bash
+systemctl {start|stop|status|restart} clickhouse-server
 ```
 
 ## How to upgrade
