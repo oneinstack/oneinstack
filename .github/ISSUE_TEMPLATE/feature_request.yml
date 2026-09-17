@@ -1,0 +1,74 @@
+name: Feature Request / 功能建议
+description: Suggest a new feature or improvement / 提出新功能或改进建议
+title: "[Feature] "
+labels: ["enhancement"]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        Thank you for your feature suggestion! Please describe your needs in detail to help us improve OneinStack.
+        
+        感谢您提出功能建议！请详细描述您的需求，帮助我们更好地改进 OneinStack。
+
+  - type: textarea
+    id: feature
+    attributes:
+      label: What feature do you want / 想要什么功能
+      description: Please clearly describe the feature you want to add / 请清晰地描述您希望添加的功能
+      placeholder: "e.g. Support installation of XXX database / 例如：支持安装 XXX 数据库"
+    validations:
+      required: true
+
+  - type: textarea
+    id: usage_scenario
+    attributes:
+      label: Usage Scenario / 使用场景
+      description: When and why do you need this feature? Please describe your specific use case / 您何时以及为什么需要此功能？请描述您的具体使用场景
+      placeholder: |
+        In production environment, we need... / 在生产环境中，我们需要...
+        For example, when deploying... / 例如，在部署...时
+        This feature would help us... / 这个功能可以帮助我们...
+    validations:
+      required: true
+
+  - type: textarea
+    id: reason
+    attributes:
+      label: Why is this needed / 为什么需要
+      description: Please explain the value of this feature and the problems with current solutions / 请说明这个功能的价值，以及目前解决方案存在的问题
+      placeholder: |
+        Currently, we have to manually... / 目前，我们不得不手动...
+        The current solution has the following issues... / 目前的解决方案存在以下问题...
+    validations:
+      required: true
+
+  - type: textarea
+    id: expected_behavior
+    attributes:
+      label: Expected Behavior / 期望行为
+      description: Please describe how this feature should ideally work / 请描述这个功能的理想工作方式
+      placeholder: |
+        1. Add option in install.sh... / 在 install.sh 中增加选项...
+        2. Config file supports... / 配置文件支持...
+        3. Final result... / 最终效果...
+    validations:
+      required: true
+
+  - type: textarea
+    id: alternatives
+    attributes:
+      label: Alternatives / 有无替代方案
+      description: Are there other ways to achieve similar functionality? / 是否有其他方式可以实现类似功能？
+      placeholder: |
+        Currently, you can manually perform the following steps... / 目前可以手动执行以下步骤来实现...
+        Or use third-party tools... / 或者使用第三方工具...
+    validations:
+      required: false
+
+  - type: textarea
+    id: additional
+    attributes:
+      label: Additional Information / 其他信息
+      description: Any other relevant information, reference links, or screenshots / 任何其他相关信息、参考链接或截图
+    validations:
+      required: false
