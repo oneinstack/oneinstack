@@ -1,27 +1,48 @@
-name: Bug 报告 / 安装问题
-description: 报告 Bug 或安装失败问题
+name: Bug Report / Bug 报告
+description: Report a bug or installation failure / 报告 Bug 或安装失败问题
 title: "[Bug] "
 labels: ["bug"]
 body:
   - type: markdown
     attributes:
       value: |
+        Thank you for submitting a bug report! Please fill in the details below to help us quickly identify and resolve the issue.
+        
         感谢您提交 Bug 报告！请尽可能详细地填写以下信息，以便我们快速定位和解决问题。
 
   - type: input
     id: summary
     attributes:
-      label: 问题摘要
-      description: 用一句话简要描述问题
-      placeholder: 例如：安装 PHP 8.4 时编译失败
+      label: Summary / 问题摘要
+      description: Briefly describe the issue in one sentence / 用一句话简要描述问题
+      placeholder: "e.g. PHP 8.4 compilation failed during installation / 例如：安装 PHP 8.4 时编译失败"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: component
+    attributes:
+      label: Component / 组件
+      description: Which component is affected? / 受影响的组件是哪个？
+      options:
+        - PHP
+        - Nginx
+        - MySQL
+        - MariaDB
+        - PostgreSQL
+        - Redis / Valkey
+        - Tomcat
+        - Apache
+        - Memcached
+        - Other / 其他
     validations:
       required: true
 
   - type: dropdown
     id: os
     attributes:
-      label: 操作系统
-      description: 选择您的操作系统发行版
+      label: Operating System / 操作系统
+      description: Select your OS distribution / 选择您的操作系统发行版
       options:
         - CentOS 7
         - CentOS 8
@@ -49,41 +70,54 @@ body:
         - openEuler
         - Kylin
         - Fedora
-        - 其他 (请在下方说明)
+        - Other (please specify below) / 其他 (请在下方说明)
     validations:
       required: true
 
   - type: dropdown
     id: arch
     attributes:
-      label: 系统架构
-      description: 选择您的 CPU 架构
+      label: Architecture / 系统架构
+      description: Select your CPU architecture / 选择您的 CPU 架构
       options:
         - x86_64 (AMD64)
         - aarch64 (ARM64)
-        - 其他
+        - Other / 其他
     validations:
       required: true
 
   - type: dropdown
     id: fresh_install
     attributes:
-      label: 是否全新安装
-      description: 是在全新系统上安装，还是已有其他软件/环境？
+      label: Fresh Installation / 是否全新安装
+      description: Is this a fresh system or are there existing software/environments? / 是在全新系统上安装，还是已有其他软件/环境？
       options:
-        - 是，全新系统
-        - 否，已有其他环境
+        - "Yes, fresh system / 是，全新系统"
+        - "No, existing environment / 否，已有其他环境"
+    validations:
+      required: true
+
+  - type: dropdown
+    id: reproducibility
+    attributes:
+      label: Reproducibility / 是否可复现
+      description: How often does this issue occur? / 此问题出现的频率如何？
+      options:
+        - Always / 每次
+        - Intermittent / 偶发
+        - Unknown / 未知
     validations:
       required: true
 
   - type: textarea
     id: versions
     attributes:
-      label: OneinStack 及组件版本
+      label: OneinStack & Component Versions / OneinStack 及组件版本
       description: |
-        请提供相关版本信息，能填多少填多少
+        Please provide version information as much as possible.
+        请提供相关版本信息，能填多少填多少。
       placeholder: |
-        OneinStack: master / 某个 commit
+        OneinStack: master / commit hash
         Nginx: 1.27.x
         PHP: 8.4.x
         MySQL: 8.0.x
@@ -94,39 +128,40 @@ body:
   - type: textarea
     id: steps
     attributes:
-      label: 复现步骤
-      description: 请详细描述如何复现此问题
+      label: Steps to Reproduce / 复现步骤
+      description: Please describe in detail how to reproduce this issue / 请详细描述如何复现此问题
       placeholder: |
-        1. 下载 OneinStack
-        2. 执行 ./install.sh
-        3. 选择安装 ...
-        4. 出现错误
+        1. Download OneinStack / 下载 OneinStack
+        2. Run ./install.sh / 执行 ./install.sh
+        3. Select to install ... / 选择安装 ...
+        4. Error occurs / 出现错误
     validations:
       required: true
 
   - type: textarea
     id: actual
     attributes:
-      label: 实际结果
-      description: 发生了什么？可贴 install.log 关键片段
-      placeholder: 安装中断，报错信息如下...
+      label: Actual Result / 实际结果
+      description: What happened? You can paste key excerpts from install.log / 发生了什么？可贴 install.log 关键片段
+      placeholder: "Installation interrupted with error... / 安装中断，报错信息如下..."
     validations:
       required: true
 
   - type: textarea
     id: expected
     attributes:
-      label: 期望结果
-      description: 您期望的正确行为是什么？
-      placeholder: 安装顺利完成，服务正常启动
+      label: Expected Result / 期望结果
+      description: What is the correct behavior you expected? / 您期望的正确行为是什么？
+      placeholder: "Installation completes successfully, services start normally / 安装顺利完成，服务正常启动"
     validations:
       required: true
 
   - type: textarea
     id: logs
     attributes:
-      label: 相关日志/报错
+      label: Relevant Logs / Errors / 相关日志/报错
       description: |
+        Please paste complete error logs or screenshots. Log files are usually located at:
         请粘贴完整的错误日志或截图。日志文件通常位于：
         - ~/oneinstack/install.log
         - /var/log/nginx/error.log
@@ -138,19 +173,19 @@ body:
   - type: dropdown
     id: mirror
     attributes:
-      label: 是否使用 OneinStack 镜像
-      description: 是否使用 mirrors.oneinstack.com 下载源码包？
+      label: Using OneinStack Mirror / 是否使用 OneinStack 镜像
+      description: Are you using mirrors.oneinstack.com to download source packages? / 是否使用 mirrors.oneinstack.com 下载源码包？
       options:
-        - 是
-        - 否
-        - 不确定
+        - "Yes / 是"
+        - "No / 否"
+        - "Not sure / 不确定"
     validations:
       required: false
 
   - type: textarea
     id: additional
     attributes:
-      label: 其他信息
-      description: 任何其他可能相关的信息
+      label: Additional Information / 其他信息
+      description: Any other potentially relevant information / 任何其他可能相关的信息
     validations:
       required: false
