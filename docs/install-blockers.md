@@ -208,21 +208,32 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 ### IB-007: PHP 8.3.33 link failure STT_GNU_IFUNC on Anolis
 
 - **Date / 日期**: 2026-09-20
-- **Status / 状态**: open
+- **Status / 状态**: investigating (workaround verified, code change pending)
 - **Component / 组件**: PHP
 - **OS / 环境**: Anolis OS 8.10 RHCK; gcc 8.5.0; binutils 2.30
 - **Machine / 机器**: 47.236.16.29 (Oneinstack测试-2 R1)
 - **Symptom / 现象**: PHP `make` link stage fails with error: `STT_GNU_IFUNC symbol 'mb_utf16be_to_wchar' ... recompile with -fPIE and relink with -pie`. Both `sapi/cli/php` and `php-fpm` builds fail.
-- **Root cause / 根因**: Anolis OS 8.10 / RHEL8 toolchain (gcc 8.5.0, binutils 2.30) requires position-independent executable flags (`-fPIE`/`-pie`) for proper linking of IFUNC symbols in PHP 8.3.
+- **Root cause / 根因**: Anolis OS 8.10 / RHEL8 toolchain (gcc 8.5.0, binutils 2.30) requires position-independent executable flags (`-fPIE`/`-pie`) for proper linking of IFUNC symbols in PHP 8.3. Additionally, the `-z*-page-size=2097152` linker flag must be removed.
 - **Fix plan / 修复方案**: 
-  1. On Anolis/RHEL8, enable `-fPIE`/`-pie` (or equivalent) for PHP build
-  2. Then rerun PHP install → start MySQL → verify site
+  1. Bake these flags into Anolis/RHEL8 PHP build path in `install.sh`:
+     - Add `EXTRA_CFLAGS=-fPIE`
+     - Add `EXTRA_LDFLAGS_PROGRAM=-pie`
+     - Remove `-zcommon-page-size=2097152` / `-zmax-page-size=2097152` linker flags
+  2. Script should auto-detect Anolis/RHEL8 and apply these flags automatically
+- **Workaround / 临时方案** (verified):
+  ```bash
+  export EXTRA_CFLAGS="-fPIE"
+  export EXTRA_LDFLAGS_PROGRAM="-pie"
+  # Also remove -z*-page-size=2097152 from linker flags
+  ```
+  Result: PHP 8.3.33 linked successfully
 - **Evidence / 证据**: 
-  - Link error: `STT_GNU_IFUNC symbol 'mb_utf16be_to_wchar'`
+  - Original link error: `STT_GNU_IFUNC symbol 'mb_utf16be_to_wchar'`
   - Install command: `install.sh --nginx_option 1 --php_option 13 --db_option 1 --phpcache_option 1 --md5sum`
-  - Current state: Nginx 1.30.5 installed/running; MySQL binary present but mysqld inactive; PHP not installed
+  - **R1 PASS** after applying workaround flags on 47.236.16.29
+  - Final state: Nginx/PHP-FPM/MySQL all active, site HTTP 200
   - Classification: Class D
-- **Code changed? / 是否已改代码**: no
+- **Code changed? / 是否已改代码**: no (workaround manual, script fix pending)
 - **Related issues**: See IB-001 for MySQL mirror truncate observation on same machine
 
 ---
