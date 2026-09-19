@@ -29,6 +29,9 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 ## Table of Contents / 目录
 
 - [IB-001: MySQL 8.0.39 package truncated on mirrors](#ib-001-mysql-8039-package-truncated-on-mirrors)
+- [IB-002: EPEL default metalink unreachable off-shore](#ib-002-epel-default-metalink-unreachable-off-shore)
+- [IB-003: Redis 8 loadmodule directives for missing modules](#ib-003-redis-8-loadmodule-directives-for-missing-modules)
+- [IB-004: RediSearch/RedisJSON build fails without Rust toolchain](#ib-004-redisearchredisjson-build-fails-without-rust-toolchain)
 
 ---
 
@@ -73,3 +76,67 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   - Official CDN status: frequently 404
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: #568
+
+---
+
+### IB-002: EPEL default metalink unreachable off-shore
+
+- **Date / 日期**: 2026-09-19
+- **Status / 状态**: open
+- **Component / 组件**: EPEL / Yum Repository
+- **OS / 环境**: AlmaLinux 9.8 (RHEL-family)
+- **Machine / 机器**: 47.84.25.92 / oneinstack-test-01
+- **Symptom / 现象**: `mirrors.fedoraproject.org:443 Connection refused` when attempting to reach EPEL metalink from off-shore (China) network. Installation stalls at EPEL dependency resolution. Manually fixing Aliyun baseurl recovers the install.
+- **Root cause / 根因**: Default EPEL metalink endpoint (`mirrors.fedoraproject.org`) is blocked or unreachable from certain regions (e.g., mainland China).
+- **Fix plan / 修复方案**: 
+  1. Add offshore/region precheck to detect EPEL connectivity
+  2. Auto-switch to usable EPEL mirror (e.g., Aliyun, Tsinghua) when metalink fails
+  3. Document manual workaround for affected users
+- **Evidence / 证据**: 
+  - Connection refused on `mirrors.fedoraproject.org:443`
+  - Aliyun mirror baseurl works as fallback
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: N/A
+
+---
+
+### IB-003: Redis 8 loadmodule directives for missing modules
+
+- **Date / 日期**: 2026-09-19
+- **Status / 状态**: open
+- **Component / 组件**: Redis
+- **OS / 环境**: AlmaLinux 9.8
+- **Machine / 机器**: 47.84.25.92 / oneinstack-test-01
+- **Symptom / 现象**: Redis 8 first start aborts immediately. Default `redis.conf` contains `loadmodule` directives for RedisBloom, RediSearch, RedisJSON, and RedisTimeSeries, but modules are not installed under `/usr/local/redis/modules/`.
+- **Root cause / 根因**: Script defect - `redis.conf` is generated with `loadmodule` lines regardless of whether Redis modules were actually built/installed. Redis server fails to start when it cannot load the specified module files.
+- **Fix plan / 修复方案**: 
+  1. Do not write `loadmodule` directives when modules were not built/installed
+  2. Or: install modules first, then enable `loadmodule`
+  3. Mitigation: comment out `loadmodule` lines manually
+- **Evidence / 证据**: 
+  - Install command: `install.sh --redis --memcached --php_extensions imagick,redis,memcached`
+  - Redis fails to start with module load errors
+  - Mitigation used: comment out `loadmodule` directives in `redis.conf`
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: Script defect (no GitHub issue yet)
+
+---
+
+### IB-004: RediSearch/RedisJSON build fails without Rust toolchain
+
+- **Date / 日期**: 2026-09-19
+- **Status / 状态**: open
+- **Component / 组件**: Redis Modules (RediSearch, RedisJSON)
+- **OS / 环境**: AlmaLinux 9.8
+- **Machine / 机器**: 47.84.25.92 / oneinstack-test-01
+- **Symptom / 现象**: RediSearch and RedisJSON module compilation fails during install. Core Redis still installs and works, but modules are missing, triggering IB-003 when `loadmodule` is present in config.
+- **Root cause / 根因**: RediSearch and RedisJSON require Rust/Cargo toolchain for compilation, which is not pre-installed and not automatically installed by the script.
+- **Fix plan / 修复方案**: 
+  1. Pre-install Rust/Cargo toolchain before attempting module build
+  2. Or: skip module build with clear warning message when Rust is unavailable
+  3. Never default to `loadmodule` for modules that failed to build
+- **Evidence / 证据**: 
+  - Build fails with missing `cargo`/`rustc`
+  - Same environment as IB-003
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: Related to IB-003
