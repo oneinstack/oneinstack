@@ -32,6 +32,9 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - [IB-002: EPEL default metalink unreachable off-shore](#ib-002-epel-default-metalink-unreachable-off-shore)
 - [IB-003: Redis 8 loadmodule directives for missing modules](#ib-003-redis-8-loadmodule-directives-for-missing-modules)
 - [IB-004: RediSearch/RedisJSON build fails without Rust toolchain](#ib-004-redisearchredisjson-build-fails-without-rust-toolchain)
+- [IB-005: Caddy primary mirror 404 + false install success](#ib-005-caddy-primary-mirror-404--false-install-success)
+- [IB-006: Tengine openssl-1.1.1w first install unstable (EXIT=137)](#ib-006-tengine-openssl-111w-first-install-unstable-exit137)
+- [IB-007: PHP 8.3.33 link failure STT_GNU_IFUNC on Anolis](#ib-007-php-8333-link-failure-stt_gnu_ifunc-on-anolis)
 
 ---
 
@@ -74,6 +77,7 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   - Mirror Content-Length: ~109MB
   - Expected size: ~423MB
   - Official CDN status: frequently 404
+  - Additional observation (IB-007 machine, 47.236.16.29 Anolis 8.10): truncated length=114542816, md5_bad=`950f19c1531cf6f4dd249491a9817352`; expected length=443772160, md5=`1c092c3814b10bfa0794077867f9f4ad`; official CDN retry succeeded
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: #568
 
@@ -140,3 +144,72 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   - Same environment as IB-003
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: Related to IB-003
+
+---
+
+### IB-005: Caddy primary mirror 404 + false install success
+
+- **Date / 日期**: 2026-09-20
+- **Status / 状态**: open
+- **Component / 组件**: Caddy
+- **OS / 环境**: Ubuntu 22.04
+- **Machine / 机器**: 47.84.16.208 (Oneinstack测试 R3c)
+- **Symptom / 现象**: Primary mirror returns 404 for Caddy package. Package later downloaded from GitHub fallback, but `caddy.service` fails to start. Install script still reports success despite service failure.
+- **Root cause / 根因**: 
+  1. Missing package on primary mirror
+  2. Install script does not verify systemd active state after installation
+- **Fix plan / 修复方案**: 
+  1. Restore missing package on primary mirror
+  2. After install, require `systemctl is-active` check and exit non-zero on failure
+- **Evidence / 证据**: 
+  - R3c logs on test host `/root/r3-logs`
+  - Service failed while script reported success
+- **Workaround / 临时方案**: Manual unit fix via journalctl inspection (not scripted)
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: N/A
+
+---
+
+### IB-006: Tengine openssl-1.1.1w first install unstable (EXIT=137)
+
+- **Date / 日期**: 2026-09-20
+- **Status / 状态**: open
+- **Component / 组件**: Tengine / OpenSSL
+- **OS / 环境**: Ubuntu 22.04
+- **Machine / 机器**: 47.84.16.208 (Oneinstack测试 R3b)
+- **Symptom / 现象**: First install attempt fails around `openssl-1.1.1w` tar extraction with EXIT=137. Retry succeeds, then uninstalled for further testing.
+- **Root cause / 根因**: Likely OOM/SIGKILL or download/extract interrupt. Exit code 137 typically indicates SIGKILL (128+9).
+- **Fix plan / 修复方案**: 
+  1. Add download + extract checksums for integrity verification
+  2. More robust extract/build with explicit retry logic
+  3. Clearer error messaging on failure
+- **Evidence / 证据**: 
+  - First attempt: FAIL EXIT=137
+  - Retry: PASS
+  - Logs: `/root/r3-logs`
+- **Workaround / 临时方案**: Retry succeeded
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: N/A
+- **Note**: OpenResty PASS; Apache 2.4.68 PASS (httpd still active) on same host — context only
+
+---
+
+### IB-007: PHP 8.3.33 link failure STT_GNU_IFUNC on Anolis
+
+- **Date / 日期**: 2026-09-20
+- **Status / 状态**: open
+- **Component / 组件**: PHP
+- **OS / 环境**: Anolis OS 8.10 RHCK; gcc 8.5.0; binutils 2.30
+- **Machine / 机器**: 47.236.16.29 (Oneinstack测试-2 R1)
+- **Symptom / 现象**: PHP `make` link stage fails with error: `STT_GNU_IFUNC symbol 'mb_utf16be_to_wchar' ... recompile with -fPIE and relink with -pie`. Both `sapi/cli/php` and `php-fpm` builds fail.
+- **Root cause / 根因**: Anolis OS 8.10 / RHEL8 toolchain (gcc 8.5.0, binutils 2.30) requires position-independent executable flags (`-fPIE`/`-pie`) for proper linking of IFUNC symbols in PHP 8.3.
+- **Fix plan / 修复方案**: 
+  1. On Anolis/RHEL8, enable `-fPIE`/`-pie` (or equivalent) for PHP build
+  2. Then rerun PHP install → start MySQL → verify site
+- **Evidence / 证据**: 
+  - Link error: `STT_GNU_IFUNC symbol 'mb_utf16be_to_wchar'`
+  - Install command: `install.sh --nginx_option 1 --php_option 13 --db_option 1 --phpcache_option 1 --md5sum`
+  - Current state: Nginx 1.30.5 installed/running; MySQL binary present but mysqld inactive; PHP not installed
+  - Classification: Class D
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: See IB-001 for MySQL mirror truncate observation on same machine
