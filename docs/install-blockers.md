@@ -154,17 +154,22 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - **Component / 组件**: Caddy
 - **OS / 环境**: Ubuntu 22.04
 - **Machine / 机器**: 47.84.16.208 (Oneinstack测试 R3c)
-- **Symptom / 现象**: Primary mirror returns 404 for Caddy package. Package later downloaded from GitHub fallback, but `caddy.service` fails to start. Install script still reports success despite service failure.
+- **Symptom / 现象**: Primary mirror returns 404 for Caddy package. Package downloaded from GitHub fallback, but `caddy.service` fails to start with status=217/USER. Script still prints "Caddy installed successfully!" despite service failure.
 - **Root cause / 根因**: 
-  1. Missing package on primary mirror
-  2. Install script does not verify systemd active state after installation
+  1. **Primary**: systemd unit hardcodes `User=caddy` / `Group=caddy`, but `include/caddy.sh` only creates `www` user from `run_user=www` — does NOT create `caddy` user
+  2. Journal error: `Failed at step USER spawning ... status=217/USER`
+  3. **Secondary**: Primary mirror 404 (contributing, not blocking after GitHub fallback)
+  4. **Secondary**: Permission denied noise on `/home/caddy` when caddy user has no home directory
+  5. Script does not verify systemd active state after `systemctl start caddy` — reports success on failure
 - **Fix plan / 修复方案**: 
-  1. Restore missing package on primary mirror
-  2. After install, require `systemctl is-active` check and exit non-zero on failure
+  1. Align systemd unit `User`/`Group` with `run_user` (e.g., use `www`), OR create `caddy` user + home directory during install
+  2. `systemctl is-active` check must fail the install with non-zero exit when service is not running
 - **Evidence / 证据**: 
   - R3c logs on test host `/root/r3-logs`
-  - Service failed while script reported success
-- **Workaround / 临时方案**: Manual unit fix via journalctl inspection (not scripted)
+  - Journal: `Failed at step USER ... status=217/USER`
+  - Manual `useradd caddy` → service becomes active, `curl` returns 200
+  - Script prints success message after `systemctl start caddy` fails
+- **Workaround / 临时方案**: `useradd caddy` manually, then restart service (not scripted)
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: N/A
 
@@ -177,17 +182,21 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - **Component / 组件**: Tengine / OpenSSL
 - **OS / 环境**: Ubuntu 22.04
 - **Machine / 机器**: 47.84.16.208 (Oneinstack测试 R3b)
-- **Symptom / 现象**: First install attempt fails around `openssl-1.1.1w` tar extraction with EXIT=137. Retry succeeds, then uninstalled for further testing.
-- **Root cause / 根因**: Likely OOM/SIGKILL or download/extract interrupt. Exit code 137 typically indicates SIGKILL (128+9).
+- **Symptom / 现象**: First install attempt fails around `openssl-1.1.1w` with EXIT=137. Retry with pre-filled source succeeds (Tengine/3.1.0, curl 200). Also observed: on success path script may still EXIT=1 after printing "Congratulations" — exit code unreliable.
+- **Root cause / 根因**: 
+  1. **Primary**: Tengine build requires `openssl-1.1.1w` (per `versions.txt` `openssl11_ver`), but download logic preferentially/only fetched `openssl-3.5.8`; `src/` missing `openssl-1.1.1w.tar.gz` → first failure
+  2. EXIT=137 also observed (SIGKILL / possible OOM during failed state)
+  3. **Secondary**: Success path exit code unreliable — script may exit 1 after printing success message
 - **Fix plan / 修复方案**: 
-  1. Add download + extract checksums for integrity verification
-  2. More robust extract/build with explicit retry logic
-  3. Clearer error messaging on failure
+  1. Fetch `openssl11` (1.1.1w) per component dependency when Tengine is selected
+  2. Verify download integrity after fetch (checksum)
+  3. Success path must exit 0 — fix exit code logic
 - **Evidence / 证据**: 
-  - First attempt: FAIL EXIT=137
-  - Retry: PASS
+  - First attempt: FAIL EXIT=137, `src/` missing `openssl-1.1.1w.tar.gz`
+  - Pre-fill `openssl-1.1.1w.tar.gz` → retry PASS (Tengine/3.1.0, curl 200)
+  - Script may exit 1 after "Congratulations" message
   - Logs: `/root/r3-logs`
-- **Workaround / 临时方案**: Retry succeeded
+- **Workaround / 临时方案**: Pre-fill `openssl-1.1.1w.tar.gz` in `src/` before install
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: N/A
 - **Note**: OpenResty PASS; Apache 2.4.68 PASS (httpd still active) on same host — context only
