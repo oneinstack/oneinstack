@@ -35,6 +35,8 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - [IB-005: Caddy primary mirror 404 + false install success](#ib-005-caddy-primary-mirror-404--false-install-success)
 - [IB-006: Tengine openssl-1.1.1w first install unstable (EXIT=137)](#ib-006-tengine-openssl-111w-first-install-unstable-exit137)
 - [IB-007: PHP 8.3.33 link failure STT_GNU_IFUNC on Anolis](#ib-007-php-8333-link-failure-stt_gnu_ifunc-on-anolis)
+- [IB-008: Tomcat Native hard-depends on /usr/local/openssl](#ib-008-tomcat-native-hard-depends-on-usrlocalopenssl)
+- [IB-009: Install_* | tee causes EXIT=1 after successful install](#ib-009-install_--tee-causes-exit1-after-successful-install)
 
 ---
 
@@ -222,3 +224,48 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   - Classification: Class D
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: See IB-001 for MySQL mirror truncate observation on same machine
+
+---
+
+### IB-008: Tomcat Native hard-depends on /usr/local/openssl
+
+- **Date / 日期**: 2026-09-20
+- **Status / 状态**: open
+- **Component / 组件**: Tomcat Native / OpenSSL
+- **OS / 环境**: Ubuntu 22.04
+- **Machine / 机器**: 47.84.16.208 (Oneinstack测试 R3)
+- **Install command**: `./install.sh --tomcat_option 1 --jdk_option 3` (Tomcat 11 + JDK 17)
+- **Symptom / 现象**: JDK installs successfully, but Tomcat Native build/link requires `/usr/local/openssl`. However, `Install_openSSL` only runs on old PHP paths — pure Tomcat scenario is missing that directory → script FAIL.
+- **Root cause / 根因**: Tomcat Native configure hardcodes `--with-ssl=/usr/local/openssl` on non-ARM, but OpenSSL is not installed to that path in Tomcat-only installs. The `Install_openSSL` function is only triggered by PHP-related install paths.
+- **Fix plan / 修复方案**: 
+  1. On non-ARM, do not hardcode `/usr/local/openssl` for Tomcat Native
+  2. Fall back to system OpenSSL (`--with-ssl=/usr`), or
+  3. Force OpenSSL install on Tomcat path when Tomcat Native is selected
+- **Evidence / 证据**: 
+  - Logs: `/root/r3-logs/` on test host
+  - Report: `/workspace/oneinstack-r3-report.md` (tester local)
+  - Classification: Class D script defect
+- **Workaround / 临时方案**: Use `--with-ssl=/usr` manually → `:8080` up (OpenJDK 17.0.20 / Tomcat 11.0.15)
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: N/A
+
+---
+
+### IB-009: Install_* | tee causes EXIT=1 after successful install
+
+- **Date / 日期**: 2026-09-20
+- **Status / 状态**: open
+- **Component / 组件**: install.sh pipeline / exit codes
+- **OS / 环境**: Ubuntu 22.04 (also seen with OpenResty/Tengine success paths)
+- **Machine / 机器**: 47.84.16.208 (Oneinstack测试 R3)
+- **Symptom / 现象**: Features install successfully and `curl` returns 200, but script exits with EXIT=1. This occurs because pipeline using `| tee` does not check `PIPESTATUS` — the tee exit code masks the actual install function exit code.
+- **Root cause / 根因**: Shell pipelines return the exit code of the last command by default. When `Install_*` functions are piped through `tee` for logging, the real exit code from the install function is lost. Script reports failure even when installation succeeded.
+- **Fix plan / 修复方案**: 
+  1. Check `${PIPESTATUS[0]}` after piped commands to capture the actual install function exit code
+  2. Or: avoid masking real exit via pipe (use process substitution or temp file)
+- **Evidence / 证据**: 
+  - Install succeeds, curl 200, but EXIT=1
+  - Pattern observed across multiple components
+  - Classification: Class D/E script defect
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: IB-006 success EXIT=1 note — same general pattern
