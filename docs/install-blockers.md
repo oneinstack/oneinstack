@@ -37,6 +37,7 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - [IB-007: PHP 8.3.33 link failure STT_GNU_IFUNC on Anolis](#ib-007-php-8333-link-failure-stt_gnu_ifunc-on-anolis)
 - [IB-008: Tomcat Native hard-depends on /usr/local/openssl](#ib-008-tomcat-native-hard-depends-on-usrlocalopenssl)
 - [IB-009: Install_* | tee causes EXIT=1 after successful install](#ib-009-install_--tee-causes-exit1-after-successful-install)
+- [IB-010: Redis modules platform detection failures on Anolis](#ib-010-redis-modules-platform-detection-failures-on-anolis)
 
 ---
 
@@ -111,20 +112,20 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - **Date / 日期**: 2026-09-19
 - **Status / 状态**: open
 - **Component / 组件**: Redis
-- **OS / 环境**: AlmaLinux 9.8
-- **Machine / 机器**: 47.84.25.92 / oneinstack-test-01
-- **Symptom / 现象**: Redis 8 first start aborts immediately. Default `redis.conf` contains `loadmodule` directives for RedisBloom, RediSearch, RedisJSON, and RedisTimeSeries, but modules are not installed under `/usr/local/redis/modules/`.
-- **Root cause / 根因**: Script defect - `redis.conf` is generated with `loadmodule` lines regardless of whether Redis modules were actually built/installed. Redis server fails to start when it cannot load the specified module files.
+- **OS / 环境**: AlmaLinux 9.8; Anolis OS 8.10
+- **Machine / 机器**: 47.84.25.92 / oneinstack-test-01; 47.236.16.29 (Oneinstack测试-2)
+- **Symptom / 现象**: Redis 8 first start aborts immediately. Default `redis.conf` contains `loadmodule` directives for RedisBloom, RediSearch, RedisJSON, and RedisTimeSeries, but modules are not installed under `/usr/local/redis/modules/`. Additionally, `install.sh` still reports EXIT:0 / "installed successfully" — **false success** even though `redis-server` won't start.
+- **Root cause / 根因**: Script defect - `redis.conf` is generated with `loadmodule` lines regardless of whether Redis modules were actually built/installed. Redis server fails to start when it cannot load the specified module files. Script does not verify redis-server is actually running before reporting success.
 - **Fix plan / 修复方案**: 
   1. Do not write `loadmodule` directives when modules were not built/installed
   2. Or: install modules first, then enable `loadmodule`
-  3. Mitigation: comment out `loadmodule` lines manually
+  3. **Fail install when redis-server is not actually running** (verify with `redis-cli PING` or `systemctl is-active`)
+  4. Mitigation: comment out `loadmodule` lines manually
 - **Evidence / 证据**: 
-  - Install command: `install.sh --redis --memcached --php_extensions imagick,redis,memcached`
-  - Redis fails to start with module load errors
-  - Mitigation used: comment out `loadmodule` directives in `redis.conf`
+  - AlmaLinux 9.8 @ 47.84.25.92: Install command `install.sh --redis --memcached --php_extensions imagick,redis,memcached`; Redis fails to start with module load errors; mitigation: comment out `loadmodule` directives
+  - Anolis OS 8.10 @ 47.236.16.29: Same issue reproduced — default `loadmodule` with no `/usr/local/redis/modules/` dir → redis-server won't start; commenting `loadmodule` → `PING` returns `PONG`; script still EXIT:0 "installed successfully"
 - **Code changed? / 是否已改代码**: no
-- **Related issues**: Script defect (no GitHub issue yet)
+- **Related issues**: Script defect (no GitHub issue yet); see IB-004, IB-010
 
 ---
 
@@ -132,20 +133,25 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 
 - **Date / 日期**: 2026-09-19
 - **Status / 状态**: open
-- **Component / 组件**: Redis Modules (RediSearch, RedisJSON)
-- **OS / 环境**: AlmaLinux 9.8
-- **Machine / 机器**: 47.84.25.92 / oneinstack-test-01
-- **Symptom / 现象**: RediSearch and RedisJSON module compilation fails during install. Core Redis still installs and works, but modules are missing, triggering IB-003 when `loadmodule` is present in config.
-- **Root cause / 根因**: RediSearch and RedisJSON require Rust/Cargo toolchain for compilation, which is not pre-installed and not automatically installed by the script.
+- **Component / 组件**: Redis Modules (RediSearch, RedisJSON, RedisBloom, RedisTimeSeries)
+- **OS / 环境**: AlmaLinux 9.8; Anolis OS 8.10
+- **Machine / 机器**: 47.84.25.92 / oneinstack-test-01; 47.236.16.29 (Oneinstack测试-2)
+- **Symptom / 现象**: Redis module compilation fails during install. Core Redis still installs and works, but modules are missing, triggering IB-003 when `loadmodule` is present in config.
+  - **AlmaLinux 9.8**: RediSearch and RedisJSON fail (Rust missing); RedisBloom and RedisTimeSeries can build
+  - **Anolis OS 8.10**: **ALL four modules fail** (redisbloom, redisearch, redisjson, redistimeseries) — worse than AlmaLinux
+- **Root cause / 根因**: 
+  1. RediSearch and RedisJSON require Rust/Cargo toolchain for compilation, which is not pre-installed and not automatically installed by the script
+  2. On Anolis, additional platform detection and Python version issues prevent even Bloom/TimeSeries from building (see IB-010)
 - **Fix plan / 修复方案**: 
   1. Pre-install Rust/Cargo toolchain before attempting module build
   2. Or: skip module build with clear warning message when Rust is unavailable
   3. Never default to `loadmodule` for modules that failed to build
+  4. Fix Anolis platform detection (see IB-010)
 - **Evidence / 证据**: 
-  - Build fails with missing `cargo`/`rustc`
-  - Same environment as IB-003
+  - AlmaLinux @ 47.84.25.92: Build fails with missing `cargo`/`rustc`; bloom/timeseries OK
+  - Anolis @ 47.236.16.29: ALL four modules fail to build — bloom, search, json, timeseries all missing
 - **Code changed? / 是否已改代码**: no
-- **Related issues**: Related to IB-003
+- **Related issues**: Related to IB-003, IB-010
 
 ---
 
@@ -280,3 +286,30 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   - Classification: Class D/E script defect
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: IB-006 success EXIT=1 note — same general pattern
+
+---
+
+### IB-010: Redis modules platform detection failures on Anolis
+
+- **Date / 日期**: 2026-09-20
+- **Status / 状态**: open
+- **Component / 组件**: Redis modules build tooling
+- **OS / 环境**: Anolis OS 8.10
+- **Machine / 机器**: 47.236.16.29 (Oneinstack测试-2)
+- **Symptom / 现象**: Redis module builds fail on Anolis due to platform detection and Python version issues:
+  1. Python 3.6.8 missing `dataclasses` module (introduced in Python 3.7)
+  2. RediSearch build system rejects OS id `anolis` — not recognized as a supported platform
+- **Root cause / 根因**: 
+  1. Redis module build scripts require Python ≥3.7 for `dataclasses` stdlib module, but Anolis 8.10 ships Python 3.6.8
+  2. Platform detection in module build systems does not recognize `anolis` as a valid OS identifier (likely expects `rhel`, `centos`, `rocky`, etc.)
+- **Fix plan / 修复方案**: 
+  1. Support `anolis` in platform detection (map to RHEL-compatible)
+  2. Require Python ≥3.7 for module builds, or provide `dataclasses` backport (`pip install dataclasses`)
+  3. Document Anolis-specific prerequisites
+- **Evidence / 证据**: 
+  - Python 3.6.8 → `ModuleNotFoundError: No module named 'dataclasses'`
+  - RediSearch rejects `anolis` OS id
+  - All four modules fail on Anolis (contrast: AlmaLinux builds bloom+timeseries OK)
+  - Classification: Class A (new platform support)
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: IB-004 (root cause for Anolis-specific module failures)
