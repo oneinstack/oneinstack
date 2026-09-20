@@ -9,8 +9,9 @@
 #       https://github.com/oneinstack/oneinstack
 
 # Redis module versions (defaults if not set in versions.txt)
-: ${redisbloom_ver:=2.8.2}
-: ${redistimeseries_ver:=1.14.1}
+# Use tags that exist on GitHub and are compatible with Redis 8.x
+: ${redisbloom_ver:=2.8.17}
+: ${redistimeseries_ver:=1.12.14}
 
 Install_redis_server() {
   pushd ${oneinstack_dir}/src > /dev/null
@@ -67,7 +68,18 @@ Install_redis_server() {
 }
 
 Install_redis_modules() {
+  # Ensure required variables are set for standalone invocation
+  : ${redis_install_dir:=/usr/local/redis}
+  : ${oneinstack_dir:=$(dirname "$(dirname "$(readlink -f "${BASH_SOURCE[0]}")")")}
+  : ${THREAD:=$(nproc)}
+  
   [ ! -e "${redis_install_dir}/bin/redis-server" ] && { echo "${CWARNING}Redis is not installed, skipping modules! ${CEND}"; return 1; }
+  
+  # Require git for recursive clone (submodules needed for build)
+  if ! command -v git >/dev/null 2>&1; then
+    echo "${CWARNING}git is required to build Redis modules (for submodule support). ${CEND}"
+    return 1
+  fi
   
   local modules_dir="${redis_install_dir}/modules"
   mkdir -p ${modules_dir}
@@ -75,63 +87,61 @@ Install_redis_modules() {
   pushd ${oneinstack_dir}/src > /dev/null
   
   # Install RedisBloom (does not require Rust)
+  # Must use git clone --recursive because GitHub archive tarballs lack submodules
   if [ -n "${redisbloom_ver}" ]; then
-    echo "Building RedisBloom ${redisbloom_ver}..."
-    local bloom_tarball="RedisBloom-${redisbloom_ver}.tar.gz"
-    if [ ! -f "${bloom_tarball}" ]; then
-      wget --tries=3 -c "https://github.com/RedisBloom/RedisBloom/archive/refs/tags/v${redisbloom_ver}.tar.gz" -O "${bloom_tarball}" 2>/dev/null || \
-      wget --tries=3 -c "${mirror_link}/oneinstack/src/${bloom_tarball}" -O "${bloom_tarball}" 2>/dev/null
-    fi
-    if [ -f "${bloom_tarball}" ]; then
-      rm -rf RedisBloom-${redisbloom_ver}
-      tar xzf "${bloom_tarball}"
-      if [ -d "RedisBloom-${redisbloom_ver}" ]; then
-        pushd RedisBloom-${redisbloom_ver} > /dev/null
-        make -j ${THREAD} 2>&1 | tail -20
-        if [ -f "redisbloom.so" ]; then
-          /bin/cp redisbloom.so ${modules_dir}/
-          chown redis:redis ${modules_dir}/redisbloom.so
-          echo "loadmodule ${modules_dir}/redisbloom.so" >> ${redis_install_dir}/etc/redis.conf
-          echo "${CSUCCESS}RedisBloom module installed successfully! ${CEND}"
-        else
-          echo "${CWARNING}RedisBloom build failed, module not installed. ${CEND}"
-        fi
-        popd > /dev/null
-        rm -rf RedisBloom-${redisbloom_ver}
+    echo "Building RedisBloom v${redisbloom_ver}..."
+    local bloom_dir="RedisBloom-${redisbloom_ver}"
+    rm -rf "${bloom_dir}"
+    
+    if git clone --recursive --depth 1 -b "v${redisbloom_ver}" \
+         https://github.com/RedisBloom/RedisBloom.git "${bloom_dir}" 2>/dev/null; then
+      pushd "${bloom_dir}" > /dev/null
+      # Initialize submodules if not already done
+      git submodule update --init --recursive 2>/dev/null || true
+      make -j ${THREAD} 2>&1 | tail -30
+      # .so may be in bin/linux-x64-release/ or similar, use find
+      local bloom_so=$(find . -name "redisbloom.so" -type f 2>/dev/null | head -1)
+      if [ -n "${bloom_so}" ] && [ -s "${bloom_so}" ]; then
+        /bin/cp "${bloom_so}" ${modules_dir}/
+        chown redis:redis ${modules_dir}/redisbloom.so
+        echo "loadmodule ${modules_dir}/redisbloom.so" >> ${redis_install_dir}/etc/redis.conf
+        echo "${CSUCCESS}RedisBloom module installed successfully! ${CEND}"
+      else
+        echo "${CWARNING}RedisBloom build failed (redisbloom.so not found), module not installed. ${CEND}"
       fi
+      popd > /dev/null
+      rm -rf "${bloom_dir}"
     else
-      echo "${CWARNING}Failed to download RedisBloom, skipping. ${CEND}"
+      echo "${CWARNING}Failed to clone RedisBloom v${redisbloom_ver}, skipping. ${CEND}"
     fi
   fi
   
   # Install RedisTimeSeries (does not require Rust)
+  # Must use git clone --recursive because GitHub archive tarballs lack submodules
   if [ -n "${redistimeseries_ver}" ]; then
-    echo "Building RedisTimeSeries ${redistimeseries_ver}..."
-    local ts_tarball="RedisTimeSeries-${redistimeseries_ver}.tar.gz"
-    if [ ! -f "${ts_tarball}" ]; then
-      wget --tries=3 -c "https://github.com/RedisTimeSeries/RedisTimeSeries/archive/refs/tags/v${redistimeseries_ver}.tar.gz" -O "${ts_tarball}" 2>/dev/null || \
-      wget --tries=3 -c "${mirror_link}/oneinstack/src/${ts_tarball}" -O "${ts_tarball}" 2>/dev/null
-    fi
-    if [ -f "${ts_tarball}" ]; then
-      rm -rf RedisTimeSeries-${redistimeseries_ver}
-      tar xzf "${ts_tarball}"
-      if [ -d "RedisTimeSeries-${redistimeseries_ver}" ]; then
-        pushd RedisTimeSeries-${redistimeseries_ver} > /dev/null
-        make -j ${THREAD} 2>&1 | tail -20
-        local ts_so=$(find . -name "redistimeseries.so" -type f 2>/dev/null | head -1)
-        if [ -n "${ts_so}" ] && [ -f "${ts_so}" ]; then
-          /bin/cp "${ts_so}" ${modules_dir}/
-          chown redis:redis ${modules_dir}/redistimeseries.so
-          echo "loadmodule ${modules_dir}/redistimeseries.so" >> ${redis_install_dir}/etc/redis.conf
-          echo "${CSUCCESS}RedisTimeSeries module installed successfully! ${CEND}"
-        else
-          echo "${CWARNING}RedisTimeSeries build failed, module not installed. ${CEND}"
-        fi
-        popd > /dev/null
-        rm -rf RedisTimeSeries-${redistimeseries_ver}
+    echo "Building RedisTimeSeries v${redistimeseries_ver}..."
+    local ts_dir="RedisTimeSeries-${redistimeseries_ver}"
+    rm -rf "${ts_dir}"
+    
+    if git clone --recursive --depth 1 -b "v${redistimeseries_ver}" \
+         https://github.com/RedisTimeSeries/RedisTimeSeries.git "${ts_dir}" 2>/dev/null; then
+      pushd "${ts_dir}" > /dev/null
+      # Initialize submodules if not already done
+      git submodule update --init --recursive 2>/dev/null || true
+      make -j ${THREAD} 2>&1 | tail -30
+      local ts_so=$(find . -name "redistimeseries.so" -type f 2>/dev/null | head -1)
+      if [ -n "${ts_so}" ] && [ -s "${ts_so}" ]; then
+        /bin/cp "${ts_so}" ${modules_dir}/
+        chown redis:redis ${modules_dir}/redistimeseries.so
+        echo "loadmodule ${modules_dir}/redistimeseries.so" >> ${redis_install_dir}/etc/redis.conf
+        echo "${CSUCCESS}RedisTimeSeries module installed successfully! ${CEND}"
+      else
+        echo "${CWARNING}RedisTimeSeries build failed (redistimeseries.so not found), module not installed. ${CEND}"
       fi
+      popd > /dev/null
+      rm -rf "${ts_dir}"
     else
-      echo "${CWARNING}Failed to download RedisTimeSeries, skipping. ${CEND}"
+      echo "${CWARNING}Failed to clone RedisTimeSeries v${redistimeseries_ver}, skipping. ${CEND}"
     fi
   fi
   
@@ -150,7 +160,7 @@ Install_redis_modules() {
   chown -R redis:redis ${modules_dir}
   
   # Reload Redis if modules were installed and it's running
-  if [ -n "$(ls -A ${modules_dir} 2>/dev/null)" ]; then
+  if [ -n "$(ls -A ${modules_dir}/*.so 2>/dev/null)" ]; then
     echo "Redis modules installed to ${modules_dir}"
     if systemctl is-active --quiet redis-server; then
       echo "Restarting Redis to load modules..."
