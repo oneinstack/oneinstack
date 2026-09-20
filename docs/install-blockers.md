@@ -146,12 +146,12 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 ### IB-004: RediSearch/RedisJSON build fails without Rust toolchain
 
 - **Date / 日期**: 2026-09-19
-- **Status / 状态**: investigating (partial — see module breakdown)
+- **Status / 状态**: **fixed-pending-release**
 - **Component / 组件**: Redis Modules (RediSearch, RedisJSON, RedisBloom, RedisTimeSeries)
 - **OS / 环境**: AlmaLinux 9.8; Anolis OS 8.10; Ubuntu 22.04
 - **Machine / 机器**: 47.84.25.92 / oneinstack-test-01; 47.236.16.29 (Oneinstack测试-2); 47.84.22.98 (oneinstack-redis-test-01)
-- **Symptom / 现象**: Redis module compilation fails or modules not deployed. Core Redis installs and works (IB-003 now fixed), but modules are not available.
-  - **Module breakdown (Ubuntu 22.04 @ 47.84.22.98 retest)**:
+- **Symptom / 现象**: Redis module compilation fails or modules not deployed. Core Redis installs and works (IB-003a fixed), but modules were not available.
+  - **Module breakdown (prior to fix)**:
     - **redisbloom / redistimeseries**: Build CAN succeed, but `.so` files NOT deployed to `/usr/local/redis/modules/`
     - **redisearch / redisjson**: Build FAILS — missing `cargo`/`rustc` (and `cmake≥3.25`)
   - **AlmaLinux 9.8**: RediSearch and RedisJSON fail (Rust missing); RedisBloom and RedisTimeSeries can build
@@ -160,19 +160,17 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   1. RediSearch and RedisJSON require Rust/Cargo toolchain + cmake≥3.25 for compilation, which are not pre-installed
   2. RedisBloom/RedisTimeSeries build artifacts not deployed to target directory even when build succeeds
   3. On Anolis, additional platform detection and Python version issues (see IB-010)
-- **Fix plan / 修复方案**: 
-  1. **Priority**: Add cargo/rust toolchain installation path for search/json modules
-  2. **Priority**: Deploy built `.so` modules to `/usr/local/redis/modules/` after successful build
-  3. Ensure cmake≥3.25 available for module builds
-  4. Skip module build with clear warning when prerequisites unavailable
-  5. Fix Anolis platform detection (see IB-010)
+- **Fix implemented**: 
+  - `--redis_modules` flag now installs bloom/timeseries into `/usr/local/redis/modules/` directory
+  - Skips search/json without cargo with clear warning message
+  - Only writes `loadmodule` directives for modules that were actually built and deployed
 - **Evidence / 证据**: 
   - AlmaLinux @ 47.84.25.92: Build fails with missing `cargo`/`rustc`; bloom/timeseries build OK but deployment unclear
   - Anolis @ 47.236.16.29: ALL four modules fail to build
   - **Ubuntu 22.04 @ 47.84.22.98 (retest on main@82f023a)**: redisearch/redisjson FAIL (no cargo/rustc); redisbloom/redistimeseries logs show build artifacts but NOT deployed to `/usr/local/redis/modules/`; no `.so` files present
-- **Code changed? / 是否已改代码**: no (partial issue remains)
-- **Related issues**: IB-003 (now fixed); IB-010 (Anolis platform detection)
-- **Conclusion**: Latest main — core Redis installable and pingable; IB-004 NOT fully fixed (module build/deploy issues remain)
+- **Code changed? / 是否已改代码**: yes — [PR #577](https://github.com/oneinstack/oneinstack/pull/577) (branch `cursor/fix-redis-modules-ib004-8065`)
+- **Related issues**: IB-003a (fixed); IB-003b (still open — retest needed for truthful messaging); IB-010 (Anolis platform detection)
+- **Note**: IB-003b remains open until retest confirms truthful messaging after IB-004 fix is merged
 
 ---
 
