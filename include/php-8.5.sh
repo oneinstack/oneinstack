@@ -66,7 +66,8 @@ Install_PHP85() {
     --disable-phar \
     --disable-rpath
 
-    make EXTRA_CFLAGS="-Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers" -j ${THREAD} && make install
+    [ -f Makefile ] && sed -i 's@-Wl,-z,max-page-size=[0-9]\+@@g; s@-z,max-page-size=[0-9]\+@@g' Makefile
+    make EXTRA_CFLAGS="-Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers -fPIE" EXTRA_LDFLAGS_PROGRAM="-pie" -j ${THREAD} && make install
     
     if [ -e "${php_install_dir}/bin/phpize" ]; then
       # php.ini配置

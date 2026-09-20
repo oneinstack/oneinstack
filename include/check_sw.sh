@@ -109,6 +109,21 @@ installDepsRHEL() {
     yum -y groupremove "Basic Web Server" "MySQL Database server" "MySQL Database client"
   fi
 
+  # Ensure EPEL repository reachability (fallback to Aliyun baseurl if mirrors.fedoraproject.org is unreachable or in China)
+  if [ -e /etc/yum.repos.d/epel.repo ]; then
+    local epel_switch=0
+    if [ "${OUTIP_STATE}"x == "China"x ]; then
+      epel_switch=1
+    elif ! curl --connect-timeout 3 -m 5 -sI https://mirrors.fedoraproject.org >/dev/null 2>&1; then
+      epel_switch=1
+    fi
+    if [ ${epel_switch} -eq 1 ]; then
+      sed -e 's|^metalink=|#metalink=|g' \
+          -e 's|^#baseurl=https://download.example/pub/epel/|baseurl=https://mirrors.aliyun.com/epel/|g' \
+          -i /etc/yum.repos.d/epel*.repo 2>/dev/null
+    fi
+  fi
+
   if [ "${RHEL_ver}" -ge 9 >/dev/null 2>&1 ] || [ "${RHEL_ver}" == '9' ] || [ "${RHEL_ver}" == '10' ]; then
     [ ! -e "/usr/lib64/libtinfo.so.5" ] && ln -s /usr/lib64/libtinfo.so.6 /usr/lib64/libtinfo.so.5
     [ ! -e "/usr/lib64/libncurses.so.5" ] && ln -s /usr/lib64/libncurses.so.6 /usr/lib64/libncurses.so.5

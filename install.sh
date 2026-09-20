@@ -9,6 +9,7 @@
 #       https://github.com/oneinstack/oneinstack
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
+set -o pipefail
 clear
 printf "
 #######################################################################
@@ -1104,18 +1105,22 @@ case "${nginx_option}" in
 1)
   . include/nginx.sh
   Install_Nginx 2>&1 | tee -a ${oneinstack_dir}/install.log
+  [ ${PIPESTATUS[0]} -ne 0 ] && { echo "${CFAILURE}Nginx install failed!${CEND}"; exit 1; }
   ;;
 2)
   . include/tengine.sh
   Install_Tengine 2>&1 | tee -a ${oneinstack_dir}/install.log
+  [ ${PIPESTATUS[0]} -ne 0 ] && { echo "${CFAILURE}Tengine install failed!${CEND}"; exit 1; }
   ;;
 3)
   . include/openresty.sh
   Install_OpenResty 2>&1 | tee -a ${oneinstack_dir}/install.log
+  [ ${PIPESTATUS[0]} -ne 0 ] && { echo "${CFAILURE}OpenResty install failed!${CEND}"; exit 1; }
   ;;
 4)
   . include/caddy.sh
   Install_Caddy 2>&1 | tee -a ${oneinstack_dir}/install.log
+  [ ${PIPESTATUS[0]} -ne 0 ] && { echo "${CFAILURE}Caddy install failed!${CEND}"; exit 1; }
   caddy_flag='y'
   ;;
 esac
@@ -1420,6 +1425,7 @@ fi
 if [ "${redis_flag}" == 'y' ]; then
   . include/redis.sh
   Install_redis_server 2>&1 | tee -a ${oneinstack_dir}/install.log
+  [ ${PIPESTATUS[0]} -ne 0 ] && { echo "${CFAILURE}Redis install failed!${CEND}"; exit 1; }
 fi
 
 # valkey

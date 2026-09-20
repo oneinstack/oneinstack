@@ -25,6 +25,8 @@ Install_redis_server() {
     sed -i "s@^# bind 127.0.0.1@bind 127.0.0.1@" ${redis_install_dir}/etc/redis.conf
     redis_maxmemory=`expr $Mem / 8`000000
     [ -z "`grep ^maxmemory ${redis_install_dir}/etc/redis.conf`" ] && sed -i "s@maxmemory <bytes>@maxmemory <bytes>\nmaxmemory `expr $Mem / 8`000000@" ${redis_install_dir}/etc/redis.conf
+    # Disable any unbuilt loadmodule to prevent startup crash
+    sed -i 's@^loadmodule @#loadmodule @g' ${redis_install_dir}/etc/redis.conf
     echo "${CSUCCESS}Redis-server installed successfully! ${CEND}"
     popd > /dev/null
     rm -rf redis-${redis_ver}
@@ -34,10 +36,24 @@ Install_redis_server() {
 
     /bin/cp ../init.d/redis-server.service /lib/systemd/system/
     sed -i "s@/usr/local/redis@${redis_install_dir}@g" /lib/systemd/system/redis-server.service
+    systemctl daemon-reload
     systemctl enable redis-server
     #[ -z "`grep 'vm.overcommit_memory' /etc/sysctl.conf`" ] && echo 'vm.overcommit_memory = 1' >> /etc/sysctl.conf
     #sysctl -p
-    systemctl start redis-server
+    systemctl restart redis-server || systemctl start redis-server
+    local redis_started=0
+    for ((i=1; i<=5; i++)); do
+      if ${redis_install_dir}/bin/redis-cli ping 2>/dev/null | grep -q 'PONG'; then
+        redis_started=1
+        break
+      fi
+      sleep 1
+    done
+    if [ ${redis_started} -eq 0 ]; then
+      echo "${CFAILURE}Redis-server start failed! redis-cli ping did not return PONG. ${CEND}"
+      systemctl status redis-server --no-pager
+      kill -9 $$; exit 1;
+    fi
   else
     rm -rf ${redis_install_dir}
     echo "${CFAILURE}Redis-server install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release

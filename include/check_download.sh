@@ -24,9 +24,12 @@ checkDownload() {
   fi
 
   # openssl
-  if [[ ${nginx_option} =~ ^[1-3]$ ]]; then
-      echo "Download openSSL..."
-      src_url=${mirror_link}/oneinstack/src/openssl-${openssl_ver}.tar.gz && Download_src
+  if [ "${nginx_option}" == '1' ] || [ "${nginx_option}" == '3' ]; then
+    echo "Download openSSL ${openssl_ver}..."
+    src_url=${mirror_link}/oneinstack/src/openssl-${openssl_ver}.tar.gz && Download_src
+  elif [ "${nginx_option}" == '2' ]; then
+    echo "Download openSSL ${openssl11_ver}..."
+    src_url=${mirror_link}/oneinstack/src/openssl-${openssl11_ver}.tar.gz && Download_src
   fi
 
   # jemalloc
@@ -208,6 +211,13 @@ checkDownload() {
         if [ "${tryDlCount}" == '6' ]; then
           echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
           kill -9 $$; exit 1;
+        fi
+        if [ "${dbinstallmethod}" == '1' ] && which xz >/dev/null 2>&1; then
+          if ! xz -t ${FILE_NAME} >/dev/null 2>&1; then
+            echo "${CFAILURE}${FILE_NAME} is corrupt or truncated! Removing bad package. Please manually place complete package into oneinstack/src.${CEND}"
+            rm -f ${FILE_NAME} ${FILE_NAME}.md5
+            kill -9 $$; exit 1;
+          fi
         fi
         ;;
       2)

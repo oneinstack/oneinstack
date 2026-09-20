@@ -41,15 +41,31 @@ Install_Caddy() {
 
   #modify caddy.service
   sed -i "s@/usr/local/caddy@${caddy_install_dir}@g" /lib/systemd/system/caddy.service
+  sed -i "s@User=caddy@User=${run_user}@g" /lib/systemd/system/caddy.service
+  sed -i "s@Group=caddy@Group=${run_group}@g" /lib/systemd/system/caddy.service
+  chown -R ${run_user}:${run_group} ${caddy_install_dir}
 
   #设置caddy开机启动
+  systemctl daemon-reload
   systemctl enable caddy
 
-  #reload systemd
-  systemctl daemon-reload
-
   #start caddy service
-  systemctl start caddy
+  systemctl restart caddy || systemctl start caddy
 
-   echo "${CSUCCESS}Caddy installed successfully! ${CEND}"
+  local caddy_started=0
+  for ((i=1; i<=5; i++)); do
+    if systemctl is-active caddy >/dev/null 2>&1; then
+      caddy_started=1
+      break
+    fi
+    sleep 1
+  done
+
+  if [ ${caddy_started} -eq 0 ]; then
+    echo "${CFAILURE}Caddy start failed! Service is not active. ${CEND}"
+    systemctl status caddy --no-pager
+    kill -9 $$; exit 1
+  fi
+
+  echo "${CSUCCESS}Caddy installed successfully! ${CEND}"
 }

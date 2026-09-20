@@ -40,11 +40,15 @@ Install_Tomcat10() {
   pushd ${tomcat_install_dir}/bin > /dev/null
   tar xzf tomcat-native.tar.gz
   pushd tomcat-native-*-src/native > /dev/null
+  local tomcat_ssl_arg="--with-ssl=yes"
   if [ "${armplatform}" == "y" ]; then
-    ./configure --prefix=${apr_install_dir} --with-apr=${apr_install_dir}
-  else
-    ./configure --prefix=${apr_install_dir} --with-apr=${apr_install_dir} --with-ssl=${openssl_install_dir}
+    tomcat_ssl_arg=""
+  elif [ -d "${openssl_install_dir}/include/openssl" ]; then
+    tomcat_ssl_arg="--with-ssl=${openssl_install_dir}"
+  elif [ -f "/usr/include/openssl/ssl.h" ]; then
+    tomcat_ssl_arg="--with-ssl=/usr"
   fi
+  ./configure --prefix=${apr_install_dir} --with-apr=${apr_install_dir} ${tomcat_ssl_arg}
   make -j ${THREAD} && make install
   popd > /dev/null
   rm -rf tomcat-native-*
