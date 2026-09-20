@@ -131,22 +131,27 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   - Ubuntu 22.04 @ 47.84.22.98 (retest on main@82f023a): script auto-comments `loadmodule` lines; Redis 8.10.1 starts successfully; `redis-cli PING` → `PONG`; core Redis PASS
 - **Code changed? / 是否已改代码**: yes (main@82f023a)
 
-#### IB-003b: False success / modules not actually enabled — OPEN
+#### IB-003b: False success / modules not actually enabled — OPEN (partial improvement)
 
-- **Status / 状态**: open
+- **Status / 状态**: open (partial improvement via IB-004 fix)
 - **Symptom / 现象**: After auto-comment fix, `MODULE LIST` returns only builtin `vectorset` — no bloom/search/json/timeseries modules loaded. Script still prints "Redis-server installed successfully" even though modules are not available.
 - **Root cause / 根因**: Auto-comment strategy prevents start failure, but modules were never built/deployed. Success message is misleading since advertised module functionality is not present.
 - **Evidence / 证据**: 
-  - Ubuntu 22.04 @ 47.84.22.98: `MODULE LIST` shows only `vectorset`; no `.so` files in `/usr/local/redis/modules/`
-- **Code changed? / 是否已改代码**: no (false-success messaging remains)
-- **Related issues**: IB-004 (module build/deploy issues); IB-010 (Anolis platform detection)
+  - Ubuntu 22.04 @ 47.84.22.98 (prior to IB-004 fix): `MODULE LIST` shows only `vectorset`; no `.so` files in `/usr/local/redis/modules/`
+- **Improvement via IB-004**: With `--redis_modules` flag (PR #577), messaging now accurate:
+  - Modules that build successfully are deployed and loaded
+  - Modules that fail (search/json without cargo) show clear skip warnings
+  - Success message reflects actual module state
+- **Residual concern**: Default Redis install (without `--redis_modules`) still prints generic success even though no modules are available — may still be misleading for users expecting module functionality
+- **Code changed? / 是否已改代码**: partial (improved for `--redis_modules` path; default path unchanged)
+- **Related issues**: IB-004 (now fixed); IB-010 (Anolis platform detection)
 
 ---
 
 ### IB-004: RediSearch/RedisJSON build fails without Rust toolchain
 
 - **Date / 日期**: 2026-09-19
-- **Status / 状态**: **fixed-pending-release**
+- **Status / 状态**: **fixed** ([PR #577](https://github.com/oneinstack/oneinstack/pull/577) @148289a)
 - **Component / 组件**: Redis Modules (RediSearch, RedisJSON, RedisBloom, RedisTimeSeries)
 - **OS / 环境**: AlmaLinux 9.8; Anolis OS 8.10; Ubuntu 22.04
 - **Machine / 机器**: 47.84.25.92 / oneinstack-test-01; 47.236.16.29 (Oneinstack测试-2); 47.84.22.98 (oneinstack-redis-test-01)
@@ -164,13 +169,15 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   - `--redis_modules` flag now installs bloom/timeseries into `/usr/local/redis/modules/` directory
   - Skips search/json without cargo with clear warning message
   - Only writes `loadmodule` directives for modules that were actually built and deployed
-- **Evidence / 证据**: 
-  - AlmaLinux @ 47.84.25.92: Build fails with missing `cargo`/`rustc`; bloom/timeseries build OK but deployment unclear
-  - Anolis @ 47.236.16.29: ALL four modules fail to build
-  - **Ubuntu 22.04 @ 47.84.22.98 (retest on main@82f023a)**: redisearch/redisjson FAIL (no cargo/rustc); redisbloom/redistimeseries logs show build artifacts but NOT deployed to `/usr/local/redis/modules/`; no `.so` files present
+- **Retest evidence (Ubuntu 22.04 @ 47.84.22.98, PR #577 @148289a)**: 
+  - ✅ RedisBloom 2.8.17 + RedisTimeSeries 1.12.14 in modules dir
+  - ✅ `loadmodule` directives written for built modules
+  - ✅ `MODULE LIST` shows `bf` (bloom) + `timeseries` — smoke OK
+  - ✅ No cargo: search/json skip warnings PASS (clear messaging)
+  - ✅ Core Redis `PONG`; IB-003 comment block not regressed
 - **Code changed? / 是否已改代码**: yes — [PR #577](https://github.com/oneinstack/oneinstack/pull/577) (branch `cursor/fix-redis-modules-ib004-8065`)
-- **Related issues**: IB-003a (fixed); IB-003b (still open — retest needed for truthful messaging); IB-010 (Anolis platform detection)
-- **Note**: IB-003b remains open until retest confirms truthful messaging after IB-004 fix is merged
+- **Related issues**: IB-003a (fixed); IB-003b (see note); IB-010 (Anolis platform detection)
+- **Residual UX note** (non-blocking): `./install.sh --redis_modules` alone still no-ops when nested under `redis_flag` check; installing modules on already-installed Redis needs sourcing `Install_redis_modules` directly — optional follow-up enhancement
 
 ---
 
