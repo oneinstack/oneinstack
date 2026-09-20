@@ -68,6 +68,7 @@ Show_Help() {
   --dbclickhousepwd [password] ClickHouse password
   --pureftpd                  Install Pure-Ftpd
   --redis                     Install Redis
+  --redis_modules             Install Redis modules (RedisBloom, RedisTimeSeries)
   --valkey                    Install Valkey
   --memcached                 Install Memcached
   --clickhouse                Install ClickHouse
@@ -79,7 +80,7 @@ Show_Help() {
   "
 }
 ARG_NUM=$#
-TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbclickhousepwd:,dbinstallmethod:,pureftpd,redis,valkey,memcached,clickhouse,phpmyadmin,ssh_port:,firewall,md5sum,reboot -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbclickhousepwd:,dbinstallmethod:,pureftpd,redis,redis_modules,valkey,memcached,clickhouse,phpmyadmin,ssh_port:,firewall,md5sum,reboot -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -280,6 +281,10 @@ while :; do
       echo "${CWARNING}redis-server already installed! ${CEND}"
       unset redis_flag
     }
+    ;;
+  --redis_modules)
+    redis_modules_flag=y
+    shift 1
     ;;
   --valkey)
     valkey_flag=y
@@ -1426,6 +1431,10 @@ if [ "${redis_flag}" == 'y' ]; then
   . include/redis.sh
   Install_redis_server 2>&1 | tee -a ${oneinstack_dir}/install.log
   [ ${PIPESTATUS[0]} -ne 0 ] && { echo "${CFAILURE}Redis install failed!${CEND}"; exit 1; }
+  # Install Redis modules (optional, does not fail main install)
+  if [ "${redis_modules_flag}" == 'y' ]; then
+    Install_redis_modules 2>&1 | tee -a ${oneinstack_dir}/install.log
+  fi
 fi
 
 # valkey

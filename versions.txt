@@ -107,6 +107,8 @@ pureftpd_ver=1.0.54
 redis_ver=8.10.1
 redis_oldver=7.4.2
 pecl_redis_ver=6.3.0
+redisbloom_ver=2.8.2
+redistimeseries_ver=1.14.1
 
 # Valkey
 valkey_ver=8.0.2
