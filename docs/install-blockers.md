@@ -80,10 +80,13 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   3. Add file size or MD5/SHA256 validation before extraction (preferred over blind version bump alone)
 - **Evidence / 证据**: 
   - File: `mysql-8.0.39-linux-glibc2.17-x86_64.tar.xz`
-  - Mirror Content-Length: ~109MB
-  - Expected size: ~423MB
+  - URL: `https://mirrors.oneinstack.com/oneinstack/src/mysql-8.0.39-linux-glibc2.17-x86_64.tar.xz`
+  - Mirror Content-Length: ~109MB (114542816 bytes)
+  - Expected size: ~423MB (443772160 bytes), md5=`1c092c3814b10bfa0794077867f9f4ad`
   - Official CDN status: frequently 404
-  - Additional observation (IB-007 machine, 47.236.16.29 Anolis 8.10): truncated length=114542816, md5_bad=`950f19c1531cf6f4dd249491a9817352`; expected length=443772160, md5=`1c092c3814b10bfa0794077867f9f4ad`; official CDN retry succeeded
+  - Anolis 8.10 @ 47.236.16.29 (IB-007 machine): truncated length=114542816, md5_bad=`950f19c1531cf6f4dd249491a9817352`; official CDN retry succeeded
+  - **Redis retest machine @ 47.84.22.98**: reproduced — bad package length=114542816; official CDN filled to length=443772160, md5=`1c092c3814b10bfa0794077867f9f4ad` (XZ_OK); Class C
+  - Note: Redis retest in progress for IB-003/004 on same machine
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: #568
 
