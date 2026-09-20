@@ -40,6 +40,7 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - [IB-010: Redis modules platform detection failures on Anolis](#ib-010-redis-modules-platform-detection-failures-on-anolis)
 - [IB-011: mirrors missing Panel release package v0.3.0-build.60](#ib-011-mirrors-missing-panel-release-package-v030-build60)
 - [IB-012: default scriptCenter disabled → software store incomplete](#ib-012-default-scriptcenter-disabled--software-store-incomplete)
+- [IB-013: Panel install.sh non-interactive false readiness success](#ib-013-panel-installsh-non-interactive-false-readiness-success)
 
 ---
 
@@ -324,7 +325,7 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - **Status / 状态**: open
 - **Component / 组件**: Panel / mirrors
 - **OS / 环境**: Ubuntu 22.04
-- **Machine / 机器**: 47.237.174.37 (oneinstack-panel-test-01)
+- **Machine / 机器**: 47.237.174.37 (oneinstack-panel-test-01); 47.237.170.234 (oneinstack-panel-test-02)
 - **Symptom / 现象**: `wget https://mirrors.oneinstack.com/oneinstack/one-linux-amd64-v0.3.0-build.60.tar.gz` returns 404. Panel installer cannot download package from primary mirror.
 - **Root cause / 根因**: Mirror out of sync with release channel. Mirror appears to only have older versions (e.g., v1.0.0). GitHub Release has the correct package available.
 - **Fix plan / 修复方案**: 
@@ -333,7 +334,8 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - **Evidence / 证据**: 
   - `HEAD` request to mirror → 404
   - GitHub Release → 302→200 (package available)
-  - Login page install succeeded after GitHub fallback
+  - panel-test-01 (47.237.174.37): Login page install succeeded after GitHub fallback
+  - panel-test-02 (47.237.170.234): Same issue reproduced — mirror only has v1.0.0; used GitHub Releases; install PASS
 - **Workaround / 临时方案**: Install from GitHub Release assets + sha256 verification → install OK (v0.3.0-build.60)
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: Oneinstack-Panel packaging/release
@@ -362,5 +364,26 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   - Classification: Configuration/deployment defect
 - **Workaround / 临时方案**: Java legacy-embedded install still works (smoke test passed with Java 11)
 - **Install conclusion context**: Login page OK; smoke Java 11 passed
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: N/A
+
+---
+
+### IB-013: Panel install.sh non-interactive false readiness success
+
+- **Date / 日期**: 2026-09-20
+- **Status / 状态**: open
+- **Component / 组件**: Panel / install.sh
+- **OS / 环境**: Ubuntu 22.04
+- **Machine / 机器**: 47.237.170.234 (oneinstack-panel-test-02)
+- **Symptom / 现象**: Non-interactive Panel install requires both `--force` and `--yes` flags. At installation end, readiness check `curl` is refused/fails, but installer still reports "passed" / success exit.
+- **Root cause / 根因**: Readiness check does not gate success exit or report. Installer declares success even when the service health endpoint is not responding.
+- **Fix plan / 修复方案**: 
+  1. Readiness check must fail install (non-zero exit) if curl/health endpoint fails
+  2. Document `--force --yes` flags for non-interactive installation in README
+- **Evidence / 证据**: 
+  - panel-test-02 Panel验收: PASS eventually noted, but false readiness observed at install completion
+  - Login page later returned 200 (service came up after delay)
+  - Non-interactive flags: `--force --yes` required
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: N/A
