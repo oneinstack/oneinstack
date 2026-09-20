@@ -38,6 +38,8 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - [IB-008: Tomcat Native hard-depends on /usr/local/openssl](#ib-008-tomcat-native-hard-depends-on-usrlocalopenssl)
 - [IB-009: Install_* | tee causes EXIT=1 after successful install](#ib-009-install_--tee-causes-exit1-after-successful-install)
 - [IB-010: Redis modules platform detection failures on Anolis](#ib-010-redis-modules-platform-detection-failures-on-anolis)
+- [IB-011: mirrors missing Panel release package v0.3.0-build.60](#ib-011-mirrors-missing-panel-release-package-v030-build60)
+- [IB-012: default scriptCenter disabled → software store incomplete](#ib-012-default-scriptcenter-disabled--software-store-incomplete)
 
 ---
 
@@ -313,3 +315,52 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   - Classification: Class A (new platform support)
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: IB-004 (root cause for Anolis-specific module failures)
+
+---
+
+### IB-011: mirrors missing Panel release package v0.3.0-build.60
+
+- **Date / 日期**: 2026-09-20
+- **Status / 状态**: open
+- **Component / 组件**: Panel / mirrors
+- **OS / 环境**: Ubuntu 22.04
+- **Machine / 机器**: 47.237.174.37 (oneinstack-panel-test-01)
+- **Symptom / 现象**: `wget https://mirrors.oneinstack.com/oneinstack/one-linux-amd64-v0.3.0-build.60.tar.gz` returns 404. Panel installer cannot download package from primary mirror.
+- **Root cause / 根因**: Mirror out of sync with release channel. Mirror appears to only have older versions (e.g., v1.0.0). GitHub Release has the correct package available.
+- **Fix plan / 修复方案**: 
+  1. Sync latest builds to mirrors.oneinstack.com
+  2. Document GitHub Release as fallback download source in README
+- **Evidence / 证据**: 
+  - `HEAD` request to mirror → 404
+  - GitHub Release → 302→200 (package available)
+  - Login page install succeeded after GitHub fallback
+- **Workaround / 临时方案**: Install from GitHub Release assets + sha256 verification → install OK (v0.3.0-build.60)
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: Oneinstack-Panel packaging/release
+
+---
+
+### IB-012: default scriptCenter disabled → software store incomplete
+
+- **Date / 日期**: 2026-09-20
+- **Status / 状态**: open
+- **Component / 组件**: Panel / scriptCenter
+- **OS / 环境**: Ubuntu 22.04
+- **Machine / 机器**: 47.237.174.37 (oneinstack-panel-test-01)
+- **Symptom / 现象**: Software store components fail to install or are incomplete:
+  - Redis install fails with exit 100
+  - MySQL shows no artifacts
+  - Nginx cannot enqueue for install
+  - firewalld returns `CENTER_UNAVAILABLE`
+- **Root cause / 根因**: `config.yaml` has `scriptCenter.enabled=false` with placeholder URL. Without an active script center, Panel cannot fetch install scripts/artifacts for most software components.
+- **Fix plan / 修复方案**: 
+  1. Enable usable scriptCenter by default for prod/acceptance deployments, OR
+  2. Ship offline artifacts for core components (Nginx/MySQL/Redis) so they work without external center
+- **Evidence / 证据**: 
+  - Task logs show scriptCenter failures
+  - Softwares table shows missing/incomplete entries
+  - Classification: Configuration/deployment defect
+- **Workaround / 临时方案**: Java legacy-embedded install still works (smoke test passed with Java 11)
+- **Install conclusion context**: Login page OK; smoke Java 11 passed
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: N/A
