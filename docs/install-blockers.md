@@ -116,20 +116,30 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 ### IB-003: Redis 8 loadmodule directives for missing modules
 
 - **Date / 日期**: 2026-09-19
-- **Status / 状态**: **fixed** (main@82f023a)
 - **Component / 组件**: Redis
 - **OS / 环境**: AlmaLinux 9.8; Anolis OS 8.10; Ubuntu 22.04
 - **Machine / 机器**: 47.84.25.92 / oneinstack-test-01; 47.236.16.29 (Oneinstack测试-2); 47.84.22.98 (oneinstack-redis-test-01)
-- **Symptom / 现象**: Redis 8 first start aborts immediately. Default `redis.conf` contains `loadmodule` directives for RedisBloom, RediSearch, RedisJSON, and RedisTimeSeries, but modules are not installed under `/usr/local/redis/modules/`. Additionally, `install.sh` still reports EXIT:0 / "installed successfully" — **false success** even though `redis-server` won't start.
-- **Root cause / 根因**: Script defect - `redis.conf` is generated with `loadmodule` lines regardless of whether Redis modules were actually built/installed. Redis server fails to start when it cannot load the specified module files.
-- **Fix implemented**: Script now automatically `sed`-comments out the four `loadmodule` lines when modules are not present. Redis starts without manual config edit.
+
+**Summary**: IB-003 start-blocking issue **FIXED**; false-success / modules-not-loaded still **open**.
+
+#### IB-003a: Redis won't start due to loadmodule — FIXED
+
+- **Status / 状态**: **fixed** (main@82f023a)
+- **Symptom / 现象**: Redis 8 first start aborted immediately because default `redis.conf` contained `loadmodule` directives for modules not installed under `/usr/local/redis/modules/`.
+- **Fix implemented**: Script now automatically `sed`-comments out the four `loadmodule` lines. Redis starts without manual config edit.
 - **Evidence / 证据**: 
-  - AlmaLinux 9.8 @ 47.84.25.92: Original issue — Redis fails to start with module load errors
-  - Anolis OS 8.10 @ 47.236.16.29: Same issue reproduced
-  - **Ubuntu 22.04 @ 47.84.22.98 (retest on main@82f023a)**: FIXED — script auto-comments `loadmodule` lines; Redis 8.10.1 starts successfully; `redis-cli PING` → `PONG`; core Redis PASS
-- **Code changed? / 是否已改代码**: yes (main@82f023a) — auto-comment strategy implemented
-- **Related issues**: See IB-004 for module build issues (separate from loadmodule config); IB-010 for Anolis platform detection
-- **Note**: Previous false-success messaging resolved via auto-comment strategy. Module deployment issues tracked separately in IB-004.
+  - Ubuntu 22.04 @ 47.84.22.98 (retest on main@82f023a): script auto-comments `loadmodule` lines; Redis 8.10.1 starts successfully; `redis-cli PING` → `PONG`; core Redis PASS
+- **Code changed? / 是否已改代码**: yes (main@82f023a)
+
+#### IB-003b: False success / modules not actually enabled — OPEN
+
+- **Status / 状态**: open
+- **Symptom / 现象**: After auto-comment fix, `MODULE LIST` returns only builtin `vectorset` — no bloom/search/json/timeseries modules loaded. Script still prints "Redis-server installed successfully" even though modules are not available.
+- **Root cause / 根因**: Auto-comment strategy prevents start failure, but modules were never built/deployed. Success message is misleading since advertised module functionality is not present.
+- **Evidence / 证据**: 
+  - Ubuntu 22.04 @ 47.84.22.98: `MODULE LIST` shows only `vectorset`; no `.so` files in `/usr/local/redis/modules/`
+- **Code changed? / 是否已改代码**: no (false-success messaging remains)
+- **Related issues**: IB-004 (module build/deploy issues); IB-010 (Anolis platform detection)
 
 ---
 
