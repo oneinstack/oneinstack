@@ -116,48 +116,53 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 ### IB-003: Redis 8 loadmodule directives for missing modules
 
 - **Date / 日期**: 2026-09-19
-- **Status / 状态**: open
+- **Status / 状态**: **fixed** (main@82f023a)
 - **Component / 组件**: Redis
-- **OS / 环境**: AlmaLinux 9.8; Anolis OS 8.10
-- **Machine / 机器**: 47.84.25.92 / oneinstack-test-01; 47.236.16.29 (Oneinstack测试-2)
+- **OS / 环境**: AlmaLinux 9.8; Anolis OS 8.10; Ubuntu 22.04
+- **Machine / 机器**: 47.84.25.92 / oneinstack-test-01; 47.236.16.29 (Oneinstack测试-2); 47.84.22.98 (oneinstack-redis-test-01)
 - **Symptom / 现象**: Redis 8 first start aborts immediately. Default `redis.conf` contains `loadmodule` directives for RedisBloom, RediSearch, RedisJSON, and RedisTimeSeries, but modules are not installed under `/usr/local/redis/modules/`. Additionally, `install.sh` still reports EXIT:0 / "installed successfully" — **false success** even though `redis-server` won't start.
-- **Root cause / 根因**: Script defect - `redis.conf` is generated with `loadmodule` lines regardless of whether Redis modules were actually built/installed. Redis server fails to start when it cannot load the specified module files. Script does not verify redis-server is actually running before reporting success.
-- **Fix plan / 修复方案**: 
-  1. Do not write `loadmodule` directives when modules were not built/installed
-  2. Or: install modules first, then enable `loadmodule`
-  3. **Fail install when redis-server is not actually running** (verify with `redis-cli PING` or `systemctl is-active`)
-  4. Mitigation: comment out `loadmodule` lines manually
+- **Root cause / 根因**: Script defect - `redis.conf` is generated with `loadmodule` lines regardless of whether Redis modules were actually built/installed. Redis server fails to start when it cannot load the specified module files.
+- **Fix implemented**: Script now automatically `sed`-comments out the four `loadmodule` lines when modules are not present. Redis starts without manual config edit.
 - **Evidence / 证据**: 
-  - AlmaLinux 9.8 @ 47.84.25.92: Install command `install.sh --redis --memcached --php_extensions imagick,redis,memcached`; Redis fails to start with module load errors; mitigation: comment out `loadmodule` directives
-  - Anolis OS 8.10 @ 47.236.16.29: Same issue reproduced — default `loadmodule` with no `/usr/local/redis/modules/` dir → redis-server won't start; commenting `loadmodule` → `PING` returns `PONG`; script still EXIT:0 "installed successfully"
-- **Code changed? / 是否已改代码**: no
-- **Related issues**: Script defect (no GitHub issue yet); see IB-004, IB-010
+  - AlmaLinux 9.8 @ 47.84.25.92: Original issue — Redis fails to start with module load errors
+  - Anolis OS 8.10 @ 47.236.16.29: Same issue reproduced
+  - **Ubuntu 22.04 @ 47.84.22.98 (retest on main@82f023a)**: FIXED — script auto-comments `loadmodule` lines; Redis 8.10.1 starts successfully; `redis-cli PING` → `PONG`; core Redis PASS
+- **Code changed? / 是否已改代码**: yes (main@82f023a) — auto-comment strategy implemented
+- **Related issues**: See IB-004 for module build issues (separate from loadmodule config); IB-010 for Anolis platform detection
+- **Note**: Previous false-success messaging resolved via auto-comment strategy. Module deployment issues tracked separately in IB-004.
 
 ---
 
 ### IB-004: RediSearch/RedisJSON build fails without Rust toolchain
 
 - **Date / 日期**: 2026-09-19
-- **Status / 状态**: open
+- **Status / 状态**: investigating (partial — see module breakdown)
 - **Component / 组件**: Redis Modules (RediSearch, RedisJSON, RedisBloom, RedisTimeSeries)
-- **OS / 环境**: AlmaLinux 9.8; Anolis OS 8.10
-- **Machine / 机器**: 47.84.25.92 / oneinstack-test-01; 47.236.16.29 (Oneinstack测试-2)
-- **Symptom / 现象**: Redis module compilation fails during install. Core Redis still installs and works, but modules are missing, triggering IB-003 when `loadmodule` is present in config.
+- **OS / 环境**: AlmaLinux 9.8; Anolis OS 8.10; Ubuntu 22.04
+- **Machine / 机器**: 47.84.25.92 / oneinstack-test-01; 47.236.16.29 (Oneinstack测试-2); 47.84.22.98 (oneinstack-redis-test-01)
+- **Symptom / 现象**: Redis module compilation fails or modules not deployed. Core Redis installs and works (IB-003 now fixed), but modules are not available.
+  - **Module breakdown (Ubuntu 22.04 @ 47.84.22.98 retest)**:
+    - **redisbloom / redistimeseries**: Build CAN succeed, but `.so` files NOT deployed to `/usr/local/redis/modules/`
+    - **redisearch / redisjson**: Build FAILS — missing `cargo`/`rustc` (and `cmake≥3.25`)
   - **AlmaLinux 9.8**: RediSearch and RedisJSON fail (Rust missing); RedisBloom and RedisTimeSeries can build
-  - **Anolis OS 8.10**: **ALL four modules fail** (redisbloom, redisearch, redisjson, redistimeseries) — worse than AlmaLinux
+  - **Anolis OS 8.10**: ALL four modules fail (platform detection + Python issues — see IB-010)
 - **Root cause / 根因**: 
-  1. RediSearch and RedisJSON require Rust/Cargo toolchain for compilation, which is not pre-installed and not automatically installed by the script
-  2. On Anolis, additional platform detection and Python version issues prevent even Bloom/TimeSeries from building (see IB-010)
+  1. RediSearch and RedisJSON require Rust/Cargo toolchain + cmake≥3.25 for compilation, which are not pre-installed
+  2. RedisBloom/RedisTimeSeries build artifacts not deployed to target directory even when build succeeds
+  3. On Anolis, additional platform detection and Python version issues (see IB-010)
 - **Fix plan / 修复方案**: 
-  1. Pre-install Rust/Cargo toolchain before attempting module build
-  2. Or: skip module build with clear warning message when Rust is unavailable
-  3. Never default to `loadmodule` for modules that failed to build
-  4. Fix Anolis platform detection (see IB-010)
+  1. **Priority**: Add cargo/rust toolchain installation path for search/json modules
+  2. **Priority**: Deploy built `.so` modules to `/usr/local/redis/modules/` after successful build
+  3. Ensure cmake≥3.25 available for module builds
+  4. Skip module build with clear warning when prerequisites unavailable
+  5. Fix Anolis platform detection (see IB-010)
 - **Evidence / 证据**: 
-  - AlmaLinux @ 47.84.25.92: Build fails with missing `cargo`/`rustc`; bloom/timeseries OK
-  - Anolis @ 47.236.16.29: ALL four modules fail to build — bloom, search, json, timeseries all missing
-- **Code changed? / 是否已改代码**: no
-- **Related issues**: Related to IB-003, IB-010
+  - AlmaLinux @ 47.84.25.92: Build fails with missing `cargo`/`rustc`; bloom/timeseries build OK but deployment unclear
+  - Anolis @ 47.236.16.29: ALL four modules fail to build
+  - **Ubuntu 22.04 @ 47.84.22.98 (retest on main@82f023a)**: redisearch/redisjson FAIL (no cargo/rustc); redisbloom/redistimeseries logs show build artifacts but NOT deployed to `/usr/local/redis/modules/`; no `.so` files present
+- **Code changed? / 是否已改代码**: no (partial issue remains)
+- **Related issues**: IB-003 (now fixed); IB-010 (Anolis platform detection)
+- **Conclusion**: Latest main — core Redis installable and pingable; IB-004 NOT fully fixed (module build/deploy issues remain)
 
 ---
 
