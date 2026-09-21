@@ -42,7 +42,7 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - [IB-012: default scriptCenter disabled → software store incomplete](#ib-012-default-scriptcenter-disabled--software-store-incomplete)
 - [IB-013: Panel install.sh non-interactive false readiness success](#ib-013-panel-installsh-non-interactive-false-readiness-success)
 - [IB-014: allowedClusterTaskType missing system.command](#ib-014-allowedclustertasktype-missing-systemcommand)
-- [IB-015: Cluster node offline — endpointAddressMismatch](#ib-015-cluster-node-offline--endpointaddressmismatch)
+- [IB-015: Cluster node offline — endpointAddressMismatch + controllerUrl /v1](#ib-015-cluster-node-offline--endpointaddressmismatch--controllerurl-v1)
 
 ---
 
@@ -436,22 +436,29 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 
 ---
 
-### IB-015: Cluster node offline — endpointAddressMismatch
+### IB-015: Cluster node offline — endpointAddressMismatch + controllerUrl /v1
 
 - **Date / 日期**: 2026-09-21
-- **Status / 状态**: investigating
+- **Status / 状态**: open (known workaround verified)
 - **Component / 组件**: Panel / cluster
 - **OS / 环境**: N/A (product behavior)
 - **Machine / 机器**: Controller 47.84.5.162; Node sg-node-02 / 47.84.134.71 (v0.3.0-build.70)
 - **Symptom / 现象**: Node registered successfully once, then became offline. Heartbeat stopped. Error indicates `endpointAddressMismatch` between public and private address.
-- **Root cause / 根因**: TBD — likely advertise/endpoint URL uses wrong address family (public IP vs internal/private IP). Controller and node may disagree on which address to use.
+- **Root cause / 根因** (confirmed):
+  1. **controllerUrl must NOT include `/v1`**: Agent `controllerUrl` with trailing `/v1` → 404; registration/heartbeat fails
+  2. **endpointAddressMismatch**: Node must advertise/use private/intranet endpoint that matches what controller validates. Public vs private IP mismatch causes offline after initial register.
 - **Fix plan / 修复方案**: 
-  1. Ensure node endpoint advertisement and controller validation agree on public vs private address
-  2. Document which address to configure for cloud VMs (public vs private)
+  1. Panel UX/docs: normalize `controllerUrl` (auto-strip trailing `/v1`)
+  2. Clarify public vs private endpoint configuration for cloud VMs
+  3. Optionally: accept both address families or auto-detect correct one
 - **Evidence / 证据**: 
-  - Oneinstack测试 multi-node progress
-  - Node Panel health still OK while cluster status shows offline
+  - PM + test multi-node 2026-09-21
+  - Controller 47.84.5.162; Node 47.84.134.71 online after fix
+  - `diagnose.v1` smoke OK after workaround applied
   - Panel v0.3.0-build.70
-- **Workaround / 临时方案**: Re-save node role config / restart Node Agent (in progress by test)
+- **Workaround / 临时方案** (verified):
+  1. Strip `/v1` from `controllerUrl` in agent config
+  2. Use internal/private endpoint address (not public IP)
+  3. Result: node-02 (47.84.134.71) became online; cluster functional
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: IB-014 (same multi-node test); IB-011 not reproduced this round (mirrors has build.70 now)
