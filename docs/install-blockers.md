@@ -439,7 +439,7 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 ### IB-015: Cluster node offline — endpointAddressMismatch + controllerUrl /v1
 
 - **Date / 日期**: 2026-09-21
-- **Status / 状态**: open (known workaround verified)
+- **Status / 状态**: **fixed-pending-release**
 - **Component / 组件**: Panel / cluster
 - **OS / 环境**: N/A (product behavior)
 - **Machine / 机器**: Controller 47.84.5.162; Node sg-node-02 / 47.84.134.71 (v0.3.0-build.70)
@@ -447,18 +447,18 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - **Root cause / 根因** (confirmed):
   1. **controllerUrl must NOT include `/v1`**: Agent `controllerUrl` with trailing `/v1` → 404; registration/heartbeat fails
   2. **endpointAddressMismatch**: Node must advertise/use private/intranet endpoint that matches what controller validates. Public vs private IP mismatch causes offline after initial register.
-- **Fix plan / 修复方案**: 
-  1. Panel UX/docs: normalize `controllerUrl` (auto-strip trailing `/v1`)
-  2. Clarify public vs private endpoint configuration for cloud VMs
-  3. Optionally: accept both address families or auto-detect correct one
+- **Fix implemented**: 
+  - `NormalizeControllerURL` function strips trailing `/v1` automatically
+  - Endpoint mismatch logic improved
+  - Documentation updated for cloud VM configuration
 - **Evidence / 证据**: 
   - PM + test multi-node 2026-09-21
   - Controller 47.84.5.162; Node 47.84.134.71 online after fix
   - `diagnose.v1` smoke OK after workaround applied
   - Panel v0.3.0-build.70
-- **Workaround / 临时方案** (verified):
+- **Workaround / 临时方案** (verified, no longer needed after fix):
   1. Strip `/v1` from `controllerUrl` in agent config
   2. Use internal/private endpoint address (not public IP)
   3. Result: node-02 (47.84.134.71) became online; cluster functional
-- **Code changed? / 是否已改代码**: no
+- **Code changed? / 是否已改代码**: yes — [Oneinstack-Panel PR #22](https://github.com/oneinstack/Oneinstack-Panel/pull/22) (branch `cursor/fix-multinode-config-pitfalls-25ce`)
 - **Related issues**: IB-014 (same multi-node test); IB-011 not reproduced this round (mirrors has build.70 now)
