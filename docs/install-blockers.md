@@ -42,6 +42,7 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - [IB-012: default scriptCenter disabled → software store incomplete](#ib-012-default-scriptcenter-disabled--software-store-incomplete)
 - [IB-013: Panel install.sh non-interactive false readiness success](#ib-013-panel-installsh-non-interactive-false-readiness-success)
 - [IB-014: allowedClusterTaskType missing system.command](#ib-014-allowedclustertasktype-missing-systemcommand)
+- [IB-015: Cluster node offline — endpointAddressMismatch](#ib-015-cluster-node-offline--endpointaddressmismatch)
 
 ---
 
@@ -432,3 +433,25 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - **Workaround / 临时方案**: Use `service.*` / `diagnostics` task types for multi-node smoke testing
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: N/A
+
+---
+
+### IB-015: Cluster node offline — endpointAddressMismatch
+
+- **Date / 日期**: 2026-09-21
+- **Status / 状态**: investigating
+- **Component / 组件**: Panel / cluster
+- **OS / 环境**: N/A (product behavior)
+- **Machine / 机器**: Controller 47.84.5.162; Node sg-node-02 / 47.84.134.71 (v0.3.0-build.70)
+- **Symptom / 现象**: Node registered successfully once, then became offline. Heartbeat stopped. Error indicates `endpointAddressMismatch` between public and private address.
+- **Root cause / 根因**: TBD — likely advertise/endpoint URL uses wrong address family (public IP vs internal/private IP). Controller and node may disagree on which address to use.
+- **Fix plan / 修复方案**: 
+  1. Ensure node endpoint advertisement and controller validation agree on public vs private address
+  2. Document which address to configure for cloud VMs (public vs private)
+- **Evidence / 证据**: 
+  - Oneinstack测试 multi-node progress
+  - Node Panel health still OK while cluster status shows offline
+  - Panel v0.3.0-build.70
+- **Workaround / 临时方案**: Re-save node role config / restart Node Agent (in progress by test)
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: IB-014 (same multi-node test); IB-011 not reproduced this round (mirrors has build.70 now)
