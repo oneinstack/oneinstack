@@ -41,6 +41,7 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
 - [IB-011: mirrors missing Panel release package v0.3.0-build.60](#ib-011-mirrors-missing-panel-release-package-v030-build60)
 - [IB-012: default scriptCenter disabled → software store incomplete](#ib-012-default-scriptcenter-disabled--software-store-incomplete)
 - [IB-013: Panel install.sh non-interactive false readiness success](#ib-013-panel-installsh-non-interactive-false-readiness-success)
+- [IB-014: allowedClusterTaskType missing system.command](#ib-014-allowedclustertasktype-missing-systemcommand)
 
 ---
 
@@ -408,5 +409,26 @@ This is an **append-only** log for tracking "unable to install" / install-blocke
   - panel-test-02 Panel验收: PASS eventually noted, but false readiness observed at install completion
   - Login page later returned 200 (service came up after delay)
   - Non-interactive flags: `--force --yes` required
+- **Code changed? / 是否已改代码**: no
+- **Related issues**: N/A
+
+---
+
+### IB-014: allowedClusterTaskType missing system.command
+
+- **Date / 日期**: 2026-09-21
+- **Status / 状态**: open
+- **Component / 组件**: Panel / cluster
+- **OS / 环境**: N/A (product behavior)
+- **Machine / 机器**: Controller 47.84.5.162 (v0.3.0-build.70); multi-node test
+- **Symptom / 现象**: README documents `system.command` as a supported cluster task type, but `allowedClusterTaskType` in implementation does not include it. Cluster tasks using `system.command` would fail or be rejected.
+- **Root cause / 根因**: Documentation/implementation drift — docs promise functionality that code does not allow.
+- **Fix plan / 修复方案**: 
+  1. Restore `system.command` in `allowedClusterTaskType` allowlist, OR
+  2. Update README/docs to match actual code behavior
+- **Evidence / 证据**: 
+  - Oneinstack测试 report on multi-node联测
+  - Panel v0.3.0-build.70
+- **Workaround / 临时方案**: Use `service.*` / `diagnostics` task types for multi-node smoke testing
 - **Code changed? / 是否已改代码**: no
 - **Related issues**: N/A
