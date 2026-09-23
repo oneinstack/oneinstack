@@ -18,13 +18,12 @@ import (
 )
 
 type Config struct {
-	Addr            string
-	Secret          string
-	RepoDir         string
-	UpdateScript    string
-	SyncPanelScript string
-	LogFile         string
-	Branch          string
+	Addr         string
+	Secret       string
+	RepoDir      string
+	UpdateScript string
+	LogFile      string
+	Branch       string
 }
 
 type PushPayload struct {
@@ -44,24 +43,11 @@ type PushPayload struct {
 	} `json:"head_commit"`
 }
 
-type ReleasePayload struct {
-	Action  string `json:"action"`
-	Release struct {
-		TagName string `json:"tag_name"`
-		Name    string `json:"name"`
-	} `json:"release"`
-	Repository struct {
-		FullName string `json:"full_name"`
-	} `json:"repository"`
-}
-
 type Deployer struct {
-	cfg          Config
-	mu           sync.Mutex
-	running      bool
-	panelMu      sync.Mutex
-	panelRunning bool
-	logWriter    io.Writer
+	cfg       Config
+	mu        sync.Mutex
+	running   bool
+	logWriter io.Writer
 }
 
 func NewDeployer(cfg Config) *Deployer {
@@ -115,7 +101,7 @@ func (d *Deployer) runDeploy(commitID, commitMsg, author string) {
 		d.mu.Unlock()
 	}()
 
-	d.log("[INFO] ================= Starting OneinStack Deployment =================")
+	d.log("[INFO] ================= Starting Deployment =================")
 	d.log("[INFO] Triggered by commit: %s (%s) by %s", commitID, commitMsg, author)
 
 	// Step 1: Git Pull
@@ -142,47 +128,7 @@ func (d *Deployer) runDeploy(commitID, commitMsg, author string) {
 		d.log("[INFO] update script success:\n%s", strings.TrimSpace(string(updateOut)))
 	}
 
-	d.log("[INFO] ================= OneinStack Deployment Finished Successfully =================")
-}
-
-func (d *Deployer) runSyncPanel(tag string) {
-	d.panelMu.Lock()
-	if d.panelRunning {
-		d.log("[WARN] Panel sync already in progress, skipping duplicate trigger for tag: %s", tag)
-		d.panelMu.Unlock()
-		return
-	}
-	d.panelRunning = true
-	d.panelMu.Unlock()
-
-	defer func() {
-		d.panelMu.Lock()
-		d.panelRunning = false
-		d.panelMu.Unlock()
-	}()
-
-	d.log("[INFO] ================= Starting Panel Synchronization =================")
-	d.log("[INFO] Target release tag: %s", tag)
-
-	syncScript := d.cfg.SyncPanelScript
-	if syncScript == "" {
-		syncScript = "/root/git/repo/sync_panel.sh"
-	}
-
-	var args []string
-	if tag != "" {
-		args = append(args, tag)
-	}
-
-	cmd := exec.Command(syncScript, args...)
-	cmd.Dir = "/root/git/repo"
-	out, err := cmd.CombinedOutput()
-	if err != nil {
-		d.log("[ERROR] Panel sync failed: %v\nOutput: %s", err, string(out))
-		return
-	}
-	d.log("[INFO] Panel sync output:\n%s", strings.TrimSpace(string(out)))
-	d.log("[INFO] ================= Panel Synchronization Finished Successfully =================")
+	d.log("[INFO] ================= Deployment Finished Successfully =================")
 }
 
 func (d *Deployer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
@@ -195,6 +141,12 @@ func (d *Deployer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	if r.Method != http.MethodPost {
 		http.Error(w, "Method Not Allowed", http.StatusMethodNotAllowed)
 		return
+	}
+
+
+	event := r.Header.Get("X-GitHub-Event")
+	if event == "" {
+		event = r.Header.Get("X-Gitee-Event")
 	}
 
 	body, err := io.ReadAll(r.Body)
@@ -211,21 +163,6 @@ func (d *Deployer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Support direct manual endpoint: /api/webhook/sync-panel
-	if strings.HasSuffix(r.URL.Path, "/sync-panel") {
-		tag := r.URL.Query().Get("tag")
-		d.log("[INFO] Manual sync-panel triggered (tag: %s)", tag)
-		go d.runSyncPanel(tag)
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(fmt.Sprintf("Panel sync triggered for tag %s\n", tag)))
-		return
-	}
-
-	event := r.Header.Get("X-GitHub-Event")
-	if event == "" {
-		event = r.Header.Get("X-Gitee-Event")
-	}
-
 	if event == "ping" {
 		d.log("[INFO] Received ping event from GitHub")
 		w.Header().Set("Content-Type", "application/json")
@@ -233,65 +170,37 @@ func (d *Deployer) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
-	// Handle GitHub Release Event (from Oneinstack-Panel)
-	if event == "release" {
-		var payload ReleasePayload
-		if err := json.Unmarshal(body, &payload); err != nil {
-			d.log("[ERROR] JSON unmarshal error for release event: %v", err)
-			http.Error(w, "Bad JSON payload", http.StatusBadRequest)
-			return
-		}
-
-		tag := payload.Release.TagName
-		repo := payload.Repository.FullName
-		action := payload.Action
-
-		d.log("[INFO] Received release event: action=%s repo=%s tag=%s", action, repo, tag)
-
-		// Trigger sync when published or created
-		if action == "published" || action == "created" || action == "released" {
-			go d.runSyncPanel(tag)
-			w.WriteHeader(http.StatusOK)
-			w.Write([]byte(fmt.Sprintf("Panel sync triggered for %s release %s\n", repo, tag)))
-			return
-		}
-
-		w.Write([]byte(fmt.Sprintf("Ignored release action: %s\n", action)))
+	if event != "push" {
+		d.log("[INFO] Ignored event type: %s", event)
+		w.Write([]byte(fmt.Sprintf("Ignored event: %s\n", event)))
 		return
 	}
 
-	// Handle Git Push Event (default for OneinStack repo)
-	if event == "push" {
-		var payload PushPayload
-		if err := json.Unmarshal(body, &payload); err != nil {
-			d.log("[ERROR] JSON unmarshal error: %v", err)
-			http.Error(w, "Bad JSON payload", http.StatusBadRequest)
-			return
-		}
-
-		if payload.Ref != d.cfg.Branch {
-			d.log("[INFO] Push ignored for ref: %s (target branch: %s)", payload.Ref, d.cfg.Branch)
-			w.Write([]byte(fmt.Sprintf("Ignored branch: %s\n", payload.Ref)))
-			return
-		}
-
-		commitID := payload.HeadCommit.ID
-		if len(commitID) > 8 {
-			commitID = commitID[:8]
-		}
-		commitMsg := payload.HeadCommit.Message
-		author := payload.HeadCommit.Author.Name
-
-		d.log("[INFO] Valid push event received on %s! Dispatching deploy job...", payload.Ref)
-		go d.runDeploy(commitID, commitMsg, author)
-
-		w.WriteHeader(http.StatusOK)
-		w.Write([]byte(fmt.Sprintf("Deployment triggered for commit %s\n", commitID)))
+	var payload PushPayload
+	if err := json.Unmarshal(body, &payload); err != nil {
+		d.log("[ERROR] JSON unmarshal error: %v", err)
+		http.Error(w, "Bad JSON payload", http.StatusBadRequest)
 		return
 	}
 
-	d.log("[INFO] Ignored event type: %s", event)
-	w.Write([]byte(fmt.Sprintf("Ignored event: %s\n", event)))
+	if payload.Ref != d.cfg.Branch {
+		d.log("[INFO] Push ignored for ref: %s (target branch: %s)", payload.Ref, d.cfg.Branch)
+		w.Write([]byte(fmt.Sprintf("Ignored branch: %s\n", payload.Ref)))
+		return
+	}
+
+	commitID := payload.HeadCommit.ID
+	if len(commitID) > 8 {
+		commitID = commitID[:8]
+	}
+	commitMsg := payload.HeadCommit.Message
+	author := payload.HeadCommit.Author.Name
+
+	d.log("[INFO] Valid push event received on %s! Dispatching deploy job...", payload.Ref)
+	go d.runDeploy(commitID, commitMsg, author)
+
+	w.WriteHeader(http.StatusOK)
+	w.Write([]byte(fmt.Sprintf("Deployment triggered for commit %s\n", commitID)))
 }
 
 func main() {
@@ -300,7 +209,6 @@ func main() {
 	flag.StringVar(&cfg.Secret, "secret", "", "GitHub Webhook secret token")
 	flag.StringVar(&cfg.RepoDir, "repo-dir", "/root/git/repo/oneinstack", "Target git repository directory")
 	flag.StringVar(&cfg.UpdateScript, "update-script", "/root/git/repo/update.sh", "Path to update.sh script")
-	flag.StringVar(&cfg.SyncPanelScript, "sync-panel-script", "/root/git/repo/sync_panel.sh", "Path to sync_panel.sh script")
 	flag.StringVar(&cfg.LogFile, "log-file", "/var/log/oneinstack-webhook.log", "Log file path")
 	flag.StringVar(&cfg.Branch, "branch", "refs/heads/main", "Branch ref to watch")
 	flag.Parse()
