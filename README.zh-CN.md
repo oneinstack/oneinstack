@@ -18,7 +18,6 @@
 - 提供虚拟主机管理脚本，包含Let's Encrypt SSL与主流DNS服务商（Cloudflare、阿里云DNS、DNSPod）DNS-01泛域名证书自动化申请与续期
 - 提供Nginx/Tengine/OpenResty/Apache/Tomcat、MySQL/MariaDB/Percona、PHP、Valkey、Redis、Memcached、phpMyAdmin升级脚本
 - 提供本地、远程（服务器间rsync）、阿里云OSS、腾讯云COS、又拍云、七牛云、亚马逊S3、Google Drive和Dropbox备份脚本
-- 内置轻量级Golang Webhook常驻服务，支持GitHub自动触发持续部署与镜像打包
 
 ## 安装
 

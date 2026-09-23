@@ -18,7 +18,6 @@ Script properties:
 - Providing virtual host management script, including Let's Encrypt SSL and DNS-01 wildcard certificates (Cloudflare, Aliyun DNS, DNSPod API automated renewal)
 - Provide Nginx/Tengine/OpenResty/Apache/Tomcat, MySQL/MariaDB/Percona, PHP, Valkey, Redis, Memcached, phpMyAdmin upgrade script
 - Provide local, remote (rsync between servers), Aliyun OSS, Qcloud COS, UPYUN, QINIU, Amazon S3, Google Drive and Dropbox backup script
-- Built-in lightweight Golang Webhook daemon for automated continuous integration and mirror packaging
 
 
 ## Installation
