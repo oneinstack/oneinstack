@@ -35,7 +35,7 @@ checkDownload() {
   # jemalloc
   if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
     echo "Download jemalloc..."
-    src_url=${mirror_link}/oneinstack/src/jemalloc-${jemalloc_ver}.tar.bz2 && Download_src
+    src_url=https://github.com/jemalloc/jemalloc/releases/download/${jemalloc_ver}/jemalloc-${jemalloc_ver}.tar.bz2 && Download_src
   fi
 
   # pcre
@@ -79,7 +79,7 @@ checkDownload() {
     src_url=https://archive.apache.org/dist/httpd/httpd-${apache_ver}.tar.gz && Download_src
     src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
     src_url=https://archive.apache.org/dist/apr/apr-util-${apr_util_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/apache/httpd/nghttp2-${nghttp2_ver}.tar.gz && Download_src
+    src_url=https://github.com/nghttp2/nghttp2/releases/download/v${nghttp2_ver}/nghttp2-${nghttp2_ver}.tar.gz && Download_src
   fi
 
   # tomcat
@@ -738,7 +738,7 @@ checkDownload() {
   # valkey-server
   if [ "${valkey_flag}" == 'y' ]; then
     echo "Download valkey-server..."
-    src_url=${mirror_link}/oneinstack/src/valkey-${valkey_ver}.tar.gz && Download_src
+    src_url=https://github.com/valkey-io/valkey/archive/refs/tags/${valkey_ver}.tar.gz && Download_src
   fi
 
   # pecl_redis

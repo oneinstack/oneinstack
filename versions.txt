@@ -17,7 +17,7 @@ apache_ver=2.4.68
 pcre_ver=8.45
 apr_ver=1.7.5
 apr_util_ver=1.6.3
-nghttp2_ver=1.64.0
+nghttp2_ver=1.70.0
 
 # DB
 mysql97_ver=9.7.2
@@ -89,16 +89,16 @@ apcu_ver=5.1.21
 apcu_oldver=4.0.11
 xcache_ver=3.2.0
 eaccelerator_ver=0.9.6.1
-phalcon_ver=5.4.0
-phalcon_oldver=3.4.5
+phalcon_ver=5.22.0
+phalcon_oldver=5.4.0
 yaf_ver=3.3.2
 yar_ver=2.2.0
-swoole_ver=6.1.6
-swoole_oldver=5.1.5
+swoole_ver=6.2.3
+swoole_oldver=6.1.6
 xdebug_ver=3.5.0
 xdebug_oldver=3.1.6
-xlswriter_ver=1.5.8
-grpc_ver=1.70.0
+xlswriter_ver=3.0.0
+grpc_ver=1.84.0
 
 # Ftp
 pureftpd_ver=1.0.54
@@ -109,7 +109,7 @@ redis_oldver=7.4.2
 pecl_redis_ver=6.3.0
 
 # Valkey
-valkey_ver=8.0.2
+valkey_ver=9.1.2
 
 # Memcached
 memcached_ver=1.6.40
@@ -120,8 +120,8 @@ pecl_memcache_ver=8.2
 pecl_memcache_oldver=4.0.5.2
 
 # MongoDB
-pecl_mongodb_ver=2.1.4
-pecl_mongodb_oldver=1.19.1
+pecl_mongodb_ver=2.5.3
+pecl_mongodb_oldver=2.1.4
 pecl_mongo_ver=1.6.16
 
 # phpMyadmin
@@ -129,7 +129,7 @@ phpmyadmin_ver=5.2.3
 phpmyadmin_oldver=4.4.15.10
 
 # jemalloc
-jemalloc_ver=5.3.0
+jemalloc_ver=5.4.0
 
 # boost
 boost_mysql84_ver=1.84.0

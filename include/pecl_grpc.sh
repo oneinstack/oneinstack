@@ -11,7 +11,7 @@ Install_pecl_grpc() {
   if [ -e "${php_install_dir}/bin/phpize" ]; then
     pushd ${oneinstack_dir}/src > /dev/null
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
-    src_url=${mirror_link}/oneinstack/src/grpc-${grpc_ver}.tgz && Download_src
+    src_url=https://pecl.php.net/get/grpc-${grpc_ver}.tgz && Download_src
     tar xzf grpc-${grpc_ver}.tgz
     pushd grpc-${grpc_ver} > /dev/null
     ${php_install_dir}/bin/phpize

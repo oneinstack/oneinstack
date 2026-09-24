@@ -12,14 +12,14 @@ Upgrade_Valkey() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -d "$valkey_install_dir" ] && echo "${CWARNING}Valkey is not installed on your system! ${CEND}" && exit 1
   OLD_valkey_ver=`$valkey_install_dir/bin/valkey-cli --version 2>&1 | awk '{print $2}'`
-  Latest_valkey_ver=${valkey_ver:-8.0.2}
+  Latest_valkey_ver=${valkey_ver:-9.1.2}
   echo "Current Valkey Version: ${CMSG}$OLD_valkey_ver${CEND}"
   while :; do echo
     [ "${valkey_flag}" != 'y' ] && read -e -p "Please input upgrade Valkey Version(default: ${Latest_valkey_ver}): " NEW_valkey_ver
     NEW_valkey_ver=${NEW_valkey_ver:-${Latest_valkey_ver}}
     if [ "$NEW_valkey_ver" != "$OLD_valkey_ver" ]; then
       src_url=${mirror_link}/oneinstack/src/valkey-${NEW_valkey_ver}.tar.gz && Download_src
-      [ ! -e "valkey-${NEW_valkey_ver}.tar.gz" ] && wget --no-check-certificate -c https://github.com/valkey-io/valkey/archive/refs/tags/v${NEW_valkey_ver}.tar.gz -O valkey-${NEW_valkey_ver}.tar.gz > /dev/null 2>&1
+      [ ! -e "valkey-${NEW_valkey_ver}.tar.gz" ] && (wget --no-check-certificate -c https://github.com/valkey-io/valkey/archive/refs/tags/${NEW_valkey_ver}.tar.gz -O valkey-${NEW_valkey_ver}.tar.gz > /dev/null 2>&1 || wget --no-check-certificate -c https://github.com/valkey-io/valkey/archive/refs/tags/v${NEW_valkey_ver}.tar.gz -O valkey-${NEW_valkey_ver}.tar.gz > /dev/null 2>&1)
       if [ -e "valkey-${NEW_valkey_ver}.tar.gz" ]; then
         echo "Download [${CMSG}valkey-$NEW_valkey_ver.tar.gz${CEND}] successfully! "
         break

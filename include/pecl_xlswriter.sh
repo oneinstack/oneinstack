@@ -13,7 +13,7 @@ Install_pecl_xlswriter() {
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
-    src_url=${mirror_link}/oneinstack/src/xlswriter-${xlswriter_ver}.tgz && Download_src
+    src_url=https://pecl.php.net/get/xlswriter-${xlswriter_ver}.tgz && Download_src
     tar xzf xlswriter-${xlswriter_ver}.tgz
     pushd xlswriter-${xlswriter_ver} > /dev/null
     ${php_install_dir}/bin/phpize

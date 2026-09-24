@@ -14,7 +14,7 @@ Install_pecl_phalcon() {
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
-    if [[ "${PHP_main_ver}" =~ ^7.[2-4]$|^8.3$ ]]; then
+    if [[ "${PHP_main_ver}" =~ ^7.[2-4]$|^8.[0-4]$ ]]; then
       src_url=https://pecl.php.net/get/phalcon-${phalcon_ver}.tgz && Download_src
       tar xzf phalcon-${phalcon_ver}.tgz
       pushd phalcon-${phalcon_ver} > /dev/null
@@ -36,7 +36,7 @@ Install_pecl_phalcon() {
     if [ -f "${phpExtensionDir}/phalcon.so" ]; then
       echo 'extension=phalcon.so' > ${php_install_dir}/etc/php.d/04-phalcon.ini
       echo "${CSUCCESS}PHP phalcon module installed successfully! ${CEND}"
-      rm -rf cphalcon-${phalcon_oldver} phalcon-${phalcon_ver}
+      rm -rf cphalcon-${phalcon_oldver} phalcon-${phalcon_ver} phalcon-5.4.0
     else
       echo "${CFAILURE}PHP phalcon module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
     fi
