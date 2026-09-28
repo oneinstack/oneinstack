@@ -61,7 +61,7 @@ php81_ver=8.1.34
 php82_ver=8.2.33
 php83_ver=8.3.33
 php84_ver=8.4.25
-php85_ver=8.5.10
+php85_ver=8.5.11
 
 # Nodejs
 nodejs_ver=22.12.0
@@ -104,7 +104,7 @@ grpc_ver=1.84.0
 pureftpd_ver=1.0.54
 
 # Redis
-redis_ver=8.10.1
+redis_ver=8.10.2
 redis_oldver=7.4.2
 pecl_redis_ver=6.3.0
 
