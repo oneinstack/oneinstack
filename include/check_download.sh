@@ -26,7 +26,7 @@ checkDownload() {
   # openssl
   if [ "${nginx_option}" == '1' ] || [ "${nginx_option}" == '3' ]; then
     echo "Download openSSL ${openssl_ver}..."
-    src_url=${mirror_link}/oneinstack/src/openssl-${openssl_ver}.tar.gz && Download_src
+    src_url=https://github.com/openssl/openssl/releases/download/openssl-${openssl_ver}/openssl-${openssl_ver}.tar.gz && Download_src
   elif [ "${nginx_option}" == '2' ]; then
     echo "Download openSSL ${openssl11_ver}..."
     src_url=${mirror_link}/oneinstack/src/openssl-${openssl11_ver}.tar.gz && Download_src
@@ -52,8 +52,7 @@ checkDownload() {
       ;;
     2)
       echo "Download tengine..."
-      #src_url=https://tengine.taobao.org/download/tengine-${tengine_ver}.tar.gz && Download_src
-      src_url=${mirror_link}/oneinstack/src/tengine-${tengine_ver}.tar.gz && Download_src
+      src_url=https://github.com/alibaba/tengine/archive/refs/tags/${tengine_ver}.tar.gz && Download_src
       ;;
     3)
       echo "Download openresty..."
