@@ -5,7 +5,7 @@ caddy_ver=2.11.4
 tengine_ver=3.1.0
 openresty_ver=1.31.1.1
 openssl11_ver=1.1.1w
-openssl_ver=3.6.5
+openssl_ver=3.5.9
 
 tomcat11_ver=11.0.15
 tomcat10_ver=10.1.50
@@ -65,6 +65,8 @@ php85_ver=8.5.10
 
 # Nodejs
 nodejs_ver=24.21.0
+# glibc < 2.28 (e.g. CentOS 7) cannot run Node.js 18+
+nodejs_oldver=16.20.2
 
 libiconv_ver=1.17
 curl_ver=8.21.0
@@ -91,12 +93,16 @@ xcache_ver=3.2.0
 eaccelerator_ver=0.9.6.1
 phalcon_ver=5.22.0
 phalcon_oldver=3.4.5
+phalcon_php74_ver=5.4.0
+phalcon_php80_ver=5.10.0
 yaf_ver=3.3.8
 yar_ver=2.4.0
 swoole_ver=6.2.3
 swoole_oldver=5.1.5
+swoole_php7_ver=4.8.13
 xdebug_ver=3.5.3
 xdebug_oldver=3.1.6
+xdebug_php70_ver=2.8.1
 xlswriter_ver=3.0.0
 grpc_ver=1.84.0
 
@@ -122,6 +128,9 @@ pecl_memcache_oldver=4.0.5.2
 # MongoDB
 pecl_mongodb_ver=2.5.3
 pecl_mongodb_oldver=1.19.1
+pecl_mongodb_php72_ver=1.16.2
+pecl_mongodb_php70_ver=1.9.2
+pecl_mongodb_php56_ver=1.7.5
 pecl_mongo_ver=1.6.16
 
 # phpMyadmin

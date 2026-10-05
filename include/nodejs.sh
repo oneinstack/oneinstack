@@ -10,6 +10,8 @@
 
 Install_Nodejs() {
   pushd ${oneinstack_dir}/src > /dev/null
+  glibc_ver=$(ldd --version 2>&1 | head -n1 | grep -oE '[0-9]+\.[0-9]+$')
+  [ -n "${glibc_ver}" ] && [ "$(printf '%s\n' 2.28 "${glibc_ver}" | sort -V | head -n1)" != "2.28" ] && nodejs_ver=${nodejs_oldver}
   tar xzf node-v${nodejs_ver}-linux-${SYS_ARCH_n}.tar.gz
   /bin/mv node-v${nodejs_ver}-linux-${SYS_ARCH_n} ${nodejs_install_dir}
   if [ -e "${nodejs_install_dir}/bin/node" ]; then

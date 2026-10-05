@@ -811,6 +811,8 @@ checkDownload() {
   # nodejs
   if [ "${nodejs_flag}" == 'y' ]; then
     echo "Download Nodejs..."
+    glibc_ver=$(ldd --version 2>&1 | head -n1 | grep -oE '[0-9]+\.[0-9]+$')
+    [ -n "${glibc_ver}" ] && [ "$(printf '%s\n' 2.28 "${glibc_ver}" | sort -V | head -n1)" != "2.28" ] && nodejs_ver=${nodejs_oldver}
     [ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR_NODE=https://mirrors.tuna.tsinghua.edu.cn/nodejs-release || DOWN_ADDR_NODE=https://nodejs.org/dist
     src_url=${DOWN_ADDR_NODE}/v${nodejs_ver}/node-v${nodejs_ver}-linux-${SYS_ARCH_n}.tar.gz && Download_src
   fi

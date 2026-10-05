@@ -28,15 +28,17 @@ Install_pecl_mongodb() {
         echo "${CFAILURE}PHP mongo module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
       fi
     else
-      if [[ "$(${php_install_dir}/bin/php-config --version | awk -F. '{print $1$2}')" =~ ^7[0-2]$ ]]; then
-        src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_oldver}.tgz && Download_src
-        tar xzf mongodb-${pecl_mongodb_oldver}.tgz
-        pushd mongodb-${pecl_mongodb_oldver} > /dev/null
-      else
-        src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_ver}.tgz && Download_src
-        tar xzf mongodb-${pecl_mongodb_ver}.tgz
-        pushd mongodb-${pecl_mongodb_ver} > /dev/null
-      fi
+      case "$(${php_install_dir}/bin/php-config --version | awk -F. '{print $1"."$2}')" in
+        5.6) mongodb_src_ver=${pecl_mongodb_php56_ver} ;;
+        7.0|7.1) mongodb_src_ver=${pecl_mongodb_php70_ver} ;;
+        7.2|7.3) mongodb_src_ver=${pecl_mongodb_php72_ver} ;;
+        7.4|8.0) mongodb_src_ver=${pecl_mongodb_oldver} ;;
+        5.*) echo "${CWARNING}Your php does not support pecl mongodb! ${CEND}"; popd > /dev/null; return ;;
+        *) mongodb_src_ver=${pecl_mongodb_ver} ;;
+      esac
+      src_url=https://pecl.php.net/get/mongodb-${mongodb_src_ver}.tgz && Download_src
+      tar xzf mongodb-${mongodb_src_ver}.tgz
+      pushd mongodb-${mongodb_src_ver} > /dev/null
       ${php_install_dir}/bin/phpize
       ./configure --with-php-config=${php_install_dir}/bin/php-config
       make -j ${THREAD} && make install
@@ -44,7 +46,7 @@ Install_pecl_mongodb() {
       if [ -f "${phpExtensionDir}/mongodb.so" ]; then
         echo 'extension=mongodb.so' > ${php_install_dir}/etc/php.d/07-mongodb.ini
         echo "${CSUCCESS}PHP mongodb module installed successfully! ${CEND}"
-        rm -rf mongodb-${pecl_mongodb_oldver} mongodb-${pecl_mongodb_ver}
+        rm -rf mongodb-${mongodb_src_ver}
       else
         echo "${CFAILURE}PHP mongodb module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
       fi

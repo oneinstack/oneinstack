@@ -14,8 +14,12 @@ Install_pecl_xdebug() {
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
-    if [[ "${PHP_main_ver}" =~ ^7.[2-4]$|^8.[0-5]$ ]]; then
-      if [[ "${PHP_main_ver}" =~ ^7.[2-4]$ ]]; then
+    if [[ "${PHP_main_ver}" =~ ^7.[0-4]$|^8.[0-5]$ ]]; then
+      if [[ "${PHP_main_ver}" =~ ^7.[0-1]$ ]]; then
+        src_url=https://pecl.php.net/get/xdebug-${xdebug_php70_ver}.tgz && Download_src
+        tar xzf xdebug-${xdebug_php70_ver}.tgz
+        pushd xdebug-${xdebug_php70_ver} > /dev/null
+      elif [[ "${PHP_main_ver}" =~ ^7.[2-4]$ ]]; then
         src_url=https://pecl.php.net/get/xdebug-${xdebug_oldver}.tgz && Download_src
         tar xzf xdebug-${xdebug_oldver}.tgz
         pushd xdebug-${xdebug_oldver} > /dev/null
@@ -47,7 +51,7 @@ xdebug.profiler_enable_trigger = 1
 EOF
         echo "${CSUCCESS}PHP xdebug module installed successfully! ${CEND}"
         echo; echo "Webgrind URL: ${CMSG}http://{Public IP}/webgrind ${CEND}"
-        rm -rf xdebug-${xdebug_ver} xdebug-${xdebug_oldver}
+        rm -rf xdebug-${xdebug_ver} xdebug-${xdebug_oldver} xdebug-${xdebug_php70_ver}
       else
         echo "${CFAILURE}PHP xdebug module install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
       fi
