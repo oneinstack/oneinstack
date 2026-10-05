@@ -26,7 +26,7 @@ Install_pecl_swoole() {
       pushd swoole-4.5.2 > /dev/null
       ${php_install_dir}/bin/phpize
       ./configure --with-php-config=${php_install_dir}/bin/php-config --enable-openssl --with-openssl-dir=${openssl_install_dir}
-    elif [[ "${PHP_main_ver}" =~ ^7.[2-4]$ ]]; then
+    elif [[ "${PHP_main_ver}" =~ ^7.[2-4]$|^8.[0-1]$ ]]; then
       src_url=https://pecl.php.net/get/swoole-${swoole_oldver}.tgz && Download_src
       tar xzf swoole-${swoole_oldver}.tgz
       pushd swoole-${swoole_oldver} > /dev/null

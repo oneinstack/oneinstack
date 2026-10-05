@@ -52,7 +52,7 @@ checkDownload() {
       ;;
     2)
       echo "Download tengine..."
-      src_url=https://github.com/alibaba/tengine/archive/refs/tags/${tengine_ver}.tar.gz && Download_src
+      src_url=${mirror_link}/oneinstack/src/tengine-${tengine_ver}.tar.gz && Download_src
       ;;
     3)
       echo "Download openresty..."
@@ -737,7 +737,7 @@ checkDownload() {
   # valkey-server
   if [ "${valkey_flag}" == 'y' ]; then
     echo "Download valkey-server..."
-    src_url=https://github.com/valkey-io/valkey/archive/refs/tags/${valkey_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/valkey-${valkey_ver}.tar.gz && Download_src
   fi
 
   # pecl_redis

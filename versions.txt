@@ -2,7 +2,7 @@
 # Web
 nginx_ver=1.30.5
 caddy_ver=2.11.4
-tengine_ver=3.2.0-rc5
+tengine_ver=3.1.0
 openresty_ver=1.31.1.1
 openssl11_ver=1.1.1w
 openssl_ver=3.6.5
@@ -79,24 +79,24 @@ libzip_ver=1.11.4
 argon2_ver=20171227
 imagemagick_ver=7.1.2-12
 imagick_ver=3.8.1
-imagick_oldver=3.7.0
+imagick_oldver=3.4.4
 imagick_php85_ver=3.8.1
 graphicsmagick_ver=1.3.46
 gmagick_ver=2.0.6RC1
 gmagick_oldver=1.1.7RC3
 zendopcache_ver=7.0.5
 apcu_ver=5.1.28
-apcu_oldver=5.1.21
+apcu_oldver=4.0.11
 xcache_ver=3.2.0
 eaccelerator_ver=0.9.6.1
 phalcon_ver=5.22.0
-phalcon_oldver=5.4.0
+phalcon_oldver=3.4.5
 yaf_ver=3.3.8
 yar_ver=2.4.0
 swoole_ver=6.2.3
-swoole_oldver=6.1.6
+swoole_oldver=5.1.5
 xdebug_ver=3.5.3
-xdebug_oldver=3.5.0
+xdebug_oldver=3.1.6
 xlswriter_ver=3.0.0
 grpc_ver=1.84.0
 
@@ -115,13 +115,13 @@ valkey_ver=9.1.2
 memcached_ver=1.6.40
 libmemcached_ver=1.0.18
 pecl_memcached_ver=3.4.0
-pecl_memcached_oldver=3.3.0
+pecl_memcached_oldver=2.2.0
 pecl_memcache_ver=8.2
 pecl_memcache_oldver=4.0.5.2
 
 # MongoDB
 pecl_mongodb_ver=2.5.3
-pecl_mongodb_oldver=2.1.4
+pecl_mongodb_oldver=1.19.1
 pecl_mongo_ver=1.6.16
 
 # phpMyadmin
