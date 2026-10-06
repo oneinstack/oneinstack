@@ -6,7 +6,7 @@ Script properties:
 - Continually updated, Provide Shell Interaction and Autoinstall
 - Source compiler installation, most stable source is the latest version, and download from the official or high-speed mirrors
 - Some security optimization
-- Providing a plurality of database versions (MySQL-9.7 LTS, MySQL-8.4 LTS, MySQL-8.2, MySQL-8.0, MySQL-5.7, MySQL-5.6, MySQL-5.5, MariaDB-13.0, MariaDB-10.11, MariaDB-10.5, MariaDB-10.4, MariaDB-5.5, Percona-8.0, Percona-5.7, Percona-5.6, Percona-5.5, PostgreSQL-18.6, ClickHouse, MongoDB)
+- Providing a plurality of database versions (MySQL-9.7 LTS, MySQL-8.4 LTS, MySQL-8.2, MySQL-8.0, MySQL-5.7, MySQL-5.6, MySQL-5.5, MariaDB-13.0, MariaDB-10.11, MariaDB-11.8 LTS, MariaDB-11.4 LTS, MariaDB-5.5, Percona-8.0, Percona-5.7, Percona-5.6, Percona-5.5, PostgreSQL-18.6, ClickHouse, MongoDB)
 - Providing multiple PHP versions (PHP-8.5, PHP-8.4, PHP-8.3, PHP-8.2, PHP-8.1, PHP-8.0, PHP-7.4, PHP-7.3, PHP-7.2, PHP-7.1, PHP-7.0, PHP-5.6, PHP-5.5, PHP-5.4, PHP-5.3)
 - Provide Nginx (with native HTTP/3 & QUIC, OpenSSL 3.5.8), Tengine, OpenResty, Caddy, Apache and ngx_lua_waf
 - Providing a plurality of Tomcat version (Tomcat-11, Tomcat-10, Tomcat-9, Tomcat-8, Tomcat-7)

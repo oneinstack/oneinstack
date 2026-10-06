@@ -13,13 +13,15 @@ Install_MongoDB() {
   id -u mongod >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -s /sbin/nologin mongod
   mkdir -p ${mongo_data_dir};chown mongod.mongod -R ${mongo_data_dir}
-  tar xzf mongodb-linux-x86_64-${mongodb_ver}.tgz
-  /bin/mv mongodb-linux-x86_64-${mongodb_ver} ${mongo_install_dir}
+  # top-level dir may differ from the package name (e.g. rhel8 package unpacks to *-rhel88-*)
+  mongodb_dir=$(tar tzf ${mongodb_pkg}.tgz | head -1 | cut -d/ -f1)
+  tar xzf ${mongodb_pkg}.tgz
+  /bin/mv ${mongodb_dir} ${mongo_install_dir}
 
   # Extract and install mongosh
-  tar xzf mongosh-${mongosh_ver}-linux-x64.tgz
-  /bin/cp mongosh-${mongosh_ver}-linux-x64/bin/mongosh ${mongo_install_dir}/bin/
-  [ -f "mongosh-${mongosh_ver}-linux-x64/bin/mongosh_crypt_v1.so" ] && /bin/cp mongosh-${mongosh_ver}-linux-x64/bin/mongosh_crypt_v1.so ${mongo_install_dir}/bin/
+  tar xzf mongosh-${mongosh_ver}-linux-${SYS_ARCH_n}.tgz
+  /bin/cp mongosh-${mongosh_ver}-linux-${SYS_ARCH_n}/bin/mongosh ${mongo_install_dir}/bin/
+  [ -f "mongosh-${mongosh_ver}-linux-${SYS_ARCH_n}/bin/mongosh_crypt_v1.so" ] && /bin/cp mongosh-${mongosh_ver}-linux-${SYS_ARCH_n}/bin/mongosh_crypt_v1.so ${mongo_install_dir}/bin/
   /bin/cp ${oneinstack_dir}/init.d/mongod.service /lib/systemd/system/
   sed -i "s@=/usr/local/mongodb@=${mongo_install_dir}@g" /lib/systemd/system/mongod.service
   systemctl enable mongod
@@ -71,7 +73,7 @@ EOF
   if [ -e "${mongo_install_dir}/bin/mongosh" ]; then
     sed -i "s+^dbmongopwd.*+dbmongopwd='$dbmongopwd'+" ../options.conf
     echo "${CSUCCESS}MongoDB installed successfully! ${CEND}"
-    rm -rf mongodb-linux-x86_64-${mongodb_ver} mongosh-${mongosh_ver}-linux-x64
+    rm -rf ${mongodb_dir} mongosh-${mongosh_ver}-linux-${SYS_ARCH_n}
   else
     rm -rf ${mongo_install_dir} ${mongo_data_dir}
     echo "${CFAILURE}MongoDB install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release

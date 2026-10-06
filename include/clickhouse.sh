@@ -23,8 +23,8 @@ Install_ClickHouse() {
   tar xzf clickhouse-server-${clickhouse_ver}-${SYS_ARCH}.tgz
   tar xzf clickhouse-client-${clickhouse_ver}-${SYS_ARCH}.tgz
 
-  if [ -f "clickhouse-common-static-${clickhouse_ver}-${SYS_ARCH}/usr/bin/clickhouse" ]; then
-    /bin/cp clickhouse-common-static-${clickhouse_ver}-${SYS_ARCH}/usr/bin/clickhouse ${clickhouse_install_dir}/bin/
+  if [ -f "clickhouse-common-static-${clickhouse_ver}/usr/bin/clickhouse" ]; then
+    /bin/cp clickhouse-common-static-${clickhouse_ver}/usr/bin/clickhouse ${clickhouse_install_dir}/bin/
     chmod +x ${clickhouse_install_dir}/bin/clickhouse
 
     # Create symlinks for clickhouse components
@@ -38,14 +38,14 @@ Install_ClickHouse() {
     ln -sf ${clickhouse_install_dir}/bin/clickhouse-client /usr/local/bin/clickhouse-client
 
     # Copy and setup configuration files
-    if [ -d "clickhouse-server-${clickhouse_ver}-${SYS_ARCH}/etc/clickhouse-server" ]; then
-      /bin/cp -R clickhouse-server-${clickhouse_ver}-${SYS_ARCH}/etc/clickhouse-server/* ${clickhouse_install_dir}/etc/clickhouse-server/
-      /bin/cp -R clickhouse-server-${clickhouse_ver}-${SYS_ARCH}/etc/clickhouse-server/* /etc/clickhouse-server/
+    if [ -d "clickhouse-server-${clickhouse_ver}/etc/clickhouse-server" ]; then
+      /bin/cp -R clickhouse-server-${clickhouse_ver}/etc/clickhouse-server/* ${clickhouse_install_dir}/etc/clickhouse-server/
+      /bin/cp -R clickhouse-server-${clickhouse_ver}/etc/clickhouse-server/* /etc/clickhouse-server/
     fi
 
-    if [ -d "clickhouse-client-${clickhouse_ver}-${SYS_ARCH}/etc/clickhouse-client" ]; then
-      /bin/cp -R clickhouse-client-${clickhouse_ver}-${SYS_ARCH}/etc/clickhouse-client/* ${clickhouse_install_dir}/etc/clickhouse-client/
-      /bin/cp -R clickhouse-client-${clickhouse_ver}-${SYS_ARCH}/etc/clickhouse-client/* /etc/clickhouse-client/
+    if [ -d "clickhouse-client-${clickhouse_ver}/etc/clickhouse-client" ]; then
+      /bin/cp -R clickhouse-client-${clickhouse_ver}/etc/clickhouse-client/* ${clickhouse_install_dir}/etc/clickhouse-client/
+      /bin/cp -R clickhouse-client-${clickhouse_ver}/etc/clickhouse-client/* /etc/clickhouse-client/
     fi
 
     # Adjust paths in config.xml
@@ -95,32 +95,32 @@ EOF
     systemctl start clickhouse-server
 
     sleep 3
-    if systemctl is-active clickhouse-server >/dev/null 2>&1 || [ -n "\`pgrep clickhouse-server\`" ]; then
-      echo "\${CSUCCESS}ClickHouse server installed successfully! \${CEND}"
+    if systemctl is-active clickhouse-server >/dev/null 2>&1 || [ -n "`pgrep clickhouse-server`" ]; then
+      echo "${CSUCCESS}ClickHouse server installed successfully! ${CEND}"
     else
-      echo "\${CWARNING}ClickHouse server started with warnings, please check log: /var/log/clickhouse-server/clickhouse-server.err.log \${CEND}"
+      echo "${CWARNING}ClickHouse server started with warnings, please check log: /var/log/clickhouse-server/clickhouse-server.err.log ${CEND}"
     fi
 
-    rm -rf clickhouse-common-static-\${clickhouse_ver}-\${SYS_ARCH} clickhouse-server-\${clickhouse_ver}-\${SYS_ARCH} clickhouse-client-\${clickhouse_ver}-\${SYS_ARCH}
+    rm -rf clickhouse-common-static-${clickhouse_ver} clickhouse-server-${clickhouse_ver} clickhouse-client-${clickhouse_ver}
   else
-    rm -rf \${clickhouse_install_dir}
-    echo "\${CFAILURE}ClickHouse install failed, Please contact the author! \${CEND}"
-    kill -9 \$\$; exit 1;
+    rm -rf ${clickhouse_install_dir}
+    echo "${CFAILURE}ClickHouse install failed, Please contact the author! ${CEND}"
+    kill -9 $$; exit 1;
   fi
 
   popd > /dev/null
 }
 
 Uninstall_ClickHouse() {
-  if [ -d "\${clickhouse_install_dir}" ] || [ -f "/lib/systemd/system/clickhouse-server.service" ]; then
+  if [ -d "${clickhouse_install_dir}" ] || [ -f "/lib/systemd/system/clickhouse-server.service" ]; then
     systemctl stop clickhouse-server >/dev/null 2>&1
     systemctl disable clickhouse-server >/dev/null 2>&1
     rm -f /lib/systemd/system/clickhouse-server.service
     systemctl daemon-reload
-    rm -rf \${clickhouse_install_dir} /etc/clickhouse-server /etc/clickhouse-client /var/log/clickhouse-server
+    rm -rf ${clickhouse_install_dir} /etc/clickhouse-server /etc/clickhouse-client /var/log/clickhouse-server
     rm -f /usr/local/bin/clickhouse /usr/local/bin/clickhouse-server /usr/local/bin/clickhouse-client
-    echo; echo "\${CMSG}ClickHouse uninstall completed! \${CEND}"
+    echo; echo "${CMSG}ClickHouse uninstall completed! ${CEND}"
   else
-    echo; echo "\${CWARNING}ClickHouse does not exist! \${CEND}"
+    echo; echo "${CWARNING}ClickHouse does not exist! ${CEND}"
   fi
 }

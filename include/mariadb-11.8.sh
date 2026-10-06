@@ -8,7 +8,7 @@
 #       https://oneinstack.com
 #       https://github.com/oneinstack/oneinstack
 
-Install_MariaDB104() {
+Install_MariaDB118() {
   pushd ${oneinstack_dir}/src > /dev/null
   id -u mysql >/dev/null 2>&1
   [ $? -ne 0 ] && useradd -M -s /sbin/nologin mysql
@@ -17,15 +17,15 @@ Install_MariaDB104() {
   mkdir -p ${mariadb_data_dir};chown mysql:mysql -R ${mariadb_data_dir}
 
   if [ "${dbinstallmethod}" == "1" ]; then
-    tar zxf mariadb-${mariadb104_ver}-linux-systemd-x86_64.tar.gz
-    mv mariadb-${mariadb104_ver}-linux-systemd-x86_64/* ${mariadb_install_dir}
+    tar zxf mariadb-${mariadb118_ver}-linux-systemd-x86_64.tar.gz
+    mv mariadb-${mariadb118_ver}-linux-systemd-x86_64/* ${mariadb_install_dir}
     sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${mariadb_install_dir}/bin/mysqld_safe
     sed -i "s@/usr/local/mysql@${mariadb_install_dir}@g" ${mariadb_install_dir}/bin/mysqld_safe
   elif [ "${dbinstallmethod}" == "2" ]; then
     boostVersion2=$(echo ${boost_oldver} | awk -F. '{print $1"_"$2"_"$3}')
     tar xzf boost_${boostVersion2}.tar.gz
-    tar xzf mariadb-${mariadb104_ver}.tar.gz
-    pushd mariadb-${mariadb104_ver}
+    tar xzf mariadb-${mariadb118_ver}.tar.gz
+    pushd mariadb-${mariadb118_ver}
     cmake . -DCMAKE_INSTALL_PREFIX=${mariadb_install_dir} \
     -DMYSQL_DATADIR=${mariadb_data_dir} \
     -DDOWNLOAD_BOOST=1 \
@@ -52,9 +52,9 @@ Install_MariaDB104() {
     sed -i "s+^dbrootpwd.*+dbrootpwd='${dbrootpwd}'+" ../options.conf
     echo "${CSUCCESS}MariaDB installed successfully! ${CEND}"
     if [ "${dbinstallmethod}" == "1" ]; then
-      rm -rf mariadb-${mariadb104_ver}-linux-systemd-x86_64
+      rm -rf mariadb-${mariadb118_ver}-linux-systemd-x86_64
     elif [ "${dbinstallmethod}" == "2" ]; then
-      rm -rf mariadb-${mariadb104_ver} boost_${boostVersion2}
+      rm -rf mariadb-${mariadb118_ver} boost_${boostVersion2}
     fi
   else
     rm -rf ${mariadb_install_dir}
@@ -139,12 +139,10 @@ innodb_open_files = 500
 innodb_buffer_pool_size = 64M
 innodb_write_io_threads = 4
 innodb_read_io_threads = 4
-innodb_thread_concurrency = 0
 innodb_purge_threads = 1
 innodb_flush_log_at_trx_commit = 2
 innodb_log_buffer_size = 2M
 innodb_log_file_size = 32M
-innodb_log_files_in_group = 3
 innodb_max_dirty_pages_pct = 90
 innodb_lock_wait_timeout = 120
 
@@ -193,7 +191,8 @@ EOF
     sed -i 's@^table_open_cache.*@table_open_cache = 1024@' /etc/my.cnf
   fi
 
-  ${mariadb_install_dir}/scripts/mysql_install_db --user=mysql --basedir=${mariadb_install_dir} --datadir=${mariadb_data_dir}
+  [ -x "${mariadb_install_dir}/scripts/mariadb-install-db" ] && install_db=mariadb-install-db || install_db=mysql_install_db
+  ${mariadb_install_dir}/scripts/${install_db} --user=mysql --basedir=${mariadb_install_dir} --datadir=${mariadb_data_dir}
 
   [ "${Wsl}" == true ] && chmod 600 /etc/my.cnf
   chown mysql:mysql -R ${mariadb_data_dir}

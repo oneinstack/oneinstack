@@ -77,10 +77,11 @@ Upgrade_DB() {
         fi
         DB_URL=https://www.percona.com/downloads/Percona-Server-`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`/Percona-Server-${NEW_db_ver}/binary/tarball/${DB_filename}.tar.gz
       elif [ "${DB}" == 'MySQL' ]; then
-        DB_filename=mysql-${NEW_db_ver}-linux-glibc2.12-x86_64
-        if [ `echo ${OLD_db_ver} | awk -F. '{print $1"."$2}'` == '8.0' ]; then
+        if [[ "`echo ${NEW_db_ver} | awk -F. '{print $1}'`" =~ ^(8|9)$ ]]; then
+          DB_filename=mysql-${NEW_db_ver}-linux-glibc${mysql_glibc:-2.28}-x86_64
           DB_URL=${DOWN_ADDR}/MySQL-`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`/${DB_filename}.tar.xz
         else
+          DB_filename=mysql-${NEW_db_ver}-linux-glibc2.12-x86_64
           DB_URL=${DOWN_ADDR}/MySQL-`echo ${NEW_db_ver} | awk -F. '{print $1"."$2}'`/${DB_filename}.tar.gz
         fi
       fi
@@ -145,7 +146,7 @@ Upgrade_DB() {
       ${percona_install_dir}/bin/mysql_upgrade -uroot -p${dbrootpwd} >/dev/null 2>&1
       [ $? -eq 0 ] &&  echo "You have ${CMSG}successfully${CEND} upgrade from ${CMSG}${OLD_db_ver}${CEND} to ${CMSG}${NEW_db_ver}${CEND}"
     elif [ "${DB}" == 'MySQL' ]; then
-      if [ `echo ${OLD_db_ver} | awk -F. '{print $1"."$2}'` == '8.0' ]; then
+      if [ -e "${DB_filename}.tar.xz" ]; then
         tar xJf ${DB_filename}.tar.xz
       else
         tar xzf ${DB_filename}.tar.gz

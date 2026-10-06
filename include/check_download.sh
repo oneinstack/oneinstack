@@ -156,7 +156,7 @@ checkDownload() {
 
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download MySQL 8.4 binary package..."
-          FILE_NAME=mysql-${mysql84_ver}-linux-glibc2.17-x86_64.tar.xz
+          FILE_NAME=mysql-${mysql84_ver}-linux-glibc${mysql_glibc}-x86_64.tar.xz
         elif [ "${dbinstallmethod}" == '2' ]; then
           echo "Download MySQL 8.4 source package..."
           FILE_NAME=mysql-${mysql84_ver}.tar.gz
@@ -190,7 +190,7 @@ checkDownload() {
 
         if [ "${dbinstallmethod}" == '1' ]; then
           echo "Download MySQL 8.0 binary package..."
-          FILE_NAME=mysql-${mysql80_ver}-linux-glibc2.17-x86_64.tar.xz
+          FILE_NAME=mysql-${mysql80_ver}-linux-glibc${mysql_glibc}-x86_64.tar.xz
         elif [ "${dbinstallmethod}" == '2' ]; then
           echo "Download MySQL 8.0 source package..."
           FILE_NAME=mysql-${mysql80_ver}.tar.gz
@@ -334,16 +334,20 @@ checkDownload() {
             mariadb_ver=${mariadb1011_ver}
 	    ;;
           6)
-            mariadb_ver=${mariadb105_ver}
+            mariadb_ver=${mariadb118_ver}
 	    ;;
           7)
-            mariadb_ver=${mariadb104_ver}
+            mariadb_ver=${mariadb114_ver}
 	    ;;
           8)
             mariadb_ver=${mariadb55_ver}
 	    ;;
         esac
 
+        if [[ "${db_option}" =~ ^[6-7]$ ]] && [ "${dbinstallmethod}" == '1' ] && [ "${mysql_glibc}" != '2.28' ]; then
+          echo "${CFAILURE}MariaDB ${mariadb_ver} binary package requires glibc 2.28+ (current: ${glibc_ver:-unknown}). Please choose MariaDB-10.11 or install from source (--dbinstallmethod 2). ${CEND}"
+          kill -9 $$; exit 1;
+        fi
         if [ "${dbinstallmethod}" == '1' ]; then
           FILE_NAME=mariadb-${mariadb_ver}-linux-systemd-x86_64.tar.gz
 	  FILE_TYPE=bintar-linux-systemd-x86_64
@@ -532,7 +536,11 @@ checkDownload() {
       14)
         # MongoDB
         echo "Download MongoDB binary package..."
-        FILE_NAME=mongodb-linux-x86_64-${mongodb_ver}.tgz
+        if [ -z "${mongodb_pkg}" ]; then
+          echo "${CFAILURE}MongoDB ${mongodb_ver} does not provide a binary package for this OS (supported: RHEL/Rocky/Alma 8+, Debian 12+, Ubuntu 20.04+) ${CEND}"
+          kill -9 $$; exit 1;
+        fi
+        FILE_NAME=${mongodb_pkg}.tgz
         if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_MongoDB=${mirror_link}/oneinstack/src
         else
@@ -553,7 +561,7 @@ checkDownload() {
           kill -9 $$; exit 1;
         fi
         echo "Download MongoDB Shell (mongosh)..."
-        src_url=https://downloads.mongodb.com/compass/mongosh-${mongosh_ver}-linux-x64.tgz && Download_src
+        src_url=https://downloads.mongodb.com/compass/mongosh-${mongosh_ver}-linux-${SYS_ARCH_n}.tgz && Download_src
         ;;
     esac
   fi

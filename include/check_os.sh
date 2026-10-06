@@ -92,6 +92,34 @@ gcc_ver=$(gcc -dumpversion | awk -F. '{print $1}')
 
 [ ${gcc_ver} -lt 5 >/dev/null 2>&1 ] && redis_ver=${redis_oldver}
 
+# MySQL 8.0.46+/8.4.11+ only ship glibc2.28 binaries; older systems (e.g. CentOS 7) use the last glibc2.17 build
+glibc_ver=$(ldd --version 2>&1 | head -n1 | grep -oE '[0-9]+\.[0-9]+$')
+if [ -n "${glibc_ver}" ] && [ "$(printf '%s\n' 2.28 "${glibc_ver}" | sort -V | head -n1)" == "2.28" ]; then
+  mysql_glibc=2.28
+else
+  mysql_glibc=2.17
+  mysql84_ver=${mysql84_oldver}
+  mysql80_ver=${mysql80_oldver}
+fi
+
+# MongoDB 8.0 only provides distro-specific binary packages
+mongodb_distro=''
+case "${Family}" in
+  rhel)
+    [ "${RHEL_ver}" == '8' ] && mongodb_distro=rhel8
+    [ "${RHEL_ver}" -ge 9 >/dev/null 2>&1 ] && mongodb_distro=rhel93
+    ;;
+  debian)
+    [ "${Debian_ver}" -ge 12 >/dev/null 2>&1 ] && [ "$(arch)" == 'x86_64' ] && mongodb_distro=debian12
+    ;;
+  ubuntu)
+    [ "${Ubuntu_ver}" == '20' ] && mongodb_distro=ubuntu2004
+    [ "${Ubuntu_ver}" == '22' ] && mongodb_distro=ubuntu2204
+    [ "${Ubuntu_ver}" -ge 24 >/dev/null 2>&1 ] && mongodb_distro=ubuntu2404
+    ;;
+esac
+[ -n "${mongodb_distro}" ] && mongodb_pkg=mongodb-linux-$(arch)-${mongodb_distro}-${mongodb_ver}
+
 if uname -m | grep -Eqi "arm|aarch64"; then
   armplatform="y"
   if uname -m | grep -Eqi "armv7"; then
