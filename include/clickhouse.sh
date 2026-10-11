@@ -53,8 +53,8 @@ Install_ClickHouse() {
       sed -i "s@<path>/var/lib/clickhouse/</path>@<path>${clickhouse_data_dir}/</path>@g" /etc/clickhouse-server/config.xml
       sed -i "s@<tmp_path>/var/lib/clickhouse/tmp/</tmp_path>@<tmp_path>${clickhouse_data_dir}/tmp/</tmp_path>@g" /etc/clickhouse-server/config.xml
       sed -i "s@<user_files_path>/var/lib/clickhouse/user_files/</user_files_path>@<user_files_path>${clickhouse_data_dir}/user_files/</user_files_path>@g" /etc/clickhouse-server/config.xml
-      sed -i "s@<!-- <listen_host>::</listen_host> -->@<listen_host>0.0.0.0</listen_host>@g" /etc/clickhouse-server/config.xml
-      sed -i "s@<!-- <listen_host>0.0.0.0</listen_host> -->@<listen_host>0.0.0.0</listen_host>@g" /etc/clickhouse-server/config.xml
+      sed -i "s@<!-- <listen_host>::</listen_host> -->@<listen_host>127.0.0.1</listen_host>@g" /etc/clickhouse-server/config.xml
+      sed -i "s@<!-- <listen_host>0.0.0.0</listen_host> -->@<listen_host>127.0.0.1</listen_host>@g" /etc/clickhouse-server/config.xml
     fi
 
     # Set password if specified
