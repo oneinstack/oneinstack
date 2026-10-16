@@ -14,7 +14,7 @@ Install_pecl_phalcon() {
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
-    if [[ "${PHP_main_ver}" =~ ^7.4$|^8.[0-4]$ ]]; then
+    if [[ "${PHP_main_ver}" =~ ^7.4$|^8.[0-5]$ ]]; then
       case "${PHP_main_ver}" in
         7.4) phalcon_src_ver=${phalcon_php74_ver} ;;
         8.0) phalcon_src_ver=${phalcon_php80_ver} ;;

@@ -67,9 +67,14 @@ net:
 #sharding:
 EOF
   systemctl start mongod
+  for ((i=1; i<=15; i++)); do
+    ${mongo_install_dir}/bin/mongosh 127.0.0.1/admin --quiet --eval "db.runCommand({ ping: 1 })" >/dev/null 2>&1 && break
+    sleep 1
+  done
   echo ${mongo_install_dir}/bin/mongosh 127.0.0.1/admin --eval \"db.createUser\(\{user:\'root\',pwd:\'$dbmongopwd\',roles:[\'userAdminAnyDatabase\']\}\)\" | bash
   sed -i 's@^#security:@security:@' /etc/mongod.conf
   sed -i 's@^#  authorization:@  authorization:@' /etc/mongod.conf
+  systemctl restart mongod
   if [ -e "${mongo_install_dir}/bin/mongosh" ]; then
     sed -i "s+^dbmongopwd.*+dbmongopwd='$dbmongopwd'+" ../options.conf
     echo "${CSUCCESS}MongoDB installed successfully! ${CEND}"

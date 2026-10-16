@@ -96,6 +96,7 @@ EOF
 
     sleep 3
     if systemctl is-active clickhouse-server >/dev/null 2>&1 || [ -n "`pgrep clickhouse-server`" ]; then
+      sed -i "s+^dbclickhousepwd.*+dbclickhousepwd='${dbclickhousepwd}'+" ../options.conf
       echo "${CSUCCESS}ClickHouse server installed successfully! ${CEND}"
     else
       echo "${CWARNING}ClickHouse server started with warnings, please check log: /var/log/clickhouse-server/clickhouse-server.err.log ${CEND}"

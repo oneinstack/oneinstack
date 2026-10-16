@@ -18,7 +18,7 @@ checkDownload() {
   # General system utils
   if [ "${with_old_openssl_flag}" == 'y' ]; then
     echo "Download openSSL..."
-    src_url=${mirror_link}/oneinstack/src/openssl-${openssl_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/openssl-${openssl102_ver}.tar.gz && Download_src
     echo "Download cacert.pem..."
     src_url=https://curl.se/ca/cacert.pem && Download_src
   fi
@@ -63,13 +63,13 @@ checkDownload() {
   # if nginx_option=4 download caddy
   if [ "${nginx_option}" == '4' ]; then
     echo "Download caddy ${caddy_ver}"
-    src_url=https://github.com/caddyserver/caddy/releases/download/v${caddy_ver}/caddy_${caddy_ver}_linux_amd64.tar.gz  && Download_src
+    src_url=https://github.com/caddyserver/caddy/releases/download/v${caddy_ver}/caddy_${caddy_ver}_linux_${SYS_ARCH}.tar.gz && Download_src
   fi
 
   # caddy
   if [ "${caddy_flag}" == 'y' ]; then
     echo "Download caddy ${caddy_ver}"
-    src_url=https://github.com/caddyserver/caddy/releases/download/v${caddy_ver}/caddy_${caddy_ver}_linux_amd64.tar.gz  && Download_src
+    src_url=https://github.com/caddyserver/caddy/releases/download/v${caddy_ver}/caddy_${caddy_ver}_linux_${SYS_ARCH}.tar.gz && Download_src
   fi
 
   # apache
@@ -107,16 +107,16 @@ checkDownload() {
   esac
 
   # jdk apr
-  if [[ "${jdk_option}"  =~ ^[1-2]$ ]]; then
+  if [[ "${jdk_option}" =~ ^[1-3]$ ]]; then
     echo "Download apr..."
     src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
   fi
 
   if [[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]]; then
-    if [[ "${db_option}" =~ ^[0,1,2,5,6,7,9]$|^10$ ]] && [ "${dbinstallmethod}" == "2" ]; then
+    if [[ "${db_option}" =~ ^[0,1,2,9]$|^10$ ]] && [ "${dbinstallmethod}" == "2" ]; then
       [[ "${db_option}" =~ ^0$ ]] && boost_ver=${boost_mysql84_ver}
       [[ "${db_option}" =~ ^1$ ]] && boost_ver=${boost_mysql80_ver}
-      [[ "${db_option}" =~ ^[2,5,6,7]$|^10$ ]] && boost_ver=${boost_oldver}
+      [[ "${db_option}" =~ ^2$|^10$ ]] && boost_ver=${boost_oldver}
       [[ "${db_option}" =~ ^9$ ]] && boost_ver=${boost_percona_ver}
       echo "Download boost..."
       [ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR_BOOST=${mirror_link}/oneinstack/src || DOWN_ADDR_BOOST=https://downloads.sourceforge.net/project/boost/boost/${boost_ver}
@@ -325,11 +325,8 @@ checkDownload() {
           kill -9 $$; exit 1;
         fi
         ;;
-      [5-8]|16)
+      [5-8])
 	case "${db_option}" in
-          16)
-            mariadb_ver=${mariadb130_ver}
-	    ;;
           5)
             mariadb_ver=${mariadb1011_ver}
 	    ;;
@@ -580,20 +577,20 @@ checkDownload() {
   if [ "${php_option}" == '1' ] || [ "${mphp_ver}" == '53' ]; then
     src_url=${mirror_link}/oneinstack/src/debian_patches_disable_SSLv2_for_openssl_1_0_0.patch && Download_src
     src_url=${mirror_link}/oneinstack/src/php5.3patch && Download_src
-    src_url=https://secure.php.net/distributions/php-${php53_ver}.tar.gz && Download_src
+    src_url=https://www.php.net/distributions/php-${php53_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/fpm-race-condition.patch && Download_src
   elif [ "${php_option}" == '2' ] || [ "${mphp_ver}" == '54' ]; then
-    src_url=https://secure.php.net/distributions/php-${php54_ver}.tar.gz && Download_src
+    src_url=https://www.php.net/distributions/php-${php54_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/fpm-race-condition.patch && Download_src
   elif [ "${php_option}" == '3' ] || [ "${mphp_ver}" == '55' ]; then
-    src_url=https://secure.php.net/distributions/php-${php55_ver}.tar.gz && Download_src
+    src_url=https://www.php.net/distributions/php-${php55_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/fpm-race-condition.patch && Download_src
   elif [ "${php_option}" == '4' ] || [ "${mphp_ver}" == '56' ]; then
-    src_url=https://secure.php.net/distributions/php-${php56_ver}.tar.gz && Download_src
+    src_url=https://www.php.net/distributions/php-${php56_ver}.tar.gz && Download_src
   elif [ "${php_option}" == '5' ] || [ "${mphp_ver}" == '70' ]; then
-    src_url=https://secure.php.net/distributions/php-${php70_ver}.tar.gz && Download_src
+    src_url=https://www.php.net/distributions/php-${php70_ver}.tar.gz && Download_src
   elif [ "${php_option}" == '6' ] || [ "${mphp_ver}" == '71' ]; then
-    src_url=https://secure.php.net/distributions/php-${php71_ver}.tar.gz && Download_src
+    src_url=https://www.php.net/distributions/php-${php71_ver}.tar.gz && Download_src
   elif [ "${php_option}" == '7' ] || [ "${mphp_ver}" == '72' ]; then
     src_url=${mirror_link}/oneinstack/src/php-${php72_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
@@ -642,7 +639,7 @@ checkDownload() {
   # PHP OPCache
   case "${phpcache_option}" in
     1)
-      if [[ "${php_option}" =~ ^[1-2]$ ]]; then
+      if [[ "${php_option}" =~ ^[1-2]$ ]] || [[ "${mphp_ver}" =~ ^5[3-4]$ ]]; then
         # php 5.3 5.4
         echo "Download Zend OPCache..."
         src_url=https://pecl.php.net/get/zendopcache-${zendopcache_ver}.tgz && Download_src
@@ -650,14 +647,14 @@ checkDownload() {
       ;;
     2)
       echo "Download apcu..."
-      if [[ "${php_option}" =~ ^[1-4]$ ]]; then
+      if [[ "${php_option}" =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]]; then
         src_url=https://pecl.php.net/get/apcu-${apcu_oldver}.tgz && Download_src
       else
         src_url=https://pecl.php.net/get/apcu-${apcu_ver}.tgz && Download_src
       fi
       ;;
     3)
-      if [[ "${php_option}" =~ ^[1-4]$ ]]; then
+      if [[ "${php_option}" =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]]; then
         # php 5.3 5.4 5.5 5.6
         echo "Download xcache..."
         src_url=https://xcache.lighttpd.net/pub/Releases/${xcache_ver}/xcache-${xcache_ver}.tar.gz && Download_src
@@ -665,10 +662,10 @@ checkDownload() {
       ;;
     4)
       # php 5.3 5.4
-      if [ "${php_option}" == '1' ]; then
+      if [ "${php_option}" == '1' ] || [ "${mphp_ver}" == '53' ]; then
         echo "Download eaccelerator 0.9..."
         src_url=https://github.com/downloads/eaccelerator/eaccelerator/eaccelerator-${eaccelerator_ver}.tar.bz2 && Download_src
-      elif [ "${php_option}" == '2' ]; then
+      elif [ "${php_option}" == '2' ] || [ "${mphp_ver}" == '54' ]; then
         echo "Download eaccelerator 1.0 dev..."
         src_url=https://github.com/eaccelerator/eaccelerator/tarball/master && Download_src
       fi
@@ -714,7 +711,7 @@ checkDownload() {
     echo "Download ImageMagick..."
     src_url=${mirror_link}/oneinstack/src/ImageMagick-${imagemagick_ver}.tar.gz && Download_src
     echo "Download imagick..."
-    if [[ "${php_option}" =~ ^1$ ]]; then
+    if [[ "${php_option}" =~ ^1$ ]] || [[ "${mphp_ver}" =~ ^53$ ]]; then
       src_url=https://pecl.php.net/get/imagick-${imagick_oldver}.tgz && Download_src
     elif [[ "${php_option}" =~ ^15$ ]] || [[ "${mphp_ver}" =~ ^85$ ]]; then
       src_url=https://pecl.php.net/get/imagick-${imagick_php85_ver}.tgz && Download_src
@@ -726,8 +723,8 @@ checkDownload() {
   # graphicsmagick
   if [ "${pecl_gmagick}" == '1' ]; then
     echo "Download graphicsmagick..."
-    src_url=https://downloads.sourceforge.net/project/graphicsmagick/graphicsmagick/${graphicsmagick_ver}/GraphicsMagick-${graphicsmagick_ver}.tar.gz && Download_src
-    if [[ "${php_option}" =~ ^[1-4]$ ]]; then
+    src_url=${mirror_link}/oneinstack/src/GraphicsMagick-${graphicsmagick_ver}.tar.gz && Download_src
+    if [[ "${php_option}" =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]]; then
       echo "Download gmagick for php..."
       src_url=https://pecl.php.net/get/gmagick-${gmagick_oldver}.tgz && Download_src
     else
@@ -750,10 +747,10 @@ checkDownload() {
 
   # pecl_redis
   if [ "${pecl_redis}" == '1' ]; then
-    if [[ "${php_option}" =~ ^[1-4]$ ]]; then
+    if [[ "${php_option}" =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]]; then
       echo "Download pecl_redis for php 5.x..."
       src_url=https://pecl.php.net/get/redis-4.3.0.tgz && Download_src
-    elif [[ "${php_option}" =~ ^[5-6]$ ]]; then
+    elif [[ "${php_option}" =~ ^[5-6]$ ]] || [[ "${mphp_ver}" =~ ^7[0-1]$ ]]; then
       echo "Download pecl_redis for php 7.0~7.1..."
       src_url=https://pecl.php.net/get/redis-5.3.7.tgz && Download_src
     else
@@ -773,7 +770,8 @@ checkDownload() {
   if [ "${pecl_memcached}" == '1' ]; then
     echo "Download libmemcached..."
     src_url=${mirror_link}/oneinstack/src/libmemcached-${libmemcached_ver}.tar.gz && Download_src
-    if [[ "${php_option}" =~ ^[1-4]$ ]]; then
+    src_url=${mirror_link}/oneinstack/src/libmemcached-build.patch && Download_src
+    if [[ "${php_option}" =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]]; then
       echo "Download pecl_memcached for php..."
       src_url=https://pecl.php.net/get/memcached-${pecl_memcached_oldver}.tgz && Download_src
     else
@@ -784,10 +782,10 @@ checkDownload() {
 
   # memcached-server pecl_memcached pecl_memcache
   if [ "${pecl_memcache}" == '1' ]; then
-    if [[ "${php_option}" =~ ^[1-4]$ ]]; then
+    if [[ "${php_option}" =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]]; then
       echo "Download pecl_memcache for php 5.x..."
       src_url=https://pecl.php.net/get/memcache-3.0.8.tgz && Download_src
-    elif [[ "${php_option}" =~ ^[5-9]$ ]]; then
+    elif [[ "${php_option}" =~ ^[5-9]$ ]] || [[ "${mphp_ver}" =~ ^7[0-4]$ ]]; then
       echo "Download pecl_memcache for php 7.x..."
       src_url=https://pecl.php.net/get/memcache-${pecl_memcache_oldver}.tgz && Download_src
     else
@@ -801,7 +799,17 @@ checkDownload() {
     echo "Download pecl mongo for php..."
     src_url=https://pecl.php.net/get/mongo-${pecl_mongo_ver}.tgz && Download_src
     echo "Download pecl mongodb for php..."
-    src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_ver}.tgz && Download_src
+    if [[ "${php_option}" =~ ^4$ ]] || [[ "${mphp_ver}" =~ ^56$ ]]; then
+      src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_php56_ver}.tgz && Download_src
+    elif [[ "${php_option}" =~ ^[5-6]$ ]] || [[ "${mphp_ver}" =~ ^7[0-1]$ ]]; then
+      src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_php70_ver}.tgz && Download_src
+    elif [[ "${php_option}" =~ ^[7-8]$ ]] || [[ "${mphp_ver}" =~ ^7[2-3]$ ]]; then
+      src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_php72_ver}.tgz && Download_src
+    elif [[ "${php_option}" =~ ^(9|10)$ ]] || [[ "${mphp_ver}" =~ ^(74|80)$ ]]; then
+      src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_oldver}.tgz && Download_src
+    else
+      src_url=https://pecl.php.net/get/mongodb-${pecl_mongodb_ver}.tgz && Download_src
+    fi
   fi
 
   # pecl_xlswriter

@@ -30,7 +30,7 @@ Install_Tengine() {
     rm -rf pcre-${pcre_ver}* openssl-${openssl11_ver}* tengine-${tengine_ver}*
     echo "${CSUCCESS}Tengine installed successfully! ${CEND}"
   else
-    rm -rf pcre-${pcre_ver}* openssl-${openssl11_ver}* tengine-${tengine_ver}* rm -rf ${tengine_install_dir}*
+    rm -rf pcre-${pcre_ver}* openssl-${openssl11_ver}* tengine-${tengine_ver}* ${tengine_install_dir}*
     echo "${CFAILURE}Tengine install failed, Please Contact the author! ${CEND}"
     kill -9 $$; exit 1;
   fi
@@ -46,7 +46,7 @@ Install_Tengine() {
   mv ${tengine_install_dir}/conf/nginx.conf{,_bk}
   if [ "${apache_flag}" == 'y' ] || [ -e "${apache_install_dir}/bin/httpd" ]; then
     /bin/cp ../config/nginx_apache.conf ${tengine_install_dir}/conf/nginx.conf
-  elif { [[ ${tomcat_option} =~ ^[1-4]$ ]] || [ -e "${tomcat_install_dir}/conf/server.xml" ]; } && { [[ ! ${php_option} =~ ^[1-9]$|^1[0-5]$ ]] && [ ! -e "${php_install_dir}/bin/php" ]; }; then
+  elif { [[ ${tomcat_option} =~ ^[1-5]$ ]] || [ -e "${tomcat_install_dir}/conf/server.xml" ]; } && { [[ ! ${php_option} =~ ^[1-9]$|^1[0-5]$ ]] && [ ! -e "${php_install_dir}/bin/php" ]; }; then
     /bin/cp ../config/nginx_tomcat.conf ${tengine_install_dir}/conf/nginx.conf
   else
     /bin/cp ../config/nginx.conf ${tengine_install_dir}/conf/nginx.conf

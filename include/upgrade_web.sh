@@ -191,9 +191,9 @@ Upgrade_OpenResty() {
     if [ "${NEW_openresty_ver}" != "${OLD_openresty_ver}" ]; then
       [ ! -e "openresty-${NEW_openresty_ver}.tar.gz" ] && wget --no-check-certificate -c https://openresty.org/download/openresty-${NEW_openresty_ver}.tar.gz > /dev/null 2>&1
       if [ -e "openresty-${NEW_openresty_ver}.tar.gz" ]; then
-        src_url=https://www.openssl.org/source/openssl-${openssl11_ver}.tar.gz && Download_src
+        src_url=https://github.com/openssl/openssl/releases/download/openssl-${openssl_ver}/openssl-${openssl_ver}.tar.gz && Download_src
         src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
-        tar xzf openssl-${openssl11_ver}.tar.gz
+        tar xzf openssl-${openssl_ver}.tar.gz
         tar xzf pcre-${pcre_ver}.tar.gz
         echo "Download [${CMSG}openresty-${NEW_openresty_ver}.tar.gz${CEND}] successfully! "
         break
@@ -217,7 +217,7 @@ Upgrade_OpenResty() {
     make clean
     sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' bundle/nginx-${NEW_openresty_ver%.*}/auto/cc/gcc # close debug
     ${openresty_install_dir}/nginx/sbin/nginx -V &> $$
-    ./configure --prefix=${openresty_install_dir} --user=${run_user} --group=${run_user} --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=../openssl-${openssl11_ver} --with-pcre=../pcre-${pcre_ver} --with-pcre-jit --with-ld-opt='-ljemalloc -Wl,-u,pcre_version' ${nginx_modules_options}
+    ./configure --prefix=${openresty_install_dir} --user=${run_user} --group=${run_group} --with-http_stub_status_module --with-http_sub_module --with-http_v2_module --with-http_ssl_module --with-http_gzip_static_module --with-http_realip_module --with-http_flv_module --with-http_mp4_module --with-openssl=../openssl-${openssl_ver} --with-pcre=../pcre-${pcre_ver} --with-pcre-jit --with-ld-opt='-ljemalloc -Wl,-u,pcre_version' ${nginx_modules_options}
     make -j ${THREAD}
     if [ -f "build/nginx-${NEW_openresty_ver%.*}/objs/nginx" ]; then
       /bin/mv ${openresty_install_dir}/nginx/sbin/nginx{,`date +%m%d`}
@@ -240,7 +240,7 @@ Upgrade_Apache() {
   [ ! -e "${apache_install_dir}/bin/httpd" ] && echo "${CWARNING}Apache is not installed on your system! ${CEND}" && exit 1
   OLD_apache_ver="`${apache_install_dir}/bin/httpd -v | grep version | awk -F'/| ' '{print $4}'`"
   Latest_apache_ver=`curl --connect-timeout 2 -m 3 -s http://httpd.apache.org/download.cgi | awk "/#apache24/{print $2}" | head -1 | grep -oE "2\.[24]\.[0-9]+"`
-  Latest_apache_ver=${Latest_apache_ver:-${apache22_ver}}
+  Latest_apache_ver=${Latest_apache_ver:-${apache_ver}}
   echo
   echo "Current Apache Version: ${CMSG}${OLD_apache_ver}${CEND}"
   while :; do echo
@@ -317,7 +317,7 @@ Upgrade_Tomcat() {
   [ ! -e "${tomcat_install_dir}/conf/server.xml" ] && echo "${CWARNING}Tomcat is not installed on your system! ${CEND}" && exit 1
   OLD_tomcat_ver="`${tomcat_install_dir}/bin/version.sh | awk '/Server number/{print $3}' | awk -F. '{print $1"."$2"."$3}'`"
   Tomcat_flag="`echo ${OLD_tomcat_ver} | awk -F. '{print $1}'`"
-  Latest_tomcat_ver=`curl --connect-timeout 2 -m 3 -s https://tomcat.apache.org/download-${Tomcat_flag}0.cgi | grep "README" | head -1 | grep -oE "[6-9]\.[0-9]\.[0-9]+"`
+  Latest_tomcat_ver=`curl --connect-timeout 2 -m 3 -s https://tomcat.apache.org/download-${Tomcat_flag}0.cgi | grep "README" | head -1 | grep -oE "[0-9]+\.[0-9]+\.[0-9]+"`
   Latest_tomcat_ver=${Latest_tomcat_ver:-${tomcat10_ver}}
   echo
   echo "Current Tomcat Version: ${CMSG}${OLD_tomcat_ver}${CEND}"
@@ -328,10 +328,10 @@ Upgrade_Tomcat() {
       rm -f catalina-jmx-remote.jar
       echo "Download tomcat-${NEW_tomcat_ver}..."
       src_url=${mirror_link}/apache/tomcat/v${NEW_tomcat_ver}/apache-tomcat-${NEW_tomcat_ver}.tar.gz && Download_src
-      [ ! -e "apache-tomcat-${NEW_tomcat_ver}.tar.gz" ] && wget --no-check-certificate -c https://archive.apache.org/dist/tomcat-${OLD_tomcat_ver}/v${NEW_tomcat_ver}/bin/apache-tomcat-${NEW_tomcat_ver}.tar.gz > /dev/null 2>&1
+      [ ! -e "apache-tomcat-${NEW_tomcat_ver}.tar.gz" ] && wget --no-check-certificate -c https://archive.apache.org/dist/tomcat/tomcat-${Tomcat_flag}/v${NEW_tomcat_ver}/bin/apache-tomcat-${NEW_tomcat_ver}.tar.gz > /dev/null 2>&1
       if [ -e "${tomcat_install_dir}/lib/catalina-jmx-remote.jar" ]; then
         src_url=${mirror_link}/apache/tomcat/v${NEW_tomcat_ver}/catalina-jmx-remote.jar && Download_src
-        [ ! -e "catalina-jmx-remote.jar" ] && wget --no-check-certificate -c https://archive.apache.org/dist/tomcat-${OLD_tomcat_ver}/v${NEW_tomcat_ver}/bin/extras/catalina-jmx-remote.jar > /dev/null 2>&1
+        [ ! -e "catalina-jmx-remote.jar" ] && wget --no-check-certificate -c https://archive.apache.org/dist/tomcat/tomcat-${Tomcat_flag}/v${NEW_tomcat_ver}/bin/extras/catalina-jmx-remote.jar > /dev/null 2>&1
       fi
       if [ -e "apache-tomcat-${NEW_tomcat_ver}.tar.gz" ]; then
         echo "Download [${CMSG}apache-tomcat-${NEW_tomcat_ver}.tar.gz${CEND}] successfully! "
@@ -357,7 +357,7 @@ Upgrade_Tomcat() {
     /bin/cp ${tomcat_install_dir}/bin/setenv.sh apache-tomcat-${NEW_tomcat_ver}/bin/
     /bin/cp -R ${tomcat_install_dir}/conf/vhost apache-tomcat-${NEW_tomcat_ver}/conf/
     chmod +x apache-tomcat-${NEW_tomcat_ver}/bin/*.sh
-    [[ -d ${tomcat_install_dir}_bak && -d ${tomcat_install_dir} ]] && rm -rf ${tomcat_install_dir}._bak
+    [[ -d ${tomcat_install_dir}_bak && -d ${tomcat_install_dir} ]] && rm -rf ${tomcat_install_dir}_bak
     service tomcat stop
     /bin/mv ${tomcat_install_dir}{,_bak}
     /bin/mv apache-tomcat-${NEW_tomcat_ver} ${tomcat_install_dir} && chown -R ${run_user}:${run_group} ${tomcat_install_dir}

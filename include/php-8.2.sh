@@ -59,11 +59,18 @@ Install_PHP82() {
     rm -rf libsodium-${libsodium_up_ver}
   fi
 
-  if [ ! -e "/usr/local/lib/libzip.la" ]; then
+  if [ ! -e "/usr/local/lib/libzip.la" -a ! -e "/usr/local/lib/libzip.so" ]; then
     tar xzf libzip-${libzip_ver}.tar.gz
     pushd libzip-${libzip_ver} > /dev/null
-    ./configure
-    make -j ${THREAD} && make install
+    if [ -e "./configure" ]; then
+      ./configure
+      make -j ${THREAD} && make install
+    else
+      mkdir -p build && pushd build > /dev/null
+      cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_INSTALL_LIBDIR=lib ..
+      make -j ${THREAD} && make install
+      popd > /dev/null
+    fi
     popd > /dev/null
     rm -rf libzip-${libzip_ver}
   fi

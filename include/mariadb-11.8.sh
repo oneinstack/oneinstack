@@ -22,14 +22,10 @@ Install_MariaDB118() {
     sed -i 's@executing mysqld_safe@executing mysqld_safe\nexport LD_PRELOAD=/usr/local/lib/libjemalloc.so@' ${mariadb_install_dir}/bin/mysqld_safe
     sed -i "s@/usr/local/mysql@${mariadb_install_dir}@g" ${mariadb_install_dir}/bin/mysqld_safe
   elif [ "${dbinstallmethod}" == "2" ]; then
-    boostVersion2=$(echo ${boost_oldver} | awk -F. '{print $1"_"$2"_"$3}')
-    tar xzf boost_${boostVersion2}.tar.gz
     tar xzf mariadb-${mariadb118_ver}.tar.gz
     pushd mariadb-${mariadb118_ver}
     cmake . -DCMAKE_INSTALL_PREFIX=${mariadb_install_dir} \
     -DMYSQL_DATADIR=${mariadb_data_dir} \
-    -DDOWNLOAD_BOOST=1 \
-    -DWITH_BOOST=../boost_${boostVersion2} \
     -DSYSCONFDIR=/etc \
     -DWITH_INNOBASE_STORAGE_ENGINE=1 \
     -DWITH_PARTITION_STORAGE_ENGINE=1 \
@@ -54,7 +50,7 @@ Install_MariaDB118() {
     if [ "${dbinstallmethod}" == "1" ]; then
       rm -rf mariadb-${mariadb118_ver}-linux-systemd-x86_64
     elif [ "${dbinstallmethod}" == "2" ]; then
-      rm -rf mariadb-${mariadb118_ver} boost_${boostVersion2}
+      rm -rf mariadb-${mariadb118_ver}
     fi
   else
     rm -rf ${mariadb_install_dir}
@@ -204,10 +200,10 @@ EOF
 
   ${mariadb_install_dir}/bin/mysql -e "grant all privileges on *.* to root@'127.0.0.1' identified by \"${dbrootpwd}\" with grant option;"
   ${mariadb_install_dir}/bin/mysql -e "grant all privileges on *.* to root@'localhost' identified by \"${dbrootpwd}\" with grant option;"
-  ${mariadb_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "delete from mysql.user where Password='' and User not like 'mariadb.%';"
+  ${mariadb_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "delete from mysql.global_priv where User='';"
   ${mariadb_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "delete from mysql.db where User='';"
   ${mariadb_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "delete from mysql.proxies_priv where Host!='localhost';"
-  ${mariadb_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "drop database test;"
+  ${mariadb_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "drop database if exists test;"
   ${mariadb_install_dir}/bin/mysql -uroot -p${dbrootpwd} -e "reset master;"
   rm -rf /etc/ld.so.conf.d/{mysql,mariadb,percona}*.conf
   echo "${mariadb_install_dir}/lib" > /etc/ld.so.conf.d/z-mariadb.conf

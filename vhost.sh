@@ -34,7 +34,7 @@ Show_Help() {
   --help, -h                  Show this help message
   --quiet, -q                 quiet operation
   --list, -l                  List Virtualhost
-  --mphp_ver [53~81]          Use another PHP version (PATH: /usr/local/php${mphp_ver})
+  --mphp_ver [53~85]          Use another PHP version (PATH: /usr/local/php${mphp_ver})
   --proxy                     Use proxy
   --add                       Add Virtualhost
   --delete, --del             Delete Virtualhost
@@ -505,10 +505,11 @@ What Are You Doing?
     fi
   done
 
-  if [ -e "${web_install_dir}/conf/vhost/${domain}.conf" -o -e "${apache_install_dir}/conf/vhost/${domain}.conf" -o -e "${tomcat_install_dir}/conf/vhost/${domain}.xml" ]; then
+  if [ -e "${web_install_dir}/conf/vhost/${domain}.conf" -o -e "${apache_install_dir}/conf/vhost/${domain}.conf" -o -e "${tomcat_install_dir}/conf/vhost/${domain}.xml" -o -e "${caddy_install_dir}/conf/vhost/${domain}.conf" ]; then
     [ -e "${web_install_dir}/conf/vhost/${domain}.conf" ] && echo -e "${domain} in the Nginx/Tengine/OpenResty already exist! \nYou can delete ${CMSG}${web_install_dir}/conf/vhost/${domain}.conf${CEND} and re-create"
     [ -e "${apache_install_dir}/conf/vhost/${domain}.conf" ] && echo -e "${domain} in the Apache already exist! \nYou can delete ${CMSG}${apache_install_dir}/conf/vhost/${domain}.conf${CEND} and re-create"
     [ -e "${tomcat_install_dir}/conf/vhost/${domain}.xml" ] && echo -e "${domain} in the Tomcat already exist! \nYou can delete ${CMSG}${tomcat_install_dir}/conf/vhost/${domain}.xml${CEND} and re-create"
+    [ -e "${caddy_install_dir}/conf/vhost/${domain}.conf" ] && echo -e "${domain} in the Caddy already exist! \nYou can delete ${CMSG}${caddy_install_dir}/conf/vhost/${domain}.conf${CEND} and re-create"
     exit
   else
     echo "domain=${domain}"
@@ -581,48 +582,51 @@ What Are You Doing?
       fi
     done
 
-    if [[ "$(${web_install_dir}/sbin/nginx -V 2>&1 | grep -Eo 'with-http_v2_module')" = 'with-http_v2_module' ]]; then
-        # 获取nginx版本号
-        nginx_version=$(${web_install_dir}/sbin/nginx -v 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
-        # 转换版本号为可比较的数字
-        version_number=$(echo $nginx_version | awk -F. '{ printf("%d%02d%02d\n", $1,$2,$3); }')
-        
-        if [ "$version_number" -lt 12501 ]; then
-          # nginx版本小于1.25.1
-          LISTENOPT="443 ssl http2"
-          HTTP2OPT=""
-        else
-          # nginx版本大于等于1.25.1
-          LISTENOPT="443 ssl"
-          HTTP2OPT="http2 on;"
-        fi
-    else
-      LISTENOPT="443 ssl spdy"
-      HTTP2OPT=""
-    fi
+    if [ "${nginx_ssl_flag}" == 'y' ]; then
+      if [[ "$(${web_install_dir}/sbin/nginx -V 2>&1 | grep -Eo 'with-http_v2_module')" = 'with-http_v2_module' ]]; then
+          # 获取nginx版本号
+          nginx_version=$(${web_install_dir}/sbin/nginx -v 2>&1 | grep -oE '[0-9]+\.[0-9]+\.[0-9]+')
+          # 转换版本号为可比较的数字
+          version_number=$(echo $nginx_version | awk -F. '{ printf("%d%02d%02d\n", $1,$2,$3); }')
+          
+          if [ "$version_number" -lt 12501 ]; then
+            # nginx版本小于1.25.1
+            LISTENOPT="443 ssl http2"
+            HTTP2OPT=""
+          else
+            # nginx版本大于等于1.25.1
+            LISTENOPT="443 ssl"
+            HTTP2OPT="http2 on;"
+          fi
+      else
+        LISTENOPT="443 ssl spdy"
+        HTTP2OPT=""
+      fi
 
-    if [[ "$(${web_install_dir}/sbin/nginx -V 2>&1 | grep -Eo 'with-http_v3_module')" = 'with-http_v3_module' ]]; then
-      HTTP3OPT_V4="listen 443 quic;\n  "
-      HTTP3OPT_V6="listen [::]:443 quic;\n  "
-      HTTP3_HEADER="add_header Alt-Svc 'h3=\":443\"; ma=86400';\n  "
-    else
-      HTTP3OPT_V4=""
-      HTTP3OPT_V6=""
-      HTTP3_HEADER=""
+      if [[ "$(${web_install_dir}/sbin/nginx -V 2>&1 | grep -Eo 'with-http_v3_module')" = 'with-http_v3_module' ]]; then
+        HTTP3OPT_V4="listen 443 quic;\n  "
+        HTTP3OPT_V6="listen [::]:443 quic;\n  "
+        HTTP3_HEADER="add_header Alt-Svc 'h3=\":443\"; ma=86400';\n  "
+      else
+        HTTP3OPT_V4=""
+        HTTP3OPT_V6=""
+        HTTP3_HEADER=""
+      fi
     fi
 
     Create_SSL
-    if [ -n "`ifconfig | grep inet6`" ]; then
-      Nginx_conf=$(echo -e "listen 80;\n  listen [::]:80;\n  listen ${LISTENOPT};\n  listen [::]:${LISTENOPT};\n  ${HTTP3OPT_V4}${HTTP3OPT_V6}${HTTP2OPT}\n  ssl_certificate ${PATH_SSL}/${domain}.crt;\n  ssl_certificate_key ${PATH_SSL}/${domain}.key;\n  ssl_protocols TLSv1.2 TLSv1.3;\n  ssl_ecdh_curve X25519:prime256v1:secp384r1:secp521r1;\n  ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256;\n  ssl_conf_command Ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256;\n  ssl_conf_command Options PrioritizeChaCha;\n  ssl_prefer_server_ciphers on;\n  ssl_session_timeout 10m;\n  ssl_session_cache shared:SSL:10m;\n  ssl_buffer_size 2k;\n  add_header Strict-Transport-Security max-age=15768000;\n  ${HTTP3_HEADER}ssl_stapling on;\n  ssl_stapling_verify on;\n")
-    else
-      Nginx_conf=$(echo -e "listen 80;\n  listen ${LISTENOPT};\n  ${HTTP3OPT_V4}${HTTP2OPT}\n  ssl_certificate ${PATH_SSL}/${domain}.crt;\n  ssl_certificate_key ${PATH_SSL}/${domain}.key;\n  ssl_protocols TLSv1.2 TLSv1.3;\n  ssl_ecdh_curve X25519:prime256v1:secp384r1:secp521r1;\n  ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256;\n  ssl_conf_command Ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256;\n  ssl_conf_command Options PrioritizeChaCha;\n  ssl_prefer_server_ciphers on;\n  ssl_session_timeout 10m;\n  ssl_session_cache shared:SSL:10m;\n  ssl_buffer_size 2k;\n  add_header Strict-Transport-Security max-age=15768000;\n  ${HTTP3_HEADER}ssl_stapling on;\n  ssl_stapling_verify on;\n")
+    if [ "${nginx_ssl_flag}" == 'y' ]; then
+      if [ -n "`ifconfig | grep inet6`" ]; then
+        Nginx_conf=$(echo -e "listen 80;\n  listen [::]:80;\n  listen ${LISTENOPT};\n  listen [::]:${LISTENOPT};\n  ${HTTP3OPT_V4}${HTTP3OPT_V6}${HTTP2OPT}\n  ssl_certificate ${PATH_SSL}/${domain}.crt;\n  ssl_certificate_key ${PATH_SSL}/${domain}.key;\n  ssl_protocols TLSv1.2 TLSv1.3;\n  ssl_ecdh_curve X25519:prime256v1:secp384r1:secp521r1;\n  ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256;\n  ssl_conf_command Ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256;\n  ssl_conf_command Options PrioritizeChaCha;\n  ssl_prefer_server_ciphers on;\n  ssl_session_timeout 10m;\n  ssl_session_cache shared:SSL:10m;\n  ssl_buffer_size 2k;\n  add_header Strict-Transport-Security max-age=15768000;\n  ${HTTP3_HEADER}ssl_stapling on;\n  ssl_stapling_verify on;\n")
+      else
+        Nginx_conf=$(echo -e "listen 80;\n  listen ${LISTENOPT};\n  ${HTTP3OPT_V4}${HTTP2OPT}\n  ssl_certificate ${PATH_SSL}/${domain}.crt;\n  ssl_certificate_key ${PATH_SSL}/${domain}.key;\n  ssl_protocols TLSv1.2 TLSv1.3;\n  ssl_ecdh_curve X25519:prime256v1:secp384r1:secp521r1;\n  ssl_ciphers ECDHE-ECDSA-AES256-GCM-SHA384:ECDHE-RSA-AES256-GCM-SHA384:ECDHE-ECDSA-CHACHA20-POLY1305:ECDHE-RSA-CHACHA20-POLY1305:ECDHE-ECDSA-AES128-GCM-SHA256:ECDHE-RSA-AES128-GCM-SHA256:DHE-RSA-AES256-GCM-SHA384:DHE-RSA-AES128-GCM-SHA256;\n  ssl_conf_command Ciphersuites TLS_AES_256_GCM_SHA384:TLS_CHACHA20_POLY1305_SHA256:TLS_AES_128_GCM_SHA256;\n  ssl_conf_command Options PrioritizeChaCha;\n  ssl_prefer_server_ciphers on;\n  ssl_session_timeout 10m;\n  ssl_session_cache shared:SSL:10m;\n  ssl_buffer_size 2k;\n  add_header Strict-Transport-Security max-age=15768000;\n  ${HTTP3_HEADER}ssl_stapling on;\n  ssl_stapling_verify on;\n")
+      fi
     fi
-    Apache_SSL=$(echo -e "SSLEngine on\n  SSLCertificateFile \"${PATH_SSL}/${domain}.crt\"\n  SSLCertificateKeyFile \"${PATH_SSL}/${domain}.key\"")
-  elif [ "${apache_ssl_flag}" == 'y' ]; then
-    Create_SSL
-    Apache_SSL=$(echo -e "SSLEngine on\n  SSLCertificateFile \"${PATH_SSL}/${domain}.crt\"\n  SSLCertificateKeyFile \"${PATH_SSL}/${domain}.key\"")
-    [ -z "$(grep 'Listen 443' ${apache_install_dir}/conf/httpd.conf)" ] && sed -i "s@Listen 80@&\nListen 443@" ${apache_install_dir}/conf/httpd.conf
-    [ -z "$(grep 'ServerName 0.0.0.0:443' ${apache_install_dir}/conf/httpd.conf)" ] && sed -i "s@ServerName 0.0.0.0:80@&\nServerName 0.0.0.0:443@" ${apache_install_dir}/conf/httpd.conf
+    if [ "${apache_ssl_flag}" == 'y' ]; then
+      Apache_SSL=$(echo -e "SSLEngine on\n  SSLCertificateFile \"${PATH_SSL}/${domain}.crt\"\n  SSLCertificateKeyFile \"${PATH_SSL}/${domain}.key\"")
+      [ -z "$(grep 'Listen 443' ${apache_install_dir}/conf/httpd.conf)" ] && sed -i "s@Listen 80@&\nListen 443@" ${apache_install_dir}/conf/httpd.conf
+      [ -z "$(grep 'ServerName 0.0.0.0:443' ${apache_install_dir}/conf/httpd.conf)" ] && sed -i "s@ServerName 0.0.0.0:80@&\nServerName 0.0.0.0:443@" ${apache_install_dir}/conf/httpd.conf
+    fi
   else
     if [ -n "`ifconfig | grep inet6`" ]; then
       Nginx_conf=$(echo -e "listen 80;\n  listen [::]:80;")
@@ -965,19 +969,7 @@ server {
 }
 EOF
 
-  [ "${redirect_flag}" == 'y' ] && sed -i "s@^  root.*;@&\n  if (\$host != ${domain}) {  return 301 \$scheme://${domain}\$request_uri;  }@" ${web_install_dir}/conf/vhost/${domain}.conf
-
-  if [ "${anti_hotlinking_flag}" == 'y' ]; then
-      sed -i "s@^  root.*;@&\n  }@" ${web_install_dir}/conf/vhost/${domain}.conf
-      sed -i "s@^  root.*;@&\n    }@" ${web_install_dir}/conf/vhost/${domain}.conf
-      sed -i "s@^  root.*;@&\n      return 403;@" ${web_install_dir}/conf/vhost/${domain}.conf
-      sed -i "s@^  root.*;@&\n      rewrite ^/ http://www.linuxeye.com/403.html;@" ${web_install_dir}/conf/vhost/${domain}.conf
-      sed -i "s@^  root.*;@&\n    if (\$invalid_referer) {@" ${web_install_dir}/conf/vhost/${domain}.conf
-      sed -i "s@^  root.*;@&\n    valid_referers none blocked ${domain_allow_all};@" ${web_install_dir}/conf/vhost/${domain}.conf
-      sed -i "s@^  root.*;@&\n  location ~ .*\.(wma|wmv|asf|mp3|mmf|zip|rar|jpg|gif|png|swf|flv|mp4)\$ {@" ${web_install_dir}/conf/vhost/${domain}.conf
-    fi
-
-  [ "${https_flag}" == 'y' ] && sed -i "s@^  root.*;@&\n  if (\$ssl_protocol = \"\") { return 301 https://\$host\$request_uri; }@" ${web_install_dir}/conf/vhost/${domain}.conf
+  [ "${https_flag}" == 'y' ] && sed -i "s@^  server_name.*;@&\n  if (\$ssl_protocol = \"\") { return 301 https://\$host\$request_uri; }@" ${web_install_dir}/conf/vhost/${domain}.conf
 
   echo
   ${web_install_dir}/sbin/nginx -t
@@ -1013,13 +1005,19 @@ Reload_Caddy() {
 
 Create_caddy_php_conf() {
   [ ! -d ${caddy_install_dir}/conf/vhost ] && mkdir -p ${caddy_install_dir}/conf/vhost
+  caddy_http_hosts="http://${domain}"
+  caddy_https_hosts="https://${domain}"
+  for D in ${moredomainame}; do
+    caddy_http_hosts="${caddy_http_hosts}, http://${D}"
+    caddy_https_hosts="${caddy_https_hosts}, https://${D}"
+  done
   if [ "${https_flag}" == 'y' ]; then
     cat > ${caddy_install_dir}/conf/vhost/${domain}.conf << EOF
-http://${domain}, http://${moredomainame} {
+${caddy_http_hosts} {
   redir https://{host}{uri}
 }
 
-https://${domain}, https://${moredomainame} {
+${caddy_https_hosts} {
   root * ${vhostdir}
   php_fastcgi unix:/dev/shm/php${mphp_ver}-cgi.sock
   file_server
@@ -1051,7 +1049,7 @@ EOF
   ${caddy_install_dir}/bin/caddy validate --config ${caddy_install_dir}/conf/Caddyfile
   if [ $? == 0 ]; then
     echo "Reload Caddy......"
-    systemctl reload caddy
+    Reload_Caddy
   else
     rm -f ${caddy_install_dir}/conf/vhost/${domain}.conf
     echo "Create virtualhost ... [${CFAILURE}FAILED${CEND}]"
@@ -1067,17 +1065,24 @@ EOF
   echo "$(printf "%-30s" "Your domain:")${CMSG}${domain}${CEND}"
   echo "$(printf "%-30s" "Caddy Virtualhost conf:")${CMSG}${caddy_install_dir}/conf/vhost/${domain}.conf${CEND}"
   echo "$(printf "%-30s" "Directory of:")${CMSG}${vhostdir}${CEND}"
+  Print_SSL
 }
 
 Create_caddy_proxy_conf() {
   [ ! -d ${caddy_install_dir}/conf/vhost ] && mkdir -p ${caddy_install_dir}/conf/vhost
+  caddy_http_hosts="http://${domain}"
+  caddy_https_hosts="https://${domain}"
+  for D in ${moredomainame}; do
+    caddy_http_hosts="${caddy_http_hosts}, http://${D}"
+    caddy_https_hosts="${caddy_https_hosts}, https://${D}"
+  done
   if [ "${https_flag}" == 'y' ]; then
     cat > ${caddy_install_dir}/conf/vhost/${domain}.conf << EOF
-http://${domain}, http://${moredomainame} {
+${caddy_http_hosts} {
   redir https://{host}{uri}
 }
 
-https://${domain}, https://${moredomainame} {
+${caddy_https_hosts} {
   reverse_proxy ${Proxy_Pass}
   ${Caddy_log}
   tls ${PATH_SSL}/${domain}.crt ${PATH_SSL}/${domain}.key
@@ -1112,6 +1117,7 @@ EOF
 "
   echo "$(printf "%-30s" "Your domain:")${CMSG}${domain}${CEND}"
   echo "$(printf "%-30s" "Caddy Virtualhost conf:")${CMSG}${caddy_install_dir}/conf/vhost/${domain}.conf${CEND}"
+  Print_SSL
 }
 
 Apache_log() {
@@ -1547,6 +1553,7 @@ Del_Tomcat_Vhost() {
             echo "${CWARNING}Your ${domain} is invalid! ${CEND}"
           else
             if [ -n "$(grep vhost-${domain} ${tomcat_install_dir}/conf/server.xml)" ]; then
+              Directory=$(grep -oE 'docBase="[^"]+"' ${tomcat_install_dir}/conf/vhost/${domain}.xml 2>/dev/null | head -1 | awk -F'"' '{print $2}')
               sed -i /vhost-${domain}/d ${tomcat_install_dir}/conf/server.xml
               rm -f ${tomcat_install_dir}/conf/vhost/${domain}.xml
               service tomcat restart
@@ -1564,7 +1571,7 @@ Del_Tomcat_Vhost() {
                   echo "Press Ctrl+c to cancel or Press any key to continue..."
                   char=$(get_char)
 		fi
-                rm -rf ${Directory}
+                [ -n "${Directory}" ] && rm -rf ${Directory}
               fi
               echo "${CSUCCESS}Domain: ${domain} has been deleted.${CEND}"
             else

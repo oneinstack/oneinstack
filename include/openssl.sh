@@ -173,8 +173,8 @@ Install_openSSL() {
   if [ "${with_old_openssl_flag}" == 'y' ]; then
     if [ ! -e "${openssl_install_dir}/lib/libssl.a" ]; then
       pushd ${oneinstack_dir}/src > /dev/null
-      tar xzf openssl-${openssl_ver}.tar.gz
-      pushd openssl-${openssl_ver} > /dev/null
+      tar xzf openssl-${openssl102_ver}.tar.gz
+      pushd openssl-${openssl102_ver} > /dev/null
       make clean
       ./config -Wl,-rpath=${openssl_install_dir}/lib -fPIC --prefix=${openssl_install_dir} --openssldir=${openssl_install_dir}
       make depend
@@ -183,7 +183,7 @@ Install_openSSL() {
       if [ -f "${openssl_install_dir}/lib/libcrypto.a" ]; then
         echo "${CSUCCESS}openSSL installed successfully! ${CEND}"
         /bin/cp cacert.pem ${openssl_install_dir}/cert.pem
-        rm -rf openssl-${openssl_ver}
+        rm -rf openssl-${openssl102_ver}
       else
         echo "${CFAILURE}openSSL install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release
         kill -9 $$; exit 1;

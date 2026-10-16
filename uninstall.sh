@@ -273,7 +273,7 @@ Uninstall_PostgreSQL() {
 
 Uninstall_MongoDB() {
   # uninstall mongodb
-  if [ -e "${mongo_install_dir}/bin/mongo" ]; then
+  if [ -e "${mongo_install_dir}/bin/mongod" -o -e "${mongo_install_dir}/bin/mongo" -o -d "${mongo_install_dir}" ]; then
     service mongod stop > /dev/null 2>&1
     rm -rf ${mongo_install_dir} /etc/mongod.conf /etc/init.d/mongod /tmp/mongo*.sock
     [ -e "/lib/systemd/system/mongod.service" ] && { systemctl disable mongod > /dev/null 2>&1; rm -f /lib/systemd/system/mongod.service; }
@@ -474,16 +474,14 @@ Uninstall_PHPext() {
 
   # xlswriter
   if [ "${pecl_xlswriter}" == '1' ]; then
-    rm -f ${php_install_dir}/etc/php.d/0*xlswriter.ini
-    [ -n "${mphp_ver}" ] && rm -f ${php_install_dir}${mphp_ver}/etc/php.d/0*xlswriter.ini
-    echo "${CMSG}PHP xlswriter extension uninstall completed! ${CEND}"
+    . include/pecl_xlswriter.sh
+    Uninstall_pecl_xlswriter
   fi
 
   # grpc
   if [ "${pecl_grpc}" == '1' ]; then
-    rm -f ${php_install_dir}/etc/php.d/0*grpc.ini
-    [ -n "${mphp_ver}" ] && rm -f ${php_install_dir}${mphp_ver}/etc/php.d/0*grpc.ini
-    echo "${CMSG}PHP grpc extension uninstall completed! ${CEND}"
+    . include/pecl_grpc.sh
+    Uninstall_pecl_grpc
   fi
 
   # reload php
@@ -513,11 +511,14 @@ Menu_PHPext() {
     echo -e "\t${CMSG}15${CEND}. Uninstall xdebug(PHP>=5.5)"
     echo -e "\t${CMSG}16${CEND}. Uninstall xlswriter"
     echo -e "\t${CMSG}17${CEND}. Uninstall grpc"
+    echo -e "\t${CMSG}18${CEND}. Uninstall yaf"
+    echo -e "\t${CMSG}19${CEND}. Uninstall yar"
+    echo -e "\t${CMSG}20${CEND}. Uninstall calendar"
     read -e -p "Please input a number:(Default 0 press Enter) " phpext_option
     phpext_option=${phpext_option:-0}
     [ "${phpext_option}" == '0' ] && break
     array_phpext=(${phpext_option})
-    array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17)
+    array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)
     for v in ${array_phpext[@]}
     do
       [ -z "`echo ${array_all[@]} | grep -w ${v}`" ] && phpext_flag=1
@@ -544,6 +545,9 @@ Menu_PHPext() {
       [ -n "`echo ${array_phpext[@]} | grep -w 15`" ] && pecl_xdebug=1
       [ -n "`echo ${array_phpext[@]} | grep -w 16`" ] && pecl_xlswriter=1
       [ -n "`echo ${array_phpext[@]} | grep -w 17`" ] && pecl_grpc=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 18`" ] && pecl_yaf=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 19`" ] && pecl_yar=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 20`" ] && pecl_calendar=1
       break
     fi
   done

@@ -60,7 +60,7 @@ Show_Help() {
                               sourceguardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,
                               yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug,xlswriter,grpc
   --nodejs                    Install Nodejs
-  --tomcat_option [1-6]       Install Tomcat version
+  --tomcat_option [1-5]       Install Tomcat version
   --jdk_option [1-3]          Install JDK version
   --db_option [0-15]          Install DB version (15: MySQL 9.7 LTS)
   --dbinstallmethod [1-2]     DB install method, default: 1 binary install
@@ -97,7 +97,7 @@ while :; do
     nginx_option=$2
     shift 2
     [[ ! ${nginx_option} =~ ^[1-4]$ ]] && {
-      echo "${CWARNING}nginx_option input error! Please only input number 1~5${CEND}"
+      echo "${CWARNING}nginx_option input error! Please only input number 1~4${CEND}"
       exit 1
     }
     [ -e "${nginx_install_dir}/sbin/nginx" ] && {
@@ -205,8 +205,8 @@ while :; do
   --tomcat_option)
     tomcat_option=$2
     shift 2
-    [[ ! ${tomcat_option} =~ ^[1-6]$ ]] && {
-      echo "${CWARNING}tomcat_option input error! Please only input number 1~6${CEND}"
+    [[ ! ${tomcat_option} =~ ^[1-5]$ ]] && {
+      echo "${CWARNING}tomcat_option input error! Please only input number 1~5${CEND}"
       exit 1
     }
     [ -e "$tomcat_install_dir/conf/server.xml" ] && {
@@ -217,8 +217,8 @@ while :; do
   --jdk_option)
     jdk_option=$2
     shift 2
-    [[ ! ${jdk_option} =~ ^[1-4]$ ]] && {
-      echo "${CWARNING}jdk_option input error! Please only input number 1~4${CEND}"
+    [[ ! ${jdk_option} =~ ^[1-3]$ ]] && {
+      echo "${CWARNING}jdk_option input error! Please only input number 1~3${CEND}"
       exit 1
     }
     ;;
@@ -505,34 +505,44 @@ if [ ${ARG_NUM} == 0 ]; then
             echo -e "\t${CMSG}3${CEND}. Install Tomcat-9"
             echo -e "\t${CMSG}4${CEND}. Install Tomcat-8"
             echo -e "\t${CMSG}5${CEND}. Install Tomcat-7"
-            echo -e "\t${CMSG}6${CEND}. Install Tomcat-6"
-            echo -e "\t${CMSG}7${CEND}. Do not install"
-            read -e -p "Please input a number:(Default 7 press Enter) " tomcat_option
-            tomcat_option=${tomcat_option:-7}
-            if [[ ! ${tomcat_option} =~ ^[1-7]$ ]]; then
-              echo "${CWARNING}input error! Please only input number 1~7${CEND}"
+            echo -e "\t${CMSG}6${CEND}. Do not install"
+            read -e -p "Please input a number:(Default 6 press Enter) " tomcat_option
+            tomcat_option=${tomcat_option:-6}
+            if [[ ! ${tomcat_option} =~ ^[1-6]$ ]]; then
+              echo "${CWARNING}input error! Please only input number 1~6${CEND}"
             else
-              [ "${tomcat_option}" != '7' -a -e "$tomcat_install_dir/conf/server.xml" ] && {
+              [ "${tomcat_option}" != '6' -a -e "$tomcat_install_dir/conf/server.xml" ] && {
                 echo "${CWARNING}Tomcat already installed! ${CEND}"
                 unset tomcat_option
               }
-              if [[ "${tomcat_option}" =~ ^1$ ]]; then
+              if [ "${tomcat_option}" == '1' ]; then
                 while :; do
                   echo
                   echo 'Please select JDK version:'
-                  echo -e "\t${CMSG}1${CEND}. Install openjdk-8-jdk"
-                  echo -e "\t${CMSG}2${CEND}. Install openjdk-11-jdk"
                   echo -e "\t${CMSG}3${CEND}. Install openjdk-17-jdk"
-                  echo -e "\t${CMSG}4${CEND}. Install openjdk-18-jdk"
-                  read -e -p "Please input a number:(Default 1 press Enter) " jdk_option
-                  jdk_option=${jdk_option:-1}
-                  if [[ ! ${jdk_option} =~ ^[1-4]$ ]]; then
-                    echo "${CWARNING}input error! Please only input number 1~4${CEND}"
+                  read -e -p "Please input a number:(Default 3 press Enter) " jdk_option
+                  jdk_option=${jdk_option:-3}
+                  if [[ ! ${jdk_option} =~ ^3$ ]]; then
+                    echo "${CWARNING}input error! Please only input number 3${CEND}"
                   else
                     break
                   fi
                 done
-              elif [[ "${tomcat_option}" =~ ^[2-3]$ ]]; then
+              elif [ "${tomcat_option}" == '2' ]; then
+                while :; do
+                  echo
+                  echo 'Please select JDK version:'
+                  echo -e "\t${CMSG}2${CEND}. Install openjdk-11-jdk"
+                  echo -e "\t${CMSG}3${CEND}. Install openjdk-17-jdk"
+                  read -e -p "Please input a number:(Default 2 press Enter) " jdk_option
+                  jdk_option=${jdk_option:-2}
+                  if [[ ! ${jdk_option} =~ ^[2-3]$ ]]; then
+                    echo "${CWARNING}input error! Please only input number 2~3${CEND}"
+                  else
+                    break
+                  fi
+                done
+              elif [ "${tomcat_option}" == '3' ]; then
                 while :; do
                   echo
                   echo 'Please select JDK version:'
@@ -547,7 +557,7 @@ if [ ${ARG_NUM} == 0 ]; then
                     break
                   fi
                 done
-              elif [ "${tomcat_option}" == '4' ]; then
+              elif [[ "${tomcat_option}" =~ ^[4-5]$ ]]; then
                 while :; do
                   echo
                   echo 'Please select JDK version:'
@@ -672,7 +682,7 @@ if [ ${ARG_NUM} == 0 ]; then
             fi
             break
           else
-            echo "${CWARNING}input error! Please only input number 1~14${CEND}"
+            echo "${CWARNING}input error! Please only input number 0~15${CEND}"
           fi
         done
       fi
@@ -959,7 +969,7 @@ if [ ${ARG_NUM} == 0 ]; then
   done
 fi
 
-if [[ ${nginx_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [ "${caddy_flag}" == 'y' ] || [[ ${tomcat_option} =~ ^[1-6]$ ]]; then
+if [[ ${nginx_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [ "${caddy_flag}" == 'y' ] || [[ ${tomcat_option} =~ ^[1-5]$ ]]; then
   [ ! -d ${wwwroot_dir}/default ] && mkdir -p ${wwwroot_dir}/default
   [ ! -d ${wwwlogs_dir} ] && mkdir -p ${wwwlogs_dir}
 fi
@@ -1025,7 +1035,7 @@ startTime=`date +%s`
 Install_openSSL | tee -a ${oneinstack_dir}/install.log
 
 # Jemalloc
-if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]]; then
+if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
   . include/jemalloc.sh
   Install_Jemalloc | tee -a ${oneinstack_dir}/install.log
 fi
@@ -1074,7 +1084,6 @@ case "${db_option}" in
     Install_MariaDB55 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   9)
-    [ "${Family}" == 'rhel' ] && [ "${RHEL_ver}" == '8' ] && dbinstallmethod=2 && checkDownload
     . include/percona-8.0.sh
     Install_Percona80 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
@@ -1370,10 +1379,6 @@ case "${jdk_option}" in
     . include/openjdk-17.sh
     Install_OpenJDK17 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
-  4)
-    . include/openjdk-18.sh
-    Install_OpenJDK18 2>&1 | tee -a ${oneinstack_dir}/install.log
-    ;;
 esac
 
 case "${tomcat_option}" in
@@ -1396,10 +1401,6 @@ case "${tomcat_option}" in
   5)
     . include/tomcat-7.sh
     Install_Tomcat7 2>&1 | tee -a ${oneinstack_dir}/install.log
-    ;;
-  6)
-    . include/tomcat-6.sh
-    Install_Tomcat6 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
 esac
 
@@ -1471,11 +1472,11 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [[ "${nginx_option}" =~ ^[1-3]$ ]] && echo -e "\n$(printf "%-32s" "Nginx install dir":)${CMSG}${web_install_dir}${CEND}"
 [ "${apache_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Apache install dir":)${CMSG}${apache_install_dir}${CEND}"
 [ "${caddy_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Caddy install dir":)${CMSG}${caddy_install_dir}${CEND}"
-[[ "${tomcat_option}" =~ ^[1-6]$ ]] && echo -e "\n$(printf "%-32s" "Tomcat install dir":)${CMSG}${tomcat_install_dir}${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]] && echo "$(printf "%-32s" "Database password:")${CMSG}${dbrootpwd}${CEND}"
+[[ "${tomcat_option}" =~ ^[1-5]$ ]] && echo -e "\n$(printf "%-32s" "Tomcat install dir":)${CMSG}${tomcat_install_dir}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] && echo "$(printf "%-32s" "Database password:")${CMSG}${dbrootpwd}${CEND}"
 [ "${db_option}" == '13' ] && echo -e "\n$(printf "%-32s" "PostgreSQL install dir:")${CMSG}${pgsql_install_dir}${CEND}"
 [ "${db_option}" == '13' ] && echo "$(printf "%-32s" "PostgreSQL data dir:")${CMSG}${pgsql_data_dir}${CEND}"
 [ "${db_option}" == '13' ] && echo "$(printf "%-32s" "PostgreSQL user:")${CMSG}postgres${CEND}"
@@ -1502,8 +1503,10 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${memcached_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "memcached install dir:")${CMSG}${memcached_install_dir}${CEND}"
 [ "${clickhouse_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "ClickHouse install dir:")${CMSG}${clickhouse_install_dir}${CEND}"
 [ "${clickhouse_flag}" == 'y' ] && echo "$(printf "%-32s" "ClickHouse data dir:")${CMSG}${clickhouse_data_dir}${CEND}"
+[ "${clickhouse_flag}" == 'y' ] && echo "$(printf "%-32s" "ClickHouse user:")${CMSG}default${CEND}"
+[ "${clickhouse_flag}" == 'y' ] && echo "$(printf "%-32s" "ClickHouse password:")${CMSG}${dbclickhousepwd}${CEND}"
 [ "${clickhouse_flag}" == 'y' ] && echo "$(printf "%-32s" "ClickHouse client command:")${CMSG}clickhouse-client${CEND}"
-if [[ ${nginx_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [[ ${tomcat_option} =~ ^[1-6]$ ]]; then
+if [[ ${nginx_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [[ ${tomcat_option} =~ ^[1-5]$ ]]; then
   echo -e "\n$(printf "%-32s" "Index URL:")${CMSG}http://${IPADDR}/${CEND}"
 fi
 if [ ${ARG_NUM} == 0 ]; then

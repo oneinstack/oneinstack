@@ -27,7 +27,7 @@ Install_SourceGuardian() {
         extension="ixed.${PHP_main_ver}.lin"
       fi
 
-      if [ -f "${phpExtensionDir}/ixed.${PHP_main_ver}.lin" ]; then
+      if [ -f "${phpExtensionDir}/${extension}" ]; then
         echo "extension=${extension}" > ${php_install_dir}/etc/php.d/02-sourceguardian.ini
         echo "${CSUCCESS}PHP SourceGuardian module installed successfully! ${CEND}"
         rm -rf sourceguardian

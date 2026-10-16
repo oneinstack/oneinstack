@@ -54,7 +54,7 @@ Install_Percona57() {
     sed -i "s+^dbrootpwd.*+dbrootpwd='${dbrootpwd}'+" ../options.conf
     echo "${CSUCCESS}Percona installed successfully! ${CEND}"
     if [ "${dbinstallmethod}" == "1" ]; then
-      rm -rf Percona-Server-${percona57_ver}-Linux.x86_64.${sslLibVer}
+      rm -rf Percona-Server-${percona57_ver}-Linux.x86_64.glibc2.17
     elif [ "${dbinstallmethod}" == "2" ]; then
       rm -rf percona-server-${percona57_ver} boost_${boostVersion2}
     fi

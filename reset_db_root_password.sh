@@ -100,7 +100,14 @@ Reset_force_dbrootpwd() {
   while [ -z "`ps -ef | grep 'mysqld ' | grep -v grep | awk '{print $2}'`" ]; do
     sleep 1
   done
-  if echo "${DB_Ver}" | grep -Eqi '^8.0.|^5.7.|^10.[4-5].|^10.11.'; then
+  if echo "${DB_Ver}" | grep -Eqi '^8\.[04]\.|^9\.|^10\.(4|5|6|11)\.|^11\.'; then
+    ${db_install_dir}/bin/mysql -uroot -hlocalhost << EOF
+flush privileges;
+alter user 'root'@'localhost' identified by '${New_dbrootpwd}';
+alter user 'root'@'127.0.0.1' identified by '${New_dbrootpwd}';
+flush privileges;
+EOF
+  elif echo "${DB_Ver}" | grep -Eqi '^5\.7\.'; then
     ${db_install_dir}/bin/mysql -uroot -hlocalhost << EOF
 update mysql.user set authentication_string=password("${New_dbrootpwd}") where user="root";
 flush privileges;
@@ -108,6 +115,7 @@ EOF
   else
     ${db_install_dir}/bin/mysql -uroot -hlocalhost << EOF
 update mysql.user set password = Password("${New_dbrootpwd}") where User = 'root';
+flush privileges;
 EOF
   fi
   if [ $? -eq 0 ]; then
