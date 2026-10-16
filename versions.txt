@@ -16,6 +16,7 @@ tomcat7_ver=7.0.109
 
 apache_ver=2.4.69
 pcre_ver=8.45
+pcre2_ver=10.49
 apr_ver=1.7.6
 apr_util_ver=1.6.5
 nghttp2_ver=1.70.0
@@ -36,6 +37,7 @@ mariadb118_ver=11.8.9
 mariadb114_ver=11.4.13
 mariadb55_ver=5.5.68
 
+percona84_ver=8.4.11-11
 percona80_ver=8.0.46-37
 percona57_ver=5.7.42-46
 percona56_ver=5.6.51-91.0
@@ -107,6 +109,10 @@ xdebug_oldver=3.1.6
 xdebug_php70_ver=2.8.1
 xlswriter_ver=3.0.0
 grpc_ver=1.84.0
+igbinary_ver=3.2.16
+msgpack_ver=3.0.1
+msgpack_oldver=2.2.0
+zstd_ver=0.18.0
 
 # Ftp
 pureftpd_ver=1.0.54
@@ -121,7 +127,8 @@ valkey_ver=9.1.2
 
 # Memcached
 memcached_ver=1.6.45
-libmemcached_ver=1.0.18
+libmemcached_ver=1.1.4
+libmemcached_oldver=1.0.18
 pecl_memcached_ver=3.4.0
 pecl_memcached_oldver=2.2.0
 pecl_memcache_ver=8.2

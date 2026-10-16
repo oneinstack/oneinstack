@@ -10,8 +10,8 @@
 
 Install_Apache() {
   pushd ${oneinstack_dir}/src > /dev/null
-  tar xzf pcre-${pcre_ver}.tar.gz
-  pushd pcre-${pcre_ver} > /dev/null
+  tar xzf pcre2-${pcre2_ver}.tar.gz
+  pushd pcre2-${pcre2_ver} > /dev/null
   ./configure
   make -j ${THREAD} && make install
   popd > /dev/null
@@ -54,13 +54,13 @@ Install_Apache() {
   fi
 
   pushd httpd-${apache_ver} > /dev/null
-  LDFLAGS=-ldl ./configure --prefix=${apache_install_dir} --enable-mpms-shared=all --with-pcre --with-apr=${apr_install_dir} --with-apr-util=${apr_install_dir} --enable-headers --enable-mime-magic --enable-deflate --enable-proxy --enable-so --enable-dav --enable-rewrite --enable-remoteip --enable-expires --enable-static-support --enable-suexec --enable-mods-shared=most --enable-nonportable-atomics=yes --enable-ssl --with-ssl --enable-http2 --with-nghttp2=/usr/local
+  LDFLAGS=-ldl ./configure --prefix=${apache_install_dir} --enable-mpms-shared=all --with-pcre=/usr/local/bin/pcre2-config --with-apr=${apr_install_dir} --with-apr-util=${apr_install_dir} --enable-headers --enable-mime-magic --enable-deflate --enable-proxy --enable-so --enable-dav --enable-rewrite --enable-remoteip --enable-expires --enable-static-support --enable-suexec --enable-mods-shared=most --enable-nonportable-atomics=yes --enable-ssl --with-ssl --enable-http2 --with-nghttp2=/usr/local
   make -j ${THREAD} && make install
   popd > /dev/null
   unset LDFLAGS
   if [ -e "${apache_install_dir}/bin/httpd" ]; then
     echo "${CSUCCESS}Apache installed successfully! ${CEND}"
-    rm -rf httpd-${apache_ver} pcre-${pcre_ver}
+    rm -rf httpd-${apache_ver} pcre2-${pcre2_ver}
   else
     rm -rf ${apache_install_dir}
     echo "${CFAILURE}Apache install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release

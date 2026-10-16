@@ -33,13 +33,17 @@ checkDownload() {
   fi
 
   # jemalloc
-  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
+  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^1[5-6]$ ]]; then
     echo "Download jemalloc..."
     src_url=https://github.com/jemalloc/jemalloc/releases/download/${jemalloc_ver}/jemalloc-${jemalloc_ver}.tar.bz2 && Download_src
   fi
 
-  # pcre
-  if [[ "${nginx_option}" =~ ^[1-3]$ ]] || [ "${apache_flag}" == 'y' ]; then
+  # pcre / pcre2
+  if [ "${nginx_option}" == '1' ] || [ "${apache_flag}" == 'y' ]; then
+    echo "Download pcre2..."
+    src_url=${mirror_link}/oneinstack/src/pcre2-${pcre2_ver}.tar.gz && Download_src
+  fi
+  if [[ "${nginx_option}" =~ ^[2-3]$ ]]; then
     echo "Download pcre..."
     src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
   fi
@@ -49,6 +53,7 @@ checkDownload() {
     1)
       echo "Download nginx..."
       src_url=${mirror_link}/oneinstack/src/nginx-${nginx_ver}.tar.gz && Download_src
+      src_url=${mirror_link}/oneinstack/src/ngx_brotli.tar.gz && Download_src
       ;;
     2)
       echo "Download tengine..."
@@ -107,17 +112,17 @@ checkDownload() {
   esac
 
   # jdk apr
-  if [[ "${jdk_option}" =~ ^[1-3]$ ]]; then
+  if [[ "${jdk_option}" =~ ^[1-4]$ ]]; then
     echo "Download apr..."
     src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
   fi
 
-  if [[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]]; then
-    if [[ "${db_option}" =~ ^[0,1,2,9]$|^10$ ]] && [ "${dbinstallmethod}" == "2" ]; then
+  if [[ "${db_option}" =~ ^[0-9]$|^1[0-6]$ ]]; then
+    if [[ "${db_option}" =~ ^[0,1,2,9]$|^10$|^16$ ]] && [ "${dbinstallmethod}" == "2" ]; then
       [[ "${db_option}" =~ ^0$ ]] && boost_ver=${boost_mysql84_ver}
       [[ "${db_option}" =~ ^1$ ]] && boost_ver=${boost_mysql80_ver}
       [[ "${db_option}" =~ ^2$|^10$ ]] && boost_ver=${boost_oldver}
-      [[ "${db_option}" =~ ^9$ ]] && boost_ver=${boost_percona_ver}
+      [[ "${db_option}" =~ ^9$|^16$ ]] && boost_ver=${boost_percona_ver}
       echo "Download boost..."
       [ "${OUTIP_STATE}"x == "China"x ] && DOWN_ADDR_BOOST=${mirror_link}/oneinstack/src || DOWN_ADDR_BOOST=https://downloads.sourceforge.net/project/boost/boost/${boost_ver}
       boostVersion2=$(echo ${boost_ver} | awk -F. '{print $1"_"$2"_"$3}')
@@ -125,6 +130,42 @@ checkDownload() {
     fi
 
     case "${db_option}" in
+      16)
+        # Percona 8.4 LTS
+        if [ "${dbinstallmethod}" == '1' ]; then
+          echo "Download Percona 8.4 binary package..."
+          FILE_NAME=Percona-Server-${percona84_ver}-Linux.x86_64.glibc2.28-minimal.tar.gz
+          if [ "${OUTIP_STATE}"x == "China"x ]; then
+            DOWN_ADDR_PERCONA=${mirror_link}/oneinstack/src
+          else
+            DOWN_ADDR_PERCONA=https://downloads.percona.com/downloads/Percona-Server-8.4/Percona-Server-${percona84_ver}/binary/tarball
+          fi
+        elif [ "${dbinstallmethod}" == '2' ]; then
+          echo "Download Percona 8.4 source package..."
+          FILE_NAME=percona-server-${percona84_ver}.tar.gz
+          if [ "${OUTIP_STATE}"x == "China"x ]; then
+            DOWN_ADDR_PERCONA=${mirror_link}/oneinstack/src
+          else
+            DOWN_ADDR_PERCONA=https://downloads.percona.com/downloads/Percona-Server-8.4/Percona-Server-${percona84_ver}/source/tarball
+          fi
+        fi
+        # start download
+        src_url=${DOWN_ADDR_PERCONA}/${FILE_NAME} && Download_src
+        src_url=${mirror_link}/oneinstack/src/${FILE_NAME}.md5sum && Download_src
+        # verifying download
+        PERCONA_TAR_MD5=$(awk '{print $1}' ${FILE_NAME}.md5sum)
+        [ -z "${PERCONA_TAR_MD5}" ] && PERCONA_TAR_MD5=$(curl -s ${mirror_link}/oneinstack/src/${FILE_NAME}.md5sum | grep ${FILE_NAME} | awk '{print $1}')
+        tryDlCount=0
+        while [ "${md5sum_flag}" == 'y' ] && [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" != "${PERCONA_TAR_MD5}" ]; do
+          wget -c --no-check-certificate ${DOWN_ADDR_PERCONA}/${FILE_NAME}; sleep 1
+          let "tryDlCount++"
+          [ "$(md5sum ${FILE_NAME} | awk '{print $1}')" == "${PERCONA_TAR_MD5}" -o "${tryDlCount}" == '6' ] && break || continue
+        done
+        if [ "${tryDlCount}" == '6' ]; then
+          echo "${CFAILURE}${FILE_NAME} download failed, Please contact the author! ${CEND}"
+          kill -9 $$; exit 1;
+        fi
+        ;;
       15)
         DOWN_ADDR_MYSQL=${mirror_link}/oneinstack/src
         DOWN_ADDR_MYSQL_BK=https://cdn.mysql.com/Downloads/MySQL-9.7
@@ -770,6 +811,7 @@ checkDownload() {
   if [ "${pecl_memcached}" == '1' ]; then
     echo "Download libmemcached..."
     src_url=${mirror_link}/oneinstack/src/libmemcached-${libmemcached_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/libmemcached-${libmemcached_oldver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libmemcached-build.patch && Download_src
     if [[ "${php_option}" =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]]; then
       echo "Download pecl_memcached for php..."
@@ -822,6 +864,34 @@ checkDownload() {
   if [ "${pecl_grpc}" == '1' ]; then
     echo "Download pecl grpc for php..."
     src_url=https://pecl.php.net/get/grpc-${grpc_ver}.tgz && Download_src
+  fi
+
+  # pecl_igbinary
+  if [ "${pecl_igbinary}" == '1' ]; then
+    echo "Download pecl igbinary for php..."
+    if [[ "${php_option}" =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]]; then
+      src_url=https://pecl.php.net/get/igbinary-2.0.8.tgz && Download_src
+    else
+      src_url=https://pecl.php.net/get/igbinary-${igbinary_ver}.tgz && Download_src
+    fi
+  fi
+
+  # pecl_msgpack
+  if [ "${pecl_msgpack}" == '1' ]; then
+    echo "Download pecl msgpack for php..."
+    if [[ "${php_option}" =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]]; then
+      src_url=https://pecl.php.net/get/msgpack-0.5.7.tgz && Download_src
+    elif [[ "${php_option}" =~ ^[5-9]$ ]] || [[ "${mphp_ver}" =~ ^7[0-4]$ ]]; then
+      src_url=https://pecl.php.net/get/msgpack-${msgpack_oldver}.tgz && Download_src
+    else
+      src_url=https://pecl.php.net/get/msgpack-${msgpack_ver}.tgz && Download_src
+    fi
+  fi
+
+  # pecl_zstd
+  if [ "${pecl_zstd}" == '1' ]; then
+    echo "Download pecl zstd for php..."
+    src_url=https://pecl.php.net/get/zstd-${zstd_ver}.tgz && Download_src
   fi
 
   # nodejs

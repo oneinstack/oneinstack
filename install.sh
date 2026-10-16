@@ -58,11 +58,12 @@ Show_Help() {
   --phpcache_option [1-4]     Install PHP opcode cache, default: 1 opcache
   --php_extensions [ext name] Install PHP extensions, include zendguardloader,ioncube,
                               sourceguardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,
-                              yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug,xlswriter,grpc
+                              yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug,xlswriter,grpc,
+                              igbinary,msgpack,zstd
   --nodejs                    Install Nodejs
   --tomcat_option [1-5]       Install Tomcat version
-  --jdk_option [1-3]          Install JDK version
-  --db_option [0-15]          Install DB version (15: MySQL 9.7 LTS)
+  --jdk_option [1-4]          Install JDK version (1: JDK8, 2: JDK11, 3: JDK17, 4: JDK21)
+  --db_option [0-16]          Install DB version (15: MySQL 9.7 LTS, 16: Percona 8.4 LTS)
   --dbinstallmethod [1-2]     DB install method, default: 1 binary install
   --dbrootpwd [password]      DB super password
   --dbclickhousepwd [password] ClickHouse password
@@ -193,6 +194,9 @@ while :; do
     [ -n "$(echo ${php_extensions} | grep -w xdebug)" ] && pecl_xdebug=1
     [ -n "$(echo ${php_extensions} | grep -w xlswriter)" ] && pecl_xlswriter=1
     [ -n "$(echo ${php_extensions} | grep -w grpc)" ] && pecl_grpc=1
+    [ -n "$(echo ${php_extensions} | grep -w igbinary)" ] && pecl_igbinary=1
+    [ -n "$(echo ${php_extensions} | grep -w msgpack)" ] && pecl_msgpack=1
+    [ -n "$(echo ${php_extensions} | grep -w zstd)" ] && pecl_zstd=1
     ;;
   --nodejs)
     nodejs_flag=y
@@ -217,15 +221,15 @@ while :; do
   --jdk_option)
     jdk_option=$2
     shift 2
-    [[ ! ${jdk_option} =~ ^[1-3]$ ]] && {
-      echo "${CWARNING}jdk_option input error! Please only input number 1~3${CEND}"
+    [[ ! ${jdk_option} =~ ^[1-4]$ ]] && {
+      echo "${CWARNING}jdk_option input error! Please only input number 1~4${CEND}"
       exit 1
     }
     ;;
   --db_option)
     db_option=$2
     shift 2
-    if [[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]]; then
+    if [[ "${db_option}" =~ ^[0-9]$|^1[0-6]$ ]]; then
       if [ "${db_option}" == '13' ]; then
         [ -e "${pgsql_install_dir}/bin/psql" ] && {
           echo "${CWARNING}PostgreSQL already installed! ${CEND}"
@@ -243,7 +247,7 @@ while :; do
         }
       fi
     else
-      echo "${CWARNING}db_option input error! Please only input number 0~15${CEND}"
+      echo "${CWARNING}db_option input error! Please only input number 0~16${CEND}"
       exit 1
     fi
     ;;
@@ -520,10 +524,11 @@ if [ ${ARG_NUM} == 0 ]; then
                   echo
                   echo 'Please select JDK version:'
                   echo -e "\t${CMSG}3${CEND}. Install openjdk-17-jdk"
-                  read -e -p "Please input a number:(Default 3 press Enter) " jdk_option
-                  jdk_option=${jdk_option:-3}
-                  if [[ ! ${jdk_option} =~ ^3$ ]]; then
-                    echo "${CWARNING}input error! Please only input number 3${CEND}"
+                  echo -e "\t${CMSG}4${CEND}. Install openjdk-21-jdk"
+                  read -e -p "Please input a number:(Default 4 press Enter) " jdk_option
+                  jdk_option=${jdk_option:-4}
+                  if [[ ! ${jdk_option} =~ ^[3-4]$ ]]; then
+                    echo "${CWARNING}input error! Please only input number 3~4${CEND}"
                   else
                     break
                   fi
@@ -534,10 +539,11 @@ if [ ${ARG_NUM} == 0 ]; then
                   echo 'Please select JDK version:'
                   echo -e "\t${CMSG}2${CEND}. Install openjdk-11-jdk"
                   echo -e "\t${CMSG}3${CEND}. Install openjdk-17-jdk"
-                  read -e -p "Please input a number:(Default 2 press Enter) " jdk_option
-                  jdk_option=${jdk_option:-2}
-                  if [[ ! ${jdk_option} =~ ^[2-3]$ ]]; then
-                    echo "${CWARNING}input error! Please only input number 2~3${CEND}"
+                  echo -e "\t${CMSG}4${CEND}. Install openjdk-21-jdk"
+                  read -e -p "Please input a number:(Default 3 press Enter) " jdk_option
+                  jdk_option=${jdk_option:-3}
+                  if [[ ! ${jdk_option} =~ ^[2-4]$ ]]; then
+                    echo "${CWARNING}input error! Please only input number 2~4${CEND}"
                   else
                     break
                   fi
@@ -549,10 +555,11 @@ if [ ${ARG_NUM} == 0 ]; then
                   echo -e "\t${CMSG}1${CEND}. Install openjdk-8-jdk"
                   echo -e "\t${CMSG}2${CEND}. Install openjdk-11-jdk"
                   echo -e "\t${CMSG}3${CEND}. Install openjdk-17-jdk"
+                  echo -e "\t${CMSG}4${CEND}. Install openjdk-21-jdk"
                   read -e -p "Please input a number:(Default 1 press Enter) " jdk_option
                   jdk_option=${jdk_option:-1}
-                  if [[ ! ${jdk_option} =~ ^[1-3]$ ]]; then
-                    echo "${CWARNING}input error! Please only input number 1~3${CEND}"
+                  if [[ ! ${jdk_option} =~ ^[1-4]$ ]]; then
+                    echo "${CWARNING}input error! Please only input number 1~4${CEND}"
                   else
                     break
                   fi
@@ -616,6 +623,7 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG} 6${CEND}. Install MariaDB-11.8 (LTS)"
           echo -e "\t${CMSG} 7${CEND}. Install MariaDB-11.4 (LTS)"
           echo -e "\t${CMSG} 8${CEND}. Install MariaDB-5.5"
+          echo -e "\t${CMSG}16${CEND}. Install Percona-8.4 (LTS)"
           echo -e "\t${CMSG} 9${CEND}. Install Percona-8.0"
           echo -e "\t${CMSG}10${CEND}. Install Percona-5.7"
           echo -e "\t${CMSG}11${CEND}. Install Percona-5.6"
@@ -624,7 +632,7 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG}14${CEND}. Install MongoDB"
           read -e -p "Please input a number:(Default 0 press Enter) " db_option
           db_option=${db_option:-0}
-          if [[ "${db_option}" =~ ^[0-9]$|^1[0-5]$ ]]; then
+          if [[ "${db_option}" =~ ^[0-9]$|^1[0-6]$ ]]; then
             if [ "${db_option}" == '13' ]; then
               [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; unset db_option; break; }
             elif [ "${db_option}" == '14' ]; then
@@ -666,7 +674,7 @@ if [ ${ARG_NUM} == 0 ]; then
               }
               dbinstallmethod=1
               echo "MySQL 9.7 will be installed from the official binary package."
-            elif [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$ ]]; then
+            elif [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$|^16$ ]]; then
               while :; do echo
                 echo "Please choose installation of the database:"
                 echo -e "\t${CMSG}1${CEND}. Install database from binary package."
@@ -682,7 +690,7 @@ if [ ${ARG_NUM} == 0 ]; then
             fi
             break
           else
-            echo "${CWARNING}input error! Please only input number 0~15${CEND}"
+            echo "${CWARNING}input error! Please only input number 0~16${CEND}"
           fi
         done
       fi
@@ -836,7 +844,7 @@ if [ ${ARG_NUM} == 0 ]; then
       echo -e "\t${CMSG} 0${CEND}. Do not install"
       echo -e "\t${CMSG} 1${CEND}. Install zendguardloader(PHP<=5.6)"
       echo -e "\t${CMSG} 2${CEND}. Install ioncube"
-      echo -e "\t${CMSG} 3${CEND}. Install sourceguardian(PHP<=7.2)"
+      echo -e "\t${CMSG} 3${CEND}. Install sourceguardian"
       echo -e "\t${CMSG} 4${CEND}. Install imagick"
       echo -e "\t${CMSG} 5${CEND}. Install gmagick"
       echo -e "\t${CMSG} 6${CEND}. Install fileinfo"
@@ -852,11 +860,14 @@ if [ ${ARG_NUM} == 0 ]; then
       echo -e "\t${CMSG}16${CEND}. Install xdebug(PHP>=5.5)"
       echo -e "\t${CMSG}17${CEND}. Install xlswriter(PHP>=7.0)"
       echo -e "\t${CMSG}18${CEND}. Install grpc(PHP>=7.0)"
+      echo -e "\t${CMSG}19${CEND}. Install igbinary"
+      echo -e "\t${CMSG}20${CEND}. Install msgpack"
+      echo -e "\t${CMSG}21${CEND}. Install zstd(PHP>=7.0)"
       read -e -p "Please input numbers:(Default '4 11 12' press Enter) " phpext_option
       phpext_option=${phpext_option:-'4 11 12'}
       [ "${phpext_option}" == '0' ] && break
       array_phpext=(${phpext_option})
-      array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18)
+      array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21)
       for v in ${array_phpext[@]}
       do
         [ -z "`echo ${array_all[@]} | grep -w ${v}`" ] && phpext_flag=1
@@ -884,6 +895,9 @@ if [ ${ARG_NUM} == 0 ]; then
         [ -n "`echo ${array_phpext[@]} | grep -w 16`" ] && pecl_xdebug=1
         [ -n "`echo ${array_phpext[@]} | grep -w 17`" ] && pecl_xlswriter=1
         [ -n "`echo ${array_phpext[@]} | grep -w 18`" ] && pecl_grpc=1
+        [ -n "`echo ${array_phpext[@]} | grep -w 19`" ] && pecl_igbinary=1
+        [ -n "`echo ${array_phpext[@]} | grep -w 20`" ] && pecl_msgpack=1
+        [ -n "`echo ${array_phpext[@]} | grep -w 21`" ] && pecl_zstd=1
         break
       fi
     done
@@ -1035,7 +1049,7 @@ startTime=`date +%s`
 Install_openSSL | tee -a ${oneinstack_dir}/install.log
 
 # Jemalloc
-if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]]; then
+if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^1[5-6]$ ]]; then
   . include/jemalloc.sh
   Install_Jemalloc | tee -a ${oneinstack_dir}/install.log
 fi
@@ -1082,6 +1096,10 @@ case "${db_option}" in
   8)
     . include/mariadb-5.5.sh
     Install_MariaDB55 2>&1 | tee -a ${oneinstack_dir}/install.log
+    ;;
+  16)
+    . include/percona-8.4.sh
+    Install_Percona84 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   9)
     . include/percona-8.0.sh
@@ -1301,6 +1319,24 @@ PHP_addons() {
     Install_pecl_yar 2>&1 | tee -a ${oneinstack_dir}/install.log
   fi
 
+  # igbinary (installed before redis/memcached so they can enable igbinary serializer)
+  if [ "${pecl_igbinary}" == '1' ]; then
+    . include/pecl_igbinary.sh
+    Install_pecl_igbinary 2>&1 | tee -a ${oneinstack_dir}/install.log
+  fi
+
+  # msgpack (installed before redis/memcached so they can enable msgpack serializer)
+  if [ "${pecl_msgpack}" == '1' ]; then
+    . include/pecl_msgpack.sh
+    Install_pecl_msgpack 2>&1 | tee -a ${oneinstack_dir}/install.log
+  fi
+
+  # zstd (installed before redis so it can enable zstd compression)
+  if [ "${pecl_zstd}" == '1' ]; then
+    . include/pecl_zstd.sh
+    Install_pecl_zstd 2>&1 | tee -a ${oneinstack_dir}/install.log
+  fi
+
   # pecl_memcached
   if [ "${pecl_memcached}" == '1' ]; then
     . include/memcached.sh
@@ -1378,6 +1414,10 @@ case "${jdk_option}" in
   3)
     . include/openjdk-17.sh
     Install_OpenJDK17 2>&1 | tee -a ${oneinstack_dir}/install.log
+    ;;
+  4)
+    . include/openjdk-21.sh
+    Install_OpenJDK21 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
 esac
 
@@ -1473,10 +1513,10 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [ "${apache_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Apache install dir":)${CMSG}${apache_install_dir}${CEND}"
 [ "${caddy_flag}" == 'y' ] && echo -e "\n$(printf "%-32s" "Caddy install dir":)${CMSG}${caddy_install_dir}${CEND}"
 [[ "${tomcat_option}" =~ ^[1-5]$ ]] && echo -e "\n$(printf "%-32s" "Tomcat install dir":)${CMSG}${tomcat_install_dir}${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
-[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^15$ ]] && echo "$(printf "%-32s" "Database password:")${CMSG}${dbrootpwd}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^1[5-6]$ ]] && echo -e "\n$(printf "%-32s" "Database install dir:")${CMSG}${db_install_dir}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^1[5-6]$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^1[5-6]$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
+[[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^1[5-6]$ ]] && echo "$(printf "%-32s" "Database password:")${CMSG}${dbrootpwd}${CEND}"
 [ "${db_option}" == '13' ] && echo -e "\n$(printf "%-32s" "PostgreSQL install dir:")${CMSG}${pgsql_install_dir}${CEND}"
 [ "${db_option}" == '13' ] && echo "$(printf "%-32s" "PostgreSQL data dir:")${CMSG}${pgsql_data_dir}${CEND}"
 [ "${db_option}" == '13' ] && echo "$(printf "%-32s" "PostgreSQL user:")${CMSG}postgres${CEND}"

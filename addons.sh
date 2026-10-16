@@ -37,6 +37,10 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/ngx_lua_waf.sh
 . ./include/pecl_xlswriter.sh
 . ./include/pecl_grpc.sh
+. ./include/supervisor.sh
+. ./include/pecl_igbinary.sh
+. ./include/pecl_msgpack.sh
+. ./include/pecl_zstd.sh
 
 # get the out ip country
 OUTIP_STATE=$(./include/ois.${ARCH} ip_state)
@@ -53,11 +57,15 @@ Show_Help() {
   --ngx_lua_waf               Ngx_lua_waf
   --xlswriter                 PHP xlswriter
   --grpc                      PHP gRPC
+  --supervisor                Supervisor
+  --igbinary                  PHP igbinary
+  --msgpack                   PHP msgpack
+  --zstd                      PHP zstd
   "
 }
 
 ARG_NUM=$#
-TEMP=`getopt -o hiu --long help,install,uninstall,composer,fail2ban,ngx_lua_waf,xlswriter,grpc -- "$@" 2>/dev/null`
+TEMP=`getopt -o hiu --long help,install,uninstall,composer,fail2ban,ngx_lua_waf,xlswriter,grpc,supervisor,igbinary,msgpack,zstd -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -86,6 +94,18 @@ while :; do
       ;;
     --grpc)
       grpc_flag=y; shift 1
+      ;;
+    --supervisor)
+      supervisor_flag=y; shift 1
+      ;;
+    --igbinary)
+      igbinary_flag=y; shift 1
+      ;;
+    --msgpack)
+      msgpack_flag=y; shift 1
+      ;;
+    --zstd)
+      zstd_flag=y; shift 1
       ;;
     --)
       shift
@@ -123,11 +143,15 @@ What Are You Doing?
 \t${CMSG}3${CEND}. Install/Uninstall ngx_lua_waf
 \t${CMSG}4${CEND}. Install/Uninstall PHP xlswriter
 \t${CMSG}5${CEND}. Install/Uninstall PHP gRPC
+\t${CMSG}6${CEND}. Install/Uninstall Supervisor
+\t${CMSG}7${CEND}. Install/Uninstall PHP igbinary
+\t${CMSG}8${CEND}. Install/Uninstall PHP msgpack
+\t${CMSG}9${CEND}. Install/Uninstall PHP zstd
 \t${CMSG}q${CEND}. Exit
 "
     read -e -p "Please input the correct option: " Number
-    if [[ ! "${Number}" =~ ^[1-5,q]$ ]]; then
-      echo "${CFAILURE}input error! Please only input 1~5 and q${CEND}"
+    if [[ ! "${Number}" =~ ^[1-9,q]$ ]]; then
+      echo "${CFAILURE}input error! Please only input 1~9 and q${CEND}"
     else
       case "${Number}" in
         1)
@@ -172,6 +196,38 @@ What Are You Doing?
             Install_pecl_grpc
           elif [ "${uninstall_flag}" = 'y' ]; then
             Uninstall_pecl_grpc
+          fi
+          ;;
+        6)
+          ACTION_FUN
+          if [ "${install_flag}" = 'y' ]; then
+            Install_supervisor
+          elif [ "${uninstall_flag}" = 'y' ]; then
+            Uninstall_supervisor
+          fi
+          ;;
+        7)
+          ACTION_FUN
+          if [ "${install_flag}" = 'y' ]; then
+            Install_pecl_igbinary
+          elif [ "${uninstall_flag}" = 'y' ]; then
+            Uninstall_pecl_igbinary
+          fi
+          ;;
+        8)
+          ACTION_FUN
+          if [ "${install_flag}" = 'y' ]; then
+            Install_pecl_msgpack
+          elif [ "${uninstall_flag}" = 'y' ]; then
+            Uninstall_pecl_msgpack
+          fi
+          ;;
+        9)
+          ACTION_FUN
+          if [ "${install_flag}" = 'y' ]; then
+            Install_pecl_zstd
+          elif [ "${uninstall_flag}" = 'y' ]; then
+            Uninstall_pecl_zstd
           fi
           ;;
         q)
@@ -220,6 +276,34 @@ else
       Install_pecl_grpc
     elif [ "${uninstall_flag}" = 'y' ]; then
       Uninstall_pecl_grpc
+    fi
+  fi
+  if [ "${supervisor_flag}" == 'y' ]; then
+    if [ "${install_flag}" = 'y' ]; then
+      Install_supervisor
+    elif [ "${uninstall_flag}" = 'y' ]; then
+      Uninstall_supervisor
+    fi
+  fi
+  if [ "${igbinary_flag}" == 'y' ]; then
+    if [ "${install_flag}" = 'y' ]; then
+      Install_pecl_igbinary
+    elif [ "${uninstall_flag}" = 'y' ]; then
+      Uninstall_pecl_igbinary
+    fi
+  fi
+  if [ "${msgpack_flag}" == 'y' ]; then
+    if [ "${install_flag}" = 'y' ]; then
+      Install_pecl_msgpack
+    elif [ "${uninstall_flag}" = 'y' ]; then
+      Uninstall_pecl_msgpack
+    fi
+  fi
+  if [ "${zstd_flag}" == 'y' ]; then
+    if [ "${install_flag}" = 'y' ]; then
+      Install_pecl_zstd
+    elif [ "${uninstall_flag}" = 'y' ]; then
+      Uninstall_pecl_zstd
     fi
   fi
 fi

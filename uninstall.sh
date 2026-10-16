@@ -44,7 +44,8 @@ Show_Help() {
   --phpcache                    Uninstall PHP opcode cache
   --php_extensions [ext name]   Uninstall PHP extensions, include zendguardloader,ioncube,
                                 sourceguardian,imagick,gmagick,fileinfo,imap,ldap,calendar,phalcon,
-                                yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug,xlswriter,grpc
+                                yaf,yar,redis,memcached,memcache,mongodb,swoole,xdebug,xlswriter,grpc,
+                                igbinary,msgpack,zstd
   --pureftpd                    Uninstall PureFtpd
   --redis                       Uninstall Redis-server
   --valkey                      Uninstall Valkey-server
@@ -134,6 +135,9 @@ while :; do
       [ -n "`echo ${php_extensions} | grep -w xdebug`" ] && pecl_xdebug=1
       [ -n "`echo ${php_extensions} | grep -w xlswriter`" ] && pecl_xlswriter=1
       [ -n "`echo ${php_extensions} | grep -w grpc`" ] && pecl_grpc=1
+      [ -n "`echo ${php_extensions} | grep -w igbinary`" ] && pecl_igbinary=1
+      [ -n "`echo ${php_extensions} | grep -w msgpack`" ] && pecl_msgpack=1
+      [ -n "`echo ${php_extensions} | grep -w zstd`" ] && pecl_zstd=1
       ;;
     --nodejs)
       nodejs_flag=y; shift 1
@@ -484,6 +488,24 @@ Uninstall_PHPext() {
     Uninstall_pecl_grpc
   fi
 
+  # igbinary
+  if [ "${pecl_igbinary}" == '1' ]; then
+    . include/pecl_igbinary.sh
+    Uninstall_pecl_igbinary
+  fi
+
+  # msgpack
+  if [ "${pecl_msgpack}" == '1' ]; then
+    . include/pecl_msgpack.sh
+    Uninstall_pecl_msgpack
+  fi
+
+  # zstd
+  if [ "${pecl_zstd}" == '1' ]; then
+    . include/pecl_zstd.sh
+    Uninstall_pecl_zstd
+  fi
+
   # reload php
   [ -e "${php_install_dir}/sbin/php-fpm" ] && { [ -e "/bin/systemctl" ] && systemctl reload php-fpm || service php-fpm reload; }
   [ -n "${mphp_ver}" -a -e "${php_install_dir}${mphp_ver}/sbin/php-fpm" ] && { [ -e "/bin/systemctl" ] && systemctl reload php${mphp_ver}-fpm || service php${mphp_ver}-fpm reload; }
@@ -496,7 +518,7 @@ Menu_PHPext() {
     echo -e "\t${CMSG} 0${CEND}. Do not uninstall"
     echo -e "\t${CMSG} 1${CEND}. Uninstall zendguardloader(PHP<=5.6)"
     echo -e "\t${CMSG} 2${CEND}. Uninstall ioncube"
-    echo -e "\t${CMSG} 3${CEND}. Uninstall sourceguardian(PHP<=7.2)"
+    echo -e "\t${CMSG} 3${CEND}. Uninstall sourceguardian"
     echo -e "\t${CMSG} 4${CEND}. Uninstall imagick"
     echo -e "\t${CMSG} 5${CEND}. Uninstall gmagick"
     echo -e "\t${CMSG} 6${CEND}. Uninstall fileinfo"
@@ -514,11 +536,14 @@ Menu_PHPext() {
     echo -e "\t${CMSG}18${CEND}. Uninstall yaf"
     echo -e "\t${CMSG}19${CEND}. Uninstall yar"
     echo -e "\t${CMSG}20${CEND}. Uninstall calendar"
+    echo -e "\t${CMSG}21${CEND}. Uninstall igbinary"
+    echo -e "\t${CMSG}22${CEND}. Uninstall msgpack"
+    echo -e "\t${CMSG}23${CEND}. Uninstall zstd"
     read -e -p "Please input a number:(Default 0 press Enter) " phpext_option
     phpext_option=${phpext_option:-0}
     [ "${phpext_option}" == '0' ] && break
     array_phpext=(${phpext_option})
-    array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20)
+    array_all=(1 2 3 4 5 6 7 8 9 10 11 12 13 14 15 16 17 18 19 20 21 22 23)
     for v in ${array_phpext[@]}
     do
       [ -z "`echo ${array_all[@]} | grep -w ${v}`" ] && phpext_flag=1
@@ -548,6 +573,9 @@ Menu_PHPext() {
       [ -n "`echo ${array_phpext[@]} | grep -w 18`" ] && pecl_yaf=1
       [ -n "`echo ${array_phpext[@]} | grep -w 19`" ] && pecl_yar=1
       [ -n "`echo ${array_phpext[@]} | grep -w 20`" ] && pecl_calendar=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 21`" ] && pecl_igbinary=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 22`" ] && pecl_msgpack=1
+      [ -n "`echo ${array_phpext[@]} | grep -w 23`" ] && pecl_zstd=1
       break
     fi
   done

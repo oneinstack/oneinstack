@@ -73,15 +73,28 @@ Install_pecl_memcached() {
     pushd ${oneinstack_dir}/src > /dev/null
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     # php memcached extension
-    tar xzf libmemcached-${libmemcached_ver}.tar.gz
-    patch -d libmemcached-${libmemcached_ver} -p0 < libmemcached-build.patch
-    pushd libmemcached-${libmemcached_ver} > /dev/null
     [ "${PM}" == 'yum' ] && yum -y install cyrus-sasl-devel
-    [ "${PM}" == 'apt-get' ] && sed -i "s@lthread -pthread -pthreads@lthread -lpthread -pthreads@" ./configure
-    ./configure --with-memcached=${memcached_install_dir}
-    make -j ${THREAD} && make install
-    popd > /dev/null
-    rm -rf libmemcached-${libmemcached_ver}
+    [ "${PM}" == 'apt-get' ] && apt-get -y install libsasl2-dev
+    [ -e "/usr/bin/cmake3" ] && CMAKE=cmake3 || CMAKE=cmake
+    if [ -e "libmemcached-${libmemcached_ver}.tar.gz" ] && command -v $CMAKE >/dev/null 2>&1; then
+      tar xzf libmemcached-${libmemcached_ver}.tar.gz
+      pushd libmemcached-${libmemcached_ver} > /dev/null
+      mkdir -p build && pushd build > /dev/null
+      $CMAKE -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_INSTALL_LIBDIR=lib -DENABLE_SASL=ON ..
+      make -j ${THREAD} && make install
+      popd > /dev/null
+      popd > /dev/null
+      rm -rf libmemcached-${libmemcached_ver}
+    else
+      tar xzf libmemcached-${libmemcached_oldver}.tar.gz
+      patch -d libmemcached-${libmemcached_oldver} -p0 < libmemcached-build.patch
+      pushd libmemcached-${libmemcached_oldver} > /dev/null
+      [ "${PM}" == 'apt-get' ] && sed -i "s@lthread -pthread -pthreads@lthread -lpthread -pthreads@" ./configure
+      ./configure --with-memcached=${memcached_install_dir}
+      make -j ${THREAD} && make install
+      popd > /dev/null
+      rm -rf libmemcached-${libmemcached_oldver}
+    fi
 
     if [ "$(${php_install_dir}/bin/php-config --version | awk -F. '{print $1}')" == '5' ]; then
       tar xzf memcached-${pecl_memcached_oldver}.tgz
@@ -90,8 +103,11 @@ Install_pecl_memcached() {
       tar xzf memcached-${pecl_memcached_ver}.tgz
       pushd memcached-${pecl_memcached_ver} > /dev/null
     fi
+    memcached_ext_opts=""
+    [ -f "${phpExtensionDir}/igbinary.so" ] && memcached_ext_opts="${memcached_ext_opts} --enable-memcached-igbinary"
+    [ -f "${phpExtensionDir}/msgpack.so" ] && memcached_ext_opts="${memcached_ext_opts} --enable-memcached-msgpack"
     ${php_install_dir}/bin/phpize
-    ./configure --with-php-config=${php_install_dir}/bin/php-config
+    ./configure --with-php-config=${php_install_dir}/bin/php-config ${memcached_ext_opts}
     make -j ${THREAD} && make install
     popd > /dev/null
     if [ -f "${phpExtensionDir}/memcached.so" ]; then
