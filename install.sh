@@ -1044,6 +1044,15 @@ fi
 
 # start Time
 startTime=`date +%s`
+install_stat_id=$(cat /proc/sys/kernel/random/uuid 2>/dev/null || echo "$$-${startTime}")
+send_install_stat() {
+  local ev="$1"
+  local dur="${2:-0}"
+  (curl -fsS --connect-timeout 2 -m 3 -X POST -H "Content-Type: application/json" \
+    -d "{\"event\":\"${ev}\",\"install_id\":\"${install_stat_id}\",\"os\":\"${Platform}-${VERSION_ID:-${VERSION_MAIN_ID}}\",\"arch\":\"${ARCH}\",\"region\":\"${OUTIP_STATE}\",\"nginx\":\"${nginx_option:-0}\",\"apache\":\"${apache_flag:-n}\",\"caddy\":\"${caddy_flag:-n}\",\"php\":\"${php_option:-0}\",\"mphp\":\"${mphp_ver:-}\",\"phpcache\":\"${phpcache_option:-0}\",\"php_exts\":\"${php_extensions:-}\",\"db\":\"${db_option:-}\",\"db_method\":\"${dbinstallmethod:-0}\",\"tomcat\":\"${tomcat_option:-0}\",\"jdk\":\"${jdk_option:-0}\",\"redis\":\"${redis_flag:-n}\",\"valkey\":\"${valkey_flag:-n}\",\"memcached\":\"${memcached_flag:-n}\",\"clickhouse\":\"${clickhouse_flag:-n}\",\"nodejs\":\"${nodejs_flag:-n}\",\"pureftpd\":\"${pureftpd_flag:-n}\",\"phpmyadmin\":\"${phpmyadmin_flag:-n}\",\"duration_min\":${dur}}" \
+    "${mirror_link}/api/stat" >/dev/null 2>&1 || true) &
+}
+send_install_stat "start" 0
 
 # openSSL
 Install_openSSL | tee -a ${oneinstack_dir}/install.log
@@ -1507,6 +1516,7 @@ fi
 
 endTime=`date +%s`
 ((installTime=($endTime-$startTime)/60))
+send_install_stat "done" "${installTime}"
 echo "####################Congratulations########################"
 echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [[ "${nginx_option}" =~ ^[1-3]$ ]] && echo -e "\n$(printf "%-32s" "Nginx install dir":)${CMSG}${web_install_dir}${CEND}"
