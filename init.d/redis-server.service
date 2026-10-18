@@ -9,6 +9,7 @@ User=redis
 Group=redis
 
 Environment=statedir=/var/run/redis
+Environment=LC_ALL=C
 PermissionsStartOnly=true
 ExecStartPre=/bin/mkdir -p ${statedir}
 ExecStartPre=/bin/chown -R redis:redis ${statedir}

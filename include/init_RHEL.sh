@@ -94,7 +94,11 @@ EOF
 sysctl -p
 
 if [ ${RHEL_ver} -ge 7 >/dev/null 2>&1 ]; then
-  sed -i 's@LANG=.*$@LANG="en_US.UTF-8"@g' /etc/locale.conf
+  if locale -a 2>/dev/null | grep -qiE '^en_US\.utf-?8$'; then
+    sed -i 's@LANG=.*$@LANG="en_US.UTF-8"@g' /etc/locale.conf
+  elif locale -a 2>/dev/null | grep -qiE '^C\.utf-?8$'; then
+    sed -i 's@LANG=.*$@LANG="C.UTF-8"@g' /etc/locale.conf
+  fi
 fi
 
 # firewall

@@ -11,7 +11,7 @@ Install_valkey_server() {
   pushd ${oneinstack_dir}/src > /dev/null
   tar xzf valkey-${valkey_ver}.tar.gz
   pushd valkey-${valkey_ver} > /dev/null
-  make -j ${THREAD}
+  make -C src OPTIMIZATION="-O3 -fno-omit-frame-pointer" -j ${THREAD}
   if [ -f "src/valkey-server" ]; then
     mkdir -p ${valkey_install_dir}/{bin,etc,var}
     /bin/cp src/{valkey-benchmark,valkey-check-aof,valkey-check-rdb,valkey-cli,valkey-sentinel,valkey-server} ${valkey_install_dir}/bin/
@@ -33,9 +33,13 @@ Install_valkey_server() {
 
     /bin/cp ../init.d/valkey-server.service /lib/systemd/system/
     sed -i "s@/usr/local/valkey@${valkey_install_dir}@g" /lib/systemd/system/valkey-server.service
-    systemctl daemon-reload
-    systemctl enable valkey-server
-    systemctl start valkey-server
+    systemctl daemon-reload 2>/dev/null || true
+    systemctl enable valkey-server 2>/dev/null || true
+    if ! systemctl restart valkey-server 2>/dev/null && ! systemctl start valkey-server 2>/dev/null; then
+      mkdir -p /var/run/valkey
+      chown -R valkey:valkey /var/run/valkey
+      LC_ALL=C su -s /bin/sh valkey -c "${valkey_install_dir}/bin/valkey-server ${valkey_install_dir}/etc/valkey.conf"
+    fi
   else
     rm -rf ${valkey_install_dir}
     echo "${CFAILURE}Valkey-server install failed, Please contact the author! ${CEND}" && grep -Ew 'NAME|ID|ID_LIKE|VERSION_ID|PRETTY_NAME' /etc/os-release

@@ -124,17 +124,17 @@ installDepsRHEL() {
     fi
   fi
 
-  if [ "${RHEL_ver}" -ge 9 >/dev/null 2>&1 ] || [ "${RHEL_ver}" == '9' ] || [ "${RHEL_ver}" == '10' ]; then
-    [ ! -e "/usr/lib64/libtinfo.so.5" ] && ln -s /usr/lib64/libtinfo.so.6 /usr/lib64/libtinfo.so.5
-    [ ! -e "/usr/lib64/libncurses.so.5" ] && ln -s /usr/lib64/libncurses.so.6 /usr/lib64/libncurses.so.5
-  fi
-
   echo "${CMSG}Installing dependencies packages...${CEND}"
   # Install needed packages
-  pkgList="perl perl-core perl-IPC-Cmd perl-FindBin deltarpm libsodium libsodium-devel drpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-dev libjpeg-devel libbz2-dev libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel libzip libzip-devel glibc glibc-devel krb5-devel libcurl4-openssl-dev libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel ncurses-compat-libs libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel net-tools libxslt-devel libssl-dev libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre-devel libmcrypt libsqlite3-dev libmcrypt-devel mhash mhash-devel mcrypt zip unzip chrony oniguruma-devel rpcgen sqlite-devel sysstat patch bc expect expat-devel perl-devel oniguruma oniguruma-devel libtirpc-devel nss libnsl rsync rsyslog git lsof lrzsz psmisc wget which util-linux procps-ng diffutils initscripts-service initscripts libselinux-utils kmod libatomic libquadmath-devel tmux chkconfig firewalld"
+  pkgList="perl perl-core perl-IPC-Cmd perl-FindBin deltarpm libsodium libsodium-devel drpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-dev libjpeg-devel libbz2-dev libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel libzip libzip-devel glibc glibc-devel glibc-langpack-en libxcrypt-compat krb5-devel libcurl4-openssl-dev libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel ncurses-compat-libs libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel net-tools libxslt-devel libssl-dev libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre-devel libmcrypt libsqlite3-dev libmcrypt-devel mhash mhash-devel mcrypt zip unzip chrony oniguruma-devel rpcgen sqlite-devel sysstat patch bc expect expat-devel perl-devel oniguruma oniguruma-devel libtirpc-devel nss libnsl rsync rsyslog git lsof lrzsz psmisc wget which util-linux procps-ng diffutils initscripts-service initscripts libselinux-utils kmod libatomic libquadmath-devel tmux chkconfig firewalld"
   for Package in ${pkgList}; do
     yum -y install ${Package}
   done
+  if [ "${RHEL_ver}" -ge 9 >/dev/null 2>&1 ] || [ "${RHEL_ver}" == '9' ] || [ "${RHEL_ver}" == '10' ]; then
+    [ ! -e "/usr/lib64/libtinfo.so.5" ] && [ -e "/usr/lib64/libtinfo.so.6" ] && ln -s /usr/lib64/libtinfo.so.6 /usr/lib64/libtinfo.so.5
+    [ ! -e "/usr/lib64/libncurses.so.5" ] && [ -e "/usr/lib64/libncurses.so.6" ] && ln -s /usr/lib64/libncurses.so.6 /usr/lib64/libncurses.so.5
+    [ ! -e "/usr/lib64/libcrypt.so.1" ] && [ -e "/usr/lib64/libcrypt.so.2" ] && ln -s /usr/lib64/libcrypt.so.2 /usr/lib64/libcrypt.so.1
+  fi
   [ ${RHEL_ver} -lt 8 >/dev/null 2>&1 ] && yum -y install cmake3
 
   yum -y update bash openssl glibc

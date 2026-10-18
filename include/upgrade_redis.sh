@@ -41,13 +41,13 @@ Upgrade_Redis() {
     tar xzf redis-$NEW_redis_ver.tar.gz
     pushd redis-$NEW_redis_ver
     make clean
-    make -j ${THREAD}
+    make -C src OPTIMIZATION="-O3 -fno-omit-frame-pointer" -j ${THREAD}
 
     if [ -f "src/redis-server" ]; then
       echo "Restarting Redis..."
-      service redis-server stop
+      systemctl stop redis-server 2>/dev/null || service redis-server stop 2>/dev/null
       /bin/cp src/{redis-benchmark,redis-check-aof,redis-check-rdb,redis-cli,redis-sentinel,redis-server} $redis_install_dir/bin/
-      service redis-server start
+      systemctl start redis-server 2>/dev/null || service redis-server start 2>/dev/null
       popd > /dev/null
       echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}$OLD_redis_ver${CEND} to ${CWARNING}$NEW_redis_ver${CEND}"
       rm -rf redis-$NEW_redis_ver

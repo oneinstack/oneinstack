@@ -994,7 +994,8 @@ if [ ! -e ~/.oneinstack ]; then
   downloadDepsSrc=1
   [ "${PM}" == 'apt-get' ] && apt-get -y update > /dev/null
   [ "${PM}" == 'yum' ] && yum clean all > /dev/null
-  ${PM} -y install wget gcc curl openssl > /dev/null
+  ${PM} -y install wget gcc openssl tar bzip2 xz > /dev/null
+  command -v curl > /dev/null 2>&1 || ${PM} -y install curl > /dev/null
 fi
 
 # get the IP information
@@ -1510,8 +1511,8 @@ fi
 [ -d "${db_install_dir}/support-files" ] && [ -z "`ps -ef 2>/dev/null | grep mysqld_safe | grep -v grep`" ] && { command -v service >/dev/null 2>&1 && service mysqld start || /etc/init.d/mysqld start; }
 
 # reload php
-[ -e "${php_install_dir}/sbin/php-fpm" ] && { [ -e "/bin/systemctl" ] && systemctl reload php-fpm || service php-fpm reload; }
-[ -n "${mphp_ver}" -a -e "${php_install_dir}${mphp_ver}/sbin/php-fpm" ] && { [ -e "/bin/systemctl" ] && systemctl reload php${mphp_ver}-fpm || service php${mphp_ver}-fpm reload; }
+[ -e "${php_install_dir}/sbin/php-fpm" ] && { systemctl reload php-fpm 2>/dev/null || service php-fpm reload 2>/dev/null || kill -USR2 `cat ${php_install_dir}/var/run/php-fpm.pid 2>/dev/null` 2>/dev/null; }
+[ -n "${mphp_ver}" -a -e "${php_install_dir}${mphp_ver}/sbin/php-fpm" ] && { systemctl reload php${mphp_ver}-fpm 2>/dev/null || service php${mphp_ver}-fpm reload 2>/dev/null || kill -USR2 `cat ${php_install_dir}${mphp_ver}/var/run/php-fpm.pid 2>/dev/null` 2>/dev/null; }
 [ -e "${apache_install_dir}/bin/apachectl" ] && ${apache_install_dir}/bin/apachectl -k graceful
 
 endTime=`date +%s`

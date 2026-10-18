@@ -12,7 +12,7 @@ Install_redis_server() {
   pushd ${oneinstack_dir}/src > /dev/null
   tar xzf redis-${redis_ver}.tar.gz
   pushd redis-${redis_ver} > /dev/null
-  make -C src -j ${THREAD}
+  make -C src OPTIMIZATION="-O3 -fno-omit-frame-pointer" -j ${THREAD}
   if [ -f "src/redis-server" ]; then
     mkdir -p ${redis_install_dir}/{bin,etc,var}
     /bin/cp src/{redis-benchmark,redis-check-aof,redis-check-rdb,redis-cli,redis-sentinel,redis-server} ${redis_install_dir}/bin/
@@ -43,7 +43,7 @@ Install_redis_server() {
     if ! systemctl restart redis-server 2>/dev/null && ! systemctl start redis-server 2>/dev/null; then
       mkdir -p /var/run/redis
       chown -R redis:redis /var/run/redis
-      su -s /bin/sh redis -c "${redis_install_dir}/bin/redis-server ${redis_install_dir}/etc/redis.conf"
+      LC_ALL=C su -s /bin/sh redis -c "${redis_install_dir}/bin/redis-server ${redis_install_dir}/etc/redis.conf"
     fi
     local redis_started=0
     for ((i=1; i<=5; i++)); do

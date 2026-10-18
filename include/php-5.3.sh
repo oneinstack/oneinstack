@@ -45,11 +45,11 @@ Install_PHP53() {
     pushd libmcrypt-${libmcrypt_ver} > /dev/null
     /bin/cp /usr/share/misc/config.guess /usr/share/misc/config.sub . 2>/dev/null
     /bin/cp /usr/share/misc/config.guess /usr/share/misc/config.sub libltdl/ 2>/dev/null
-    CFLAGS="-std=gnu89 -O2 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=return-mismatch" ./configure
+    CFLAGS="-std=gnu89 -O2 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-return-type" ./configure
     make -j ${THREAD} && make install
     ldconfig
     pushd libltdl > /dev/null
-    CFLAGS="-std=gnu89 -O2 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=return-mismatch" ./configure --enable-ltdl-install
+    CFLAGS="-std=gnu89 -O2 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-return-type" ./configure --enable-ltdl-install
     make -j ${THREAD} && make install
     popd > /dev/null
     popd > /dev/null
@@ -80,7 +80,7 @@ Install_PHP53() {
     pushd mcrypt-${mcrypt_ver} > /dev/null
     ldconfig
     /bin/cp /usr/share/misc/config.guess /usr/share/misc/config.sub . 2>/dev/null
-    CFLAGS="-std=gnu89 -O2 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=return-mismatch" ./configure
+    CFLAGS="-std=gnu89 -O2 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-return-type" ./configure
     make -j ${THREAD} && make install
     popd > /dev/null
     rm -rf mcrypt-${mcrypt_ver}
@@ -137,7 +137,7 @@ Install_PHP53() {
     --with-gettext --enable-zip --enable-soap --disable-debug ${php_modules_options}
   fi
   { [ ${RHEL_ver} -ge 9 >/dev/null 2>&1 ] || [ ${Debian_ver} -ge 10 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -ge 19 >/dev/null 2>&1 ]; } || sed -i '/^BUILD_/ s/\$(CC)/\$(CXX)/g' Makefile
-  make EXTRA_CFLAGS="-std=gnu17 -Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers -Wno-error=int-conversion -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=return-mismatch" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
+  make EXTRA_CFLAGS="-std=gnu17 -Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers -Wno-error=int-conversion -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-return-type" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
   make install
 
   if [ -e "${php_install_dir}/bin/phpize" ]; then
@@ -260,10 +260,10 @@ EOF
       sed -i "s@^pm.max_spare_servers.*@pm.max_spare_servers = 80@" ${php_install_dir}/etc/php-fpm.conf
     fi
 
-    systemctl start php-fpm
+    systemctl start php-fpm 2>/dev/null || ${php_install_dir}/sbin/php-fpm
 
   elif [ "${apache_mode_option}" == '2' ]; then
-    systemctl restart httpd
+    systemctl restart httpd 2>/dev/null || ${apache_install_dir}/bin/apachectl -k restart
   fi
   popd > /dev/null
   [ -e "${php_install_dir}/bin/phpize" ] && rm -rf php-${php53_ver}

@@ -25,8 +25,8 @@ Install_Nginx() {
     mkdir -p out && pushd out > /dev/null
     [ -e "/usr/bin/cmake3" ] && CMAKE=cmake3 || CMAKE=cmake
     if command -v $CMAKE >/dev/null 2>&1; then
-      $CMAKE -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-Ofast -m64 -march=native -mtune=native -flto -funroll-loops -ffunction-sections -fdata-sections -Wl,--gc-sections" -DCMAKE_INSTALL_PREFIX=./installed ..
-      $CMAKE --build . --config Release --target brotlienc
+      $CMAKE -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-Ofast -funroll-loops -ffunction-sections -fdata-sections -Wl,--gc-sections" -DCMAKE_INSTALL_PREFIX=./installed ..
+      $CMAKE --build . --config Release --target brotlienc -j ${THREAD}
     fi
     popd > /dev/null
     popd > /dev/null

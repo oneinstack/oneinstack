@@ -9,6 +9,7 @@ User=valkey
 Group=valkey
 
 Environment=statedir=/var/run/valkey
+Environment=LC_ALL=C
 PermissionsStartOnly=true
 ExecStartPre=/bin/mkdir -p ${statedir}
 ExecStartPre=/bin/chown -R valkey:valkey ${statedir}
