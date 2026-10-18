@@ -8,6 +8,7 @@
 #       https://github.com/oneinstack/oneinstack
 
 checkDownload() {
+  [ ! -d "${oneinstack_dir}/src" ] && mkdir -p ${oneinstack_dir}/src
   pushd ${oneinstack_dir}/src > /dev/null
   # icu
   if ! command -v icu-config >/dev/null 2>&1 || icu-config --version | grep '^3.' || [ "${Ubuntu_ver}" == "20" ]; then

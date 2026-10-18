@@ -989,12 +989,12 @@ if [[ ${nginx_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [ "${caddy
 fi
 [ -d /data ] && chmod 755 /data
 
-# install wget gcc curl
+# install wget gcc curl openssl
 if [ ! -e ~/.oneinstack ]; then
   downloadDepsSrc=1
   [ "${PM}" == 'apt-get' ] && apt-get -y update > /dev/null
   [ "${PM}" == 'yum' ] && yum clean all > /dev/null
-  ${PM} -y install wget gcc curl > /dev/null
+  ${PM} -y install wget gcc curl openssl > /dev/null
 fi
 
 # get the IP information

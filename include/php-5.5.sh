@@ -23,7 +23,7 @@ Install_PHP55() {
     tar xzf curl-${curl_ver}.tar.gz
     pushd curl-${curl_ver} > /dev/null
     [ -e "/usr/local/lib/libnghttp2.so" ] && with_nghttp2='--with-nghttp2=/usr/local'
-    ./configure --prefix=${curl_install_dir} ${php5_with_ssl} ${with_nghttp2}
+    ./configure --prefix=${curl_install_dir} ${php5_with_ssl} ${with_nghttp2} --without-libpsl
     make -j ${THREAD} && make install
     popd > /dev/null
     rm -rf curl-${curl_ver}
@@ -43,11 +43,13 @@ Install_PHP55() {
   if [ ! -e "/usr/local/bin/libmcrypt-config" -a ! -e "/usr/bin/libmcrypt-config" ]; then
     tar xzf libmcrypt-${libmcrypt_ver}.tar.gz
     pushd libmcrypt-${libmcrypt_ver} > /dev/null
-    ./configure
+    /bin/cp /usr/share/misc/config.guess /usr/share/misc/config.sub . 2>/dev/null
+    /bin/cp /usr/share/misc/config.guess /usr/share/misc/config.sub libltdl/ 2>/dev/null
+    CFLAGS="-std=gnu89 -O2 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=return-mismatch" ./configure
     make -j ${THREAD} && make install
     ldconfig
     pushd libltdl > /dev/null
-    ./configure --enable-ltdl-install
+    CFLAGS="-std=gnu89 -O2 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=return-mismatch" ./configure --enable-ltdl-install
     make -j ${THREAD} && make install
     popd > /dev/null
     popd > /dev/null
@@ -57,7 +59,8 @@ Install_PHP55() {
   if [ ! -e "/usr/local/include/mhash.h" -a ! -e "/usr/include/mhash.h" ]; then
     tar xzf mhash-${mhash_ver}.tar.gz
     pushd mhash-${mhash_ver} > /dev/null
-    ./configure
+    /bin/cp /usr/share/misc/config.guess /usr/share/misc/config.sub . 2>/dev/null
+    CFLAGS="-std=gnu17 -O2 -Wno-error=implicit-function-declaration -Wno-error=int-conversion -Wno-error=incompatible-pointer-types" ./configure
     make -j ${THREAD} && make install
     popd > /dev/null
     rm -rf mhash-${mhash_ver}
@@ -76,7 +79,8 @@ Install_PHP55() {
     tar xzf mcrypt-${mcrypt_ver}.tar.gz
     pushd mcrypt-${mcrypt_ver} > /dev/null
     ldconfig
-    ./configure
+    /bin/cp /usr/share/misc/config.guess /usr/share/misc/config.sub . 2>/dev/null
+    CFLAGS="-std=gnu89 -O2 -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=int-conversion -Wno-error=incompatible-pointer-types -Wno-error=return-mismatch" ./configure
     make -j ${THREAD} && make install
     popd > /dev/null
     rm -rf mcrypt-${mcrypt_ver}
@@ -89,6 +93,20 @@ Install_PHP55() {
   tar xzf php-${php55_ver}.tar.gz
   patch -d php-${php55_ver} -p0 < fpm-race-condition.patch
   pushd php-${php55_ver} > /dev/null
+  [ -e ext/libxml/libxml.c ] && sed -i 's/ATTRIBUTE_UNUSED/__attribute__((unused))/g' ext/libxml/libxml.c
+  if [ -e ext/openssl/php_openssl.h ] && ! grep -q '^#ifndef ERR_NUM_ERRORS' ext/openssl/php_openssl.h; then
+    sed -i '/struct php_openssl_errors {/i #ifndef ERR_NUM_ERRORS\n#define ERR_NUM_ERRORS 16\n#endif' ext/openssl/php_openssl.h
+  fi
+  if [ -e ext/openssl/xp_ssl.c ]; then
+    sed -i 's/san->d.iPAddress->length/ASN1_STRING_length(san->d.iPAddress)/g' ext/openssl/xp_ssl.c
+    sed -i 's/san->d.iPAddress->data/ASN1_STRING_get0_data(san->d.iPAddress)/g' ext/openssl/xp_ssl.c
+  fi
+  if [ -e ext/openssl/openssl.c ]; then
+    sed -i 's/(char \*)str->data, str->length/(char *)ASN1_STRING_get0_data(str), ASN1_STRING_length(str)/g' ext/openssl/openssl.c
+    sed -i 's/timestr->data/ASN1_STRING_get0_data(timestr)/g' ext/openssl/openssl.c
+    sed -i 's/extension_data->data/ASN1_STRING_get0_data(extension_data)/g' ext/openssl/openssl.c
+    sed -i 's/extension_data->length/ASN1_STRING_length(extension_data)/g' ext/openssl/openssl.c
+  fi
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}
   { [ ${RHEL_ver} -ge 9 >/dev/null 2>&1 ] || [ ${Debian_ver} -ge 10 >/dev/null 2>&1 ] || [ ${Ubuntu_ver} -ge 19 >/dev/null 2>&1 ]; } || intl_modules_options='--enable-intl'
   [ "${phpcache_option}" == '1' ] && phpcache_arg='--enable-opcache' || phpcache_arg='--disable-opcache'
@@ -115,7 +133,7 @@ Install_PHP55() {
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --with-xsl ${intl_modules_options} \
     --with-gettext --enable-zip --enable-soap --disable-debug ${php_modules_options}
   fi
-  make EXTRA_CFLAGS="-Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
+  make EXTRA_CFLAGS="-std=gnu17 -Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers -Wno-error=int-conversion -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=return-mismatch" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
   make install
 
   if [ -e "${php_install_dir}/bin/phpize" ]; then

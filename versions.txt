@@ -74,6 +74,7 @@ nodejs_oldver=16.20.2
 
 libiconv_ver=1.19
 curl_ver=8.23.0
+curl_oldver=8.17.0
 libmcrypt_ver=2.5.8
 mcrypt_ver=2.6.8
 mhash_ver=0.9.9.9

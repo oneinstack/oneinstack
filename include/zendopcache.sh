@@ -34,19 +34,21 @@ EOF
       popd > /dev/null
       return 0
     fi
-    if [[ "${PHP_main_ver}" =~ ^5.[3-4]$ ]]; then
-      tar xzf zendopcache-${zendopcache_ver}.tgz
-      pushd zendopcache-${zendopcache_ver} > /dev/null
-    else
-      src_url=https://www.php.net/distributions/php-${PHP_detail_ver}.tar.gz && Download_src
-      tar xzf php-${PHP_detail_ver}.tar.gz
-      pushd php-${PHP_detail_ver}/ext/opcache > /dev/null
-    fi
+    if [ ! -f "${phpExtensionDir}/opcache.so" ]; then
+      if [[ "${PHP_main_ver}" =~ ^5.[3-4]$ ]]; then
+        tar xzf zendopcache-${zendopcache_ver}.tgz
+        pushd zendopcache-${zendopcache_ver} > /dev/null
+      else
+        src_url=${mirror_link}/oneinstack/src/php-${PHP_detail_ver}.tar.gz && Download_src
+        tar xzf php-${PHP_detail_ver}.tar.gz
+        pushd php-${PHP_detail_ver}/ext/opcache > /dev/null
+      fi
 
-    ${php_install_dir}/bin/phpize
-    ./configure --with-php-config=${php_install_dir}/bin/php-config
-    make -j ${THREAD} && make install
-    popd > /dev/null
+      ${php_install_dir}/bin/phpize
+      ./configure --with-php-config=${php_install_dir}/bin/php-config
+      make CFLAGS="-std=gnu17 -O2 -Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers -Wno-error=int-conversion -Wno-error=implicit-function-declaration" -j ${THREAD} && make install
+      popd > /dev/null
+    fi
     if [ -f "${phpExtensionDir}/opcache.so" ]; then
       # write opcache configs
       if [[ "${PHP_main_ver}" =~ ^5.[3-4]$ ]]; then

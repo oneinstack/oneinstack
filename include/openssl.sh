@@ -47,6 +47,7 @@ if openssl version | grep -Eqi 'OpenSSL 1.0.2*'; then
   php83_with_curl="--with-curl"
   php84_with_curl="--with-curl"
   php85_with_curl="--with-curl"
+  curl_ver=${curl_oldver}
 elif openssl version | grep -Eqi 'OpenSSL 1.1.*'; then
   php5_with_openssl="--with-openssl=${openssl_install_dir}"
   php70_with_openssl="--with-openssl"
@@ -87,7 +88,8 @@ elif openssl version | grep -Eqi 'OpenSSL 1.1.*'; then
   php84_with_curl="--with-curl"
   php85_with_curl="--with-curl"
   [[ ${php_option} =~ ^[1-4]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$ ]] && with_old_openssl_flag=y
-elif openssl version | grep -Eqi 'OpenSSL 3.*'; then
+  curl_ver=${curl_oldver}
+elif openssl version | grep -Eqi 'OpenSSL [3-9]\.'; then
   php5_with_openssl="--with-openssl=${openssl_install_dir}"
   php70_with_openssl="--with-openssl=${openssl_install_dir}"
   php71_with_openssl="--with-openssl"
@@ -126,7 +128,10 @@ elif openssl version | grep -Eqi 'OpenSSL 3.*'; then
   php83_with_curl="--with-curl"
   php84_with_curl="--with-curl"
   php85_with_curl="--with-curl"
-  [[ ${php_option} =~ ^[1-5]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^70$ ]] && with_old_openssl_flag=y
+  if [[ ${php_option} =~ ^[1-5]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^70$ ]]; then
+    with_old_openssl_flag=y
+    curl_ver=${curl_oldver}
+  fi
 else
   php5_with_openssl="--with-openssl=${openssl_install_dir}"
   php70_with_openssl="--with-openssl=${openssl_install_dir}"
@@ -167,6 +172,7 @@ else
   php84_with_curl="--with-curl=${curl_install_dir}"
   php85_with_curl="--with-curl=${curl_install_dir}"
   with_old_openssl_flag=y
+  curl_ver=${curl_oldver}
 fi
 
 Install_openSSL() {

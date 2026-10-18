@@ -23,7 +23,7 @@ Install_PHP72() {
     tar xzf curl-${curl_ver}.tar.gz
     pushd curl-${curl_ver} > /dev/null
     [ -e "/usr/local/lib/libnghttp2.so" ] && with_nghttp2='--with-nghttp2=/usr/local'
-    ./configure --prefix=${curl_install_dir} ${php72_with_ssl} ${with_nghttp2}
+    ./configure --prefix=${curl_install_dir} ${php72_with_ssl} ${with_nghttp2} --without-libpsl
     make -j ${THREAD} && make install
     popd > /dev/null
     rm -rf curl-${curl_ver}
@@ -62,7 +62,8 @@ Install_PHP72() {
   if [ ! -e "/usr/local/include/mhash.h" -a ! -e "/usr/include/mhash.h" ]; then
     tar xzf mhash-${mhash_ver}.tar.gz
     pushd mhash-${mhash_ver} > /dev/null
-    ./configure
+    /bin/cp /usr/share/misc/config.guess /usr/share/misc/config.sub . 2>/dev/null
+    CFLAGS="-std=gnu17 -O2 -Wno-error=implicit-function-declaration -Wno-error=int-conversion -Wno-error=incompatible-pointer-types" ./configure
     make -j ${THREAD} && make install
     popd > /dev/null
     rm -rf mhash-${mhash_ver}
@@ -86,6 +87,20 @@ Install_PHP72() {
   if [ -e ext/openssl/openssl.c ] && ! grep -Eqi '^#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c; then
     sed -i '/OPENSSL_SSLV23_PADDING/i#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c
     sed -i '/OPENSSL_SSLV23_PADDING/a#endif' ext/openssl/openssl.c
+  fi
+  [ -e ext/libxml/libxml.c ] && sed -i 's/ATTRIBUTE_UNUSED/__attribute__((unused))/g' ext/libxml/libxml.c
+  if [ -e ext/openssl/php_openssl.h ] && ! grep -q '^#ifndef ERR_NUM_ERRORS' ext/openssl/php_openssl.h; then
+    sed -i '/struct php_openssl_errors {/i #ifndef ERR_NUM_ERRORS\n#define ERR_NUM_ERRORS 16\n#endif' ext/openssl/php_openssl.h
+  fi
+  if [ -e ext/openssl/xp_ssl.c ]; then
+    sed -i 's/san->d.iPAddress->length/ASN1_STRING_length(san->d.iPAddress)/g' ext/openssl/xp_ssl.c
+    sed -i 's/san->d.iPAddress->data/ASN1_STRING_get0_data(san->d.iPAddress)/g' ext/openssl/xp_ssl.c
+  fi
+  if [ -e ext/openssl/openssl.c ]; then
+    sed -i 's/(char \*)str->data, str->length/(char *)ASN1_STRING_get0_data(str), ASN1_STRING_length(str)/g' ext/openssl/openssl.c
+    sed -i 's/timestr->data/ASN1_STRING_get0_data(timestr)/g' ext/openssl/openssl.c
+    sed -i 's/extension_data->data/ASN1_STRING_get0_data(extension_data)/g' ext/openssl/openssl.c
+    sed -i 's/extension_data->length/ASN1_STRING_length(extension_data)/g' ext/openssl/openssl.c
   fi
   make clean
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}
@@ -113,7 +128,7 @@ Install_PHP72() {
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
     --with-gettext --enable-zip --enable-soap --disable-debug ${php_modules_options}
   fi
-  make EXTRA_CFLAGS="-Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
+  make EXTRA_CFLAGS="-std=gnu17 -Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers -Wno-error=int-conversion -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-error=return-mismatch" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
   make install
 
   if [ -e "${php_install_dir}/bin/phpize" ]; then

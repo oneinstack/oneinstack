@@ -193,6 +193,7 @@ installDepsUbuntu() {
 }
 
 installDepsBySrc() {
+  [ ! -d "${oneinstack_dir}/src" ] && mkdir -p ${oneinstack_dir}/src
   pushd ${oneinstack_dir}/src > /dev/null
   if ! command -v icu-config > /dev/null 2>&1 || icu-config --version | grep '^3.' || [ "${Ubuntu_ver}" == "20" ]; then
     tar xzf icu4c-${icu4c_ver}-src.tgz

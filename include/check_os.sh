@@ -87,7 +87,10 @@ if [ ${RHEL_ver} -lt 7 >/dev/null 2>&1 ] || [ ${Debian_ver} -lt 9 >/dev/null 2>&
   kill -9 $$; exit 1;
 fi
 
-command -v gcc > /dev/null 2>&1 || $PM -y install gcc
+if ! command -v gcc > /dev/null 2>&1; then
+  [ "${PM}" == 'apt-get' ] && apt-get -y update > /dev/null
+  ${PM} -y install gcc > /dev/null
+fi
 gcc_ver=$(gcc -dumpversion | awk -F. '{print $1}')
 
 [ ${gcc_ver} -lt 5 >/dev/null 2>&1 ] && redis_ver=${redis_oldver}
