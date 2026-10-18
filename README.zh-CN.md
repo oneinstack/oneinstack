@@ -159,4 +159,19 @@ systemctl {start|stop|status|restart} clickhouse-server
 
 如需反馈、提问，以及关注项目进展：<br />
 [Telegram 群组](https://t.me/oneinstackn)<br />
-[OneinStack官网](https://oneinstack.com)<br /> 
+[OneinStack官网](https://oneinstack.com)<br />
+
+## 匿名安装统计与隐私说明
+
+为了更好地驱动 OneinStack 后续版本的持续维护与更新迭代，`install.sh` 在安装开始与完成时会以非阻塞后台方式发送一次匿名统计请求：
+
+1. **统计内容**：
+   - **基础环境信息**：操作系统发行版与版本号（如 `ubuntu-24.04`、`debian-12`、`rocky-9`）、CPU 架构（如 `x86_64`、`aarch64`）、网络所在区域标识（用于优化镜像源加速策略）。
+   - **选配组件参数**：本次安装所选择的软件版本与开关项（如 Web 服务器类型、PHP 版本及扩展名、数据库版本与安装方式、JDK/Tomcat、Redis/Valkey/Memcached 等）。
+   - **安装状态与耗时**：随机生成的单次安装会话 ID（`install_id`）、安装开始/完成状态以及安装总耗时（分钟）。
+2. **统计目的**：
+   - 统计各 Linux 发行版及各软件组件版本（PHP、MySQL/MariaDB/Percona、Web 服务及扩展等）的真实使用热度、平均编译耗时与安装成功率，为后续版本更新、新系统兼容性适配、组件升级优先级及镜像站资源调配提供数据支撑。
+3. **隐私承诺**：
+   - **本次更新绝不收集任何用户隐私或敏感数据**：不收集也不上传数据库密码、SSH 端口、服务器主机名、系统账号、网站域名、业务文件或任何个人身份信息。
+   - 统计请求在后台静默异步执行（超时时间仅 2~3 秒），任何网络异常或请求失败均不会影响您的正常安装流程。
+

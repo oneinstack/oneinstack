@@ -163,3 +163,18 @@ systemctl {start|stop|status|restart} clickhouse-server
 For feedback, questions, and to follow the progress of the project: <br />
 [Telegram Group](https://t.me/oneinstackn)<br />
 [OneinStack](https://oneinstack.com)<br />
+
+## Anonymous Installation Statistics & Privacy Notice
+
+To better guide future updates, version maintenance, and mirror optimization for OneinStack, `install.sh` sends a lightweight, non-blocking anonymous telemetry request when an installation starts and completes:
+
+1. **What is collected**:
+   - **System environment**: OS distribution and version (e.g., `ubuntu-24.04`, `debian-12`, `rocky-9`), CPU architecture (e.g., `x86_64`, `aarch64`), and network region flag (used for mirror routing).
+   - **Selected component options**: The software flags/options selected for installation (e.g., Web server option, PHP version and extension names, Database version and install method, JDK/Tomcat, Redis/Valkey/Memcached flags).
+   - **Installation status & duration**: A randomly generated single-run session ID (`install_id`), start/completion status, and total installation time (in minutes).
+2. **Purpose of statistics**:
+   - To understand real-world usage trends across Linux distributions and software versions, measure compilation durations, and track installation success rates so we can prioritize dependency updates, OS compatibility fixes, and mirror bandwidth allocation.
+3. **Privacy guarantee**:
+   - **No personal or sensitive data is ever collected**: We NEVER collect or transmit database passwords, SSH ports, hostnames, system usernames, domain names, directory contents, or any personally identifiable information (PII).
+   - Telemetry requests run asynchronously in the background with a strict 2–3 second timeout and will never block or affect your installation process even in offline or restricted network environments.
+
