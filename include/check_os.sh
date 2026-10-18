@@ -102,15 +102,34 @@ if [ ${RHEL_ver} -lt 7 >/dev/null 2>&1 ] || [ ${Debian_ver} -lt 9 >/dev/null 2>&
   kill -9 $$; exit 1;
 fi
 
-if ! command -v gcc > /dev/null 2>&1 || ! command -v getopt > /dev/null 2>&1; then
+if ! command -v gcc > /dev/null 2>&1 || ! command -v getopt > /dev/null 2>&1 || ! command -v make > /dev/null 2>&1; then
   [ "${PM}" == 'apt-get' ] && apt-get -y update > /dev/null
-  ${PM} -y install gcc util-linux > /dev/null
+  ${PM} -y install gcc make util-linux > /dev/null
 fi
 gcc_ver=$(gcc -dumpversion | awk -F. '{print $1}')
 
 [ ${gcc_ver} -lt 5 >/dev/null 2>&1 ] && redis_ver=${redis_oldver}
 # jemalloc 5.4.0+ uses __has_include in #if, which GCC < 5 (e.g. CentOS 7 GCC 4.8) cannot parse
 [ ${gcc_ver} -lt 5 >/dev/null 2>&1 ] && jemalloc_ver=${jemalloc_oldver}
+# libiconv 1.18+ po/Makefile uses the '!=' shell assignment, which needs GNU make 4.0+ (CentOS 7 ships make 3.82)
+make_ver=$(make --version 2>/dev/null | head -n1 | grep -oE '[0-9]+\.[0-9]+' | head -n1)
+[ -n "${make_ver}" ] && [ "${make_ver%%.*}" -lt 4 >/dev/null 2>&1 ] && libiconv_ver=${libiconv_oldver}
+
+# Compatibility CFLAGS for building legacy C code (PHP etc.) with GCC 14+/C23 defaults.
+# Only pass flags the local GCC understands: -std=gnu17 needs GCC 8+, and
+# -Wincompatible-pointer-types/-Wdiscarded-qualifiers/-Wint-conversion need GCC 5+ (CentOS 7 ships GCC 4.8).
+if [ ${gcc_ver} -ge 8 >/dev/null 2>&1 ]; then
+  compat_cflags='-std=gnu17 -Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers -Wno-error=int-conversion'
+  compat_cflags_c89='-std=gnu89 -Wno-error=int-conversion -Wno-error=incompatible-pointer-types'
+elif [ ${gcc_ver} -ge 5 >/dev/null 2>&1 ]; then
+  compat_cflags='-std=gnu11 -Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers -Wno-error=int-conversion'
+  compat_cflags_c89='-std=gnu89 -Wno-error=int-conversion -Wno-error=incompatible-pointer-types'
+else
+  compat_cflags=''
+  compat_cflags_c89='-std=gnu89'
+fi
+compat_cflags="${compat_cflags} -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-return-type"
+compat_cflags_c89="${compat_cflags_c89} -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-return-type"
 
 # MySQL 8.0.46+/8.4.11+ only ship glibc2.28 binaries; older systems (e.g. CentOS 7) use the last glibc2.17 build
 glibc_ver=$(ldd --version 2>&1 | head -n1 | grep -oE '[0-9]+\.[0-9]+$')

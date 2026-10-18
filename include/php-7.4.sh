@@ -67,7 +67,9 @@ Install_PHP74() {
       make -j ${THREAD} && make install
     else
       mkdir -p build && pushd build > /dev/null
-      cmake -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_INSTALL_LIBDIR=lib ..
+      # libzip 1.10+ requires CMake 3.14+; CentOS 7 ships CMake 2.8 as cmake and 3.x as cmake3
+      [ -e "/usr/bin/cmake3" ] && CMAKE=cmake3 || CMAKE=cmake
+      ${CMAKE} -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_OSSFUZZ=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF ..
       make -j ${THREAD} && make install
       popd > /dev/null
     fi
@@ -79,7 +81,7 @@ Install_PHP74() {
     tar xzf mhash-${mhash_ver}.tar.gz
     pushd mhash-${mhash_ver} > /dev/null
     /bin/cp /usr/share/misc/config.guess /usr/share/misc/config.sub . 2>/dev/null
-    CFLAGS="-std=gnu17 -O2 -Wno-error=implicit-function-declaration -Wno-error=int-conversion -Wno-error=incompatible-pointer-types" ./configure
+    CFLAGS="-O2 ${compat_cflags}" ./configure
     make -j ${THREAD} && make install
     popd > /dev/null
     rm -rf mhash-${mhash_ver}
@@ -108,6 +110,13 @@ Install_PHP74() {
   if [ -e ext/openssl/php_openssl.h ] && ! grep -q '^#ifndef ERR_NUM_ERRORS' ext/openssl/php_openssl.h; then
     sed -i '/struct php_openssl_errors {/i #ifndef ERR_NUM_ERRORS\n#define ERR_NUM_ERRORS 16\n#endif' ext/openssl/php_openssl.h
   fi
+  # ASN1_STRING_get0_data() only exists in OpenSSL 1.1.0+; map it for OpenSSL 1.0.x (e.g. CentOS 7 system OpenSSL 1.0.2).
+  # PHP 7.x openssl.c already ships its own static fallback, so only patch files that lack one.
+  for f in ext/openssl/xp_ssl.c ext/openssl/openssl.c; do
+    if [ -e "${f}" ] && ! grep -q 'ASN1_STRING_get0_data(const ASN1_STRING' ${f} && ! grep -q 'define ASN1_STRING_get0_data' ${f}; then
+      sed -i '1i #include <openssl/opensslv.h>\n#if OPENSSL_VERSION_NUMBER < 0x10100000L && !defined(LIBRESSL_VERSION_NUMBER)\n#define ASN1_STRING_get0_data ASN1_STRING_data\n#endif' ${f}
+    fi
+  done
   if [ -e ext/openssl/xp_ssl.c ]; then
     sed -i 's/san->d.iPAddress->length/ASN1_STRING_length(san->d.iPAddress)/g' ext/openssl/xp_ssl.c
     sed -i 's/san->d.iPAddress->data/ASN1_STRING_get0_data(san->d.iPAddress)/g' ext/openssl/xp_ssl.c
@@ -145,7 +154,7 @@ Install_PHP74() {
     --with-mhash --enable-pcntl --enable-sockets --with-xmlrpc --enable-ftp --enable-intl --with-xsl \
     --with-gettext --with-zip=/usr/local --enable-soap --disable-debug ${php_modules_options}
   fi
-  make EXTRA_CFLAGS="-std=gnu17 -Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers -Wno-error=int-conversion -Wno-error=implicit-function-declaration -Wno-error=implicit-int -Wno-return-type" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
+  make EXTRA_CFLAGS="${compat_cflags}" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
   make install
 
   if [ -e "${php_install_dir}/bin/phpize" ]; then

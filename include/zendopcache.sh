@@ -46,7 +46,7 @@ EOF
 
       ${php_install_dir}/bin/phpize
       ./configure --with-php-config=${php_install_dir}/bin/php-config
-      make CFLAGS="-std=gnu17 -O2 -Wno-error=incompatible-pointer-types -Wno-error=discarded-qualifiers -Wno-error=int-conversion -Wno-error=implicit-function-declaration" -j ${THREAD} && make install
+      make CFLAGS="-O2 ${compat_cflags}" -j ${THREAD} && make install
       popd > /dev/null
     fi
     if [ -f "${phpExtensionDir}/opcache.so" ]; then
