@@ -1507,7 +1507,7 @@ fi
 
 # Starting DB
 [ -d "/etc/mysql" ] && /bin/mv /etc/mysql{,_bk}
-[ -d "${db_install_dir}/support-files" ] && [ -z "`ps -ef | grep mysqld_safe | grep -v grep`" ] && service mysqld start
+[ -d "${db_install_dir}/support-files" ] && [ -z "`ps -ef 2>/dev/null | grep mysqld_safe | grep -v grep`" ] && { command -v service >/dev/null 2>&1 && service mysqld start || /etc/init.d/mysqld start; }
 
 # reload php
 [ -e "${php_install_dir}/sbin/php-fpm" ] && { [ -e "/bin/systemctl" ] && systemctl reload php-fpm || service php-fpm reload; }
@@ -1570,4 +1570,4 @@ if [ ${ARG_NUM} == 0 ]; then
     fi
   done
 fi
-[ "${reboot_flag}" == 'y' ] && reboot
+[ "${reboot_flag}" == 'y' ] && reboot || :

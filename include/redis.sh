@@ -12,19 +12,19 @@ Install_redis_server() {
   pushd ${oneinstack_dir}/src > /dev/null
   tar xzf redis-${redis_ver}.tar.gz
   pushd redis-${redis_ver} > /dev/null
-  make -j ${THREAD}
+  make -C src -j ${THREAD}
   if [ -f "src/redis-server" ]; then
     mkdir -p ${redis_install_dir}/{bin,etc,var}
     /bin/cp src/{redis-benchmark,redis-check-aof,redis-check-rdb,redis-cli,redis-sentinel,redis-server} ${redis_install_dir}/bin/
     /bin/cp redis.conf ${redis_install_dir}/etc/
-    ln -s ${redis_install_dir}/bin/* /usr/local/bin/
+    ln -sf ${redis_install_dir}/bin/* /usr/local/bin/
     sed -i 's@pidfile.*@pidfile /var/run/redis/redis.pid@' ${redis_install_dir}/etc/redis.conf
     sed -i "s@logfile.*@logfile ${redis_install_dir}/var/redis.log@" ${redis_install_dir}/etc/redis.conf
     sed -i "s@^dir.*@dir ${redis_install_dir}/var@" ${redis_install_dir}/etc/redis.conf
     sed -i 's@daemonize no@daemonize yes@' ${redis_install_dir}/etc/redis.conf
-    sed -i "s@^# bind 127.0.0.1@bind 127.0.0.1@" ${redis_install_dir}/etc/redis.conf
-    redis_maxmemory=`expr $Mem / 8`000000
-    [ -z "`grep ^maxmemory ${redis_install_dir}/etc/redis.conf`" ] && sed -i "s@maxmemory <bytes>@maxmemory <bytes>\nmaxmemory `expr $Mem / 8`000000@" ${redis_install_dir}/etc/redis.conf
+    sed -i "s@^# bind 127.0.0.1.*@bind 127.0.0.1 -::1@" ${redis_install_dir}/etc/redis.conf
+    redis_maxmemory=`expr ${Mem:-1024} / 8`000000
+    [ -z "`grep ^maxmemory ${redis_install_dir}/etc/redis.conf`" ] && sed -i "s@maxmemory <bytes>@maxmemory <bytes>\nmaxmemory ${redis_maxmemory}@" ${redis_install_dir}/etc/redis.conf
     # Disable any unbuilt loadmodule to prevent startup crash
     sed -i 's@^loadmodule @#loadmodule @g' ${redis_install_dir}/etc/redis.conf
     echo "${CSUCCESS}Redis-server installed successfully! ${CEND}"
@@ -36,11 +36,15 @@ Install_redis_server() {
 
     /bin/cp ../init.d/redis-server.service /lib/systemd/system/
     sed -i "s@/usr/local/redis@${redis_install_dir}@g" /lib/systemd/system/redis-server.service
-    systemctl daemon-reload
-    systemctl enable redis-server
+    systemctl daemon-reload 2>/dev/null || true
+    systemctl enable redis-server 2>/dev/null || true
     #[ -z "`grep 'vm.overcommit_memory' /etc/sysctl.conf`" ] && echo 'vm.overcommit_memory = 1' >> /etc/sysctl.conf
     #sysctl -p
-    systemctl restart redis-server || systemctl start redis-server
+    if ! systemctl restart redis-server 2>/dev/null && ! systemctl start redis-server 2>/dev/null; then
+      mkdir -p /var/run/redis
+      chown -R redis:redis /var/run/redis
+      su -s /bin/sh redis -c "${redis_install_dir}/bin/redis-server ${redis_install_dir}/etc/redis.conf"
+    fi
     local redis_started=0
     for ((i=1; i<=5; i++)); do
       if ${redis_install_dir}/bin/redis-cli ping 2>/dev/null | grep -q 'PONG'; then

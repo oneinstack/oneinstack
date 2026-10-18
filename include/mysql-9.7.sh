@@ -109,6 +109,7 @@ quick
 max_allowed_packet = 500M
 EOF
 
+  [ -z "${Mem}" ] && Mem=1024
   sed -i "s@^max_connections.*@max_connections = $((${Mem}/3))@" /etc/my.cnf
   if [ "${Mem}" -gt 1500 ] && [ "${Mem}" -le 2500 ]; then
     sed -i 's@^thread_cache_size.*@thread_cache_size = 16@' /etc/my.cnf
@@ -130,21 +131,24 @@ EOF
   "${mysql_install_dir}/bin/mysqld" --defaults-file=/etc/my.cnf \
     --log-error=/dev/stderr --validate-config || {
     echo "${CFAILURE}MySQL 9.7 configuration validation failed. ${CEND}"
+    rm -rf "${mysql_install_dir}" "${mysql_data_dir}" "${mysql97_package}" /etc/init.d/mysqld
     return 1
   }
   "${mysql_install_dir}/bin/mysqld" --no-defaults --initialize-insecure \
     --user=mysql --basedir="${mysql_install_dir}" --datadir="${mysql_data_dir}" || {
     echo "${CFAILURE}MySQL 9.7 data directory initialization failed. ${CEND}"
     [ -f "${mysql_data_dir}/mysql-error.log" ] && tail -n 80 "${mysql_data_dir}/mysql-error.log"
+    rm -rf "${mysql_install_dir}" "${mysql_data_dir}" "${mysql97_package}" /etc/init.d/mysqld
     return 1
   }
 
   [ "${Wsl}" == true ] && chmod 600 /etc/my.cnf
   chown mysql:mysql -R "${mysql_data_dir}"
   [ -d /etc/mysql ] && /bin/mv /etc/mysql{,_bk}
-  service mysqld start || {
+  (command -v service >/dev/null 2>&1 && service mysqld start || /etc/init.d/mysqld start) || {
     echo "${CFAILURE}MySQL 9.7 service failed to start.${CEND}"
     [ -f "${mysql_data_dir}/mysql-error.log" ] && tail -n 80 "${mysql_data_dir}/mysql-error.log"
+    rm -rf "${mysql_install_dir}" "${mysql_data_dir}" "${mysql97_package}" /etc/init.d/mysqld
     return 1
   }
 
@@ -157,6 +161,7 @@ EOF
   done
   [ "${mysql_ready}" == '1' ] || {
     echo "${CFAILURE}MySQL 9.7 did not become ready; check ${mysql_data_dir}/mysql-error.log. ${CEND}"
+    rm -rf "${mysql_install_dir}" "${mysql_data_dir}" "${mysql97_package}" /etc/init.d/mysqld
     return 1
   }
 
@@ -177,7 +182,7 @@ EOF
   [ -e "${mysql_install_dir}/my.cnf" ] && rm -f "${mysql_install_dir}/my.cnf"
   echo "${mysql_install_dir}/lib" > /etc/ld.so.conf.d/z-mysql.conf
   ldconfig
-  service mysqld stop || {
+  (command -v service >/dev/null 2>&1 && service mysqld stop || /etc/init.d/mysqld stop) || {
     echo "${CFAILURE}MySQL 9.7 service failed to stop after initialization.${CEND}"
     return 1
   }

@@ -10,8 +10,15 @@
 
 export LANG=en_US.UTF-8
 export LANGUAGE=en_US:en
-Mem=`free -m | awk '/Mem:/{print $2}'`
-Swap=`free -m | awk '/Swap:/{print $2}'`
+if command -v free >/dev/null 2>&1; then
+  Mem=`free -m | awk '/Mem:/{print $2}'`
+  Swap=`free -m | awk '/Swap:/{print $2}'`
+else
+  Mem=`awk '/MemTotal:/{printf "%d\n", $2/1024}' /proc/meminfo 2>/dev/null`
+  Swap=`awk '/SwapTotal:/{printf "%d\n", $2/1024}' /proc/meminfo 2>/dev/null`
+fi
+Mem=${Mem:-1024}
+Swap=${Swap:-0}
 
 if [ $Mem -le 640 ]; then
   Mem_level=512M

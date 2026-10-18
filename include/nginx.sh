@@ -112,5 +112,5 @@ ${wwwlogs_dir}/*nginx.log {
 EOF
   popd > /dev/null
   ldconfig
-  systemctl start nginx
+  systemctl start nginx 2>/dev/null || ${nginx_install_dir}/sbin/nginx
 }

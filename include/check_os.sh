@@ -87,9 +87,9 @@ if [ ${RHEL_ver} -lt 7 >/dev/null 2>&1 ] || [ ${Debian_ver} -lt 9 >/dev/null 2>&
   kill -9 $$; exit 1;
 fi
 
-if ! command -v gcc > /dev/null 2>&1; then
+if ! command -v gcc > /dev/null 2>&1 || ! command -v getopt > /dev/null 2>&1; then
   [ "${PM}" == 'apt-get' ] && apt-get -y update > /dev/null
-  ${PM} -y install gcc > /dev/null
+  ${PM} -y install gcc util-linux > /dev/null
 fi
 gcc_ver=$(gcc -dumpversion | awk -F. '{print $1}')
 

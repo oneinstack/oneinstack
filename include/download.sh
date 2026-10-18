@@ -16,13 +16,13 @@ verify_archive_integrity() {
       gzip -t "${target}" >/dev/null 2>&1 || return 1
       ;;
     *.tar.xz|*.xz)
-      which xz >/dev/null 2>&1 && { xz -t "${target}" >/dev/null 2>&1 || return 1; }
+      command -v xz >/dev/null 2>&1 && { xz -t "${target}" >/dev/null 2>&1 || return 1; }
       ;;
     *.tar.bz2|*.bz2)
-      which bzip2 >/dev/null 2>&1 && { bzip2 -t "${target}" >/dev/null 2>&1 || return 1; }
+      command -v bzip2 >/dev/null 2>&1 && { bzip2 -t "${target}" >/dev/null 2>&1 || return 1; }
       ;;
     *.zip)
-      which unzip >/dev/null 2>&1 && { unzip -tq "${target}" >/dev/null 2>&1 || return 1; }
+      command -v unzip >/dev/null 2>&1 && { unzip -tq "${target}" >/dev/null 2>&1 || return 1; }
       ;;
   esac
   return 0
@@ -67,8 +67,6 @@ Download_src() {
     urls+=("${src_url/mirrors.tuna.tsinghua.edu.cn/mirrors.ustc.edu.cn}")
   elif [[ "${src_url}" == *"ftp.postgresql.org/pub"* ]]; then
     urls+=("${src_url/ftp.postgresql.org\/pub/ftp.heanet.ie\/mirrors\/postgresql}")
-  elif [[ "${src_url}" == *"mirrors.oneinstack.com"* ]]; then
-    urls+=("${src_url/mirrors.oneinstack.com/mirrors.linuxeye.com}")
   fi
 
   local success=0

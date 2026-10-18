@@ -203,7 +203,7 @@ EOF
   [ "${Wsl}" == true ] && chmod 600 /etc/my.cnf
   chown mysql:mysql -R ${mysql_data_dir}
   [ -d "/etc/mysql" ] && /bin/mv /etc/mysql{,_bk}
-  service mysqld start
+  command -v service >/dev/null 2>&1 && service mysqld start || /etc/init.d/mysqld start
   [ -z "$(grep ^'export PATH=' /etc/profile)" ] && echo "export PATH=${mysql_install_dir}/bin:\$PATH" >> /etc/profile
   [ -n "$(grep ^'export PATH=' /etc/profile)" -a -z "$(grep ${mysql_install_dir} /etc/profile)" ] && sed -i "s@^export PATH=\(.*\)@export PATH=${mysql_install_dir}/bin:\1@" /etc/profile
   . /etc/profile
@@ -218,5 +218,5 @@ EOF
   [ -e "${mysql_install_dir}/my.cnf" ] && rm -f ${mysql_install_dir}/my.cnf
   echo "${mysql_install_dir}/lib" > /etc/ld.so.conf.d/z-mysql.conf
   ldconfig
-  service mysqld stop
+  command -v service >/dev/null 2>&1 && service mysqld stop || /etc/init.d/mysqld stop
 }
