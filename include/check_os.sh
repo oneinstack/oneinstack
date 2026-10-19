@@ -61,6 +61,14 @@ if [[ "${Platform}" =~ ^centos$|^rhel$|^almalinux$|^rocky$|^fedora$|^amzn$|^ol$|
                /etc/yum.repos.d/AliYun*.repo 2>/dev/null
       fi
     fi
+  elif [[ "${Platform}" =~ ^anolis$ ]]; then
+    [[ "${VERSION_MAIN_ID}" =~ ^23$ ]] && RHEL_ver=9
+    if ls /etc/yum.repos.d/AnolisOS-*.repo >/dev/null 2>&1; then
+      if ! curl --connect-timeout 3 -m 5 -sI http://mirrors.openanolis.cn/anolis/RPM-GPG-KEY-ANOLIS 2>/dev/null | head -n1 | grep -q '200'; then
+        sed -i 's@https\?://mirrors.openanolis.cn/anolis@https://mirrors.nju.edu.cn/anolis@g' /etc/yum.repos.d/AnolisOS-*.repo 2>/dev/null
+        yum clean all > /dev/null 2>&1
+      fi
+    fi
   elif [[ "${Platform}" =~ ^openeuler$ ]]; then
     [[ "${RHEL_ver}" =~ ^20$ ]] && RHEL_ver=7
     [[ "${RHEL_ver}" =~ ^2[1,2]$ ]] && RHEL_ver=8
