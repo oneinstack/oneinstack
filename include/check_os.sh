@@ -54,6 +54,13 @@ if [[ "${Platform}" =~ ^centos$|^rhel$|^almalinux$|^rocky$|^fedora$|^amzn$|^ol$|
     [[ "${VERSION_MAIN_ID}" =~ ^2$ ]] && RHEL_ver=7
     [[ "${VERSION_MAIN_ID}" =~ ^3$ ]] && RHEL_ver=8
     [[ "${VERSION_MAIN_ID}" =~ ^4$ ]] && RHEL_ver=9
+    if [[ "${Platform}" =~ ^alinux$ ]] && ls /etc/yum.repos.d/AliYun*.repo >/dev/null 2>&1; then
+      if ! curl --connect-timeout 2 -m 3 -sI http://mirrors.cloud.aliyuncs.com/alinux/ 2>/dev/null | head -n1 | grep -q '200'; then
+        sed -i -e 's@http://mirrors.cloud.aliyuncs.com@https://mirrors.aliyun.com@g' \
+               -e 's@http://mirrors.aliyun.com@https://mirrors.aliyun.com@g' \
+               /etc/yum.repos.d/AliYun*.repo 2>/dev/null
+      fi
+    fi
   elif [[ "${Platform}" =~ ^openeuler$ ]]; then
     [[ "${RHEL_ver}" =~ ^20$ ]] && RHEL_ver=7
     [[ "${RHEL_ver}" =~ ^2[1,2]$ ]] && RHEL_ver=8

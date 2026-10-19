@@ -171,8 +171,10 @@ else
   php83_with_curl="--with-curl=${curl_install_dir}"
   php84_with_curl="--with-curl=${curl_install_dir}"
   php85_with_curl="--with-curl=${curl_install_dir}"
-  with_old_openssl_flag=y
-  curl_ver=${curl_oldver}
+  if [[ ${php_option} =~ ^[1-9]$|^1[0-5]$ ]] || [ -n "${mphp_ver}" ] || [ "${apache_flag}" == 'y' ]; then
+    with_old_openssl_flag=y
+    curl_ver=${curl_oldver}
+  fi
 fi
 
 Install_openSSL() {

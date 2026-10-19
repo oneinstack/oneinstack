@@ -71,26 +71,33 @@ Download_src() {
 
   local success=0
   for url in "${urls[@]}"; do
-    wget --limit-rate=100M --tries=3 -c --no-check-certificate "${url}"
-    
-    if [ -e "${filename}" ]; then
-      local sz=$(wc -c < "${filename}" 2>/dev/null | tr -d ' ')
-      if [ -n "$sz" ] && [ "$sz" -lt 1000 ]; then
-        if grep -qi "<html>\|404 Not Found\|301 Moved" "${filename}" 2>/dev/null; then
-          rm -f "${filename}"
-          continue
-        fi
-      fi
-      
-      if ! verify_archive_integrity "${filename}"; then
-        echo "${CWARNING}Downloaded file ${filename} from ${url} is incomplete or corrupted, removing...${CEND}"
-        rm -f "${filename}"
-        continue
+    for attempt in 1 2 3; do
+      wget --limit-rate=100M --tries=3 --timeout=30 -c --no-check-certificate "${url}"
+      if [ ! -s "${filename}" ] && command -v curl >/dev/null 2>&1; then
+        curl -k -fL --connect-timeout 15 --retry 2 -C - -o "${filename}" "${url}"
       fi
 
-      success=1
-      break
-    fi
+      if [ -e "${filename}" ]; then
+        local sz=$(wc -c < "${filename}" 2>/dev/null | tr -d ' ')
+        if [ -n "$sz" ] && [ "$sz" -lt 1000 ]; then
+          if grep -qi "<html>\|404 Not Found\|301 Moved" "${filename}" 2>/dev/null; then
+            rm -f "${filename}"
+            continue
+          fi
+        fi
+
+        if ! verify_archive_integrity "${filename}"; then
+          echo "${CWARNING}Downloaded file ${filename} from ${url} (attempt ${attempt}) is incomplete or corrupted, removing...${CEND}"
+          rm -f "${filename}"
+          sleep 1
+          continue
+        fi
+
+        success=1
+        break 2
+      fi
+      sleep 1
+    done
   done
 
   if [ ${success} -eq 0 ]; then

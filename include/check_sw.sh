@@ -84,7 +84,7 @@ installDepsRHEL() {
       dnf config-manager --set-enabled ol${RHEL_ver}_codeready_builder
       dnf -y install chrony oniguruma-devel rpcgen
     else
-      dnf -y --enablerepo=crb install chrony oniguruma-devel rpcgen
+      dnf -y --enablerepo=crb install chrony oniguruma-devel rpcgen 2>/dev/null || dnf -y install chrony oniguruma-devel rpcgen
     fi
     [ -z "`grep -w epel /etc/yum.repos.d/*.repo 2>/dev/null`" ] && dnf -y install epel-release
     systemctl enable chronyd
