@@ -40,6 +40,6 @@ DEMO() {
     esac
   fi
   chown -R ${run_user}:${run_group} ${wwwroot_dir}/default
-  [ -e /bin/systemctl ] && systemctl daemon-reload
+  [ -e /bin/systemctl ] && systemctl daemon-reload 2>/dev/null || true
   popd > /dev/null
 }

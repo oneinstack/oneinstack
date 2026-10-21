@@ -23,10 +23,10 @@ Install_memcached_server() {
   if [ -f "${memcached_install_dir}/bin/memcached" ]; then
     echo "${CSUCCESS}memcached installed successfully! ${CEND}"
     rm -rf memcached-${memcached_ver}
-    ln -s ${memcached_install_dir}/bin/memcached /usr/bin/memcached
+    ln -sf ${memcached_install_dir}/bin/memcached /usr/bin/memcached
     /bin/cp ../init.d/memcached.service /lib/systemd/system/
-    systemctl enable memcached
-    systemctl start memcached
+    systemctl enable memcached 2>/dev/null || true
+    systemctl start memcached 2>/dev/null || ${memcached_install_dir}/bin/memcached -d -p 11211 -u memcached -m 256 -c 1024 -l 127.0.0.1
     rm -rf memcached-${memcached_ver}
   else
     rm -rf ${memcached_install_dir}

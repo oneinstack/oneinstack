@@ -80,12 +80,13 @@ Install_pecl_redis() {
       tar xzf redis-${pecl_redis_ver}.tgz
       pushd redis-${pecl_redis_ver} > /dev/null
     fi
+    [ -f common.h ] && sed -i '/#include "backoff.h"/i #ifndef REDIS_NODISCARD\n#define REDIS_NODISCARD\n#endif' common.h
     redis_ext_opts=""
     [ -f "${phpExtensionDir}/igbinary.so" ] && redis_ext_opts="${redis_ext_opts} --enable-redis-igbinary"
     [ -f "${phpExtensionDir}/msgpack.so" ] && redis_ext_opts="${redis_ext_opts} --enable-redis-msgpack"
     [ -f "${phpExtensionDir}/zstd.so" ] && redis_ext_opts="${redis_ext_opts} --enable-redis-zstd"
     ${php_install_dir}/bin/phpize
-    ./configure --with-php-config=${php_install_dir}/bin/php-config ${redis_ext_opts}
+    CFLAGS="-std=gnu99 -g -O2" ./configure --with-php-config=${php_install_dir}/bin/php-config ${redis_ext_opts}
     make -j ${THREAD} && make install
     popd > /dev/null
     if [ -f "${phpExtensionDir}/redis.so" ]; then
