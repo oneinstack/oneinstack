@@ -62,10 +62,10 @@ php73_ver=7.3.33
 php74_ver=7.4.33
 php80_ver=8.0.30
 php81_ver=8.1.34
-php82_ver=8.2.34
-php83_ver=8.3.35
-php84_ver=8.4.26
-php85_ver=8.5.11
+php82_ver=8.2.35
+php83_ver=8.3.36
+php84_ver=8.4.27
+php85_ver=8.5.12
 
 # Nodejs
 nodejs_ver=24.22.0

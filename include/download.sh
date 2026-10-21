@@ -67,6 +67,9 @@ Download_src() {
     urls+=("${src_url/mirrors.tuna.tsinghua.edu.cn/mirrors.ustc.edu.cn}")
   elif [[ "${src_url}" == *"ftp.postgresql.org/pub"* ]]; then
     urls+=("${src_url/ftp.postgresql.org\/pub/ftp.heanet.ie\/mirrors\/postgresql}")
+  elif [[ "${filename}" =~ ^php-[0-9]+\.[0-9]+\.[0-9]+\.tar\.gz$ ]] && [[ "${src_url}" != *"www.php.net"* ]]; then
+    urls+=("https://www.php.net/distributions/${filename}")
+    urls+=("https://museum.php.net/php5/${filename}")
   fi
 
   local success=0
