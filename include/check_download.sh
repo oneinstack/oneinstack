@@ -22,6 +22,11 @@ checkDownload() {
     src_url=${mirror_link}/oneinstack/src/openssl-${openssl102_ver}.tar.gz && Download_src
     echo "Download cacert.pem..."
     src_url=https://curl.se/ca/cacert.pem && Download_src
+  elif [ "${with_openssl11_flag}" == 'y' ]; then
+    echo "Download openSSL ${openssl11_ver}..."
+    src_url=${mirror_link}/oneinstack/src/openssl-${openssl11_ver}.tar.gz && Download_src
+    echo "Download cacert.pem..."
+    src_url=https://curl.se/ca/cacert.pem && Download_src
   fi
 
   # openssl

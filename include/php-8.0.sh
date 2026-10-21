@@ -127,8 +127,11 @@ Install_PHP80() {
     sed -i 's/extension_data->data/ASN1_STRING_get0_data(extension_data)/g' ext/openssl/openssl.c
     sed -i 's/extension_data->length/ASN1_STRING_length(extension_data)/g' ext/openssl/openssl.c
   fi
+  [ -e Zend/zend_portability.h ] && sed -i 's@typedef std::max_align_t zend_max_align_t;@typedef max_align_t zend_max_align_t;@' Zend/zend_portability.h
+  [ -e ext/pdo_sqlite/pdo_sqlite.c ] && sed -i 's@sqlite3_db_config(sqlite_handle, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, \([01]\), NULL)@sqlite3_enable_load_extension(sqlite_handle, \1)@g' ext/pdo_sqlite/pdo_sqlite.c
+  [ -f configure ] && sed -i 's@libxml-2.0 >= 2.9.4@libxml-2.0 >= 2.9.0@g; s@zlib >= 1.2.11@zlib >= 1.2.7@g' configure
   make clean
-  export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/:$PKG_CONFIG_PATH
+  export PKG_CONFIG_PATH=${openssl_install_dir}/lib/pkgconfig:${curl_install_dir}/lib/pkgconfig:${freetype_install_dir}/lib/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}
   [ "${phpcache_option}" == '1' ] && phpcache_arg='--enable-opcache' || phpcache_arg='--disable-opcache'
   if [ "${apache_mode_option}" == '2' ]; then

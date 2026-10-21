@@ -74,7 +74,8 @@ Install_PHP85() {
       mkdir -p build && pushd build > /dev/null
       # libzip 1.10+ requires CMake 3.14+; CentOS 7 ships CMake 2.8 as cmake and 3.x as cmake3
       [ -e "/usr/bin/cmake3" ] && CMAKE=cmake3 || CMAKE=cmake
-      ${CMAKE} -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_OSSFUZZ=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF ..
+      [ -d "${openssl_install_dir}" ] && cmake_openssl="-DCMAKE_PREFIX_PATH=${openssl_install_dir}"
+      ${CMAKE} ${cmake_openssl} -DCMAKE_INSTALL_PREFIX=/usr/local -DCMAKE_INSTALL_LIBDIR=lib -DBUILD_OSSFUZZ=OFF -DBUILD_REGRESS=OFF -DBUILD_EXAMPLES=OFF -DBUILD_DOC=OFF ..
       make -j ${THREAD} && make install
       popd > /dev/null
     fi
@@ -128,8 +129,13 @@ Install_PHP85() {
     sed -i 's/extension_data->data/ASN1_STRING_get0_data(extension_data)/g' ext/openssl/openssl.c
     sed -i 's/extension_data->length/ASN1_STRING_length(extension_data)/g' ext/openssl/openssl.c
   fi
+  [ -e ext/dom/lexbor/lexbor/selectors-adapted/selectors.c ] && sed -i 's@#include <libxml/dict.h>@#include <libxml/tree.h>\n#include <libxml/dict.h>@' ext/dom/lexbor/lexbor/selectors-adapted/selectors.c
+  [ -e ext/hash/php_hash_sha.h ] && sed -i 's@^#  define PHP_HASH_INTRIN_SHA_RESOLVER 1@#if !defined(__GNUC__) || __GNUC__ >= 5 || (__GNUC__ == 4 \&\& __GNUC_MINOR__ >= 9)\n#  define PHP_HASH_INTRIN_SHA_RESOLVER 1\n#endif@' ext/hash/php_hash_sha.h
+  [ -e Zend/zend_portability.h ] && sed -i 's@typedef std::max_align_t zend_max_align_t;@typedef max_align_t zend_max_align_t;@' Zend/zend_portability.h
+  [ -e ext/pdo_sqlite/pdo_sqlite.c ] && sed -i 's@sqlite3_db_config(sqlite_handle, SQLITE_DBCONFIG_ENABLE_LOAD_EXTENSION, \([01]\), NULL)@sqlite3_enable_load_extension(sqlite_handle, \1)@g' ext/pdo_sqlite/pdo_sqlite.c
+  [ -f configure ] && sed -i 's@libxml-2.0 >= 2.9.4@libxml-2.0 >= 2.9.0@g; s@zlib >= 1.2.11@zlib >= 1.2.7@g' configure
   make clean
-  export PKG_CONFIG_PATH=/usr/local/lib/pkgconfig/:$PKG_CONFIG_PATH
+  export PKG_CONFIG_PATH=${openssl_install_dir}/lib/pkgconfig:${curl_install_dir}/lib/pkgconfig:${freetype_install_dir}/lib/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
   [ ! -d "${php_install_dir}" ] && mkdir -p ${php_install_dir}
   [ "${phpcache_option}" == '1' ] && phpcache_arg='--enable-opcache' || phpcache_arg='--disable-opcache'
   if [ "${apache_mode_option}" == '2' ]; then
@@ -155,8 +161,8 @@ Install_PHP85() {
     --with-mhash --enable-pcntl --enable-sockets --enable-ftp --enable-intl --with-xsl \
     --with-gettext --with-zip=/usr/local --enable-soap --disable-debug ${php_modules_options}
   fi
-  [ -f Makefile ] && sed -i 's@-Wl,-z,max-page-size=[0-9]\+@@g; s@-z,max-page-size=[0-9]\+@@g' Makefile
-  make EXTRA_CFLAGS="${compat_cflags} -fPIE" EXTRA_LDFLAGS_PROGRAM="-pie" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
+  [ -f Makefile ] && sed -i 's@-Wl,-z,max-page-size=[0-9]\+@@g; s@-Wl,-zmax-page-size=[0-9]\+@@g; s@-Wl,-zcommon-page-size=[0-9]\+@@g; s@-z,max-page-size=[0-9]\+@@g' Makefile
+  make EXTRA_CFLAGS="${compat_cflags} -fPIE" EXTRA_CXXFLAGS="${compat_cflags} -fPIE" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
   make install
 
   if [ -e "${php_install_dir}/bin/phpize" ]; then
@@ -187,7 +193,7 @@ Install_PHP85() {
   sed -i 's@^;realpath_cache_size.*@realpath_cache_size = 2M@' ${php_install_dir}/etc/php.ini
   sed -i 's@^disable_functions.*@disable_functions = passthru,exec,system,chroot,chgrp,chown,shell_exec,proc_open,proc_get_status,ini_alter,ini_restore,dl,readlink,symlink,popepassthru,stream_socket_server,fsocket,popen@' ${php_install_dir}/etc/php.ini
   [ -e /usr/sbin/sendmail ] && sed -i 's@^;sendmail_path.*@sendmail_path = /usr/sbin/sendmail -t -i@' ${php_install_dir}/etc/php.ini
-  if [ "${with_old_openssl_flag}" = 'y' ]; then
+  if [ "${with_old_openssl_flag}" = 'y' -o "${with_openssl11_flag}" = 'y' ]; then
     sed -i "s@^;curl.cainfo.*@curl.cainfo = \"${openssl_install_dir}/cert.pem\"@" ${php_install_dir}/etc/php.ini
     sed -i "s@^;openssl.cafile.*@openssl.cafile = \"${openssl_install_dir}/cert.pem\"@" ${php_install_dir}/etc/php.ini
     sed -i "s@^;openssl.capath.*@openssl.capath = \"${openssl_install_dir}/cert.pem\"@" ${php_install_dir}/etc/php.ini
