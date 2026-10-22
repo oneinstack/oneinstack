@@ -42,8 +42,16 @@ Upgrade_PHP() {
       char=`get_char`
     fi
     tar xzf php-${NEW_php_ver}.tar.gz
-    src_url=${mirror_link}/oneinstack/src/fpm-race-condition.patch && Download_src
-    patch -d php-${NEW_php_ver} -p0 < fpm-race-condition.patch
+    if [[ "${NEW_php_ver}" =~ ^5\.[3-5]\. ]]; then
+      src_url=${mirror_link}/oneinstack/src/fpm-race-condition.patch && Download_src
+      patch -d php-${NEW_php_ver} -p0 < fpm-race-condition.patch
+    elif [[ "${NEW_php_ver}" =~ ^7\.4\. ]]; then
+      src_url=${mirror_link}/oneinstack/src/php-7.4-CVE-2026-109618-109619.patch && Download_src
+      patch -d php-${NEW_php_ver} -p1 < php-7.4-CVE-2026-109618-109619.patch
+    elif [[ "${NEW_php_ver}" =~ ^8\.1\. ]]; then
+      src_url=${mirror_link}/oneinstack/src/php-8.1-CVE-2026-109618-109619.patch && Download_src
+      patch -d php-${NEW_php_ver} -p1 < php-8.1-CVE-2026-109618-109619.patch
+    fi
     pushd php-${NEW_php_ver}
     if [[ "${OLD_php_ver%.*}" =~ ^7.[1-4]$|^8.[0-1]$ ]] && [ -e ext/openssl/openssl.c ] && ! grep -Eqi '^#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c; then
       sed -i '/OPENSSL_SSLV23_PADDING/i#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c

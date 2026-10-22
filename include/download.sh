@@ -70,6 +70,10 @@ Download_src() {
   elif [[ "${filename}" =~ ^php-[0-9]+\.[0-9]+\.[0-9]+\.tar\.gz$ ]] && [[ "${src_url}" != *"www.php.net"* ]]; then
     urls+=("https://www.php.net/distributions/${filename}")
     urls+=("https://museum.php.net/php5/${filename}")
+  elif [ "${filename}" == "php-7.4-CVE-2026-109618-109619.patch" ]; then
+    urls+=("https://github.com/php/php-src/commit/712e60f9edfd03f0960fc4fc3c2c375f42b90aa2.patch")
+  elif [ "${filename}" == "php-8.1-CVE-2026-109618-109619.patch" ]; then
+    urls+=("https://github.com/php/php-src/commit/1d7dec178a094e6e75b229ce22754045f8c6070a.patch")
   fi
 
   local success=0

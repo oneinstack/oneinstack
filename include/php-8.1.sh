@@ -102,6 +102,7 @@ Install_PHP81() {
 
   tar xzf php-${php81_ver}.tar.gz
   pushd php-${php81_ver} > /dev/null
+  [ -f ../php-8.1-CVE-2026-109618-109619.patch ] && patch -p1 < ../php-8.1-CVE-2026-109618-109619.patch
   [ -e ext/libxml/libxml.c ] && sed -i 's/ATTRIBUTE_UNUSED/__attribute__((unused))/g' ext/libxml/libxml.c
   if [ -e ext/openssl/php_openssl.h ] && ! grep -q '^#ifndef ERR_NUM_ERRORS' ext/openssl/php_openssl.h; then
     sed -i '/struct php_openssl_errors {/i #ifndef ERR_NUM_ERRORS\n#define ERR_NUM_ERRORS 16\n#endif' ext/openssl/php_openssl.h
