@@ -654,6 +654,7 @@ checkDownload() {
     src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
   elif [ "${php_option}" == '10' ] || [ "${mphp_ver}" == '80' ]; then
     src_url=${mirror_link}/oneinstack/src/php-${php80_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/php-8.0-CVE-2026-109618-109619.patch && Download_src
     src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src

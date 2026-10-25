@@ -8,6 +8,7 @@ src/*.log
 src/redis-*/
 src/*.patch
 !src/php-7.4-CVE-2026-109618-109619.patch
+!src/php-8.0-CVE-2026-109618-109619.patch
 !src/php-8.1-CVE-2026-109618-109619.patch
 src/*.jar
 src/download_deps.py

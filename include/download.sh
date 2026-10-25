@@ -72,6 +72,8 @@ Download_src() {
     urls+=("https://museum.php.net/php5/${filename}")
   elif [ "${filename}" == "php-7.4-CVE-2026-109618-109619.patch" ]; then
     urls+=("https://github.com/php/php-src/commit/712e60f9edfd03f0960fc4fc3c2c375f42b90aa2.patch")
+  elif [ "${filename}" == "php-8.0-CVE-2026-109618-109619.patch" ]; then
+    urls+=("https://github.com/php/php-src/commit/82f8f31b16a035c1b67cc253e79f7cc288f4cc20.patch")
   elif [ "${filename}" == "php-8.1-CVE-2026-109618-109619.patch" ]; then
     urls+=("https://github.com/php/php-src/commit/1d7dec178a094e6e75b229ce22754045f8c6070a.patch")
   fi
