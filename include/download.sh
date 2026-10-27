@@ -74,14 +74,36 @@ Download_src() {
     urls+=("https://github.com/php/php-src/commit/712e60f9edfd03f0960fc4fc3c2c375f42b90aa2.patch")
   elif [ "${filename}" == "php-8.1-CVE-2026-109618-109619.patch" ]; then
     urls+=("https://github.com/php/php-src/commit/1d7dec178a094e6e75b229ce22754045f8c6070a.patch")
+  elif [[ "${filename}" =~ ^nginx-[0-9]+\.[0-9]+\.[0-9]+\.tar\.gz$ ]]; then
+    urls+=("https://nginx.org/download/${filename}")
+  elif [[ "${filename}" =~ ^pcre2-([0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://github.com/PCRE2Project/pcre2/releases/download/pcre2-${BASH_REMATCH[1]}/${filename}")
+  elif [[ "${filename}" =~ ^curl-([0-9]+)\.([0-9]+)\.([0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://github.com/curl/curl/releases/download/curl-${BASH_REMATCH[1]}_${BASH_REMATCH[2]}_${BASH_REMATCH[3]}/${filename}")
+    urls+=("https://curl.se/download/${filename}")
+  elif [[ "${filename}" =~ ^libiconv-[0-9]+\.[0-9]+(\.[0-9]+)?\.tar\.gz$ ]]; then
+    urls+=("https://mirrors.aliyun.com/gnu/libiconv/${filename}")
+    urls+=("https://ftp.gnu.org/gnu/libiconv/${filename}")
+  elif [[ "${filename}" =~ ^freetype-([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://downloads.sourceforge.net/project/freetype/freetype2/${BASH_REMATCH[1]}/${filename}")
+    urls+=("https://download.savannah.gnu.org/releases/freetype/${filename}")
+  elif [[ "${filename}" =~ ^libsodium-([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://github.com/jedisct1/libsodium/releases/download/${BASH_REMATCH[1]}-RELEASE/${filename}")
+    urls+=("https://download.libsodium.org/libsodium/releases/${filename}")
+  elif [[ "${filename}" =~ ^libzip-([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://github.com/nih-at/libzip/releases/download/v${BASH_REMATCH[1]}/${filename}")
+    urls+=("https://libzip.org/download/${filename}")
+  elif [[ "${filename}" =~ ^icu4c-([0-9]+_[0-9]+)-src\.tgz$ ]]; then
+    urls+=("https://github.com/unicode-org/icu/releases/download/release-${BASH_REMATCH[1]/_/-}/${filename}")
   fi
 
   local success=0
   for url in "${urls[@]}"; do
     for attempt in 1 2 3; do
-      wget --limit-rate=100M --tries=3 --timeout=30 -c --no-check-certificate "${url}"
-      if [ ! -s "${filename}" ] && command -v curl >/dev/null 2>&1; then
-        curl -k -fL --connect-timeout 15 --retry 2 -C - -o "${filename}" "${url}"
+      if ! wget --limit-rate=100M --tries=2 --timeout=20 -c --no-check-certificate "${url}" || ! verify_archive_integrity "${filename}"; then
+        if command -v curl >/dev/null 2>&1; then
+          curl -k -fL --connect-timeout 15 --retry 2 -C - -o "${filename}" "${url}"
+        fi
       fi
 
       if [ -e "${filename}" ]; then
@@ -94,8 +116,8 @@ Download_src() {
         fi
 
         if ! verify_archive_integrity "${filename}"; then
-          echo "${CWARNING}Downloaded file ${filename} from ${url} (attempt ${attempt}) is incomplete or corrupted, removing...${CEND}"
-          rm -f "${filename}"
+          echo "${CWARNING}Downloaded file ${filename} from ${url} (attempt ${attempt}) is incomplete or corrupted...${CEND}"
+          [ ${attempt} -eq 3 ] && rm -f "${filename}"
           sleep 1
           continue
         fi
@@ -105,6 +127,7 @@ Download_src() {
       fi
       sleep 1
     done
+    rm -f "${filename}"
   done
 
   if [ ${success} -eq 0 ]; then

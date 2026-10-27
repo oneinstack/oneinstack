@@ -21,6 +21,10 @@ Install_Nginx() {
   brotli_module_opt=""
   if [ -e "ngx_brotli.tar.gz" ]; then
     tar xzf ngx_brotli.tar.gz
+  elif command -v git >/dev/null 2>&1; then
+    git clone --depth 1 --recurse-submodules https://github.com/google/ngx_brotli.git ngx_brotli 2>/dev/null
+  fi
+  if [ -d "ngx_brotli/deps/brotli" ]; then
     pushd ngx_brotli/deps/brotli > /dev/null
     mkdir -p out && pushd out > /dev/null
     [ -e "/usr/bin/cmake3" ] && CMAKE=cmake3 || CMAKE=cmake

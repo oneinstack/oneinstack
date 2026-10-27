@@ -11,9 +11,11 @@ checkDownload() {
   [ ! -d "${oneinstack_dir}/src" ] && mkdir -p ${oneinstack_dir}/src
   pushd ${oneinstack_dir}/src > /dev/null
   # icu
-  if ! command -v icu-config >/dev/null 2>&1 || icu-config --version | grep '^3.' || [ "${Ubuntu_ver}" == "20" ]; then
-    echo "Download icu..."
-    src_url=${mirror_link}/oneinstack/src/icu4c-${icu4c_ver}-src.tgz && Download_src
+  if [[ "${php_option}" =~ ^[1-8]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-3]$ ]] || [ "${Ubuntu_ver}" == "20" ]; then
+    if ! command -v icu-config >/dev/null 2>&1 || icu-config --version | grep '^3.' || [ "${Ubuntu_ver}" == "20" ]; then
+      echo "Download icu..."
+      src_url=${mirror_link}/oneinstack/src/icu4c-${icu4c_ver}-src.tgz && Download_src
+    fi
   fi
 
   # General system utils
@@ -59,7 +61,7 @@ checkDownload() {
     1)
       echo "Download nginx..."
       src_url=${mirror_link}/oneinstack/src/nginx-${nginx_ver}.tar.gz && Download_src
-      src_url=${mirror_link}/oneinstack/src/ngx_brotli.tar.gz && Download_src
+      src_url=${mirror_link}/oneinstack/src/ngx_brotli.tar.gz && Download_src no_kill
       ;;
     2)
       echo "Download tengine..."

@@ -195,13 +195,16 @@ installDepsUbuntu() {
 installDepsBySrc() {
   [ ! -d "${oneinstack_dir}/src" ] && mkdir -p ${oneinstack_dir}/src
   pushd ${oneinstack_dir}/src > /dev/null
-  if ! command -v icu-config > /dev/null 2>&1 || icu-config --version | grep '^3.' || [ "${Ubuntu_ver}" == "20" ]; then
-    tar xzf icu4c-${icu4c_ver}-src.tgz
-    pushd icu/source > /dev/null
-    ./configure --prefix=/usr/local
-    make -j ${THREAD} && make install
-    popd > /dev/null
-    rm -rf icu
+  if [[ "${php_option}" =~ ^[1-8]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-3]$ ]] || [ "${Ubuntu_ver}" == "20" ] || (! command -v icu-config > /dev/null 2>&1 && ! pkg-config --exists icu-uc 2>/dev/null); then
+    if ! command -v icu-config > /dev/null 2>&1 || icu-config --version | grep '^3.' || [ "${Ubuntu_ver}" == "20" ]; then
+      [ ! -e "icu4c-${icu4c_ver}-src.tgz" ] && src_url=${mirror_link}/oneinstack/src/icu4c-${icu4c_ver}-src.tgz && Download_src
+      tar xzf icu4c-${icu4c_ver}-src.tgz
+      pushd icu/source > /dev/null
+      ./configure --prefix=/usr/local
+      make -j ${THREAD} && make install
+      popd > /dev/null
+      rm -rf icu
+    fi
   fi
 
   if command -v lsof >/dev/null 2>&1; then
