@@ -30,16 +30,11 @@ if [[ "${Platform}" =~ ^centos$|^rhel$|^almalinux$|^rocky$|^fedora$|^amzn$|^ol$|
       [ -e /etc/yum.repos.d/epel.repo ] && rm -f /etc/yum.repos.d/epel.repo
     elif [ "${VERSION_MAIN_ID}" == '7' ]; then
       # CentOS 7 reached EOL (2024-06-30): mirrorlist.centos.org/mirror.centos.org are offline,
-      # so every yum call fails. Switch the stock repos to the vault archive.
+      # so every yum call fails. Switch the stock repos to the vault archive with multi-mirror fallback.
       if grep -qE '^mirrorlist=https?://mirrorlist.centos.org|^baseurl=https?://mirror.centos.org' /etc/yum.repos.d/CentOS-*.repo 2>/dev/null; then
-        if curl --connect-timeout 3 -m 5 -sI https://vault.centos.org > /dev/null 2>&1; then
-          c7_vault=https://vault.centos.org
-        else
-          c7_vault=https://mirrors.aliyun.com/centos-vault
-        fi
         sed -i -e 's@^mirrorlist=@#mirrorlist=@g' \
-               -e "s@^#\?baseurl=https\?://mirror.centos.org/centos/\$releasever@baseurl=${c7_vault}/7.9.2009@g" \
-               -e "s@^#\?baseurl=https\?://mirror.centos.org/altarch/\$releasever@baseurl=${c7_vault}/altarch/7.9.2009@g" \
+               -e 's@^#\?baseurl=https\?://mirror.centos.org/centos/\$releasever/\(.*\)@baseurl=https://mirrors.aliyun.com/centos-vault/7.9.2009/\1\n        https://vault.centos.org/7.9.2009/\1@g' \
+               -e 's@^#\?baseurl=https\?://mirror.centos.org/altarch/\$releasever/\(.*\)@baseurl=https://mirrors.aliyun.com/centos-vault/altarch/7.9.2009/\1\n        https://vault.centos.org/altarch/7.9.2009/\1@g' \
                /etc/yum.repos.d/CentOS-*.repo
         yum clean all > /dev/null 2>&1
       fi

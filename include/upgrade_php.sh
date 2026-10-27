@@ -44,6 +44,7 @@ Upgrade_PHP() {
       char=`get_char`
     fi
     tar xzf php-${NEW_php_ver}.tar.gz
+    command -v patch >/dev/null 2>&1 || ${PM} -y install patch
     if [[ "${NEW_php_ver}" =~ ^5\.[3-5]\. ]]; then
       src_url=${mirror_link}/oneinstack/src/fpm-race-condition.patch && Download_src
       patch -d php-${NEW_php_ver} -p0 < fpm-race-condition.patch
