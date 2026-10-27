@@ -189,6 +189,7 @@ What Are You Doing?
           fi
           ;;
         q)
+          type check_os_eol >/dev/null 2>&1 && check_os_eol
           exit
           ;;
       esac
@@ -224,5 +225,6 @@ else
       echo "${CWARNING}acme.sh not found!${CEND}"
     fi
   fi
+  type check_os_eol >/dev/null 2>&1 && check_os_eol
 fi
 

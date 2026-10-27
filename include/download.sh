@@ -98,6 +98,12 @@ Download_src() {
     urls+=("https://github.com/redis/redis/archive/refs/tags/${BASH_REMATCH[1]}.tar.gz")
   elif [[ "${filename}" =~ ^valkey-([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
     urls+=("https://github.com/valkey-io/valkey/archive/refs/tags/${BASH_REMATCH[1]}.tar.gz")
+  elif [[ "${filename}" =~ ^memcached-([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://www.memcached.org/files/${filename}")
+    urls+=("https://github.com/memcached/memcached/releases/download/${BASH_REMATCH[1]}/${filename}")
+  elif [[ "${filename}" =~ ^node-v([0-9]+\.[0-9]+\.[0-9]+)-linux-.*\.tar\.gz$ ]]; then
+    urls+=("https://nodejs.org/dist/v${BASH_REMATCH[1]}/${filename}")
+    urls+=("https://mirrors.tuna.tsinghua.edu.cn/nodejs-release/v${BASH_REMATCH[1]}/${filename}")
   elif [[ "${filename}" =~ ^icu4c-([0-9]+_[0-9]+)-src\.tgz$ ]]; then
     urls+=("https://github.com/unicode-org/icu/releases/download/release-${BASH_REMATCH[1]/_/-}/${filename}")
   fi

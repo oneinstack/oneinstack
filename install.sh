@@ -1560,6 +1560,7 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 if [[ ${nginx_option} =~ ^[1-4]$ ]] || [ "${apache_flag}" == 'y' ] || [[ ${tomcat_option} =~ ^[1-5]$ ]]; then
   echo -e "\n$(printf "%-32s" "Index URL:")${CMSG}http://${IPADDR}/${CEND}"
 fi
+type check_os_eol >/dev/null 2>&1 && check_os_eol
 if [ ${ARG_NUM} == 0 ]; then
   while :; do echo
     echo "${CMSG}Please restart the server and see if the services start up fine.${CEND}"

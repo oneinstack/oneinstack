@@ -21,9 +21,15 @@ Install_valkey_server() {
     sed -i "s@logfile.*@logfile ${valkey_install_dir}/var/valkey.log@" ${valkey_install_dir}/etc/valkey.conf
     sed -i "s@^dir.*@dir ${valkey_install_dir}/var@" ${valkey_install_dir}/etc/valkey.conf
     sed -i 's@daemonize no@daemonize yes@' ${valkey_install_dir}/etc/valkey.conf
-    sed -i "s@^# bind 127.0.0.1@bind 127.0.0.1@" ${valkey_install_dir}/etc/valkey.conf
-    valkey_maxmemory=`expr $Mem / 8`000000
-    [ -z "`grep ^maxmemory ${valkey_install_dir}/etc/valkey.conf`" ] && sed -i "s@maxmemory <bytes>@maxmemory <bytes>\nmaxmemory `expr $Mem / 8`000000@" ${valkey_install_dir}/etc/valkey.conf
+    sed -i "s@^# bind 127.0.0.1.*@bind 127.0.0.1 -::1@" ${valkey_install_dir}/etc/valkey.conf
+    valkey_maxmemory=`expr ${Mem:-1024} / 8`000000
+    [ -z "`grep ^maxmemory ${valkey_install_dir}/etc/valkey.conf`" ] && sed -i "s@maxmemory <bytes>@maxmemory <bytes>\nmaxmemory ${valkey_maxmemory}@" ${valkey_install_dir}/etc/valkey.conf
+    sed -i 's@^loadmodule @#loadmodule @g' ${valkey_install_dir}/etc/valkey.conf
+    local valkey_port=6379
+    if [ -e "${redis_install_dir}/bin/redis-server" ] || ss -tnl 2>/dev/null | grep -q ':6379 '; then
+      valkey_port=6380
+      sed -i "s@^port 6379@port ${valkey_port}@" ${valkey_install_dir}/etc/valkey.conf
+    fi
     echo "${CSUCCESS}Valkey-server installed successfully! ${CEND}"
     popd > /dev/null
     rm -rf valkey-${valkey_ver}
@@ -39,6 +45,19 @@ Install_valkey_server() {
       mkdir -p /var/run/valkey
       chown -R valkey:valkey /var/run/valkey
       LC_ALL=C su -s /bin/sh valkey -c "${valkey_install_dir}/bin/valkey-server ${valkey_install_dir}/etc/valkey.conf"
+    fi
+    local valkey_started=0
+    for ((i=1; i<=5; i++)); do
+      if ${valkey_install_dir}/bin/valkey-cli -p ${valkey_port} ping 2>/dev/null | grep -q 'PONG'; then
+        valkey_started=1
+        break
+      fi
+      sleep 1
+    done
+    if [ ${valkey_started} -eq 0 ]; then
+      echo "${CFAILURE}Valkey-server start failed! valkey-cli ping did not return PONG. ${CEND}"
+      systemctl status valkey-server --no-pager 2>/dev/null || true
+      kill -9 $$; exit 1;
     fi
   else
     rm -rf ${valkey_install_dir}

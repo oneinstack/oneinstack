@@ -49,11 +49,11 @@ if [[ "${Platform}" =~ ^centos$|^rhel$|^almalinux$|^rocky$|^fedora$|^amzn$|^ol$|
     [[ "${VERSION_MAIN_ID}" =~ ^2$ ]] && RHEL_ver=7
     [[ "${VERSION_MAIN_ID}" =~ ^3$ ]] && RHEL_ver=8
     [[ "${VERSION_MAIN_ID}" =~ ^4$ ]] && RHEL_ver=9
-    if [[ "${Platform}" =~ ^alinux$ ]] && ls /etc/yum.repos.d/AliYun*.repo >/dev/null 2>&1; then
+    if [[ "${Platform}" =~ ^alinux$ ]]; then
       if ! curl --connect-timeout 2 -m 3 -sI http://mirrors.cloud.aliyuncs.com/alinux/ 2>/dev/null | head -n1 | grep -q '200'; then
         sed -i -e 's@http://mirrors.cloud.aliyuncs.com@https://mirrors.aliyun.com@g' \
                -e 's@http://mirrors.aliyun.com@https://mirrors.aliyun.com@g' \
-               /etc/yum.repos.d/AliYun*.repo 2>/dev/null
+               /etc/yum.repos.d/*.repo 2>/dev/null
       fi
     fi
   elif [[ "${Platform}" =~ ^anolis$ ]]; then
@@ -229,3 +229,47 @@ elif [ "${RHEL_ver}" == '8' ]; then
 else
   sslLibVer=unknown
 fi
+
+# Check whether the current OS version has reached End-of-Life (EOL)
+check_os_eol() {
+  local is_eol=0
+  local os_pretty="${PRETTY_NAME:-${Platform} ${VERSION_ID}}"
+  case "${Platform}" in
+    centos)
+      [ "${VERSION_MAIN_ID:-0}" -le 8 ] 2>/dev/null && is_eol=1
+      ;;
+    rhel|ol|almalinux|rocky|anolis|opencloudos)
+      [ "${VERSION_MAIN_ID:-0}" -le 7 ] 2>/dev/null && is_eol=1
+      ;;
+    fedora)
+      [ "${VERSION_MAIN_ID:-0}" -le 41 ] 2>/dev/null && is_eol=1
+      ;;
+    amzn|alinux|tencentos|euleros)
+      [ "${VERSION_MAIN_ID:-0}" -le 2 ] 2>/dev/null && is_eol=1
+      ;;
+    openeuler)
+      [ "${VERSION_MAIN_ID:-0}" -le 21 ] 2>/dev/null && is_eol=1
+      ;;
+    debian)
+      [ "${VERSION_MAIN_ID:-0}" -le 11 ] 2>/dev/null && is_eol=1
+      ;;
+    deepin)
+      [ "${VERSION_MAIN_ID:-0}" -le 20 ] 2>/dev/null && is_eol=1
+      ;;
+    ubuntu|linuxmint|elementary)
+      if [ "${Ubuntu_ver:-0}" -le 20 ] 2>/dev/null || [[ "${Ubuntu_ver}" =~ ^(21|23|25)$ ]]; then
+        is_eol=1
+      fi
+      ;;
+  esac
+
+  if [ "${is_eol}" -eq 1 ]; then
+    echo
+    echo "${CWARNING}=======================================================================${CEND}"
+    echo "${CFAILURE}[安全提醒 / Security Warning]${CEND}"
+    echo "${CWARNING}检测到当前操作系统 (${os_pretty}) 已停止官方维护 (End-of-Life)。${CEND}"
+    echo "${CWARNING}当前使用的系统为不安全系统，不再接收官方安全更新，请谨慎使用！${CEND}"
+    echo "${CWARNING}Warning: Your OS (${os_pretty}) has reached End-of-Life (EOL) and is no longer receiving security updates. Please use with caution!${CEND}"
+    echo "${CWARNING}=======================================================================${CEND}"
+  fi
+}
