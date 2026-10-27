@@ -93,6 +93,11 @@ Download_src() {
   elif [[ "${filename}" =~ ^libzip-([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
     urls+=("https://github.com/nih-at/libzip/releases/download/v${BASH_REMATCH[1]}/${filename}")
     urls+=("https://libzip.org/download/${filename}")
+  elif [[ "${filename}" =~ ^redis-([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://download.redis.io/releases/${filename}")
+    urls+=("https://github.com/redis/redis/archive/refs/tags/${BASH_REMATCH[1]}.tar.gz")
+  elif [[ "${filename}" =~ ^valkey-([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://github.com/valkey-io/valkey/archive/refs/tags/${BASH_REMATCH[1]}.tar.gz")
   elif [[ "${filename}" =~ ^icu4c-([0-9]+_[0-9]+)-src\.tgz$ ]]; then
     urls+=("https://github.com/unicode-org/icu/releases/download/release-${BASH_REMATCH[1]/_/-}/${filename}")
   fi
