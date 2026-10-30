@@ -161,7 +161,7 @@ Install_PHP85() {
     --with-mhash --enable-pcntl --enable-sockets --enable-ftp --enable-intl --with-xsl \
     --with-gettext --with-zip=/usr/local --enable-soap --disable-debug ${php_modules_options}
   fi
-  [ -f Makefile ] && sed -i 's@-Wl,-z,max-page-size=[0-9]\+@@g; s@-Wl,-zmax-page-size=[0-9]\+@@g; s@-Wl,-zcommon-page-size=[0-9]\+@@g; s@-z,max-page-size=[0-9]\+@@g' Makefile
+  [ -f Makefile ] && sed -i 's@-Wl,-z,max-page-size=[0-9]\+@@g; s@-Wl,-zmax-page-size=[0-9]\+@@g; s@-Wl,-zcommon-page-size=[0-9]\+@@g; s@-z,max-page-size=[0-9]\+@@g; s@^EXTRA_LDFLAGS_PROGRAM =@EXTRA_LDFLAGS_PROGRAM = -Wl,-pie @g' Makefile
   make EXTRA_CFLAGS="${compat_cflags} -fPIE" EXTRA_CXXFLAGS="${compat_cflags} -fPIE" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
   make install
 
