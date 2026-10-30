@@ -106,6 +106,16 @@ Download_src() {
     urls+=("https://mirrors.tuna.tsinghua.edu.cn/nodejs-release/v${BASH_REMATCH[1]}/${filename}")
   elif [[ "${filename}" =~ ^icu4c-([0-9]+_[0-9]+)-src\.tgz$ ]]; then
     urls+=("https://github.com/unicode-org/icu/releases/download/release-${BASH_REMATCH[1]/_/-}/${filename}")
+  elif [[ "${filename}" =~ ^lua-resty-core-([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://github.com/openresty/lua-resty-core/archive/refs/tags/v${BASH_REMATCH[1]}.tar.gz")
+  elif [[ "${filename}" =~ ^lua-resty-lrucache-([0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://github.com/openresty/lua-resty-lrucache/archive/refs/tags/v${BASH_REMATCH[1]}.tar.gz")
+  elif [[ "${filename}" =~ ^lua-nginx-module-([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://github.com/openresty/lua-nginx-module/archive/refs/tags/v${BASH_REMATCH[1]}.tar.gz")
+  elif [[ "${filename}" =~ ^luajit2-(2\.[0-9]+-[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://github.com/openresty/luajit2/archive/refs/tags/v${BASH_REMATCH[1]}.tar.gz")
+  elif [[ "${filename}" =~ ^lua-cjson-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://github.com/openresty/lua-cjson/archive/refs/tags/${BASH_REMATCH[1]}.tar.gz")
   fi
 
   local success=0

@@ -272,11 +272,11 @@ checkDownload() {
         # MySQL 5.7
         if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.7
-          DOWN_ADDR_MYSQL_BK=https://mirrors.aliyun.com/mysql/MySQL-5.7
-          DOWN_ADDR_MYSQL_BK2=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.7
+          DOWN_ADDR_MYSQL_BK=${mirror_link}/oneinstack/src
+          DOWN_ADDR_MYSQL_BK2=https://mirrors.aliyun.com/mysql/MySQL-5.7
         else
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.7
-          DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-5.7
+          DOWN_ADDR_MYSQL_BK=${mirror_link}/oneinstack/src
         fi
 
         if [ "${dbinstallmethod}" == '1' ]; then
@@ -307,11 +307,11 @@ checkDownload() {
         # MySQL 5.6
         if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_MYSQL=http://mirrors.aliyun.com/mysql/MySQL-5.6
-          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.6
+          DOWN_ADDR_MYSQL_BK=${mirror_link}/oneinstack/src
           DOWN_ADDR_MYSQL_BK2=https://mirrors.aliyun.com/mysql/MySQL-5.6
         else
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.6
-          DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-5.6
+          DOWN_ADDR_MYSQL_BK=${mirror_link}/oneinstack/src
         fi
 
         if [ "${dbinstallmethod}" == '1' ]; then
@@ -342,11 +342,11 @@ checkDownload() {
         # MySQL 5.5
         if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_MYSQL=http://mirrors.aliyun.com/mysql/MySQL-5.5
-          DOWN_ADDR_MYSQL_BK=http://mirrors.tuna.tsinghua.edu.cn/mysql/downloads/MySQL-5.5
+          DOWN_ADDR_MYSQL_BK=${mirror_link}/oneinstack/src
           DOWN_ADDR_MYSQL_BK2=https://mirrors.aliyun.com/mysql/MySQL-5.5
         else
           DOWN_ADDR_MYSQL=https://cdn.mysql.com/Downloads/MySQL-5.5
-          DOWN_ADDR_MYSQL_BK=https://mirrors.dotsrc.org/mysql/Downloads/MySQL-5.5
+          DOWN_ADDR_MYSQL_BK=${mirror_link}/oneinstack/src
         fi
 
         if [ "${dbinstallmethod}" == '1' ]; then

@@ -161,8 +161,8 @@ boost_oldver=1.59.0
 
 # Others
 lua_nginx_module_ver=0.10.28
-luajit2_ver=2.1-ROLLING
+luajit2_ver=2.1-20261023
 lua_resty_core_ver=0.1.32
 lua_resty_lrucache_ver=0.15
-lua_cjson_ver=2.1.0+dfsg-4
+lua_cjson_ver=2.1.0.20
 fail2ban_ver=master
