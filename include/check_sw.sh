@@ -50,7 +50,7 @@ installDepsDebian() {
       kill -9 $$; exit 1;
       ;;
   esac
-  pkgList="debian-keyring libsodium-dev debian-archive-keyring libxpm-dev build-essential gcc g++ make cmake autoconf libbz2-dev libjpeg62-turbo-dev libjpeg-dev libpng-dev libgd-dev libxml2 libxml2-dev zlib1g zlib1g-dev libc6 libc6-dev libc-client2007e-dev libglib2.0-0 libglib2.0-dev bzip2 libzip-dev libbz2-1.0 ${pkgCompatList} libaio-dev numactl libreadline-dev curl libcurl3-gnutls libcurl4-openssl-dev e2fsprogs libkrb5-3 libkrb5-dev libltdl-dev openssl net-tools libssl-dev libtool libevent-dev bison re2c libsasl2-dev libxslt1-dev libicu-dev locales patch vim zip unzip tmux htop bc dc expect libexpat1-dev libonig-dev libtirpc-dev rsync git lsof lrzsz rsyslog cron logrotate chrony libsqlite3-dev psmisc wget sysv-rc apt-transport-https ca-certificates software-properties-common gnupg ufw"
+  pkgList="debian-keyring libsodium-dev debian-archive-keyring libxpm-dev build-essential gcc g++ make cmake autoconf libbz2-dev libjpeg62-turbo-dev libjpeg-dev libpng-dev libgd-dev libxml2 libxml2-dev zlib1g zlib1g-dev libc6 libc6-dev libc-client2007e-dev libglib2.0-0 libglib2.0-dev bzip2 libzip-dev libbz2-1.0 ${pkgCompatList} libaio-dev numactl libreadline-dev curl libcurl3-gnutls libcurl4-openssl-dev e2fsprogs libkrb5-3 libkrb5-dev libltdl-dev openssl net-tools libssl-dev libtool libevent-dev bison flex re2c libsasl2-dev libxslt1-dev libicu-dev locales patch vim zip unzip tmux htop bc dc expect libexpat1-dev libonig-dev libtirpc-dev rsync git lsof lrzsz rsyslog cron logrotate chrony libsqlite3-dev psmisc wget sysv-rc apt-transport-https ca-certificates software-properties-common gnupg ufw"
   for Package in ${pkgList}; do
     apt-get --no-install-recommends -y install ${Package}
   done
@@ -126,10 +126,19 @@ installDepsRHEL() {
 
   echo "${CMSG}Installing dependencies packages...${CEND}"
   # Install needed packages
-  pkgList="tar perl perl-core perl-IPC-Cmd perl-FindBin deltarpm libsodium libsodium-devel drpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-dev libjpeg-devel libbz2-dev libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel libzip libzip-devel glibc glibc-devel glibc-langpack-en libxcrypt-compat krb5-devel libcurl4-openssl-dev libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel ncurses-compat-libs libaio numactl numactl-libs readline-devel curl curl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel net-tools libxslt-devel libssl-dev libicu-devel libevent-devel libtool libtool-ltdl bison gd-devel vim-enhanced pcre-devel libmcrypt libsqlite3-dev libmcrypt-devel mhash mhash-devel mcrypt zip unzip chrony oniguruma-devel rpcgen sqlite-devel sysstat patch bc expect expat-devel perl-devel oniguruma oniguruma-devel libtirpc-devel nss libnsl rsync rsyslog git lsof lrzsz psmisc wget which util-linux procps-ng diffutils initscripts-service initscripts libselinux-utils kmod libatomic libquadmath-devel tmux chkconfig firewalld"
-  for Package in ${pkgList}; do
-    yum -y install ${Package}
-  done
+  pkgList="tar perl perl-core perl-IPC-Cmd perl-FindBin deltarpm libsodium libsodium-devel drpm gcc gcc-c++ make cmake autoconf libjpeg libjpeg-dev libjpeg-devel libbz2-dev libjpeg-turbo libjpeg-turbo-devel libpng libpng-devel libxml2 libxml2-devel zlib zlib-devel libzip libzip-devel glibc glibc-devel glibc-langpack-en libxcrypt-compat krb5-devel libcurl4-openssl-dev libc-client libc-client-devel glib2 glib2-devel bzip2 bzip2-devel ncurses ncurses-devel ncurses-compat-libs libaio numactl numactl-libs readline-devel curl-devel libcurl-devel e2fsprogs e2fsprogs-devel krb5-devel libidn libidn-devel openssl openssl-devel net-tools libxslt-devel libssl-dev libicu-devel libevent-devel libtool libtool-ltdl bison flex gd-devel vim-enhanced pcre-devel libmcrypt libsqlite3-dev libmcrypt-devel mhash mhash-devel mcrypt zip unzip chrony oniguruma-devel rpcgen sqlite-devel sysstat patch bc expect expat-devel perl-devel oniguruma oniguruma-devel libtirpc-devel nss libnsl rsync rsyslog git lsof lrzsz psmisc wget which util-linux procps-ng diffutils initscripts-service initscripts libselinux-utils kmod libatomic libquadmath-devel tmux chkconfig firewalld"
+  command -v curl >/dev/null 2>&1 || pkgList="${pkgList} curl"
+  if command -v dnf >/dev/null 2>&1; then
+    dnf -y --setopt=strict=0 install ${pkgList} || {
+      for Package in ${pkgList}; do
+        yum -y install ${Package}
+      done
+    }
+  else
+    for Package in ${pkgList}; do
+      yum -y install ${Package}
+    done
+  fi
   if [ "${RHEL_ver}" -ge 9 >/dev/null 2>&1 ] || [ "${RHEL_ver}" == '9' ] || [ "${RHEL_ver}" == '10' ]; then
     [ ! -e "/usr/lib64/libtinfo.so.5" ] && [ -e "/usr/lib64/libtinfo.so.6" ] && ln -s /usr/lib64/libtinfo.so.6 /usr/lib64/libtinfo.so.5
     [ ! -e "/usr/lib64/libncurses.so.5" ] && [ -e "/usr/lib64/libncurses.so.6" ] && ln -s /usr/lib64/libncurses.so.6 /usr/lib64/libncurses.so.5
@@ -185,7 +194,7 @@ installDepsUbuntu() {
       kill -9 $$; exit 1;
       ;;
   esac
-  pkgList="libperl-dev pkg-config libsodium-dev libbz2-dev libxslt-dev libjpeg-dev libxml2-dev libxpm-dev libfreetype-dev debian-keyring debian-archive-keyring build-essential gcc g++ make cmake autoconf libjpeg8 libjpeg8-dev libpng-dev libxml2 libxml2-dev zlib1g zlib1g-dev libc6 libc6-dev libc-client2007e-dev libglib2.0-0 libglib2.0-dev bzip2 libzip-dev libbz2-1.0 ${pkgCompatList} libaio-dev numactl libreadline-dev curl libcurl3-gnutls libcurl4-gnutls-dev libcurl4-openssl-dev e2fsprogs libkrb5-3 libkrb5-dev libltdl-dev openssl net-tools libssl-dev libtool libevent-dev re2c libsasl2-dev libxslt1-dev libicu-dev libsqlite3-dev bison patch vim zip unzip tmux htop bc dc expect libexpat1-dev rsyslog libonig-dev libtirpc-dev libnss3 rsync git lsof lrzsz chrony psmisc wget sysv-rc apt-transport-https ca-certificates software-properties-common gnupg ufw libiconv-dev libfreetype6-dev libexif-dev gettext-dev libgmp-dev"
+  pkgList="libperl-dev pkg-config libsodium-dev libbz2-dev libxslt-dev libjpeg-dev libxml2-dev libxpm-dev libfreetype-dev debian-keyring debian-archive-keyring build-essential gcc g++ make cmake autoconf libjpeg8 libjpeg8-dev libpng-dev libxml2 libxml2-dev zlib1g zlib1g-dev libc6 libc6-dev libc-client2007e-dev libglib2.0-0 libglib2.0-dev bzip2 libzip-dev libbz2-1.0 ${pkgCompatList} libaio-dev numactl libreadline-dev curl libcurl3-gnutls libcurl4-gnutls-dev libcurl4-openssl-dev e2fsprogs libkrb5-3 libkrb5-dev libltdl-dev openssl net-tools libssl-dev libtool libevent-dev re2c libsasl2-dev libxslt1-dev libicu-dev libsqlite3-dev bison flex patch vim zip unzip tmux htop bc dc expect libexpat1-dev rsyslog libonig-dev libtirpc-dev libnss3 rsync git lsof lrzsz chrony psmisc wget sysv-rc apt-transport-https ca-certificates software-properties-common gnupg ufw libiconv-dev libfreetype6-dev libexif-dev gettext-dev libgmp-dev"
   export DEBIAN_FRONTEND=noninteractive
   for Package in ${pkgList}; do
     apt-get --no-install-recommends -y install ${Package}

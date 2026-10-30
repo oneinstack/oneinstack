@@ -73,8 +73,8 @@ Install_pecl_memcached() {
     pushd ${oneinstack_dir}/src > /dev/null
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     # php memcached extension
-    [ "${PM}" == 'yum' ] && yum -y install cyrus-sasl-devel
-    [ "${PM}" == 'apt-get' ] && apt-get -y install libsasl2-dev
+    [ "${PM}" == 'yum' ] && yum -y install cyrus-sasl-devel flex bison
+    [ "${PM}" == 'apt-get' ] && apt-get -y install libsasl2-dev flex bison
     [ -e "/usr/bin/cmake3" ] && CMAKE=cmake3 || CMAKE=cmake
     if [ -e "libmemcached-${libmemcached_ver}.tar.gz" ] && command -v $CMAKE >/dev/null 2>&1; then
       tar xzf libmemcached-${libmemcached_ver}.tar.gz

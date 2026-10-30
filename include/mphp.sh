@@ -9,7 +9,9 @@
 #       https://github.com/oneinstack/oneinstack
 
 Install_MPHP() {
-  if [ -e "${php_install_dir}/sbin/php-fpm" ]; then
+  if [ "${apache_mode_option}" == '2' ] || [ -e "${apache_install_dir}/modules/libphp5.so" ] || [ -e "${apache_install_dir}/modules/libphp7.so" ] || [ -e "${apache_install_dir}/modules/libphp.so" ]; then
+    echo "${CWARNING}To use the multiple PHP versions, You need to use PHP-FPM! ${CEND}"
+  else
     if [ -e "${php_install_dir}${mphp_ver}/bin/phpize" ]; then
       echo "${CWARNING}PHP${mphp_ver} already installed! ${CEND}"
     else
@@ -78,18 +80,19 @@ Install_MPHP() {
           ;;
       esac
       if [ -e "${php_install_dir}/sbin/php-fpm" ]; then
-        systemctl stop php-fpm
+        systemctl stop php-fpm 2>/dev/null || kill `cat ${php_install_dir}/var/run/php-fpm.pid 2>/dev/null` 2>/dev/null || true
         sed -i "s@/dev/shm/php-cgi.sock@/dev/shm/php${mphp_ver}-cgi.sock@" ${php_install_dir}/etc/php-fpm.conf
         [ -e "/lib/systemd/system/php-fpm.service" ] && /bin/mv /lib/systemd/system/php-fpm.service /lib/systemd/system/php${mphp_ver}-fpm.service
-        [ -e "/lib/systemd/system/php-fpm.service_bk" ] && /bin/mv /lib/systemd/system/php-fpm.service{_bk,}
-        systemctl enable php${mphp_ver}-fpm
-        systemctl enable php-fpm
-        systemctl start php-fpm
-        systemctl start php${mphp_ver}-fpm
+        if [ -e "/lib/systemd/system/php-fpm.service_bk" ]; then
+          /bin/mv /lib/systemd/system/php-fpm.service{_bk,}
+          systemctl enable php-fpm 2>/dev/null || true
+          systemctl start php-fpm 2>/dev/null || true
+        fi
+        systemctl daemon-reload 2>/dev/null || true
+        systemctl enable php${mphp_ver}-fpm 2>/dev/null || true
+        systemctl start php${mphp_ver}-fpm 2>/dev/null || ${php_install_dir}/sbin/php-fpm
         sed -i "s@${php_install_dir}/bin:@@" /etc/profile
       fi
     fi
-  else
-    echo "${CWARNING}To use the multiple PHP versions, You need to use PHP-FPM! ${CEND}"
   fi
 }

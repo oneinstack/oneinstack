@@ -1402,13 +1402,15 @@ PHP_addons() {
   fi
 }
 
-[ "${mphp_addons_flag}" != 'y' ] && PHP_addons
+[ "${mphp_addons_flag}" != 'y' ] && [ -e "${php_install_dir}/bin/phpize" ] && PHP_addons
 
 if [ "${mphp_flag}" == 'y' ]; then
   . include/mphp.sh
   Install_MPHP 2>&1 | tee -a ${oneinstack_dir}/install.log
+  orig_php_install_dir=${php_install_dir}
   php_install_dir=${php_install_dir}${mphp_ver}
   PHP_addons
+  php_install_dir=${orig_php_install_dir}
 fi
 
 # JDK

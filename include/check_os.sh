@@ -48,7 +48,7 @@ if [[ "${Platform}" =~ ^centos$|^rhel$|^almalinux$|^rocky$|^fedora$|^amzn$|^ol$|
   elif [[ "${Platform}" =~ ^amzn$|^alinux$|^tencentos$|^euleros$ ]]; then
     [[ "${VERSION_MAIN_ID}" =~ ^2$ ]] && RHEL_ver=7
     [[ "${VERSION_MAIN_ID}" =~ ^3$ ]] && RHEL_ver=8
-    [[ "${VERSION_MAIN_ID}" =~ ^4$ ]] && RHEL_ver=9
+    [[ "${VERSION_MAIN_ID}" =~ ^(4|2023)$ ]] && RHEL_ver=9
     if [[ "${Platform}" =~ ^alinux$ ]]; then
       if ! curl --connect-timeout 2 -m 3 -sI http://mirrors.cloud.aliyuncs.com/alinux/ 2>/dev/null | head -n1 | grep -q '200'; then
         sed -i -e 's@http://mirrors.cloud.aliyuncs.com@https://mirrors.aliyun.com@g' \
