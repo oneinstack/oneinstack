@@ -36,6 +36,7 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/upgrade_valkey.sh
 . ./include/upgrade_memcached.sh
 . ./include/upgrade_phpmyadmin.sh
+. ./include/upgrade_nodejs.sh
 . ./include/upgrade_oneinstack.sh
 
 # get the out ip country
@@ -56,13 +57,14 @@ Show_Help() {
   --valkey       [version]    Upgrade Valkey
   --memcached    [version]    Upgrade Memcached
   --phpmyadmin   [version]    Upgrade phpMyAdmin
+  --nodejs       [version]    Upgrade Nodejs
   --oneinstack                Upgrade OneinStack latest
   --acme.sh                   Upgrade acme.sh latest
   "
 }
 
 ARG_NUM=$#
-TEMP=`getopt -o h --long help,nginx:,tengine:,openresty:,apache:,tomcat:,db:,php:,redis:,valkey:,memcached:,phpmyadmin:,oneinstack,acme.sh -- "$@" 2>/dev/null`
+TEMP=`getopt -o h --long help,nginx:,tengine:,openresty:,apache:,tomcat:,db:,php:,redis:,valkey:,memcached:,phpmyadmin:,nodejs:,node:,oneinstack,acme.sh -- "$@" 2>/dev/null`
 
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
@@ -105,6 +107,9 @@ while :; do
     --phpmyadmin)
       phpmyadmin_flag=y; NEW_phpmyadmin_ver=$2; shift 2
       ;;
+    --nodejs|--node)
+      nodejs_flag=y; NEW_nodejs_ver=$2; shift 2
+      ;;
     --oneinstack)
       NEW_oneinstack_ver=latest; shift 1
       ;;
@@ -133,14 +138,15 @@ What Are You Doing?
 \t${CMSG} 7${CEND}. Upgrade Valkey
 \t${CMSG} 8${CEND}. Upgrade Memcached
 \t${CMSG} 9${CEND}. Upgrade phpMyAdmin
-\t${CMSG}10${CEND}. Upgrade OneinStack latest
-\t${CMSG}11${CEND}. Upgrade acme.sh latest
+\t${CMSG}10${CEND}. Upgrade Nodejs
+\t${CMSG}11${CEND}. Upgrade OneinStack latest
+\t${CMSG}12${CEND}. Upgrade acme.sh latest
 \t${CMSG} q${CEND}. Exit
 "
     echo
     read -e -p "Please input the correct option: " Upgrade_flag
-    if [[ ! "${Upgrade_flag}" =~ ^[1-9,q]$|^1[0-1]$ ]]; then
-      echo "${CWARNING}input error! Please only input 1~11 and q${CEND}"
+    if [[ ! "${Upgrade_flag}" =~ ^[1-9,q]$|^1[0-2]$ ]]; then
+      echo "${CWARNING}input error! Please only input 1~12 and q${CEND}"
     else
       case "${Upgrade_flag}" in
         1)
@@ -173,9 +179,12 @@ What Are You Doing?
           Upgrade_phpMyAdmin
           ;;
         10)
-          Upgrade_OneinStack
+          Upgrade_Nodejs
           ;;
         11)
+          Upgrade_OneinStack
+          ;;
+        12)
           if [ -e ~/.acme.sh/acme.sh ]; then
             ~/.acme.sh/acme.sh --force --upgrade; ~/.acme.sh/acme.sh --version;
           elif [ -e /usr/local/acme.sh/acme.sh ]; then
@@ -211,6 +220,7 @@ else
   [ "${valkey_flag}" == 'y' ] && Upgrade_Valkey
   [ "${memcached_flag}" == 'y' ] && Upgrade_Memcached
   [ "${phpmyadmin_flag}" == 'y' ] && Upgrade_phpMyAdmin
+  [ "${nodejs_flag}" == 'y' ] && Upgrade_Nodejs
   [ "${NEW_oneinstack_ver}" == 'latest' ] && Upgrade_OneinStack
   if [ "${NEW_acme_ver}" == 'latest' ]; then
     if [ -e ~/.acme.sh/acme.sh ]; then
