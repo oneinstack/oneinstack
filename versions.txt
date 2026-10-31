@@ -3,7 +3,7 @@
 nginx_ver=1.30.6
 caddy_ver=2.11.7
 tengine_ver=3.1.0
-openresty_ver=1.31.1.1
+openresty_ver=1.31.8.1
 openssl102_ver=1.0.2u
 openssl11_ver=1.1.1w
 openssl_ver=3.5.9
@@ -22,9 +22,9 @@ apr_util_ver=1.6.5
 nghttp2_ver=1.70.0
 
 # DB
-mysql97_ver=9.7.2
-mysql97_md5=fdf198c9a51b1f96220301b1563eb5bc
-mysql84_ver=8.4.11
+mysql97_ver=9.7.4
+mysql97_md5=dbc4f76f6bedab22a136af9ed846b2cf
+mysql84_ver=8.4.13
 mysql84_oldver=8.4.10
 mysql80_ver=8.0.46
 mysql80_oldver=8.0.45
@@ -46,9 +46,9 @@ percona55_ver=5.5.62-38.14
 pgsql_ver=18.6
 
 mongodb_ver=8.0.34
-mongosh_ver=2.13.0
+mongosh_ver=2.14.1
 
-clickhouse_ver=26.8.28.14
+clickhouse_ver=26.8.34.13
 
 # PHP
 php53_ver=5.3.29
@@ -68,7 +68,7 @@ php84_ver=8.4.27
 php85_ver=8.5.12
 
 # Nodejs
-nodejs_ver=24.22.0
+nodejs_ver=24.22.2
 # glibc < 2.28 (e.g. CentOS 7) cannot run Node.js 18+
 nodejs_oldver=16.20.2
 
@@ -97,20 +97,20 @@ apcu_ver=5.1.28
 apcu_oldver=4.0.11
 xcache_ver=3.2.0
 eaccelerator_ver=0.9.6.1
-phalcon_ver=5.22.1
+phalcon_ver=5.23.0
 phalcon_oldver=3.4.5
 phalcon_php74_ver=5.4.0
 phalcon_php80_ver=5.10.0
 yaf_ver=3.3.8
 yar_ver=2.4.0
-swoole_ver=6.2.3
+swoole_ver=6.2.4
 swoole_oldver=5.1.5
 swoole_php7_ver=4.8.13
 xdebug_ver=3.5.3
 xdebug_oldver=3.1.6
 xdebug_php70_ver=2.8.1
 xlswriter_ver=3.0.0
-grpc_ver=1.84.0
+grpc_ver=1.85.0
 igbinary_ver=3.2.16
 msgpack_ver=3.0.1
 msgpack_oldver=2.2.0
@@ -120,12 +120,12 @@ zstd_ver=0.18.0
 pureftpd_ver=1.0.54
 
 # Redis
-redis_ver=8.10.2
+redis_ver=8.10.3
 redis_oldver=7.4.11
 pecl_redis_ver=6.3.0
 
 # Valkey
-valkey_ver=9.1.2
+valkey_ver=9.1.3
 
 # Memcached
 memcached_ver=1.6.45
@@ -160,7 +160,7 @@ boost_percona_ver=1.86.0
 boost_oldver=1.59.0
 
 # Others
-lua_nginx_module_ver=0.10.28
+lua_nginx_module_ver=0.10.31
 luajit2_ver=2.1-20261023
 lua_resty_core_ver=0.1.32
 lua_resty_lrucache_ver=0.15

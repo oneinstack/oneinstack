@@ -27,11 +27,13 @@ Upgrade_Nginx() {
         if [[ "${NEW_nginx_ver}" =~ ^1\.(2[5-9]|[3-9][0-9]) ]]; then
           nginx_target_openssl_ver=${openssl_ver}
         fi
-        src_url=https://www.openssl.org/source/openssl-${nginx_target_openssl_ver}.tar.gz && Download_src
+        src_url=${mirror_link}/oneinstack/src/openssl-${nginx_target_openssl_ver}.tar.gz && Download_src
+        src_url=${mirror_link}/oneinstack/src/pcre2-${pcre2_ver}.tar.gz && Download_src
         src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
         src_url=${mirror_link}/oneinstack/src/ngx_devel_kit.tar.gz && Download_src
         src_url=${mirror_link}/oneinstack/src/lua-nginx-module-${lua_nginx_module_ver}.tar.gz && Download_src
         tar xzf openssl-${nginx_target_openssl_ver}.tar.gz
+        tar xzf pcre2-${pcre2_ver}.tar.gz
         tar xzf pcre-${pcre_ver}.tar.gz
         tar xzf ngx_devel_kit.tar.gz
         tar xzf lua-nginx-module-${lua_nginx_module_ver}.tar.gz
@@ -59,7 +61,25 @@ Upgrade_Nginx() {
     if [[ "${NEW_nginx_ver}" =~ ^1\.(2[5-9]|[3-9][0-9]) ]]; then
       nginx_target_openssl_ver=${openssl_ver}
     fi
-    nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@lua-nginx-module-[^ ]\+ @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@lua-nginx-module @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@--with-openssl=[^ ]\+ @--with-openssl=../openssl-${nginx_target_openssl_ver} @" | sed "s@--with-pcre=[^ ]\+ @--with-pcre=../pcre-${pcre_ver} @"`
+    nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@lua-nginx-module-[^ ]\+ @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@lua-nginx-module @lua-nginx-module-${lua_nginx_module_ver} @" | sed "s@--with-openssl=[^ ]\+ @--with-openssl=../openssl-${nginx_target_openssl_ver} @" | sed "s@--with-pcre=../pcre2-[^ ]\+ @--with-pcre=../pcre2-${pcre2_ver} @" | sed "s@--with-pcre=../pcre-[^ ]\+ @--with-pcre=../pcre-${pcre_ver} @"`
+    if echo "${nginx_configure_args}" | grep -q -- '--add-module=../ngx_brotli'; then
+      src_url=${mirror_link}/oneinstack/src/ngx_brotli.tar.gz && Download_src no_kill
+      [ -e "ngx_brotli.tar.gz" ] && tar xzf ngx_brotli.tar.gz
+      if [ -d "ngx_brotli/deps/brotli" ]; then
+        pushd ngx_brotli/deps/brotli > /dev/null
+        mkdir -p out && pushd out > /dev/null
+        [ -e "/usr/bin/cmake3" ] && CMAKE=cmake3 || CMAKE=cmake
+        if command -v $CMAKE >/dev/null 2>&1; then
+          $CMAKE -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-Ofast -funroll-loops -ffunction-sections -fdata-sections -Wl,--gc-sections" -DCMAKE_INSTALL_PREFIX=./installed ..
+          $CMAKE --build . --config Release --target brotlienc -j ${THREAD}
+        fi
+        popd > /dev/null
+        popd > /dev/null
+      fi
+      if [ ! -e "ngx_brotli/deps/brotli/out/libbrotlienc.a" -a ! -e "ngx_brotli/deps/brotli/out/libbrotlienc-static.a" ]; then
+        nginx_configure_args=`echo ${nginx_configure_args} | sed 's@--add-module=../ngx_brotli@@g'`
+      fi
+    fi
     if [[ "${NEW_nginx_ver}" =~ ^1\.(2[5-9]|[3-9][0-9]) ]] && [ -z "`echo $nginx_configure_args | grep -- '--with-http_v3_module'`" ]; then
       nginx_configure_args="${nginx_configure_args} --with-http_v3_module"
     fi

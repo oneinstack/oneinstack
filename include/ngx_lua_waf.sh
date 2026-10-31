@@ -11,13 +11,13 @@
 Nginx_lua_waf() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "${nginx_install_dir}/sbin/nginx" ] && echo "${CWARNING}Nginx is not installed on your system! ${CEND}" && exit 1
-  if [ ! -e "/usr/local/lib/libluajit-5.1.so.2.1.0" ]; then
+  if ! ls /usr/local/lib/libluajit-5.1.so.2.1* >/dev/null 2>&1; then
     [ -e "/usr/local/lib/libluajit-5.1.so.2.0.5" ] && find /usr/local -name *luajit* | xargs rm -rf
     src_url=${mirror_link}/oneinstack/src/luajit2-${luajit2_ver}.tar.gz && Download_src
     tar xzf luajit2-${luajit2_ver}.tar.gz
     pushd luajit2-${luajit2_ver}
     make && make install
-    [ ! -e "/usr/local/lib/libluajit-5.1.so.2.1.0" ] && { echo "${CFAILURE}LuaJIT install failed! ${CEND}"; kill -9 $$; exit 1; }
+    ! ls /usr/local/lib/libluajit-5.1.so.2.1* >/dev/null 2>&1 && { echo "${CFAILURE}LuaJIT install failed! ${CEND}"; kill -9 $$; exit 1; }
     popd > /dev/null
     rm -rf luajit2-${luajit2_ver}
   fi
@@ -49,18 +49,38 @@ Nginx_lua_waf() {
   ${nginx_install_dir}/sbin/nginx -V &> $$
   nginx_configure_args_tmp=`cat $$ | grep 'configure arguments:' | awk -F: '{print $2}'`
   rm -rf $$
-  nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@--with-openssl=../openssl-[0-9a-z.]\+ @--with-openssl=../openssl-${openssl_ver} @" | sed "s@--with-pcre=../pcre-[0-9.]\+ @--with-pcre=../pcre-${pcre_ver} @"`
+  nginx_configure_args=`echo ${nginx_configure_args_tmp} | sed "s@--with-openssl=../openssl-[0-9a-z.]\+ @--with-openssl=../openssl-${openssl_ver} @" | sed "s@--with-pcre=../pcre2-[0-9.]\+ @--with-pcre=../pcre2-${pcre2_ver} @" | sed "s@--with-pcre=../pcre-[0-9.]\+ @--with-pcre=../pcre-${pcre_ver} @"`
   if [ -z "`echo ${nginx_configure_args} | grep lua-nginx-module`" ]; then
-    src_url=https://nginx.org/download/nginx-${nginx_ver}.tar.gz && Download_src
-    src_url=https://github.com/openssl/openssl/releases/download/openssl-${openssl_ver}/openssl-${openssl_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/nginx-${nginx_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/openssl-${openssl_ver}.tar.gz && Download_src
+    src_url=${mirror_link}/oneinstack/src/pcre2-${pcre2_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/pcre-${pcre_ver}.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/ngx_devel_kit.tar.gz && Download_src
     src_url=${mirror_link}/oneinstack/src/lua-nginx-module-${lua_nginx_module_ver}.tar.gz && Download_src
     tar xzf nginx-${nginx_ver}.tar.gz
     tar xzf openssl-${openssl_ver}.tar.gz
+    tar xzf pcre2-${pcre2_ver}.tar.gz
     tar xzf pcre-${pcre_ver}.tar.gz
     tar xzf ngx_devel_kit.tar.gz
     tar xzf lua-nginx-module-${lua_nginx_module_ver}.tar.gz
+    if echo "${nginx_configure_args}" | grep -q -- '--add-module=../ngx_brotli'; then
+      src_url=${mirror_link}/oneinstack/src/ngx_brotli.tar.gz && Download_src no_kill
+      [ -e "ngx_brotli.tar.gz" ] && tar xzf ngx_brotli.tar.gz
+      if [ -d "ngx_brotli/deps/brotli" ]; then
+        pushd ngx_brotli/deps/brotli > /dev/null
+        mkdir -p out && pushd out > /dev/null
+        [ -e "/usr/bin/cmake3" ] && CMAKE=cmake3 || CMAKE=cmake
+        if command -v $CMAKE >/dev/null 2>&1; then
+          $CMAKE -DCMAKE_BUILD_TYPE=Release -DBUILD_SHARED_LIBS=OFF -DCMAKE_C_FLAGS="-Ofast -funroll-loops -ffunction-sections -fdata-sections -Wl,--gc-sections" -DCMAKE_INSTALL_PREFIX=./installed ..
+          $CMAKE --build . --config Release --target brotlienc -j ${THREAD}
+        fi
+        popd > /dev/null
+        popd > /dev/null
+      fi
+      if [ ! -e "ngx_brotli/deps/brotli/out/libbrotlienc.a" -a ! -e "ngx_brotli/deps/brotli/out/libbrotlienc-static.a" ]; then
+        nginx_configure_args=`echo ${nginx_configure_args} | sed 's@--add-module=../ngx_brotli@@g'`
+      fi
+    fi
     pushd nginx-${nginx_ver}
     make clean
     sed -i 's@CFLAGS="$CFLAGS -g"@#CFLAGS="$CFLAGS -g"@' auto/cc/gcc # close debug
@@ -89,13 +109,13 @@ Nginx_lua_waf() {
 Tengine_lua_waf() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "${tengine_install_dir}/sbin/nginx" ] && echo "${CWARNING}Tengine is not installed on your system! ${CEND}" && exit 1
-  if [ ! -e "/usr/local/lib/libluajit-5.1.so.2.1.0" ]; then
+  if ! ls /usr/local/lib/libluajit-5.1.so.2.1* >/dev/null 2>&1; then
     [ -e "/usr/local/lib/libluajit-5.1.so.2.0.5" ] && find /usr/local -name *luajit* | xargs rm -rf
     src_url=${mirror_link}/oneinstack/src/luajit2-${luajit2_ver}.tar.gz && Download_src
     tar xzf luajit2-${luajit2_ver}.tar.gz
     pushd luajit2-${luajit2_ver}
     make && make install
-    [ ! -e "/usr/local/lib/libluajit-5.1.so.2.1.0" ] && { echo "${CFAILURE}LuaJIT install failed! ${CEND}"; kill -9 $$; exit 1; }
+    ! ls /usr/local/lib/libluajit-5.1.so.2.1* >/dev/null 2>&1 && { echo "${CFAILURE}LuaJIT install failed! ${CEND}"; kill -9 $$; exit 1; }
     popd > /dev/null
   fi
   if [ ! -e "/usr/local/lib/lua/5.1/cjson.so" ]; then
@@ -162,7 +182,7 @@ enable_lua_waf() {
   [ -z "`grep 'include waf.conf;' ${web_install_dir}/conf/nginx.conf`" ] && sed -i "s@ vhost/\*.conf;@&\n  include waf.conf;@" ${web_install_dir}/conf/nginx.conf
   ${web_install_dir}/sbin/nginx -t
   if [ $? -eq 0 ]; then
-    service nginx reload
+    systemctl reload nginx 2>/dev/null || ${web_install_dir}/sbin/nginx -s reload
     echo "${CSUCCESS}ngx_lua_waf enabled successfully! ${CEND}"
     chown ${run_user}:${run_group} ${wwwlogs_dir}
   else
@@ -178,7 +198,7 @@ disable_lua_waf() {
   ${web_install_dir}/sbin/nginx -t
   if [ $? -eq 0 ]; then
     rm -rf ${web_install_dir}/conf/{waf,waf.conf}
-    service nginx reload
+    systemctl reload nginx 2>/dev/null || ${web_install_dir}/sbin/nginx -s reload
     echo "${CSUCCESS}ngx_lua_waf disabled successfully! ${CEND}"
   else
     echo "${CFAILURE}ngx_lua_waf disable failed! ${CEND}"

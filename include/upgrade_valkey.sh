@@ -12,7 +12,7 @@ Upgrade_Valkey() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -d "$valkey_install_dir" ] && echo "${CWARNING}Valkey is not installed on your system! ${CEND}" && exit 1
   OLD_valkey_ver=`$valkey_install_dir/bin/valkey-cli --version 2>&1 | awk '{print $2}'`
-  Latest_valkey_ver=${valkey_ver:-9.1.2}
+  Latest_valkey_ver=${valkey_ver:-9.1.3}
   echo "Current Valkey Version: ${CMSG}$OLD_valkey_ver${CEND}"
   while :; do echo
     [ "${valkey_flag}" != 'y' ] && read -e -p "Please input upgrade Valkey Version(default: ${Latest_valkey_ver}): " NEW_valkey_ver
