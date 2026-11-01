@@ -994,7 +994,11 @@ if [ ! -e ~/.oneinstack ]; then
   downloadDepsSrc=1
   [ "${PM}" == 'apt-get' ] && apt-get -y update > /dev/null
   [ "${PM}" == 'yum' ] && yum clean all > /dev/null
-  ${PM} -y install wget gcc openssl tar bzip2 xz > /dev/null
+  ${PM} -y install wget gcc openssl tar bzip2 xz > /dev/null || {
+    for Package in wget gcc openssl tar bzip2 xz; do
+      ${PM} -y install ${Package} > /dev/null
+    done
+  }
   command -v curl > /dev/null 2>&1 || ${PM} -y install curl > /dev/null
 fi
 

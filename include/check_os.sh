@@ -51,9 +51,7 @@ if [[ "${Platform}" =~ ^centos$|^rhel$|^almalinux$|^rocky$|^fedora$|^amzn$|^ol$|
     [[ "${VERSION_MAIN_ID}" =~ ^(4|2023)$ ]] && RHEL_ver=9
     if [[ "${Platform}" =~ ^alinux$ ]]; then
       if ! curl --connect-timeout 2 -m 3 -sI http://mirrors.cloud.aliyuncs.com/alinux/ 2>/dev/null | head -n1 | grep -q '200'; then
-        sed -i -e 's@http://mirrors.cloud.aliyuncs.com@https://mirrors.aliyun.com@g' \
-               -e 's@http://mirrors.aliyun.com@https://mirrors.aliyun.com@g' \
-               /etc/yum.repos.d/*.repo 2>/dev/null
+        sed -i 's@http://mirrors.cloud.aliyuncs.com@https://mirrors.aliyun.com@g' /etc/yum.repos.d/*.repo 2>/dev/null
       fi
     fi
   elif [[ "${Platform}" =~ ^anolis$ ]]; then
@@ -114,7 +112,11 @@ fi
 
 if ! command -v gcc > /dev/null 2>&1 || ! command -v getopt > /dev/null 2>&1 || ! command -v make > /dev/null 2>&1; then
   [ "${PM}" == 'apt-get' ] && apt-get -y update > /dev/null
-  ${PM} -y install gcc make util-linux > /dev/null
+  ${PM} -y install gcc make util-linux > /dev/null || {
+    for Package in gcc make util-linux; do
+      ${PM} -y install ${Package} > /dev/null
+    done
+  }
 fi
 gcc_ver=$(gcc -dumpversion | awk -F. '{print $1}')
 

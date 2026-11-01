@@ -8,6 +8,11 @@
 #       https://oneinstack.com
 #       https://github.com/oneinstack/oneinstack
 
+if ! command -v openssl > /dev/null 2>&1; then
+  [ "${PM}" == 'apt-get' ] && apt-get -y update > /dev/null 2>&1
+  ${PM} -y install openssl > /dev/null 2>&1
+fi
+
 if openssl version | grep -Eqi 'OpenSSL 1.0.2*'; then
   php5_with_openssl="--with-openssl"
   php70_with_openssl="--with-openssl"
