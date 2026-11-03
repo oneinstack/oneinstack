@@ -174,7 +174,7 @@ body:
     id: mirror
     attributes:
       label: Using OneinStack Mirror / 是否使用 OneinStack 镜像
-      description: Are you using mirrors.oneinstack.com to download source packages? / 是否使用 mirrors.oneinstack.com 下载源码包？
+      description: Are you using cdn.oneinstack.com to download source packages? / 是否使用 cdn.oneinstack.com 下载源码包？
       options:
         - "Yes / 是"
         - "No / 否"

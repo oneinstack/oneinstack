@@ -53,8 +53,8 @@ Download_src() {
   # Build URL fallback array
   local urls=()
   
-  # 1. ALWAYS inject mirrors.oneinstack.com/oneinstack/src as the absolute primary
-  local oneinstack_url="https://mirrors.oneinstack.com/oneinstack/src/${filename}"
+  # 1. ALWAYS inject cdn.oneinstack.com/oneinstack/src as the absolute primary
+  local oneinstack_url="https://cdn.oneinstack.com/oneinstack/src/${filename}"
   urls+=("${oneinstack_url}")
   
   # 2. Add the requested src_url if it's different
