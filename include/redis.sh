@@ -84,7 +84,14 @@ Install_pecl_redis() {
     redis_ext_opts=""
     [ -f "${phpExtensionDir}/igbinary.so" ] && redis_ext_opts="${redis_ext_opts} --enable-redis-igbinary"
     [ -f "${phpExtensionDir}/msgpack.so" ] && redis_ext_opts="${redis_ext_opts} --enable-redis-msgpack"
-    [ -f "${phpExtensionDir}/zstd.so" ] && redis_ext_opts="${redis_ext_opts} --enable-redis-zstd"
+    if [ -f "${phpExtensionDir}/zstd.so" ]; then
+      # phpredis zstd support links against the system libzstd (the zstd extension bundles its own copy)
+      if [ ! -e "/usr/include/zstd.h" ]; then
+        [ "${PM}" == 'yum' ] && yum -y install libzstd-devel
+        [ "${PM}" == 'apt-get' ] && apt-get -y install libzstd-dev
+      fi
+      [ -e "/usr/include/zstd.h" ] && redis_ext_opts="${redis_ext_opts} --enable-redis-zstd"
+    fi
     ${php_install_dir}/bin/phpize
     CFLAGS="-std=gnu99 -g -O2" ./configure --with-php-config=${php_install_dir}/bin/php-config ${redis_ext_opts}
     make -j ${THREAD} && make install

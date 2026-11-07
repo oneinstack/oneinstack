@@ -16,7 +16,12 @@ Install_pecl_grpc() {
     pushd grpc-${grpc_ver} > /dev/null
     ${php_install_dir}/bin/phpize
     ./configure --with-php-config=${php_install_dir}/bin/php-config
-    make -j ${THREAD} && make install
+    # gRPC C++ sources need ~1.5GB RAM per cc1plus job; cap parallelism by memory to avoid OOM kills
+    local grpc_mem=$(awk '/MemTotal:/{t=$2} /SwapTotal:/{s=$2} END{printf "%d", (t+s)/1024}' /proc/meminfo 2>/dev/null)
+    local grpc_jobs=$(( ${grpc_mem:-1536} / 1536 ))
+    [ ${grpc_jobs} -lt 1 ] && grpc_jobs=1
+    [ ${grpc_jobs} -gt ${THREAD} ] && grpc_jobs=${THREAD}
+    make -j ${grpc_jobs} && make install
     popd > /dev/null
     if [ -f "${phpExtensionDir}/grpc.so" ]; then
       echo 'extension=grpc.so' > ${php_install_dir}/etc/php.d/06-grpc.ini
