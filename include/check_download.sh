@@ -41,7 +41,7 @@ checkDownload() {
   fi
 
   # jemalloc
-  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^1[5-6]$ ]]; then
+  if [[ ${nginx_option} =~ ^[1-3]$ ]] || [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^1[5-7]$ ]]; then
     echo "Download jemalloc..."
     src_url=https://github.com/jemalloc/jemalloc/releases/download/${jemalloc_ver}/jemalloc-${jemalloc_ver}.tar.bz2 && Download_src
   fi
@@ -125,7 +125,7 @@ checkDownload() {
     src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
   fi
 
-  if [[ "${db_option}" =~ ^[0-9]$|^1[0-6]$ ]]; then
+  if [[ "${db_option}" =~ ^[0-9]$|^1[0-7]$ ]]; then
     if [[ "${db_option}" =~ ^[0,1,2,9]$|^10$|^16$ ]] && [ "${dbinstallmethod}" == "2" ]; then
       [[ "${db_option}" =~ ^0$ ]] && boost_ver=${boost_mysql84_ver}
       [[ "${db_option}" =~ ^1$ ]] && boost_ver=${boost_mysql80_ver}
@@ -374,13 +374,16 @@ checkDownload() {
           kill -9 $$; exit 1;
         fi
         ;;
-      [5-8])
+      [5-8]|17)
 	case "${db_option}" in
           5)
             mariadb_ver=${mariadb1011_ver}
 	    ;;
           6)
             mariadb_ver=${mariadb118_ver}
+	    ;;
+          17)
+            mariadb_ver=${mariadb123_ver}
 	    ;;
           7)
             mariadb_ver=${mariadb114_ver}
@@ -390,7 +393,7 @@ checkDownload() {
 	    ;;
         esac
 
-        if [[ "${db_option}" =~ ^[6-7]$ ]] && [ "${dbinstallmethod}" == '1' ] && [ "${mysql_glibc}" != '2.28' ]; then
+        if [[ "${db_option}" =~ ^[6-7]$|^17$ ]] && [ "${dbinstallmethod}" == '1' ] && [ "${mysql_glibc}" != '2.28' ]; then
           echo "${CFAILURE}MariaDB ${mariadb_ver} binary package requires glibc 2.28+ (current: ${glibc_ver:-unknown}). Please choose MariaDB-10.11 or install from source (--dbinstallmethod 2). ${CEND}"
           kill -9 $$; exit 1;
         fi

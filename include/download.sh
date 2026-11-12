@@ -116,6 +116,12 @@ Download_src() {
     urls+=("https://github.com/openresty/luajit2/archive/refs/tags/v${BASH_REMATCH[1]}.tar.gz")
   elif [[ "${filename}" =~ ^lua-cjson-([0-9]+\.[0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
     urls+=("https://github.com/openresty/lua-cjson/archive/refs/tags/${BASH_REMATCH[1]}.tar.gz")
+  elif [[ "${filename}" =~ ^mariadb-([0-9]+\.[0-9]+\.[0-9]+)-linux-systemd-x86_64\.tar\.gz$ ]]; then
+    urls+=("https://archive.mariadb.org/mariadb-${BASH_REMATCH[1]}/bintar-linux-systemd-x86_64/${filename}")
+    urls+=("https://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${BASH_REMATCH[1]}/bintar-linux-systemd-x86_64/${filename}")
+  elif [[ "${filename}" =~ ^mariadb-([0-9]+\.[0-9]+\.[0-9]+)\.tar\.gz$ ]]; then
+    urls+=("https://archive.mariadb.org/mariadb-${BASH_REMATCH[1]}/source/${filename}")
+    urls+=("https://mirrors.tuna.tsinghua.edu.cn/mariadb/mariadb-${BASH_REMATCH[1]}/source/${filename}")
   fi
 
   local success=0

@@ -35,6 +35,7 @@ mysql55_ver=5.5.62
 mariadb1011_ver=10.11.19
 mariadb118_ver=11.8.9
 mariadb114_ver=11.4.13
+mariadb123_ver=12.3.3
 mariadb55_ver=5.5.68
 
 percona84_ver=8.4.11-11
