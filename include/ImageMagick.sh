@@ -44,7 +44,7 @@ Install_pecl_imagick() {
     if [[ "${PHP_main_ver}" =~ ^5.3$ ]]; then
       tar xzf imagick-${imagick_oldver}.tgz
       pushd imagick-${imagick_oldver} > /dev/null
-    elif [[ "${PHP_main_ver}" =~ ^8.5$ ]]; then
+    elif [[ "${PHP_main_ver}" =~ ^8.[5-6]$ ]]; then
       tar xzf imagick-${imagick_php85_ver}.tgz
       pushd imagick-${imagick_php85_ver} > /dev/null
     else

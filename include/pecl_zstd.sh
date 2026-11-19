@@ -13,7 +13,7 @@ Install_pecl_zstd() {
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
-    if [[ "${PHP_main_ver}" =~ ^7\.[0-4]$|^8\.[0-5]$ ]]; then
+    if [[ "${PHP_main_ver}" =~ ^7\.[0-4]$|^8\.[0-6]$ ]]; then
       src_url=https://pecl.php.net/get/zstd-${zstd_ver}.tgz && Download_src
       tar xzf zstd-${zstd_ver}.tgz
       pushd zstd-${zstd_ver} > /dev/null

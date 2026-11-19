@@ -14,7 +14,7 @@ Install_ZendOPcache() {
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
-    if [ "${PHP_main_ver}" == '8.5' ]; then
+    if [[ "${PHP_main_ver}" =~ ^8\.[5-9]$ ]]; then
       cat > ${php_install_dir}/etc/php.d/02-opcache.ini << EOF
 [opcache]
 opcache.enable=1

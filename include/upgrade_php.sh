@@ -88,7 +88,7 @@ Upgrade_PHP() {
     export PKG_CONFIG_PATH=${openssl_install_dir}/lib/pkgconfig:${curl_install_dir}/lib/pkgconfig:${freetype_install_dir}/lib/pkgconfig:/usr/local/lib/pkgconfig:$PKG_CONFIG_PATH
     ${php_install_dir}/bin/php -i |grep 'Configure Command' | awk -F'=>' '{print $2}' | bash
     [ -f Makefile ] && sed -i 's@-Wl,-z,max-page-size=[0-9]\+@@g; s@-Wl,-zmax-page-size=[0-9]\+@@g; s@-Wl,-zcommon-page-size=[0-9]\+@@g; s@-z,max-page-size=[0-9]\+@@g' Makefile
-    if [[ "${NEW_php_ver}" =~ ^8\.[3-5]\. ]] && [ ! -e "${apache_install_dir}/bin/httpd" ]; then
+    if [[ "${NEW_php_ver}" =~ ^8\.[3-6]\. ]] && [ ! -e "${apache_install_dir}/bin/httpd" ]; then
       [ -f Makefile ] && sed -i 's@^EXTRA_LDFLAGS_PROGRAM =@EXTRA_LDFLAGS_PROGRAM = -XCClinker -pie @g' Makefile
       make EXTRA_CFLAGS="${compat_cflags} -fPIE" EXTRA_CXXFLAGS="${compat_cflags} -fPIE" ZEND_EXTRA_LIBS='-liconv' -j ${THREAD}
     else

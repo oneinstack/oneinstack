@@ -78,6 +78,10 @@ Install_MPHP() {
           . include/php-8.5.sh
           Install_PHP85 2>&1 | tee -a ${oneinstack_dir}/install.log
           ;;
+        86)
+          . include/php-8.6.sh
+          Install_PHP86 2>&1 | tee -a ${oneinstack_dir}/install.log
+          ;;
       esac
       if [ -e "${php_install_dir}/sbin/php-fpm" ]; then
         systemctl stop php-fpm 2>/dev/null || kill `cat ${php_install_dir}/var/run/php-fpm.pid 2>/dev/null` 2>/dev/null || true
