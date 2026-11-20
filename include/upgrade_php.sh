@@ -51,6 +51,8 @@ Upgrade_PHP() {
     elif [[ "${NEW_php_ver}" =~ ^7\.4\. ]]; then
       src_url=${mirror_link}/oneinstack/src/php-7.4-CVE-2026-109618-109619.patch && Download_src
       patch -d php-${NEW_php_ver} -p1 < php-7.4-CVE-2026-109618-109619.patch
+      src_url=${mirror_link}/oneinstack/src/php-7.4-CVE-2026-1119.patch && Download_src
+      patch -d php-${NEW_php_ver} -p1 < php-7.4-CVE-2026-1119.patch
     elif [[ "${NEW_php_ver}" =~ ^8\.1\. ]]; then
       src_url=${mirror_link}/oneinstack/src/php-8.1-CVE-2026-109618-109619.patch && Download_src
       patch -d php-${NEW_php_ver} -p1 < php-8.1-CVE-2026-109618-109619.patch

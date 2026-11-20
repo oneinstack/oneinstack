@@ -106,6 +106,10 @@ Install_PHP74() {
     command -v patch >/dev/null 2>&1 || ${PM} -y install patch
     patch -p1 < ../php-7.4-CVE-2026-109618-109619.patch
   fi
+  if [ -f ../php-7.4-CVE-2026-1119.patch ]; then
+    command -v patch >/dev/null 2>&1 || ${PM} -y install patch
+    patch -p1 < ../php-7.4-CVE-2026-1119.patch
+  fi
   if [ -e ext/openssl/openssl.c ] && ! grep -Eqi '^#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c; then
     sed -i '/OPENSSL_SSLV23_PADDING/i#ifdef RSA_SSLV23_PADDING' ext/openssl/openssl.c
     sed -i '/OPENSSL_SSLV23_PADDING/a#endif' ext/openssl/openssl.c
