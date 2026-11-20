@@ -44,7 +44,12 @@ percona57_ver=5.7.42-46
 percona56_ver=5.6.51-91.0
 percona55_ver=5.5.62-38.14
 
-pgsql_ver=18.6
+pgsql_ver=18.7
+pgsql14_ver=14.25
+pgsql15_ver=15.20
+pgsql16_ver=16.16
+pgsql17_ver=17.12
+pgsql18_ver=18.7
 
 mongodb_ver=8.0.34
 mongosh_ver=2.14.1

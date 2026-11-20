@@ -95,7 +95,7 @@ Install_PostgreSQL() {
   systemctl reload postgresql
   
   if [ -e "${pgsql_install_dir}/bin/psql" ]; then
-    sed -i "s+^dbpostgrespwd.*+dbpostgrespwd='$dbpostgrespwd'+" ../options.conf
+    sed -i "s+^dbpostgrespwd.*+dbpostgrespwd='$dbpostgrespwd'+" "${oneinstack_dir}/options.conf"
     echo "${CSUCCESS}PostgreSQL installed successfully! ${CEND}"
   else
     rm -rf ${pgsql_install_dir} ${pgsql_data_dir}
