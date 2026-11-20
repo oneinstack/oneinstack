@@ -48,6 +48,9 @@ Upgrade_PHP() {
     if [[ "${NEW_php_ver}" =~ ^5\.[3-5]\. ]]; then
       src_url=${mirror_link}/oneinstack/src/fpm-race-condition.patch && Download_src
       patch -d php-${NEW_php_ver} -p0 < fpm-race-condition.patch
+    elif [[ "${NEW_php_ver}" =~ ^7\.3\. ]]; then
+      src_url=${mirror_link}/oneinstack/src/php-7.3-CVE-2026-1119.patch && Download_src
+      patch -d php-${NEW_php_ver} -p1 < php-7.3-CVE-2026-1119.patch
     elif [[ "${NEW_php_ver}" =~ ^7\.4\. ]]; then
       src_url=${mirror_link}/oneinstack/src/php-7.4-CVE-2026-109618-109619.patch && Download_src
       patch -d php-${NEW_php_ver} -p1 < php-7.4-CVE-2026-109618-109619.patch
