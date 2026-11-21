@@ -556,7 +556,7 @@ checkDownload() {
         ;;
       13)
         FILE_NAME=postgresql-${pgsql_ver}.tar.gz
-        DOWN_ADDR_PGSQL=${mirror_link}/oneinstack/src
+        DOWN_ADDR_PGSQL=https://mirrors.oneinstack.com/oneinstack/src
         if [ "${OUTIP_STATE}"x == "China"x ]; then
           DOWN_ADDR_PGSQL_BK=https://mirrors.tuna.tsinghua.edu.cn/postgresql/source/v${pgsql_ver}
         else

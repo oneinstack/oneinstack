@@ -11,6 +11,9 @@ src/*.patch
 !src/php-7.4-CVE-2026-109618-109619.patch
 !src/php-7.4-CVE-2026-1119.patch
 !src/php-8.1-CVE-2026-109618-109619.patch
+packages/postgresql/**/*.tar.gz
+packages/postgresql/**/*.tar.gz.md5
+packages/postgresql/**/*.tar.gz.sha256
 src/*.jar
 src/download_deps.py
 src/download_mirrors.sh
