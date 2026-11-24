@@ -169,7 +169,7 @@ What Are You Doing?
           ;;
         4)
           if [ ! -e "$db_install_dir/bin/mysql" ]; then
-            echo "$CWARNING MySQL/MariaDB/Percona is not installed. Choose 13 to upgrade PostgreSQL.$CEND"
+            echo "${CWARNING}MySQL/MariaDB/Percona is not installed. Choose 13 to upgrade PostgreSQL.${CEND}"
           else
             Upgrade_DB
           fi

@@ -38,6 +38,8 @@ Upgrade_PostgreSQL() {
   local pgsql_failed_dir
   local was_active
   local pgsql_port
+  local pgsql_socket_dir
+  local postgres_home
 
   OLD_pgsql_ver=$("${pgsql_install_dir}/bin/pg_config" --version | awk '{print $2}')
   OLD_pgsql_major=$(awk -F. '{if ($1 < 10) print $1 "." $2; else print $1}' <<< "${OLD_pgsql_ver}")
@@ -82,7 +84,7 @@ Upgrade_PostgreSQL() {
     fi
 
     PACKAGE_FILE=postgresql-${NEW_pgsql_ver}.tar.gz
-    pgsql_mirror_base=https://cdn.oneinstack.com/oneinstack/src
+    pgsql_mirror_base=${mirror_link:-https://cdn.oneinstack.com}/oneinstack/src
     pgsql_official_base=https://ftp.postgresql.org/pub/source/v${NEW_pgsql_ver}
     if [ ! -s "${PACKAGE_FILE}" ]; then
       if ! curl -fL --retry 2 --connect-timeout 20 -o "${PACKAGE_FILE}" "${pgsql_mirror_base}/${PACKAGE_FILE}" > /dev/null 2>&1; then
@@ -113,7 +115,7 @@ Upgrade_PostgreSQL() {
         curl -fL --retry 2 --connect-timeout 20 -o "${PACKAGE_FILE}.sha256" "${pgsql_official_base}/${PACKAGE_FILE}.sha256" > /dev/null 2>&1
       fi
     fi
-    expected_sha256=$(awk 'NR == 1 {print $1}' "${PACKAGE_FILE}.sha256" 2>/dev/null)
+    expected_sha256=$(awk 'NR == 1 {print $1}' "${PACKAGE_FILE}.sha256" 2>/dev/null | tr '[:upper:]' '[:lower:]')
     actual_sha256=$(sha256sum "${PACKAGE_FILE}" 2>/dev/null | awk '{print $1}')
     if [[ ! "${expected_sha256}" =~ ^[[:xdigit:]]{64}$ ]] || [ "${actual_sha256}" != "${expected_sha256}" ]; then
       echo "${CWARNING}PostgreSQL ${NEW_pgsql_ver} SHA-256 verification failed! ${CEND}"
@@ -227,9 +229,16 @@ Upgrade_PostgreSQL() {
   rm -rf "${pgsql_stage_root}"
 
   if [ "${was_active}" == 'y' ]; then
-    pgsql_port=$(sed -n 's/^[[:space:]]*port[[:space:]]*=[[:space:]]*\([0-9][0-9]*\).*/\1/p' "${pgsql_data_dir}/postgresql.conf" | head -n 1)
-    pgsql_port=${pgsql_port:-5432}
-    if ! systemctl start postgresql || ! systemctl is-active --quiet postgresql || ! "${pgsql_install_dir}/bin/pg_isready" -q -h 127.0.0.1 -p "${pgsql_port}"; then
+    postgres_home=$(getent passwd postgres | awk -F: '{print $6}')
+    [ -n "${postgres_home}" ] || postgres_home=${pgsql_install_dir}
+    pgsql_port=$(runuser -u postgres -- env HOME="${postgres_home}" "${pgsql_install_dir}/bin/postgres" -D "${pgsql_data_dir}" -C port 2>/dev/null)
+    if [[ ! "${pgsql_port}" =~ ^[0-9]+$ ]]; then
+      pgsql_port=$(sed -n 's/^[[:space:]]*port[[:space:]]*=[[:space:]]*\([0-9][0-9]*\).*/\1/p' "${pgsql_data_dir}/postgresql.conf" | tail -n 1)
+    fi
+    [[ "${pgsql_port}" =~ ^[0-9]+$ ]] || pgsql_port=5432
+    pgsql_socket_dir=$(runuser -u postgres -- env HOME="${postgres_home}" "${pgsql_install_dir}/bin/postgres" -D "${pgsql_data_dir}" -C unix_socket_directories 2>/dev/null | awk -F, '{print $1}' | sed "s/^['\"]//;s/['\"]$//;s/^ *//;s/ *$//")
+    [ -n "${pgsql_socket_dir}" ] || pgsql_socket_dir=/tmp
+    if ! systemctl start postgresql || ! systemctl is-active --quiet postgresql || ! "${pgsql_install_dir}/bin/pg_isready" -q -h "${pgsql_socket_dir}" -p "${pgsql_port}"; then
       systemctl stop postgresql >/dev/null 2>&1
       if mv "${pgsql_install_dir}" "${pgsql_failed_dir}" && mv "${pgsql_backup_dir}" "${pgsql_install_dir}"; then
         systemctl start postgresql
