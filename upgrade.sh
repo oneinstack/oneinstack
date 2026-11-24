@@ -31,6 +31,8 @@ pushd ${oneinstack_dir} > /dev/null
 . ./include/get_char.sh
 . ./include/upgrade_web.sh
 . ./include/upgrade_db.sh
+. ./include/upgrade_postgresql.sh
+. ./include/upgrade_postgresql_major.sh
 . ./include/upgrade_php.sh
 . ./include/upgrade_redis.sh
 . ./include/upgrade_valkey.sh
@@ -52,6 +54,7 @@ Show_Help() {
   --apache       [version]    Upgrade Apache
   --tomcat       [version]    Upgrade Tomcat
   --db           [version]    Upgrade MySQL/MariaDB/Percona
+  --postgresql   [version]    Upgrade PostgreSQL (minor or major version)
   --php          [version]    Upgrade PHP
   --redis        [version]    Upgrade Redis
   --valkey       [version]    Upgrade Valkey
@@ -64,7 +67,7 @@ Show_Help() {
 }
 
 ARG_NUM=$#
-TEMP=`getopt -o h --long help,nginx:,tengine:,openresty:,apache:,tomcat:,db:,php:,redis:,valkey:,memcached:,phpmyadmin:,nodejs:,node:,oneinstack,acme.sh -- "$@" 2>/dev/null`
+TEMP=`getopt -o h --long help,nginx:,tengine:,openresty:,apache:,tomcat:,db:,postgresql:,php:,redis:,valkey:,memcached:,phpmyadmin:,nodejs:,node:,oneinstack,acme.sh -- "$@" 2>/dev/null`
 
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
@@ -91,6 +94,9 @@ while :; do
       ;;
     --db)
       db_flag=y; NEW_db_ver=$2; shift 2
+      ;;
+    --postgresql)
+      postgresql_flag=y; NEW_pgsql_ver=$2; shift 2
       ;;
     --php)
       php_flag=y; NEW_php_ver=$2; shift 2
@@ -141,12 +147,13 @@ What Are You Doing?
 \t${CMSG}10${CEND}. Upgrade Nodejs
 \t${CMSG}11${CEND}. Upgrade OneinStack latest
 \t${CMSG}12${CEND}. Upgrade acme.sh latest
+\t${CMSG}13${CEND}. Upgrade PostgreSQL (minor or major version)
 \t${CMSG} q${CEND}. Exit
 "
     echo
     read -e -p "Please input the correct option: " Upgrade_flag
-    if [[ ! "${Upgrade_flag}" =~ ^[1-9,q]$|^1[0-2]$ ]]; then
-      echo "${CWARNING}input error! Please only input 1~12 and q${CEND}"
+    if [[ ! "${Upgrade_flag}" =~ ^[1-9,q]$|^1[0-3]$ ]]; then
+      echo "${CWARNING}input error! Please only input 1~13 and q${CEND}"
     else
       case "${Upgrade_flag}" in
         1)
@@ -161,7 +168,11 @@ What Are You Doing?
           Upgrade_Tomcat
           ;;
         4)
-          Upgrade_DB
+          if [ ! -e "$db_install_dir/bin/mysql" ]; then
+            echo "$CWARNING MySQL/MariaDB/Percona is not installed. Choose 13 to upgrade PostgreSQL.$CEND"
+          else
+            Upgrade_DB
+          fi
           ;;
         5)
           Upgrade_PHP
@@ -197,6 +208,9 @@ What Are You Doing?
             echo "${CWARNING}acme.sh not found!${CEND}"
           fi
           ;;
+        13)
+          Upgrade_PostgreSQL
+          ;;
         q)
           type check_os_eol >/dev/null 2>&1 && check_os_eol
           exit
@@ -215,6 +229,7 @@ else
   [ "${apache_flag}" == 'y' ] && Upgrade_Apache
   [ "${tomcat_flag}" == 'y' ] && Upgrade_Tomcat
   [ "${db_flag}" == 'y' ] && Upgrade_DB
+  [ "${postgresql_flag}" == 'y' ] && Upgrade_PostgreSQL
   [ "${php_flag}" == 'y' ] && Upgrade_PHP
   [ "${redis_flag}" == 'y' ] && Upgrade_Redis
   [ "${valkey_flag}" == 'y' ] && Upgrade_Valkey
