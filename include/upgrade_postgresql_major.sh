@@ -79,7 +79,7 @@ PostgreSQL_Major_Upgrade() {
   PACKAGE_FILE="postgresql-$NEW_pgsql_ver.tar.gz"
   package_dir="$oneinstack_dir/packages/postgresql/$NEW_pgsql_ver"
   package_path="$package_dir/$PACKAGE_FILE"
-  pgsql_mirror_base=https://mirrors.oneinstack.com/oneinstack/src
+  pgsql_mirror_base=https://cdn.oneinstack.com/oneinstack/src
   pgsql_official_base="https://ftp.postgresql.org/pub/source/v$NEW_pgsql_ver"
 
   if [ ! -s "$PACKAGE_FILE" ] && [ -s "$package_path" ]; then

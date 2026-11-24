@@ -5,7 +5,7 @@ This is the PostgreSQL 18.7 source archive downloaded from a public PostgreSQL s
 Upload these files unchanged to:
 
 ```text
-https://mirrors.oneinstack.com/oneinstack/src/
+https://cdn.oneinstack.com/oneinstack/src/
 ```
 
 Files:

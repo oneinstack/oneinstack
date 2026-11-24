@@ -82,7 +82,7 @@ Upgrade_PostgreSQL() {
     fi
 
     PACKAGE_FILE=postgresql-${NEW_pgsql_ver}.tar.gz
-    pgsql_mirror_base=https://mirrors.oneinstack.com/oneinstack/src
+    pgsql_mirror_base=https://cdn.oneinstack.com/oneinstack/src
     pgsql_official_base=https://ftp.postgresql.org/pub/source/v${NEW_pgsql_ver}
     if [ ! -s "${PACKAGE_FILE}" ]; then
       if ! curl -fL --retry 2 --connect-timeout 20 -o "${PACKAGE_FILE}" "${pgsql_mirror_base}/${PACKAGE_FILE}" > /dev/null 2>&1; then
