@@ -63,7 +63,7 @@ Show_Help() {
   --nodejs                    Install Nodejs
   --tomcat_option [1-5]       Install Tomcat version
   --jdk_option [1-4]          Install JDK version (1: JDK8, 2: JDK11, 3: JDK17, 4: JDK21)
-  --db_option [0-17]          Install DB version (15: MySQL 9.7 LTS, 16: Percona 8.4 LTS, 17: MariaDB 12.3 LTS)
+  --db_option [0-21]          Install DB version (13: PostgreSQL 18, 15: MySQL 9.7 LTS, 16: Percona 8.4 LTS, 17: MariaDB 12.3 LTS, 18-21: PostgreSQL 17-14)
   --dbinstallmethod [1-2]     DB install method, default: 1 binary install
   --dbrootpwd [password]      DB super password
   --dbclickhousepwd [password] ClickHouse password
@@ -229,8 +229,8 @@ while :; do
   --db_option)
     db_option=$2
     shift 2
-    if [[ "${db_option}" =~ ^[0-9]$|^1[0-7]$ ]]; then
-      if [ "${db_option}" == '13' ]; then
+    if [[ "${db_option}" =~ ^[0-9]$|^1[0-9]$|^2[0-1]$ ]]; then
+      if [[ "${db_option}" =~ ^13$|^1[8-9]$|^2[0-1]$ ]]; then
         [ -e "${pgsql_install_dir}/bin/psql" ] && {
           echo "${CWARNING}PostgreSQL already installed! ${CEND}"
           unset db_option
@@ -247,7 +247,7 @@ while :; do
         }
       fi
     else
-      echo "${CWARNING}db_option input error! Please only input number 0~17${CEND}"
+      echo "${CWARNING}db_option input error! Please only input number 0~21${CEND}"
       exit 1
     fi
     ;;
@@ -629,12 +629,16 @@ if [ ${ARG_NUM} == 0 ]; then
           echo -e "\t${CMSG}10${CEND}. Install Percona-5.7"
           echo -e "\t${CMSG}11${CEND}. Install Percona-5.6"
           echo -e "\t${CMSG}12${CEND}. Install Percona-5.5"
-          echo -e "\t${CMSG}13${CEND}. Install PostgreSQL"
+          echo -e "\t${CMSG}13${CEND}. Install PostgreSQL-18"
+          echo -e "\t${CMSG}18${CEND}. Install PostgreSQL-17"
+          echo -e "\t${CMSG}19${CEND}. Install PostgreSQL-16"
+          echo -e "\t${CMSG}20${CEND}. Install PostgreSQL-15"
+          echo -e "\t${CMSG}21${CEND}. Install PostgreSQL-14"
           echo -e "\t${CMSG}14${CEND}. Install MongoDB"
           read -e -p "Please input a number:(Default 0 press Enter) " db_option
           db_option=${db_option:-0}
-          if [[ "${db_option}" =~ ^[0-9]$|^1[0-7]$ ]]; then
-            if [ "${db_option}" == '13' ]; then
+          if [[ "${db_option}" =~ ^[0-9]$|^1[0-9]$|^2[0-1]$ ]]; then
+            if [[ "${db_option}" =~ ^13$|^1[8-9]$|^2[0-1]$ ]]; then
               [ -e "${pgsql_install_dir}/bin/psql" ] && { echo "${CWARNING}PostgreSQL already installed! ${CEND}"; unset db_option; break; }
             elif [ "${db_option}" == '14' ]; then
               [ -e "${mongo_install_dir}/bin/mongod" ] && { echo "${CWARNING}MongoDB already installed! ${CEND}"; unset db_option; break; }
@@ -642,7 +646,7 @@ if [ ${ARG_NUM} == 0 ]; then
               [ -d "${db_install_dir}/support-files" ] && { echo "${CWARNING}MySQL already installed! ${CEND}"; unset db_option; break; }
             fi
             while :; do
-              if [ "${db_option}" == '13' ]; then
+              if [[ "${db_option}" =~ ^13$|^1[8-9]$|^2[0-1]$ ]]; then
                 read -e -p "Please input the postgres password of PostgreSQL(default: ${dbpostgrespwd}): " dbpwd
                 dbpwd=${dbpwd:-${dbpostgrespwd}}
               elif [ "${db_option}" == '14' ]; then
@@ -654,7 +658,7 @@ if [ ${ARG_NUM} == 0 ]; then
               fi
               [ -n "`echo ${dbpwd} | grep '[+|&]'`" ] && { echo "${CWARNING}input error,not contain a plus sign (+) and & ${CEND}"; continue; }
               if (( ${#dbpwd} >= 5 )); then
-                if [ "${db_option}" == '13' ]; then
+                if [[ "${db_option}" =~ ^13$|^1[8-9]$|^2[0-1]$ ]]; then
                   dbpostgrespwd=${dbpwd}
                 elif [ "${db_option}" == '14' ]; then
                   dbmongopwd=${dbpwd}
@@ -675,7 +679,10 @@ if [ ${ARG_NUM} == 0 ]; then
               }
               dbinstallmethod=1
               echo "MySQL 9.7 will be installed from the official binary package."
-            elif [[ "${db_option}" =~ ^[0-9]$|^1[0-4]$|^1[6-7]$ ]]; then
+            elif [[ "${db_option}" =~ ^13$|^1[8-9]$|^2[0-1]$ ]]; then
+              dbinstallmethod=2
+              echo "PostgreSQL will be installed from source."
+            elif [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^14$|^1[6-7]$ ]]; then
               while :; do echo
                 echo "Please choose installation of the database:"
                 echo -e "\t${CMSG}1${CEND}. Install database from binary package."
@@ -691,7 +698,7 @@ if [ ${ARG_NUM} == 0 ]; then
             fi
             break
           else
-            echo "${CWARNING}input error! Please only input number 0~17${CEND}"
+            echo "${CWARNING}input error! Please only input number 0~21${CEND}"
           fi
         done
       fi
@@ -1137,7 +1144,14 @@ case "${db_option}" in
     . include/percona-5.5.sh
     Install_Percona55 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
-  13)
+  13|18|19|20|21)
+    case "${db_option}" in
+      13) pgsql_ver=${pgsql18_ver:-${pgsql_ver}} ;;
+      18) pgsql_ver=${pgsql17_ver} ;;
+      19) pgsql_ver=${pgsql16_ver} ;;
+      20) pgsql_ver=${pgsql15_ver} ;;
+      21) pgsql_ver=${pgsql14_ver} ;;
+    esac
     . include/postgresql.sh
     Install_PostgreSQL 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
@@ -1544,10 +1558,10 @@ echo "Total OneinStack Install Time: ${CQUESTION}${installTime}${CEND} minutes"
 [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^1[5-7]$ ]] && echo "$(printf "%-32s" "Database data dir:")${CMSG}${db_data_dir}${CEND}"
 [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^1[5-7]$ ]] && echo "$(printf "%-32s" "Database user:")${CMSG}root${CEND}"
 [[ "${db_option}" =~ ^[0-9]$|^1[0-2]$|^1[5-7]$ ]] && echo "$(printf "%-32s" "Database password:")${CMSG}${dbrootpwd}${CEND}"
-[ "${db_option}" == '13' ] && echo -e "\n$(printf "%-32s" "PostgreSQL install dir:")${CMSG}${pgsql_install_dir}${CEND}"
-[ "${db_option}" == '13' ] && echo "$(printf "%-32s" "PostgreSQL data dir:")${CMSG}${pgsql_data_dir}${CEND}"
-[ "${db_option}" == '13' ] && echo "$(printf "%-32s" "PostgreSQL user:")${CMSG}postgres${CEND}"
-[ "${db_option}" == '13' ] && echo "$(printf "%-32s" "postgres password:")${CMSG}${dbpostgrespwd}${CEND}"
+[[ "${db_option}" =~ ^13$|^1[8-9]$|^2[0-1]$ ]] && echo -e "\n$(printf "%-32s" "PostgreSQL install dir:")${CMSG}${pgsql_install_dir}${CEND}"
+[[ "${db_option}" =~ ^13$|^1[8-9]$|^2[0-1]$ ]] && echo "$(printf "%-32s" "PostgreSQL data dir:")${CMSG}${pgsql_data_dir}${CEND}"
+[[ "${db_option}" =~ ^13$|^1[8-9]$|^2[0-1]$ ]] && echo "$(printf "%-32s" "PostgreSQL user:")${CMSG}postgres${CEND}"
+[[ "${db_option}" =~ ^13$|^1[8-9]$|^2[0-1]$ ]] && echo "$(printf "%-32s" "postgres password:")${CMSG}${dbpostgrespwd}${CEND}"
 [ "${db_option}" == '14' ] && echo -e "\n$(printf "%-32s" "MongoDB install dir:")${CMSG}${mongo_install_dir}${CEND}"
 [ "${db_option}" == '14' ] && echo "$(printf "%-32s" "MongoDB data dir:")${CMSG}${mongo_data_dir}${CEND}"
 [ "${db_option}" == '14' ] && echo "$(printf "%-32s" "MongoDB user:")${CMSG}root${CEND}"

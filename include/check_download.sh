@@ -125,7 +125,7 @@ checkDownload() {
     src_url=https://archive.apache.org/dist/apr/apr-${apr_ver}.tar.gz && Download_src
   fi
 
-  if [[ "${db_option}" =~ ^[0-9]$|^1[0-7]$ ]]; then
+  if [[ "${db_option}" =~ ^[0-9]$|^1[0-9]$|^2[0-1]$ ]]; then
     if [[ "${db_option}" =~ ^[0,1,2,9]$|^10$|^16$ ]] && [ "${dbinstallmethod}" == "2" ]; then
       [[ "${db_option}" =~ ^0$ ]] && boost_ver=${boost_mysql84_ver}
       [[ "${db_option}" =~ ^1$ ]] && boost_ver=${boost_mysql80_ver}
@@ -554,7 +554,14 @@ checkDownload() {
           kill -9 $$; exit 1;
         fi
         ;;
-      13)
+      13|18|19|20|21)
+        case "${db_option}" in
+          13) pgsql_ver=${pgsql18_ver:-${pgsql_ver}} ;;
+          18) pgsql_ver=${pgsql17_ver} ;;
+          19) pgsql_ver=${pgsql16_ver} ;;
+          20) pgsql_ver=${pgsql15_ver} ;;
+          21) pgsql_ver=${pgsql14_ver} ;;
+        esac
         FILE_NAME=postgresql-${pgsql_ver}.tar.gz
         DOWN_ADDR_PGSQL=${mirror_link}/oneinstack/src
         if [ "${OUTIP_STATE}"x == "China"x ]; then
