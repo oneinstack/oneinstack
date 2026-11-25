@@ -8,6 +8,15 @@
 #       https://oneinstack.com
 #       https://github.com/oneinstack/oneinstack
 
+# Keep the version query independent from installation preflight. In
+# particular, check_os.sh may install build dependencies on a minimal system.
+if [ "$#" -eq 1 ] && { [ "$1" = "--version" ] || [ "$1" = "-v" ] || [ "$1" = "-V" ]; }; then
+  oneinstack_dir=$(dirname "$(readlink -f "$0")")
+  . "${oneinstack_dir}/include/oneinstack_version.sh"
+  printf 'version: %s\nupdated date: %s\n' "$ONEINSTACK_VERSION" "$ONEINSTACK_UPDATED_DATE"
+  exit 0
+fi
+
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
 set -o pipefail
 clear
@@ -23,6 +32,7 @@ printf "
 oneinstack_dir=$(dirname "`readlink -f $0`")
 pushd ${oneinstack_dir} > /dev/null
 . ./versions.txt
+. ./include/oneinstack_version.sh
 . ./options.conf
 . ./include/color.sh
 . ./include/check_os.sh
@@ -38,8 +48,8 @@ xcachepwd=`< /dev/urandom tr -dc A-Za-z0-9 | head -c8`
 dbinstallmethod=1
 
 version() {
-  echo "version: 2.8"
-  echo "updated date: 2026-09-17"
+  echo "version: ${ONEINSTACK_VERSION}"
+  echo "updated date: ${ONEINSTACK_UPDATED_DATE}"
 }
 
 

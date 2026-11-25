@@ -168,6 +168,32 @@ systemctl {start|stop|status|restart} clickhouse-server
 ~/oneinstack/upgrade.sh
 ```
 
+Upgrade output is appended to `~/oneinstack/upgrade.log` (mode `0600`). To query
+the project version, host details, and detected component versions:
+
+```bash
+~/oneinstack/info.sh --version
+~/oneinstack/info.sh --host
+~/oneinstack/info.sh --oneinstack
+~/oneinstack/info.sh --all
+```
+
+`~/oneinstack/install.sh --version` reports the same project version.
+
+### Migrate older V2.5/V2.6 installations
+
+Older releases may point to an obsolete upgrade mirror. Run this one-time
+bootstrap as root from the existing installation directory. It verifies the
+download before replacing project files and keeps the values in `options.conf`:
+
+```bash
+cd ~/oneinstack
+curl -fsSL https://raw.githubusercontent.com/oneinstack/oneinstack/main/tools/upgrade_oneinstack_bootstrap.sh -o /tmp/upgrade_oneinstack_bootstrap.sh
+bash /tmp/upgrade_oneinstack_bootstrap.sh --install-dir "$PWD"
+```
+
+After migration, use `~/oneinstack/upgrade.sh` as usual.
+
 ## How to uninstall
 
 ```bash

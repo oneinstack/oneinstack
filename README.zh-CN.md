@@ -165,6 +165,29 @@ systemctl {start|stop|status|restart} clickhouse-server
 ~/oneinstack/upgrade.sh
 ```
 
+升级输出会追加写入 `~/oneinstack/upgrade.log`，权限为 `0600`。查询项目版本、宿主机信息和已检测到的组件版本：
+
+```bash
+~/oneinstack/info.sh --version
+~/oneinstack/info.sh --host
+~/oneinstack/info.sh --oneinstack
+~/oneinstack/info.sh --all
+```
+
+`~/oneinstack/install.sh --version` 与 `info.sh --version` 使用相同的项目版本来源。
+
+### V2.5/V2.6 旧版本迁移
+
+旧版本可能配置了已过时的升级镜像。请以 root 身份在现有安装目录执行一次引导命令。它会先校验下载包，再替换项目文件，并保留 `options.conf` 中已有的配置值：
+
+```bash
+cd ~/oneinstack
+curl -fsSL https://raw.githubusercontent.com/oneinstack/oneinstack/main/tools/upgrade_oneinstack_bootstrap.sh -o /tmp/upgrade_oneinstack_bootstrap.sh
+bash /tmp/upgrade_oneinstack_bootstrap.sh --install-dir "$PWD"
+```
+
+迁移完成后，照常运行 `~/oneinstack/upgrade.sh`。
+
 ## 如何卸载
 
 ```bash

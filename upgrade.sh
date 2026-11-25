@@ -9,7 +9,27 @@
 #       https://github.com/oneinstack/oneinstack
 
 export PATH=/sbin:/bin:/usr/sbin:/usr/bin:/usr/local/sbin:/usr/local/bin
-clear
+oneinstack_dir=$(dirname "$(readlink -f "$0")")
+clear 2>/dev/null || true
+if [ "$(id -u)" != "0" ]; then
+  echo "Error: You must be root to run this script" >&2
+  exit 1
+fi
+umask 077
+upgrade_log="${oneinstack_dir}/upgrade.log"
+touch "${upgrade_log}" || { echo "Unable to create upgrade log: ${upgrade_log}" >&2; exit 1; }
+chmod 600 "${upgrade_log}" || { echo "Unable to secure upgrade log: ${upgrade_log}" >&2; exit 1; }
+exec > >(tee -a "${upgrade_log}") 2>&1
+printf "\n===== upgrade.sh started at %s =====\n" "$(date '+%F %T %z')"
+printf "Upgrade output is being logged to %s\n" "${upgrade_log}"
+upgrade_log_finish() {
+  local status=$?
+  trap - EXIT
+  printf "===== upgrade.sh finished at %s (exit status: %s) =====\n" "$(date '+%F %T %z')" "${status}"
+  exit "${status}"
+}
+trap upgrade_log_finish EXIT
+
 printf "
 #######################################################################
 #       OneinStack for CentOS/RedHat 7+ Debian 9+ and Ubuntu 16+      #
@@ -17,10 +37,6 @@ printf "
 #       For more information please visit https://oneinstack.com      #
 #######################################################################
 "
-# Check if user is root
-[ $(id -u) != "0" ] && { echo "${CFAILURE}Error: You must be root to run this script${CEND}"; exit 1; }
-
-oneinstack_dir=$(dirname "`readlink -f $0`")
 pushd ${oneinstack_dir} > /dev/null
 . ./versions.txt
 . ./options.conf
@@ -132,6 +148,7 @@ while :; do
 done
 
 Menu() {
+  menu_status=0
   while :; do
     printf "
 What Are You Doing?
@@ -152,6 +169,7 @@ What Are You Doing?
 "
     echo
     read -e -p "Please input the correct option: " Upgrade_flag
+    printf 'Selected menu option: %s\n' "${Upgrade_flag}"
     if [[ ! "${Upgrade_flag}" =~ ^[1-9,q]$|^1[0-3]$ ]]; then
       echo "${CWARNING}input error! Please only input 1~13 and q${CEND}"
     else
@@ -193,7 +211,7 @@ What Are You Doing?
           Upgrade_Nodejs
           ;;
         11)
-          Upgrade_OneinStack
+          if Upgrade_OneinStack; then menu_status=0; else menu_status=$?; fi
           ;;
         12)
           if [ -e ~/.acme.sh/acme.sh ]; then
@@ -213,7 +231,7 @@ What Are You Doing?
           ;;
         q)
           type check_os_eol >/dev/null 2>&1 && check_os_eol
-          exit
+          exit "${menu_status}"
           ;;
       esac
     fi
@@ -223,6 +241,7 @@ What Are You Doing?
 if [ ${ARG_NUM} == 0 ]; then
   Menu
 else
+  upgrade_status=0
   [ "${nginx_flag}" == 'y' ] && Upgrade_Nginx
   [ "${tengine_flag}" == 'y' ] && Upgrade_Tengine
   [ "${openresty_flag}" == 'y' ] && Upgrade_OpenResty
@@ -236,7 +255,9 @@ else
   [ "${memcached_flag}" == 'y' ] && Upgrade_Memcached
   [ "${phpmyadmin_flag}" == 'y' ] && Upgrade_phpMyAdmin
   [ "${nodejs_flag}" == 'y' ] && Upgrade_Nodejs
-  [ "${NEW_oneinstack_ver}" == 'latest' ] && Upgrade_OneinStack
+  if [ "${NEW_oneinstack_ver}" == 'latest' ]; then
+    Upgrade_OneinStack || upgrade_status=$?
+  fi
   if [ "${NEW_acme_ver}" == 'latest' ]; then
     if [ -e ~/.acme.sh/acme.sh ]; then
       ~/.acme.sh/acme.sh --force --upgrade; ~/.acme.sh/acme.sh --version;
@@ -251,5 +272,6 @@ else
     fi
   fi
   type check_os_eol >/dev/null 2>&1 && check_os_eol
+  exit "${upgrade_status}"
 fi
 
