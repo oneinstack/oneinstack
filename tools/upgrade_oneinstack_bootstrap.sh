@@ -13,6 +13,7 @@ then the current official CDN and mirror. Existing options.conf values are kept.
 
 For controlled testing, ONEINSTACK_UPGRADE_MIRRORS may contain a space- or
 comma-separated mirror list. Setting it replaces the built-in mirror list.
+ONEINSTACK_UPGRADE_SOURCE_URL overrides the official GitHub source fallback.
 EOF
 }
 
@@ -107,7 +108,7 @@ merge_options() {
 }
 
 validate_archive() {
-  local archive="$1" listing="$2" entry normalized
+  local archive="$1" listing="$2" root="$3" entry normalized
   gzip -t "$archive" >/dev/null 2>&1 || return 1
   tar -tzf "$archive" > "$listing" 2>/dev/null || return 1
   [ -s "$listing" ] || return 1
@@ -115,13 +116,12 @@ validate_archive() {
     normalized=${entry#./}
     [[ "$normalized" == /* ]] && return 1
     [[ "/$normalized/" == *"/../"* ]] && return 1
-    [[ "$normalized" == oneinstack || "$normalized" == oneinstack/* ]] || return 1
+    [[ "$normalized" == "$root" || "$normalized" == "$root/"* ]] || return 1
   done < "$listing"
-  grep -Fxq 'oneinstack/upgrade.sh' "$listing" || grep -Fxq './oneinstack/upgrade.sh' "$listing" || return 1
-  grep -Fxq 'oneinstack/options.conf' "$listing" || grep -Fxq './oneinstack/options.conf' "$listing" || return 1
-  # This marker distinguishes the current package from valid but stale V2.5/V2.6 mirror archives.
-  grep -Fxq 'oneinstack/tools/upgrade_oneinstack_bootstrap.sh' "$listing" || \
-    grep -Fxq './oneinstack/tools/upgrade_oneinstack_bootstrap.sh' "$listing" || return 1
+  grep -Fxq "${root}/upgrade.sh" "$listing" || grep -Fxq "./${root}/upgrade.sh" "$listing" || return 1
+  grep -Fxq "${root}/options.conf" "$listing" || grep -Fxq "./${root}/options.conf" "$listing" || return 1
+  grep -Fxq "${root}/tools/upgrade_oneinstack_bootstrap.sh" "$listing" || \
+    grep -Fxq "./${root}/tools/upgrade_oneinstack_bootstrap.sh" "$listing" || return 1
 }
 
 install_dir=''
@@ -213,6 +213,7 @@ trap cleanup EXIT
 
 selected_md5=''
 selected_archive=''
+selected_root=''
 for mirror in "${unique_mirrors[@]}"; do
   printf 'Checking upgrade mirror: %s\n' "$(display_mirror "$mirror")"
   checksum_file="${tmp_dir}/md5sum.txt"
@@ -239,18 +240,43 @@ for mirror in "${unique_mirrors[@]}"; do
     printf '  Package checksum does not match the checksum from this mirror.\n'
     continue
   fi
-  if ! validate_archive "$archive_file" "${tmp_dir}/archive.list"; then
+  if ! validate_archive "$archive_file" "${tmp_dir}/archive.list" oneinstack; then
     printf '  Package is damaged, unsafe, or is an outdated OneinStack archive.\n'
     continue
   fi
 
   selected_md5=$latest_md5
   selected_archive=$archive_file
+  selected_root=oneinstack
   break
 done
 
 if [ -z "$selected_archive" ]; then
-  fail 'all mirrors failed validation; the installed files were not changed'
+  source_url=${ONEINSTACK_UPGRADE_SOURCE_URL:-https://codeload.github.com/oneinstack/oneinstack/tar.gz/refs/heads/main}
+  source_archive="${tmp_dir}/oneinstack-github-source.tar.gz"
+  source_listing="${tmp_dir}/github-archive.list"
+  printf 'Mirror packages were unavailable or outdated; trying the official GitHub source archive.\n'
+  if fetch_to_file "$source_url" "$source_archive" && [ -s "$source_archive" ] && \
+    gzip -t "$source_archive" >/dev/null 2>&1 && tar -tzf "$source_archive" > "$source_listing" 2>/dev/null; then
+    source_root=$(head -n1 "$source_listing")
+    source_root=${source_root#./}
+    source_root=${source_root%%/*}
+    if [[ "$source_root" =~ ^oneinstack-[A-Za-z0-9._-]+$ ]] && \
+      validate_archive "$source_archive" "$source_listing" "$source_root"; then
+      selected_archive=$source_archive
+      selected_root=$source_root
+      selected_md5=$(md5sum "$selected_archive" | awk '{print tolower($1)}')
+      printf '  GitHub source archive validated (local package MD5: %s).\n' "$selected_md5"
+    else
+      printf '  GitHub source archive is invalid or does not contain the current upgrader.\n'
+    fi
+  else
+    printf '  GitHub source archive download failed or was incomplete.\n'
+  fi
+fi
+
+if [ -z "$selected_archive" ]; then
+  fail 'all mirror and GitHub source downloads failed validation; the installed files were not changed'
   exit 1
 fi
 
@@ -266,9 +292,9 @@ if ! tar -xzf "$selected_archive" -C "$extract_dir" 2>/dev/null; then
   fail 'package extraction failed; the installed files were not changed'
   exit 1
 fi
-[ -d "${extract_dir}/oneinstack" ] || { fail 'package has no oneinstack directory'; exit 1; }
+[ -d "${extract_dir}/${selected_root}" ] || { fail "package has no ${selected_root} directory"; exit 1; }
 
-if ! cp -a "${install_dir}/." "$stage_dir/" || ! cp -a "${extract_dir}/oneinstack/." "$stage_dir/"; then
+if ! cp -a "${install_dir}/." "$stage_dir/" || ! cp -a "${extract_dir}/${selected_root}/." "$stage_dir/"; then
   fail 'could not prepare the updated installation; the installed files were not changed'
   exit 1
 fi
