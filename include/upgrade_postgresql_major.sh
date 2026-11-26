@@ -68,9 +68,9 @@ PostgreSQL_Major_Upgrade() {
   NEW_pgsql_major=$(awk -F. '{if ($1 < 10) print $1 "." $2; else print $1}' <<< "$NEW_pgsql_ver")
 
   case "$NEW_pgsql_ver" in
-    "$pgsql14_ver"|"$pgsql15_ver"|"$pgsql16_ver"|"$pgsql17_ver"|"$pgsql18_ver") ;;
+    "$pgsql14_ver"|"$pgsql15_ver"|"$pgsql16_ver"|"$pgsql17_ver"|"$pgsql18_ver"|"$pgsql19_ver") ;;
     *)
-      echo "${CWARNING}OneinStack currently supports PostgreSQL major upgrades to: $pgsql14_ver, $pgsql15_ver, $pgsql16_ver, $pgsql17_ver, $pgsql18_ver.${CEND}"
+      echo "${CWARNING}OneinStack currently supports PostgreSQL major upgrades to: $pgsql14_ver, $pgsql15_ver, $pgsql16_ver, $pgsql17_ver, $pgsql18_ver, $pgsql19_ver.${CEND}"
       echo "No installation files or database data were changed."
       echo "Official PostgreSQL $NEW_pgsql_major upgrade guide: https://www.postgresql.org/docs/$NEW_pgsql_major/upgrading.html"
       echo "Official pg_upgrade guide: https://www.postgresql.org/docs/$NEW_pgsql_major/pgupgrade.html"

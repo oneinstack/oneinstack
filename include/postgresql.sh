@@ -85,8 +85,8 @@ Install_PostgreSQL() {
   # 配置远程访问
   sed -i 's@^host.*@#&@g' ${pgsql_data_dir}/pg_hba.conf
   sed -i 's@^local.*@#&@g' ${pgsql_data_dir}/pg_hba.conf
-  echo 'local   all             all                                     md5' >> ${pgsql_data_dir}/pg_hba.conf
-  echo 'host    all             all             0.0.0.0/0               md5' >> ${pgsql_data_dir}/pg_hba.conf
+  echo 'local   all             all                                     scram-sha-256' >> ${pgsql_data_dir}/pg_hba.conf
+  echo 'host    all             all             0.0.0.0/0               scram-sha-256' >> ${pgsql_data_dir}/pg_hba.conf
   
   # 允许远程连接
   sed -i "s@^#listen_addresses.*@listen_addresses = '*'@" ${pgsql_data_dir}/postgresql.conf

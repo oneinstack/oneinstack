@@ -53,7 +53,7 @@ Upgrade_PostgreSQL() {
   Latest_pgsql_ver=${pgsql_ver:-${OLD_pgsql_ver}}
   echo
   echo "Current PostgreSQL Version: ${CMSG}${OLD_pgsql_ver}${CEND}"
-  echo "Prepared PostgreSQL major-version targets: ${pgsql14_ver}, ${pgsql15_ver}, ${pgsql16_ver}, ${pgsql17_ver}, ${pgsql18_ver}"
+  echo "Prepared PostgreSQL major-version targets: ${pgsql14_ver}, ${pgsql15_ver}, ${pgsql16_ver}, ${pgsql17_ver}, ${pgsql18_ver}, ${pgsql19_ver}"
   while :; do
     [ "${postgresql_flag}" != 'y' ] && read -e -p "Please input upgrade PostgreSQL Version(default: ${Latest_pgsql_ver}): " NEW_pgsql_ver
     NEW_pgsql_ver=${NEW_pgsql_ver:-${Latest_pgsql_ver}}

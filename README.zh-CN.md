@@ -6,7 +6,7 @@
 - 持续更新，提供交互式安装和自动安装
 - 源码编译安装，采用最新稳定版本，并从官方或高速镜像站点下载
 - 提供多重安全优化
-- 提供多个数据库版本（MySQL-9.7 LTS、MySQL-8.4 LTS、MySQL-8.2、MySQL-8.0、MySQL-5.7、MySQL-5.6、MySQL-5.5、MariaDB-12.3 LTS、MariaDB-11.8 LTS、MariaDB-11.4 LTS、MariaDB-10.11、MariaDB-5.5、Percona-8.0、Percona-5.7、Percona-5.6、Percona-5.5、PostgreSQL-18.7、PostgreSQL-17.12、PostgreSQL-16.16、PostgreSQL-15.20、PostgreSQL-14.25、ClickHouse、MongoDB）
+- 提供多个数据库版本（MySQL-9.7 LTS、MySQL-8.4 LTS、MySQL-8.2、MySQL-8.0、MySQL-5.7、MySQL-5.6、MySQL-5.5、MariaDB-12.3 LTS、MariaDB-11.8 LTS、MariaDB-11.4 LTS、MariaDB-10.11、MariaDB-5.5、Percona-8.4 LTS、Percona-8.0、Percona-5.7、Percona-5.6、Percona-5.5、PostgreSQL-19.0、PostgreSQL-18.7、PostgreSQL-17.12、PostgreSQL-16.16、PostgreSQL-15.20、PostgreSQL-14.25、ClickHouse、MongoDB）
 - 提供多个PHP版本（PHP-8.6、PHP-8.5、PHP-8.4、PHP-8.3、PHP-8.2、PHP-8.1、PHP-8.0、PHP-7.4、PHP-7.3、PHP-7.2、PHP-7.1、PHP-7.0、PHP-5.6、PHP-5.5、PHP-5.4、PHP-5.3）
 - 提供Nginx（原生支持 HTTP/3 & QUIC、OpenSSL 3.5.8）、Tengine、OpenResty、Caddy、Apache和ngx_lua_waf
 - 提供多个Tomcat版本（Tomcat-11、Tomcat-10、Tomcat-9、Tomcat-8、Tomcat-7）
@@ -97,14 +97,14 @@ crontab -l    # 可添加到计划任务，例如每天凌晨1点自动备份
 运行 `~/oneinstack/upgrade.sh`，在菜单中选择 `13` 更新 PostgreSQL；也可以指定版本：
 
 ```bash
-~/oneinstack/upgrade.sh --postgresql 18.7
+~/oneinstack/upgrade.sh --postgresql 19.0
 ```
 
-支持 PostgreSQL 14–18 的已准备版本。主版本升级通过 pg_upgrade 的复制模式执行；升级前会检查兼容性，旧数据目录和旧程序目录会保留。请先单独备份数据库，并确保磁盘有足够空间。
+支持 PostgreSQL 14–19 的已准备版本。主版本升级通过 pg_upgrade 的复制模式执行；升级前会检查兼容性，旧数据目录和旧程序目录会保留。请先单独备份数据库，并确保磁盘有足够空间。
 
-例如，当前为 PostgreSQL 17.x 时，可升级到 18.7：
+例如，当前为 PostgreSQL 18.x 时，可升级到 19.0：
 
-    ~/oneinstack/upgrade.sh --postgresql 18.7
+    ~/oneinstack/upgrade.sh --postgresql 19.0
 
 目标版本不在已准备清单中或兼容性检查失败时，脚本会停止并输出 PostgreSQL 官方升级指引。主版本升级后，请检查扩展与自定义配置，运行 pg_upgrade 生成的后续脚本，并在确认新库正常且已有备份前保留旧目录。PostgreSQL 14.25 已结束官方支持，不建议升级到 14。
 
