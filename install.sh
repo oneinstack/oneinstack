@@ -53,8 +53,8 @@ Show_Help() {
   --apache_mode_option [1-2]  Apache2.4 mode, 1(default): php-fpm, 2: mod_php
   --apache_mpm_option [1-3]   Apache2.4 MPM, 1(default): event, 2: prefork, 3: worker
   --php_option [1-16]         Install PHP version
-  --php_install_method [dnf|source]
-                              PHP install method on DNF-capable systems (default: dnf, auto-fallback to source)
+  --php_install_method [auto|dnf|apt|source]
+                              PHP install method (default: auto, prefers DNF/APT with auto-fallback to source)
   --mphp_ver [53~86]          Install another PHP version (PATH: ${php_install_dir}\${mphp_ver})
   --mphp_addons               Only install another PHP addons
   --phpcache_option [1-4]     Install PHP opcode cache, default: 1 opcache
@@ -159,8 +159,8 @@ while :; do
   --php_install_method)
     php_install_method=$2
     shift 2
-    [[ ! "${php_install_method}" =~ ^(dnf|source)$ ]] && {
-      echo "${CWARNING}php_install_method input error! Please only input 'dnf' or 'source'${CEND}"
+    [[ ! "${php_install_method}" =~ ^(auto|dnf|apt|source)$ ]] && {
+      echo "${CWARNING}php_install_method input error! Please only input 'auto', 'dnf', 'apt' or 'source'${CEND}"
       exit 1
     }
     ;;

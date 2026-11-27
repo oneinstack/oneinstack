@@ -291,20 +291,24 @@ Uninstall_MongoDB() {
   fi
 }
 
-Print_PHP_DNF_Info() {
+Print_PHP_Pkg_Info() {
   local target_dir="$1"
   if [ -f "${target_dir}/.install_method" ]; then
-    local _php_method _remi_pkg
+    local _php_method _remi_pkg _apt_pkg
     _php_method=$(awk -F= '/^method=/{print $2}' "${target_dir}/.install_method" 2>/dev/null)
     _remi_pkg=$(awk -F= '/^remi_pkg=/{print $2}' "${target_dir}/.install_method" 2>/dev/null)
+    _apt_pkg=$(awk -F= '/^apt_pkg=/{print $2}' "${target_dir}/.install_method" 2>/dev/null)
     if [ "${_php_method}" == "dnf" ] && [ -n "${_remi_pkg}" ]; then
       echo "DNF packages: ${_remi_pkg}-php-* ${_remi_pkg}-runtime"
+    elif [ "${_php_method}" == "apt" ] && [ -n "${_apt_pkg}" ]; then
+      echo "APT packages: ${_apt_pkg} ${_apt_pkg}-*"
     fi
   fi
 }
 
-PHP_DNF_Package_Still_In_Use() {
-  local target_pkg="$1"
+PHP_Pkg_Still_In_Use() {
+  local target_method="$1"
+  local target_pkg="$2"
   local d _m _p
   for d in "${php_install_dir}" "${php_install_dir}"53 "${php_install_dir}"54 "${php_install_dir}"55 "${php_install_dir}"56 \
            "${php_install_dir}"70 "${php_install_dir}"71 "${php_install_dir}"72 "${php_install_dir}"73 "${php_install_dir}"74 \
@@ -312,29 +316,52 @@ PHP_DNF_Package_Still_In_Use() {
            "${php_install_dir}"85 "${php_install_dir}"86; do
     [ ! -f "${d}/.install_method" ] && continue
     _m=$(awk -F= '/^method=/{print $2}' "${d}/.install_method" 2>/dev/null)
-    _p=$(awk -F= '/^remi_pkg=/{print $2}' "${d}/.install_method" 2>/dev/null)
-    [ "${_m}" == "dnf" ] && [ "${_p}" == "${target_pkg}" ] && return 0
+    if [ "${target_method}" == "dnf" ]; then
+      _p=$(awk -F= '/^remi_pkg=/{print $2}' "${d}/.install_method" 2>/dev/null)
+    else
+      _p=$(awk -F= '/^apt_pkg=/{print $2}' "${d}/.install_method" 2>/dev/null)
+    fi
+    [ "${_m}" == "${target_method}" ] && [ "${_p}" == "${target_pkg}" ] && return 0
   done
   return 1
 }
 
-Uninstall_PHP_Dir_And_DNF() {
+Uninstall_PHP_Dir_And_Pkg() {
   local target_dir="$1"
   local label="$2"
   local _php_method=""
   local _remi_pkg=""
+  local _apt_pkg=""
+  local _apt_ver=""
   if [ -f "${target_dir}/.install_method" ]; then
     _php_method=$(awk -F= '/^method=/{print $2}' "${target_dir}/.install_method" 2>/dev/null)
     _remi_pkg=$(awk -F= '/^remi_pkg=/{print $2}' "${target_dir}/.install_method" 2>/dev/null)
+    _apt_pkg=$(awk -F= '/^apt_pkg=/{print $2}' "${target_dir}/.install_method" 2>/dev/null)
+    _apt_ver=$(awk -F= '/^apt_ver=/{print $2}' "${target_dir}/.install_method" 2>/dev/null)
   fi
   if [ -e "${target_dir}" ]; then
     rm -rf "${target_dir}"
     if [ "${_php_method}" == "dnf" ] && [ -n "${_remi_pkg}" ] && command -v dnf >/dev/null 2>&1; then
-      if ! PHP_DNF_Package_Still_In_Use "${_remi_pkg}"; then
+      if ! PHP_Pkg_Still_In_Use "dnf" "${_remi_pkg}"; then
         systemctl stop "${_remi_pkg}-php-fpm" >/dev/null 2>&1 || true
         systemctl disable "${_remi_pkg}-php-fpm" >/dev/null 2>&1 || true
         dnf -y remove "${_remi_pkg}-php-*" "${_remi_pkg}-runtime"
         [ ! -d "/opt/remi/${_remi_pkg}" ] && rm -rf "/etc/opt/remi/${_remi_pkg}" "/var/opt/remi/${_remi_pkg}"
+      fi
+    elif [ "${_php_method}" == "apt" ] && [ -n "${_apt_pkg}" ] && command -v apt-get >/dev/null 2>&1; then
+      if ! PHP_Pkg_Still_In_Use "apt" "${_apt_pkg}"; then
+        systemctl stop "${_apt_pkg}-fpm" >/dev/null 2>&1 || true
+        systemctl disable "${_apt_pkg}-fpm" >/dev/null 2>&1 || true
+        [ -x "/etc/init.d/${_apt_pkg}-fpm" ] && { service "${_apt_pkg}-fpm" stop >/dev/null 2>&1 || true; update-rc.d "${_apt_pkg}-fpm" disable >/dev/null 2>&1 || true; }
+        local _apt_installed=""
+        command -v dpkg-query >/dev/null 2>&1 && _apt_installed=$(dpkg-query -W -f='${Package}\n' "${_apt_pkg}" "${_apt_pkg}-*" 2>/dev/null | tr '\n' ' ')
+        if [ -n "${_apt_installed}" ]; then
+          DEBIAN_FRONTEND=noninteractive apt-get -y purge ${_apt_installed}
+        else
+          DEBIAN_FRONTEND=noninteractive apt-get -y purge "${_apt_pkg}" "${_apt_pkg}-*"
+        fi
+        DEBIAN_FRONTEND=noninteractive apt-get -y autoremove
+        [ -n "${_apt_ver}" ] && [ ! -x "/usr/sbin/php-fpm${_apt_ver}" ] && [ ! -x "/usr/bin/php${_apt_ver}" ] && rm -rf "/etc/php/${_apt_ver}"
       fi
     fi
     echo "${CMSG}${label} uninstall completed! ${CEND}"
@@ -343,26 +370,26 @@ Uninstall_PHP_Dir_And_DNF() {
 
 Print_PHP() {
   [ -e "${php_install_dir}" ] && echo ${php_install_dir}
-  Print_PHP_DNF_Info "${php_install_dir}"
+  Print_PHP_Pkg_Info "${php_install_dir}"
   [ -e "/etc/init.d/php-fpm" ] && echo /etc/init.d/php-fpm
   [ -e "/lib/systemd/system/php-fpm.service" ] && echo /lib/systemd/system/php-fpm.service
 }
 
 Print_MPHP() {
   [ -e "${php_install_dir}${mphp_ver}" ] && echo ${php_install_dir}${mphp_ver}
-  Print_PHP_DNF_Info "${php_install_dir}${mphp_ver}"
+  Print_PHP_Pkg_Info "${php_install_dir}${mphp_ver}"
   [ -e "/etc/init.d/php${mphp_ver}-fpm" ] && echo /etc/init.d/php${mphp_ver}-fpm
   [ -e "/lib/systemd/system/php${mphp_ver}-fpm.service" ] && echo /lib/systemd/system/php${mphp_ver}-fpm.service
 }
 
 Print_ALLPHP() {
   [ -e "${php_install_dir}" ] && echo ${php_install_dir}
-  Print_PHP_DNF_Info "${php_install_dir}"
+  Print_PHP_Pkg_Info "${php_install_dir}"
   [ -e "/etc/init.d/php-fpm" ] && echo /etc/init.d/php-fpm
   [ -e "/lib/systemd/system/php-fpm.service" ] && echo /lib/systemd/system/php-fpm.service
   for php_ver in 53 54 55 56 70 71 72 73 74 80 81 82 83 84 85 86; do
     [ -e "${php_install_dir}${php_ver}" ] && echo ${php_install_dir}${php_ver}
-    Print_PHP_DNF_Info "${php_install_dir}${php_ver}"
+    Print_PHP_Pkg_Info "${php_install_dir}${php_ver}"
     [ -e "/etc/init.d/php${php_ver}-fpm" ] && echo /etc/init.d/php${php_ver}-fpm
     [ -e "/lib/systemd/system/php${php_ver}-fpm.service" ] && echo /lib/systemd/system/php${php_ver}-fpm.service
   done
@@ -376,26 +403,26 @@ Uninstall_PHP() {
   [ -e "/etc/init.d/php-fpm" ] && { service php-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php-fpm; }
   [ -e "/lib/systemd/system/php-fpm.service" ] && { systemctl stop php-fpm > /dev/null 2>&1; systemctl disable php-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php-fpm.service; systemctl daemon-reload > /dev/null 2>&1 || true; }
   [ -e "${apache_install_dir}/conf/httpd.conf" ] && [ -n "`grep libphp ${apache_install_dir}/conf/httpd.conf`" ] && sed -i '/libphp/d' ${apache_install_dir}/conf/httpd.conf
-  Uninstall_PHP_Dir_And_DNF "${php_install_dir}" "PHP"
+  Uninstall_PHP_Dir_And_Pkg "${php_install_dir}" "PHP"
   sed -i "s@${php_install_dir}/bin:@@" /etc/profile
 }
 
 Uninstall_MPHP() {
   [ -e "/etc/init.d/php${mphp_ver}-fpm" ] && { service php${mphp_ver}-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php${mphp_ver}-fpm; }
   [ -e "/lib/systemd/system/php${mphp_ver}-fpm.service" ] && { systemctl stop php${mphp_ver}-fpm > /dev/null 2>&1; systemctl disable php${mphp_ver}-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php${mphp_ver}-fpm.service; systemctl daemon-reload > /dev/null 2>&1 || true; }
-  Uninstall_PHP_Dir_And_DNF "${php_install_dir}${mphp_ver}" "PHP${mphp_ver}"
+  Uninstall_PHP_Dir_And_Pkg "${php_install_dir}${mphp_ver}" "PHP${mphp_ver}"
 }
 
 Uninstall_ALLPHP() {
   [ -e "/etc/init.d/php-fpm" ] && { service php-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php-fpm; }
   [ -e "/lib/systemd/system/php-fpm.service" ] && { systemctl stop php-fpm > /dev/null 2>&1; systemctl disable php-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php-fpm.service; }
   [ -e "${apache_install_dir}/conf/httpd.conf" ] && [ -n "`grep libphp ${apache_install_dir}/conf/httpd.conf`" ] && sed -i '/libphp/d' ${apache_install_dir}/conf/httpd.conf
-  Uninstall_PHP_Dir_And_DNF "${php_install_dir}" "PHP"
+  Uninstall_PHP_Dir_And_Pkg "${php_install_dir}" "PHP"
   sed -i "s@${php_install_dir}/bin:@@" /etc/profile
   for php_ver in 53 54 55 56 70 71 72 73 74 80 81 82 83 84 85 86; do
     [ -e "/etc/init.d/php${php_ver}-fpm" ] && { service php${php_ver}-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php${php_ver}-fpm; }
     [ -e "/lib/systemd/system/php${php_ver}-fpm.service" ] && { systemctl stop php${php_ver}-fpm > /dev/null 2>&1; systemctl disable php${php_ver}-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php${php_ver}-fpm.service; }
-    Uninstall_PHP_Dir_And_DNF "${php_install_dir}${php_ver}" "PHP${php_ver}"
+    Uninstall_PHP_Dir_And_Pkg "${php_install_dir}${php_ver}" "PHP${php_ver}"
   done
   systemctl daemon-reload > /dev/null 2>&1 || true
 

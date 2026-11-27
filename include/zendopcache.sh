@@ -14,8 +14,17 @@ Install_ZendOPcache() {
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
-    # Prevent Remi's default 10-opcache.ini from colliding with OneinStack's 02-opcache.ini
+    # Prevent Remi/Debian default 10-opcache.ini from colliding with OneinStack's 02-opcache.ini
     [ -f "${php_install_dir}/etc/php.d/10-opcache.ini" ] && /bin/mv "${php_install_dir}/etc/php.d/10-opcache.ini" "${php_install_dir}/etc/php.d/10-opcache.ini.remi.bak"
+    if [ -f "${php_install_dir}/.install_method" ]; then
+      local _php_method _apt_ver
+      _php_method=$(awk -F= '/^method=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+      _apt_ver=$(awk -F= '/^apt_ver=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+      if [ "${_php_method}" == "apt" ] && [ -n "${_apt_ver}" ]; then
+        command -v phpdismod >/dev/null 2>&1 && phpdismod -v "${_apt_ver}" opcache >/dev/null 2>&1 || true
+        rm -f "/etc/php/${_apt_ver}/fpm/conf.d/"*opcache.ini "/etc/php/${_apt_ver}/cli/conf.d/"*opcache.ini 2>/dev/null || true
+      fi
+    fi
     if [[ "${PHP_main_ver}" =~ ^8\.[5-9]$ ]]; then
       cat > ${php_install_dir}/etc/php.d/02-opcache.ini << EOF
 [opcache]
@@ -108,6 +117,18 @@ Uninstall_ZendOPcache() {
   if [ -f "${php_install_dir}/etc/php.d/10-opcache.ini" ]; then
     /bin/mv "${php_install_dir}/etc/php.d/10-opcache.ini" "${php_install_dir}/etc/php.d/10-opcache.ini.remi.bak"
     removed=1
+  fi
+  if [ -f "${php_install_dir}/.install_method" ]; then
+    local _php_method _apt_ver
+    _php_method=$(awk -F= '/^method=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+    _apt_ver=$(awk -F= '/^apt_ver=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+    if [ "${_php_method}" == "apt" ] && [ -n "${_apt_ver}" ]; then
+      if ls "/etc/php/${_apt_ver}/fpm/conf.d/"*opcache.ini "/etc/php/${_apt_ver}/cli/conf.d/"*opcache.ini >/dev/null 2>&1; then
+        command -v phpdismod >/dev/null 2>&1 && phpdismod -v "${_apt_ver}" opcache >/dev/null 2>&1 || true
+        rm -f "/etc/php/${_apt_ver}/fpm/conf.d/"*opcache.ini "/etc/php/${_apt_ver}/cli/conf.d/"*opcache.ini 2>/dev/null || true
+        removed=1
+      fi
+    fi
   fi
   if [ "${removed}" == "1" ]; then
     echo; echo "${CMSG}PHP opcache module uninstall completed${CEND}"

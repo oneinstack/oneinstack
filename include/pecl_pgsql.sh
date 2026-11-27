@@ -14,16 +14,23 @@ Install_pecl_pgsql() {
       echo "${CSUCCESS}PHP pgsql module is already enabled! ${CEND}"
       return 0
     fi
-    if [ -f "${php_install_dir}/.install_method" ] && command -v dnf >/dev/null 2>&1; then
-      local _php_method _remi_pkg
+    if [ -f "${php_install_dir}/.install_method" ]; then
+      local _php_method _remi_pkg _apt_pkg
       _php_method=$(awk -F= '/^method=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
       _remi_pkg=$(awk -F= '/^remi_pkg=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
-      if [ "${_php_method}" == "dnf" ] && [ -n "${_remi_pkg}" ]; then
+      _apt_pkg=$(awk -F= '/^apt_pkg=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+      if [ "${_php_method}" == "dnf" ] && [ -n "${_remi_pkg}" ] && command -v dnf >/dev/null 2>&1; then
         type PHP_DNF_Build_Repo_Args >/dev/null 2>&1 || . "${oneinstack_dir}/include/php_dnf.sh"
         PHP_DNF_Build_Repo_Args
         dnf -y ${PHP_DNF_REPO_ARGS} install "${_remi_pkg}-php-pgsql" >/dev/null 2>&1 || true
         if ${php_install_dir}/bin/php -m 2>/dev/null | grep -qiw '^pgsql$' && ${php_install_dir}/bin/php -m 2>/dev/null | grep -qiw '^pdo_pgsql$'; then
           echo "${CSUCCESS}PHP pgsql module installed successfully via DNF! ${CEND}"
+          return 0
+        fi
+      elif [ "${_php_method}" == "apt" ] && [ -n "${_apt_pkg}" ] && command -v apt-get >/dev/null 2>&1; then
+        DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends -y install "${_apt_pkg}-pgsql" >/dev/null 2>&1 || true
+        if ${php_install_dir}/bin/php -m 2>/dev/null | grep -qiw '^pgsql$' && ${php_install_dir}/bin/php -m 2>/dev/null | grep -qiw '^pdo_pgsql$'; then
+          echo "${CSUCCESS}PHP pgsql module installed successfully via APT! ${CEND}"
           return 0
         fi
       fi
@@ -59,12 +66,16 @@ Uninstall_pecl_pgsql() {
   if [ -e "${php_install_dir}/etc/php.d/07-pgsql.ini" ]; then
     rm -f ${php_install_dir}/etc/php.d/07-pgsql.ini
     echo; echo "${CMSG}PHP pgsql module uninstall completed${CEND}"
-  elif [ -f "${php_install_dir}/.install_method" ] && command -v dnf >/dev/null 2>&1; then
-    local _php_method _remi_pkg
+  elif [ -f "${php_install_dir}/.install_method" ]; then
+    local _php_method _remi_pkg _apt_pkg
     _php_method=$(awk -F= '/^method=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
     _remi_pkg=$(awk -F= '/^remi_pkg=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
-    if [ "${_php_method}" == "dnf" ] && [ -n "${_remi_pkg}" ] && rpm -q "${_remi_pkg}-php-pgsql" >/dev/null 2>&1; then
+    _apt_pkg=$(awk -F= '/^apt_pkg=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+    if [ "${_php_method}" == "dnf" ] && [ -n "${_remi_pkg}" ] && command -v dnf >/dev/null 2>&1 && rpm -q "${_remi_pkg}-php-pgsql" >/dev/null 2>&1; then
       dnf -y remove "${_remi_pkg}-php-pgsql"
+      echo; echo "${CMSG}PHP pgsql module uninstall completed${CEND}"
+    elif [ "${_php_method}" == "apt" ] && [ -n "${_apt_pkg}" ] && command -v apt-get >/dev/null 2>&1 && dpkg -s "${_apt_pkg}-pgsql" >/dev/null 2>&1; then
+      DEBIAN_FRONTEND=noninteractive apt-get -y purge "${_apt_pkg}-pgsql"
       echo; echo "${CMSG}PHP pgsql module uninstall completed${CEND}"
     else
       echo; echo "${CWARNING}PHP pgsql module does not exist! ${CEND}"

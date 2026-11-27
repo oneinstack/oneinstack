@@ -13,12 +13,14 @@ Upgrade_PHP() {
   [ ! -e "${php_install_dir}" ] && echo "${CWARNING}PHP is not installed on your system! ${CEND}" && exit 1
   OLD_php_ver=`${php_install_dir}/bin/php-config --version`
 
-  # Handle DNF-managed PHP installations via dnf upgrade
-  if [ -f "${php_install_dir}/.install_method" ] && command -v dnf >/dev/null 2>&1; then
-    local _php_method _remi_pkg
+  # Handle DNF or APT-managed PHP installations via system package manager
+  if [ -f "${php_install_dir}/.install_method" ]; then
+    local _php_method _remi_pkg _apt_pkg _apt_ver
     _php_method=$(awk -F= '/^method=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
     _remi_pkg=$(awk -F= '/^remi_pkg=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
-    if [ "${_php_method}" == "dnf" ] && [ -n "${_remi_pkg}" ]; then
+    _apt_pkg=$(awk -F= '/^apt_pkg=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+    _apt_ver=$(awk -F= '/^apt_ver=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+    if [ "${_php_method}" == "dnf" ] && [ -n "${_remi_pkg}" ] && command -v dnf >/dev/null 2>&1; then
       echo
       echo "Current PHP Version: ${CMSG}${OLD_php_ver}${CEND} (DNF package: ${_remi_pkg})"
       if [ "${php_flag}" != 'y' ]; then
@@ -41,6 +43,32 @@ Upgrade_PHP() {
       fi
       systemctl stop "${_remi_pkg}-php-fpm" >/dev/null 2>&1 || true
       systemctl disable "${_remi_pkg}-php-fpm" >/dev/null 2>&1 || true
+      echo "Restarting php-fpm..."
+      systemctl restart php-fpm 2>/dev/null || service php-fpm restart
+      NEW_php_ver=`${php_install_dir}/bin/php-config --version`
+      echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}${OLD_php_ver}${CEND} to ${CWARNING}${NEW_php_ver}${CEND}"
+      popd > /dev/null
+      return 0
+    elif [ "${_php_method}" == "apt" ] && [ -n "${_apt_pkg}" ] && command -v apt-get >/dev/null 2>&1; then
+      echo
+      echo "Current PHP Version: ${CMSG}${OLD_php_ver}${CEND} (APT package: ${_apt_pkg})"
+      if [ "${php_flag}" != 'y' ]; then
+        echo "Press Ctrl+c to cancel or Press any key to upgrade via APT..."
+        char=`get_char`
+      fi
+      DEBIAN_FRONTEND=noninteractive apt-get -y update
+      local _installed_apt_pkgs
+      _installed_apt_pkgs=$(dpkg-query -W -f='${Package}\n' "${_apt_pkg}" "${_apt_pkg}-*" 2>/dev/null | tr '\n' ' ')
+      if [ -n "${_installed_apt_pkgs}" ]; then
+        DEBIAN_FRONTEND=noninteractive apt-get --no-install-recommends -y install --only-upgrade ${_installed_apt_pkgs}
+      fi
+      # Prevent Debian's stock 10-opcache.ini from colliding with OneinStack's 02-opcache.ini after upgrade
+      if [ -n "${_apt_ver}" ] && [ -f "${php_install_dir}/etc/php.d/02-opcache.ini" ]; then
+        command -v phpdismod >/dev/null 2>&1 && phpdismod -v "${_apt_ver}" opcache >/dev/null 2>&1 || true
+        rm -f "/etc/php/${_apt_ver}/fpm/conf.d/"*opcache.ini "/etc/php/${_apt_ver}/cli/conf.d/"*opcache.ini 2>/dev/null || true
+      fi
+      systemctl stop "${_apt_pkg}-fpm" >/dev/null 2>&1 || true
+      systemctl disable "${_apt_pkg}-fpm" >/dev/null 2>&1 || true
       echo "Restarting php-fpm..."
       systemctl restart php-fpm 2>/dev/null || service php-fpm restart
       NEW_php_ver=`${php_install_dir}/bin/php-config --version`

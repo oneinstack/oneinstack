@@ -43,6 +43,15 @@ Uninstall_pecl_fileinfo() {
   elif [ -f "${php_install_dir}/.install_method" ] && [ -e "${php_install_dir}/etc/php.d/20-fileinfo.ini" ]; then
     /bin/mv "${php_install_dir}/etc/php.d/20-fileinfo.ini" "${php_install_dir}/etc/php.d/20-fileinfo.ini.disabled"
     echo; echo "${CMSG}PHP fileinfo module disabled${CEND}"
+  elif [ -f "${php_install_dir}/.install_method" ] && [ "$(awk -F= '/^method=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)" == "apt" ]; then
+    local _apt_ver
+    _apt_ver=$(awk -F= '/^apt_ver=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+    if [ -n "${_apt_ver}" ] && ls "/etc/php/${_apt_ver}/"*/conf.d/*fileinfo.ini >/dev/null 2>&1; then
+      command -v phpdismod >/dev/null 2>&1 && phpdismod -v "${_apt_ver}" fileinfo >/dev/null 2>&1 || rm -f "/etc/php/${_apt_ver}/"*/conf.d/*fileinfo.ini
+      echo; echo "${CMSG}PHP fileinfo module disabled${CEND}"
+    else
+      echo; echo "${CWARNING}PHP fileinfo module does not exist! ${CEND}"
+    fi
   else
     echo; echo "${CWARNING}PHP fileinfo module does not exist! ${CEND}"
   fi

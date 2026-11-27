@@ -624,23 +624,23 @@ checkDownload() {
   fi
 
   # PHP
-  type PHP_DNF_Eligible >/dev/null 2>&1 || . "${oneinstack_dir}/include/php_dnf.sh"
+  type PHP_Pkg_Eligible >/dev/null 2>&1 || . "${oneinstack_dir}/include/php_dnf.sh"
   _primary_php_code=""
   _need_php_common_src=0
   _need_primary_php_src=0
   _need_mphp_src=0
   if [[ "${php_option}" =~ ^[1-9]$|^1[0-6]$ ]]; then
     _primary_php_code=$(PHP_Option_To_Code "${php_option}")
-    if PHP_DNF_Eligible "${_primary_php_code}"; then
-      echo "${CMSG}DNF package manager detected for PHP ${_primary_php_code}; skipping upfront PHP source download (will download automatically if fallback to source is needed).${CEND}"
+    if PHP_Pkg_Eligible "${_primary_php_code}"; then
+      echo "${CMSG}Package manager (DNF/APT) detected for PHP ${_primary_php_code}; skipping upfront PHP source download (will download automatically if fallback to source is needed).${CEND}"
     else
       _need_php_common_src=1
       _need_primary_php_src=1
     fi
   fi
   if [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-6]$ ]]; then
-    if PHP_DNF_Eligible "${mphp_ver}"; then
-      echo "${CMSG}DNF package manager detected for MPHP ${mphp_ver}; skipping upfront PHP source download (will download automatically if fallback to source is needed).${CEND}"
+    if PHP_Pkg_Eligible "${mphp_ver}"; then
+      echo "${CMSG}Package manager (DNF/APT) detected for MPHP ${mphp_ver}; skipping upfront PHP source download (will download automatically if fallback to source is needed).${CEND}"
     else
       _need_php_common_src=1
       _need_mphp_src=1

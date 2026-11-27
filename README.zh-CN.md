@@ -7,7 +7,7 @@
 - 源码编译安装，采用最新稳定版本，并从官方或高速镜像站点下载
 - 提供多重安全优化
 - 提供多个数据库版本（MySQL-9.7 LTS、MySQL-8.4 LTS、MySQL-8.2、MySQL-8.0、MySQL-5.7、MySQL-5.6、MySQL-5.5、MariaDB-12.3 LTS、MariaDB-11.8 LTS、MariaDB-11.4 LTS、MariaDB-10.11、MariaDB-5.5、Percona-8.4 LTS、Percona-8.0、Percona-5.7、Percona-5.6、Percona-5.5、PostgreSQL-19.0、PostgreSQL-18.7、PostgreSQL-17.12、PostgreSQL-16.16、PostgreSQL-15.20、PostgreSQL-14.25、ClickHouse、MongoDB）
-- 提供多个PHP版本（PHP-8.6、PHP-8.5、PHP-8.4、PHP-8.3、PHP-8.2、PHP-8.1、PHP-8.0、PHP-7.4、PHP-7.3、PHP-7.2、PHP-7.1、PHP-7.0、PHP-5.6、PHP-5.5、PHP-5.4、PHP-5.3），在支持 DNF 的 RHEL 8+/Fedora 系统上默认优先使用 DNF（Remi SCL）包管理器安装，失败自动回退到源码编译（可通过 `--php_install_method source` 强制源码编译）
+- 提供多个PHP版本（PHP-8.6、PHP-8.5、PHP-8.4、PHP-8.3、PHP-8.2、PHP-8.1、PHP-8.0、PHP-7.4、PHP-7.3、PHP-7.2、PHP-7.1、PHP-7.0、PHP-5.6、PHP-5.5、PHP-5.4、PHP-5.3），在支持 DNF 的 RHEL 8+/Fedora 系统默认优先使用 DNF（Remi SCL）、在 Debian/Ubuntu 系统默认优先使用 APT（Sury/Ondřej）包管理器安装，失败自动回退到源码编译（可通过 `--php_install_method source` 强制源码编译）
 - 提供Nginx（原生支持 HTTP/3 & QUIC、OpenSSL 3.5.8）、Tengine、OpenResty、Caddy、Apache和ngx_lua_waf
 - 提供多个Tomcat版本（Tomcat-11、Tomcat-10、Tomcat-9、Tomcat-8、Tomcat-7）
 - 提供多个JDK版本（OpenJDK-8、OpenJDK-11、OpenJDK-17、OpenJDK-18）

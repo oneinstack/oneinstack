@@ -32,7 +32,9 @@ PHP_Option_To_Code() {
 # Return 0 if this host + options are eligible for DNF (Remi SCL) PHP installation
 PHP_DNF_Eligible() {
   local ver_code="$1"
-  [ "${php_install_method:-dnf}" == "source" ] && return 1
+  local method="${php_install_method:-auto}"
+  [ "${method}" == "source" ] && return 1
+  [ "${method}" == "apt" ] && return 1
   command -v dnf >/dev/null 2>&1 || return 1
   [ "${Family}" == "rhel" ] || return 1
   [ "${RHEL_ver:-0}" -ge 8 ] 2>/dev/null || return 1
@@ -543,17 +545,34 @@ EOF
   return 0
 }
 
-# Try DNF PHP installation first when eligible; on any failure, download source deps and compile from source
+# Return 0 if this host + options are eligible for either DNF or APT PHP package installation
+PHP_Pkg_Eligible() {
+  local ver_code="$1"
+  type PHP_APT_Eligible >/dev/null 2>&1 || [ ! -f "${oneinstack_dir}/include/php_apt.sh" ] || . "${oneinstack_dir}/include/php_apt.sh"
+  PHP_DNF_Eligible "${ver_code}" && return 0
+  type PHP_APT_Eligible >/dev/null 2>&1 && PHP_APT_Eligible "${ver_code}" && return 0
+  return 1
+}
+
+# Try DNF or APT PHP installation first when eligible; on any failure, download source deps and compile from source
 Install_PHP_With_Fallback() {
   local ver_code="$1"
   local source_script="$2"
   local source_func="$3"
+
+  type PHP_APT_Eligible >/dev/null 2>&1 || [ ! -f "${oneinstack_dir}/include/php_apt.sh" ] || . "${oneinstack_dir}/include/php_apt.sh"
 
   if PHP_DNF_Eligible "${ver_code}"; then
     if Install_PHP_DNF "${ver_code}"; then
       return 0
     fi
     echo "${CWARNING}DNF installation for PHP ${ver_code} failed, falling back to source compilation...${CEND}"
+    Download_PHP_Source_Deps "${ver_code}"
+  elif type PHP_APT_Eligible >/dev/null 2>&1 && PHP_APT_Eligible "${ver_code}"; then
+    if Install_PHP_APT "${ver_code}"; then
+      return 0
+    fi
+    echo "${CWARNING}APT installation for PHP ${ver_code} failed, falling back to source compilation...${CEND}"
     Download_PHP_Source_Deps "${ver_code}"
   fi
 
