@@ -29,6 +29,18 @@ PHP_Option_To_Code() {
   esac
 }
 
+# Return 0 if target Remi PHP packages are already installed on the system (isolation-first guard)
+PHP_DNF_Preexisting_Detected() {
+  local ver_code="$1"
+  local remi_pkg="php${ver_code}"
+  command -v rpm >/dev/null 2>&1 || return 1
+  local pkg
+  for pkg in "${remi_pkg}-php-fpm" "${remi_pkg}-php-cli" "${remi_pkg}-php-common"; do
+    rpm -q "${pkg}" >/dev/null 2>&1 && return 0
+  done
+  return 1
+}
+
 # Return 0 if this host + options are eligible for DNF (Remi SCL) PHP installation
 PHP_DNF_Eligible() {
   local ver_code="$1"
@@ -41,6 +53,7 @@ PHP_DNF_Eligible() {
   [ "${apache_mode_option}" == "2" ] && return 1
   [ -n "${php_modules_options}" ] && return 1
   [[ "${ver_code}" =~ ^(56|7[0-4]|8[0-6])$ ]] || return 1
+  PHP_DNF_Preexisting_Detected "${ver_code}" && return 1
   return 0
 }
 
@@ -170,6 +183,9 @@ PHP_DNF_Rollback() {
     systemctl stop php-fpm >/dev/null 2>&1 || true
     systemctl disable php-fpm >/dev/null 2>&1 || true
     rm -f /lib/systemd/system/php-fpm.service
+    if [ -e "/lib/systemd/system/php-fpm.service.sys.orig" ]; then
+      /bin/mv /lib/systemd/system/php-fpm.service.sys.orig /lib/systemd/system/php-fpm.service
+    fi
     systemctl daemon-reload >/dev/null 2>&1 || true
   else
     rm -f /lib/systemd/system/php-fpm.service
@@ -294,16 +310,20 @@ Download_PHP_Source_Deps() {
 # Install PHP via DNF (Remi SCL) and bridge into ${php_install_dir} for full OneinStack compatibility
 Install_PHP_DNF() {
   local ver_code="$1"
+  local remi_pkg="php${ver_code}"
+
+  if PHP_DNF_Preexisting_Detected "${ver_code}"; then
+    echo "${CWARNING}Pre-existing DNF package (${remi_pkg}) detected; using isolated source build for ${php_install_dir} to keep existing PHP untouched.${CEND}"
+    return 1
+  fi
   PHP_DNF_Eligible "${ver_code}" || return 1
 
-  local remi_pkg="php${ver_code}"
   if PHP_DNF_Remi_Claimed "${remi_pkg}" "${php_install_dir}"; then
     echo "${CWARNING}${remi_pkg} is already managed via DNF by another OneinStack PHP installation; using source build for ${php_install_dir}.${CEND}"
     return 1
   fi
 
   local had_remi_pkg=0
-  rpm -q "${remi_pkg}-php-fpm" >/dev/null 2>&1 && had_remi_pkg=1
 
   # Ensure run_user / run_group exist
   id -g ${run_group} >/dev/null 2>&1
@@ -514,15 +534,24 @@ EOF
     return 1
   fi
 
+  # Preserve any pre-existing non-OneinStack system php-fpm.service (e.g. RHEL stock php-fpm)
+  if [ ! -e "/lib/systemd/system/php-fpm.service_bk" ] && [ -f "/lib/systemd/system/php-fpm.service" ]; then
+    if ! grep -q "${php_install_dir}/sbin/php-fpm" /lib/systemd/system/php-fpm.service 2>/dev/null; then
+      echo "${CWARNING}Detected existing system php-fpm.service; backing up to /lib/systemd/system/php-fpm.service.sys.orig.${CEND}"
+      systemctl stop php-fpm >/dev/null 2>&1 || true
+      [ ! -e "/lib/systemd/system/php-fpm.service.sys.orig" ] && /bin/cp /lib/systemd/system/php-fpm.service /lib/systemd/system/php-fpm.service.sys.orig
+    fi
+  fi
+
   # Install OneinStack systemd unit
   /bin/cp "${oneinstack_dir}/init.d/php-fpm.service" /lib/systemd/system/php-fpm.service
   sed -i "s@/usr/local/php@${php_install_dir}@g" /lib/systemd/system/php-fpm.service
 
-  # Start service immediately only for primary PHP (for mphp, include/mphp.sh rewrites socket & service name first)
+  # Start/restart service immediately only for primary PHP (for mphp, include/mphp.sh rewrites socket & service name first)
   if [ ! -e "/lib/systemd/system/php-fpm.service_bk" ]; then
     systemctl daemon-reload >/dev/null 2>&1 || true
     systemctl enable php-fpm >/dev/null 2>&1 || true
-    systemctl start php-fpm 2>/dev/null || "${php_install_dir}/sbin/php-fpm" --fpm-config "${php_install_dir}/etc/php-fpm.conf"
+    systemctl restart php-fpm 2>/dev/null || "${php_install_dir}/sbin/php-fpm" --fpm-config "${php_install_dir}/etc/php-fpm.conf"
     if ! systemctl is-active --quiet php-fpm 2>/dev/null && [ ! -s "${php_install_dir}/var/run/php-fpm.pid" ]; then
       echo "${CWARNING}Failed to start DNF PHP-FPM service for ${remi_pkg}.${CEND}"
       PHP_DNF_Rollback "${remi_pkg}" "${php_install_dir}" "${had_remi_pkg}"
@@ -574,6 +603,16 @@ Install_PHP_With_Fallback() {
     fi
     echo "${CWARNING}APT installation for PHP ${ver_code} failed, falling back to source compilation...${CEND}"
     Download_PHP_Source_Deps "${ver_code}"
+  else
+    if [ "${php_install_method:-auto}" != "source" ]; then
+      if [ "${Family}" == "rhel" ] && PHP_DNF_Preexisting_Detected "${ver_code}"; then
+        echo "${CWARNING}Pre-existing DNF package (php${ver_code}) detected; using isolated source installation at ${php_install_dir}.${CEND}"
+        Download_PHP_Source_Deps "${ver_code}"
+      elif [[ "${Family}" =~ ^(debian|ubuntu)$ ]] && type PHP_APT_Preexisting_Detected >/dev/null 2>&1 && PHP_APT_Preexisting_Detected "${ver_code}"; then
+        echo "${CWARNING}Pre-existing APT package (php$(PHP_Code_To_Dot "${ver_code}")) detected; using isolated source installation at ${php_install_dir}.${CEND}"
+        Download_PHP_Source_Deps "${ver_code}"
+      fi
+    fi
   fi
 
   . "${source_script}"

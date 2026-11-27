@@ -401,7 +401,12 @@ Print_ALLPHP() {
 
 Uninstall_PHP() {
   [ -e "/etc/init.d/php-fpm" ] && { service php-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php-fpm; }
-  [ -e "/lib/systemd/system/php-fpm.service" ] && { systemctl stop php-fpm > /dev/null 2>&1; systemctl disable php-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php-fpm.service; systemctl daemon-reload > /dev/null 2>&1 || true; }
+  [ -e "/lib/systemd/system/php-fpm.service" ] && { systemctl stop php-fpm > /dev/null 2>&1; systemctl disable php-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php-fpm.service; }
+  if [ -e "/lib/systemd/system/php-fpm.service.sys.orig" ]; then
+    /bin/mv /lib/systemd/system/php-fpm.service.sys.orig /lib/systemd/system/php-fpm.service
+    echo "${CMSG}Restored original system php-fpm.service${CEND}"
+  fi
+  systemctl daemon-reload > /dev/null 2>&1 || true
   [ -e "${apache_install_dir}/conf/httpd.conf" ] && [ -n "`grep libphp ${apache_install_dir}/conf/httpd.conf`" ] && sed -i '/libphp/d' ${apache_install_dir}/conf/httpd.conf
   Uninstall_PHP_Dir_And_Pkg "${php_install_dir}" "PHP"
   sed -i "s@${php_install_dir}/bin:@@" /etc/profile
@@ -416,6 +421,10 @@ Uninstall_MPHP() {
 Uninstall_ALLPHP() {
   [ -e "/etc/init.d/php-fpm" ] && { service php-fpm stop > /dev/null 2>&1; rm -f /etc/init.d/php-fpm; }
   [ -e "/lib/systemd/system/php-fpm.service" ] && { systemctl stop php-fpm > /dev/null 2>&1; systemctl disable php-fpm > /dev/null 2>&1; rm -f /lib/systemd/system/php-fpm.service; }
+  if [ -e "/lib/systemd/system/php-fpm.service.sys.orig" ]; then
+    /bin/mv /lib/systemd/system/php-fpm.service.sys.orig /lib/systemd/system/php-fpm.service
+    echo "${CMSG}Restored original system php-fpm.service${CEND}"
+  fi
   [ -e "${apache_install_dir}/conf/httpd.conf" ] && [ -n "`grep libphp ${apache_install_dir}/conf/httpd.conf`" ] && sed -i '/libphp/d' ${apache_install_dir}/conf/httpd.conf
   Uninstall_PHP_Dir_And_Pkg "${php_install_dir}" "PHP"
   sed -i "s@${php_install_dir}/bin:@@" /etc/profile

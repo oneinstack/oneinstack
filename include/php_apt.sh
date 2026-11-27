@@ -16,6 +16,29 @@ PHP_Code_To_Dot() {
   fi
 }
 
+# Return 0 only when the given Debian/Ubuntu package is actively installed (ignores 'rc' config-only state)
+PHP_APT_Pkg_Installed() {
+  local pkg="$1"
+  command -v dpkg-query >/dev/null 2>&1 || return 1
+  local status
+  status=$(dpkg-query -W -f='${Status}\n' "${pkg}" 2>/dev/null)
+  [ "${status}" == "install ok installed" ]
+}
+
+# Return 0 if target APT PHP packages are already installed on the system (isolation-first guard)
+PHP_APT_Preexisting_Detected() {
+  local ver_code="$1"
+  local apt_ver
+  apt_ver=$(PHP_Code_To_Dot "${ver_code}")
+  [ -z "${apt_ver}" ] && return 1
+  local apt_pkg="php${apt_ver}"
+  local pkg
+  for pkg in "${apt_pkg}-fpm" "${apt_pkg}-cli" "${apt_pkg}-common"; do
+    PHP_APT_Pkg_Installed "${pkg}" && return 0
+  done
+  return 1
+}
+
 # Return 0 if this host + options are eligible for APT PHP installation
 PHP_APT_Eligible() {
   local ver_code="$1"
@@ -27,6 +50,7 @@ PHP_APT_Eligible() {
   [ "${apache_mode_option}" == "2" ] && return 1
   [ -n "${php_modules_options}" ] && return 1
   [[ "${ver_code}" =~ ^(56|7[0-4]|8[0-6])$ ]] || return 1
+  PHP_APT_Preexisting_Detected "${ver_code}" && return 1
   return 0
 }
 
@@ -75,7 +99,7 @@ Ensure_PHP_APT_Repo() {
   apt_ver=$(PHP_Code_To_Dot "${ver_code}")
   local apt_pkg="php${apt_ver}"
 
-  if dpkg -s "${apt_pkg}-fpm" >/dev/null 2>&1 || apt-cache show "${apt_pkg}-fpm" >/dev/null 2>&1; then
+  if PHP_APT_Pkg_Installed "${apt_pkg}-fpm" || apt-cache show "${apt_pkg}-fpm" >/dev/null 2>&1; then
     return 0
   fi
 
@@ -160,6 +184,9 @@ PHP_APT_Rollback() {
     systemctl stop php-fpm >/dev/null 2>&1 || true
     systemctl disable php-fpm >/dev/null 2>&1 || true
     rm -f /lib/systemd/system/php-fpm.service
+    if [ -e "/lib/systemd/system/php-fpm.service.sys.orig" ]; then
+      /bin/mv /lib/systemd/system/php-fpm.service.sys.orig /lib/systemd/system/php-fpm.service
+    fi
     systemctl daemon-reload >/dev/null 2>&1 || true
   else
     rm -f /lib/systemd/system/php-fpm.service
@@ -178,11 +205,15 @@ PHP_APT_Rollback() {
 # Install PHP via APT (Sury/Ondrej) and bridge into ${php_install_dir} for full OneinStack compatibility
 Install_PHP_APT() {
   local ver_code="$1"
-  PHP_APT_Eligible "${ver_code}" || return 1
-
   local apt_ver
   apt_ver=$(PHP_Code_To_Dot "${ver_code}")
   local apt_pkg="php${apt_ver}"
+
+  if PHP_APT_Preexisting_Detected "${ver_code}"; then
+    echo "${CWARNING}Pre-existing APT package (${apt_pkg}) detected; using isolated source build for ${php_install_dir} to keep existing PHP untouched.${CEND}"
+    return 1
+  fi
+  PHP_APT_Eligible "${ver_code}" || return 1
 
   if PHP_APT_Pkg_Claimed "${apt_pkg}" "${php_install_dir}"; then
     echo "${CWARNING}${apt_pkg} is already managed via APT by another OneinStack PHP installation; using source build for ${php_install_dir}.${CEND}"
@@ -190,7 +221,6 @@ Install_PHP_APT() {
   fi
 
   local had_apt_pkg=0
-  dpkg -s "${apt_pkg}-fpm" >/dev/null 2>&1 && had_apt_pkg=1
 
   # Ensure run_user / run_group exist
   id -g ${run_group} >/dev/null 2>&1
@@ -437,15 +467,24 @@ EOF
     return 1
   fi
 
+  # Preserve any pre-existing non-OneinStack system php-fpm.service
+  if [ ! -e "/lib/systemd/system/php-fpm.service_bk" ] && [ -f "/lib/systemd/system/php-fpm.service" ]; then
+    if ! grep -q "${php_install_dir}/sbin/php-fpm" /lib/systemd/system/php-fpm.service 2>/dev/null; then
+      echo "${CWARNING}Detected existing system php-fpm.service; backing up to /lib/systemd/system/php-fpm.service.sys.orig.${CEND}"
+      systemctl stop php-fpm >/dev/null 2>&1 || true
+      [ ! -e "/lib/systemd/system/php-fpm.service.sys.orig" ] && /bin/cp /lib/systemd/system/php-fpm.service /lib/systemd/system/php-fpm.service.sys.orig
+    fi
+  fi
+
   # Install OneinStack systemd unit
   /bin/cp "${oneinstack_dir}/init.d/php-fpm.service" /lib/systemd/system/php-fpm.service
   sed -i "s@/usr/local/php@${php_install_dir}@g" /lib/systemd/system/php-fpm.service
 
-  # Start service immediately only for primary PHP (for mphp, include/mphp.sh rewrites socket & service name first)
+  # Start/restart service immediately only for primary PHP (for mphp, include/mphp.sh rewrites socket & service name first)
   if [ ! -e "/lib/systemd/system/php-fpm.service_bk" ]; then
     systemctl daemon-reload >/dev/null 2>&1 || true
     systemctl enable php-fpm >/dev/null 2>&1 || true
-    systemctl start php-fpm 2>/dev/null || "${php_install_dir}/sbin/php-fpm" --fpm-config "${php_install_dir}/etc/php-fpm.conf"
+    systemctl restart php-fpm 2>/dev/null || "${php_install_dir}/sbin/php-fpm" --fpm-config "${php_install_dir}/etc/php-fpm.conf"
     if ! systemctl is-active --quiet php-fpm 2>/dev/null && [ ! -s "${php_install_dir}/var/run/php-fpm.pid" ]; then
       echo "${CWARNING}Failed to start APT PHP-FPM service for ${apt_pkg}.${CEND}"
       PHP_APT_Rollback "${apt_pkg}" "${php_install_dir}" "${had_apt_pkg}"
