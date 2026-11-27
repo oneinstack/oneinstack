@@ -14,6 +14,8 @@ Install_ZendOPcache() {
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
     PHP_main_ver=${PHP_detail_ver%.*}
+    # Prevent Remi's default 10-opcache.ini from colliding with OneinStack's 02-opcache.ini
+    [ -f "${php_install_dir}/etc/php.d/10-opcache.ini" ] && /bin/mv "${php_install_dir}/etc/php.d/10-opcache.ini" "${php_install_dir}/etc/php.d/10-opcache.ini.remi.bak"
     if [[ "${PHP_main_ver}" =~ ^8\.[5-9]$ ]]; then
       cat > ${php_install_dir}/etc/php.d/02-opcache.ini << EOF
 [opcache]
@@ -98,8 +100,16 @@ EOF
 }
 
 Uninstall_ZendOPcache() {
+  local removed=0
   if [ -e "${php_install_dir}/etc/php.d/02-opcache.ini" ]; then
     rm -f ${php_install_dir}/etc/php.d/02-opcache.ini
+    removed=1
+  fi
+  if [ -f "${php_install_dir}/etc/php.d/10-opcache.ini" ]; then
+    /bin/mv "${php_install_dir}/etc/php.d/10-opcache.ini" "${php_install_dir}/etc/php.d/10-opcache.ini.remi.bak"
+    removed=1
+  fi
+  if [ "${removed}" == "1" ]; then
     echo; echo "${CMSG}PHP opcache module uninstall completed${CEND}"
   else
     echo; echo "${CWARNING}PHP opcache module does not exist! ${CEND}"

@@ -624,85 +624,36 @@ checkDownload() {
   fi
 
   # PHP
-  if [[ "${php_option}" =~ ^[1-9]$|^1[0-6]$ ]] || [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-6]$ ]]; then
-    echo "PHP common..."
-    src_url=${mirror_link}/oneinstack/src/libiconv-${libiconv_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/curl-${curl_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/mhash-${mhash_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libmcrypt-${libmcrypt_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/mcrypt-${mcrypt_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/freetype-${freetype_ver}.tar.gz && Download_src
+  type PHP_DNF_Eligible >/dev/null 2>&1 || . "${oneinstack_dir}/include/php_dnf.sh"
+  _primary_php_code=""
+  _need_php_common_src=0
+  _need_primary_php_src=0
+  _need_mphp_src=0
+  if [[ "${php_option}" =~ ^[1-9]$|^1[0-6]$ ]]; then
+    _primary_php_code=$(PHP_Option_To_Code "${php_option}")
+    if PHP_DNF_Eligible "${_primary_php_code}"; then
+      echo "${CMSG}DNF package manager detected for PHP ${_primary_php_code}; skipping upfront PHP source download (will download automatically if fallback to source is needed).${CEND}"
+    else
+      _need_php_common_src=1
+      _need_primary_php_src=1
+    fi
   fi
-
-  if [ "${php_option}" == '1' ] || [ "${mphp_ver}" == '53' ]; then
-    src_url=${mirror_link}/oneinstack/src/debian_patches_disable_SSLv2_for_openssl_1_0_0.patch && Download_src
-    src_url=${mirror_link}/oneinstack/src/php5.3patch && Download_src
-    src_url=https://www.php.net/distributions/php-${php53_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/fpm-race-condition.patch && Download_src
-  elif [ "${php_option}" == '2' ] || [ "${mphp_ver}" == '54' ]; then
-    src_url=https://www.php.net/distributions/php-${php54_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/fpm-race-condition.patch && Download_src
-  elif [ "${php_option}" == '3' ] || [ "${mphp_ver}" == '55' ]; then
-    src_url=https://www.php.net/distributions/php-${php55_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/fpm-race-condition.patch && Download_src
-  elif [ "${php_option}" == '4' ] || [ "${mphp_ver}" == '56' ]; then
-    src_url=https://www.php.net/distributions/php-${php56_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '5' ] || [ "${mphp_ver}" == '70' ]; then
-    src_url=https://www.php.net/distributions/php-${php70_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '6' ] || [ "${mphp_ver}" == '71' ]; then
-    src_url=https://www.php.net/distributions/php-${php71_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '7' ] || [ "${mphp_ver}" == '72' ]; then
-    src_url=${mirror_link}/oneinstack/src/php-${php72_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '8' ] || [ "${mphp_ver}" == '73' ]; then
-    src_url=${mirror_link}/oneinstack/src/php-${php73_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/php-7.3-CVE-2026-1119.patch && Download_src
-    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '9' ] || [ "${mphp_ver}" == '74' ]; then
-    src_url=${mirror_link}/oneinstack/src/php-${php74_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/php-7.4-CVE-2026-109618-109619.patch && Download_src
-    src_url=${mirror_link}/oneinstack/src/php-7.4-CVE-2026-1119.patch && Download_src
-    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '10' ] || [ "${mphp_ver}" == '80' ]; then
-    src_url=${mirror_link}/oneinstack/src/php-${php80_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '11' ] || [ "${mphp_ver}" == '81' ]; then
-    src_url=${mirror_link}/oneinstack/src/php-${php81_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/php-8.1-CVE-2026-109618-109619.patch && Download_src
-    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '12' ] || [ "${mphp_ver}" == '82' ]; then
-    src_url=${mirror_link}/oneinstack/src/php-${php82_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_up_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '13' ] || [ "${mphp_ver}" == '83' ]; then
-    src_url=${mirror_link}/oneinstack/src/php-${php83_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_up_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '14' ] || [ "${mphp_ver}" == '84' ]; then
-    src_url=${mirror_link}/oneinstack/src/php-${php84_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_up_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '15' ] || [ "${mphp_ver}" == '85' ]; then
-    src_url=${mirror_link}/oneinstack/src/php-${php85_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_up_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
-  elif [ "${php_option}" == '16' ] || [ "${mphp_ver}" == '86' ]; then
-    src_url=${mirror_link}/oneinstack/src/php-${php86_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/argon2-${argon2_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libsodium-${libsodium_up_ver}.tar.gz && Download_src
-    src_url=${mirror_link}/oneinstack/src/libzip-${libzip_ver}.tar.gz && Download_src
+  if [[ "${mphp_ver}" =~ ^5[3-6]$|^7[0-4]$|^8[0-6]$ ]]; then
+    if PHP_DNF_Eligible "${mphp_ver}"; then
+      echo "${CMSG}DNF package manager detected for MPHP ${mphp_ver}; skipping upfront PHP source download (will download automatically if fallback to source is needed).${CEND}"
+    else
+      _need_php_common_src=1
+      _need_mphp_src=1
+    fi
+  fi
+  if [ "${_need_php_common_src}" -eq 1 ]; then
+    Download_PHP_Common_Src
+  fi
+  if [ "${_need_primary_php_src}" -eq 1 ]; then
+    Download_PHP_Version_Src "${_primary_php_code}"
+  fi
+  if [ "${_need_mphp_src}" -eq 1 ] && [ "${mphp_ver}" != "${_primary_php_code}" ]; then
+    Download_PHP_Version_Src "${mphp_ver}"
   fi
 
   # PHP OPCache

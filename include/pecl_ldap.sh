@@ -10,6 +10,24 @@
 
 Install_pecl_ldap() {
   if [ -e "${php_install_dir}/bin/phpize" ]; then
+    if ${php_install_dir}/bin/php -m 2>/dev/null | grep -qiw '^ldap$'; then
+      echo "${CSUCCESS}PHP ldap module is already enabled! ${CEND}"
+      return 0
+    fi
+    if [ -f "${php_install_dir}/.install_method" ] && command -v dnf >/dev/null 2>&1; then
+      local _php_method _remi_pkg
+      _php_method=$(awk -F= '/^method=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+      _remi_pkg=$(awk -F= '/^remi_pkg=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+      if [ "${_php_method}" == "dnf" ] && [ -n "${_remi_pkg}" ]; then
+        type PHP_DNF_Build_Repo_Args >/dev/null 2>&1 || . "${oneinstack_dir}/include/php_dnf.sh"
+        PHP_DNF_Build_Repo_Args
+        dnf -y ${PHP_DNF_REPO_ARGS} install "${_remi_pkg}-php-ldap" >/dev/null 2>&1 || true
+        if ${php_install_dir}/bin/php -m 2>/dev/null | grep -qiw '^ldap$'; then
+          echo "${CSUCCESS}PHP ldap module installed successfully via DNF! ${CEND}"
+          return 0
+        fi
+      fi
+    fi
     pushd ${oneinstack_dir}/src > /dev/null
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
@@ -46,6 +64,16 @@ Uninstall_pecl_ldap() {
   if [ -e "${php_install_dir}/etc/php.d/04-ldap.ini" ]; then
     rm -f ${php_install_dir}/etc/php.d/04-ldap.ini
     echo; echo "${CMSG}PHP ldap module uninstall completed${CEND}"
+  elif [ -f "${php_install_dir}/.install_method" ] && command -v dnf >/dev/null 2>&1; then
+    local _php_method _remi_pkg
+    _php_method=$(awk -F= '/^method=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+    _remi_pkg=$(awk -F= '/^remi_pkg=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+    if [ "${_php_method}" == "dnf" ] && [ -n "${_remi_pkg}" ] && rpm -q "${_remi_pkg}-php-ldap" >/dev/null 2>&1; then
+      dnf -y remove "${_remi_pkg}-php-ldap"
+      echo; echo "${CMSG}PHP ldap module uninstall completed${CEND}"
+    else
+      echo; echo "${CWARNING}PHP ldap module does not exist! ${CEND}"
+    fi
   else
     echo; echo "${CWARNING}PHP ldap module does not exist! ${CEND}"
   fi

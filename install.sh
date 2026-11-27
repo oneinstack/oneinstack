@@ -53,6 +53,8 @@ Show_Help() {
   --apache_mode_option [1-2]  Apache2.4 mode, 1(default): php-fpm, 2: mod_php
   --apache_mpm_option [1-3]   Apache2.4 MPM, 1(default): event, 2: prefork, 3: worker
   --php_option [1-16]         Install PHP version
+  --php_install_method [dnf|source]
+                              PHP install method on DNF-capable systems (default: dnf, auto-fallback to source)
   --mphp_ver [53~86]          Install another PHP version (PATH: ${php_install_dir}\${mphp_ver})
   --mphp_addons               Only install another PHP addons
   --phpcache_option [1-4]     Install PHP opcode cache, default: 1 opcache
@@ -80,7 +82,7 @@ Show_Help() {
   "
 }
 ARG_NUM=$#
-TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbclickhousepwd:,dbinstallmethod:,pureftpd,redis,valkey,memcached,clickhouse,phpmyadmin,ssh_port:,firewall,md5sum,reboot -- "$@" 2>/dev/null`
+TEMP=`getopt -o hvV --long help,version,nginx_option:,apache,apache_mode_option:,apache_mpm_option:,php_option:,php_install_method:,mphp_ver:,mphp_addons,phpcache_option:,php_extensions:,nodejs,tomcat_option:,jdk_option:,db_option:,dbrootpwd:,dbclickhousepwd:,dbinstallmethod:,pureftpd,redis,valkey,memcached,clickhouse,phpmyadmin,ssh_port:,firewall,md5sum,reboot -- "$@" 2>/dev/null`
 [ $? != 0 ] && echo "${CWARNING}ERROR: unknown argument! ${CEND}" && Show_Help && exit 1
 eval set -- "${TEMP}"
 while :; do
@@ -152,6 +154,14 @@ while :; do
     [ -e "${php_install_dir}/bin/phpize" ] && {
       echo "${CWARNING}PHP already installed! ${CEND}"
       unset php_option
+    }
+    ;;
+  --php_install_method)
+    php_install_method=$2
+    shift 2
+    [[ ! "${php_install_method}" =~ ^(dnf|source)$ ]] && {
+      echo "${CWARNING}php_install_method input error! Please only input 'dnf' or 'source'${CEND}"
+      exit 1
     }
     ;;
   --mphp_ver)
@@ -1197,70 +1207,55 @@ if [ "${apache_flag}" == 'y' ]; then
 fi
 
 # PHP
+. include/php_dnf.sh
 case "${php_option}" in
   1)
-    . include/php-5.3.sh
-    Install_PHP53 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 53 include/php-5.3.sh Install_PHP53 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   2)
-    . include/php-5.4.sh
-    Install_PHP54 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 54 include/php-5.4.sh Install_PHP54 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   3)
-    . include/php-5.5.sh
-    Install_PHP55 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 55 include/php-5.5.sh Install_PHP55 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   4)
-    . include/php-5.6.sh
-    Install_PHP56 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 56 include/php-5.6.sh Install_PHP56 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   5)
-    . include/php-7.0.sh
-    Install_PHP70 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 70 include/php-7.0.sh Install_PHP70 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   6)
-    . include/php-7.1.sh
-    Install_PHP71 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 71 include/php-7.1.sh Install_PHP71 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   7)
-    . include/php-7.2.sh
-    Install_PHP72 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 72 include/php-7.2.sh Install_PHP72 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   8)
-    . include/php-7.3.sh
-    Install_PHP73 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 73 include/php-7.3.sh Install_PHP73 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   9)
-    . include/php-7.4.sh
-    Install_PHP74 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 74 include/php-7.4.sh Install_PHP74 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   10)
-    . include/php-8.0.sh
-    Install_PHP80 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 80 include/php-8.0.sh Install_PHP80 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   11)
-    . include/php-8.1.sh
-    Install_PHP81 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 81 include/php-8.1.sh Install_PHP81 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   12)
-    . include/php-8.2.sh
-    Install_PHP82 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 82 include/php-8.2.sh Install_PHP82 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   13)
-    . include/php-8.3.sh
-    Install_PHP83 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 83 include/php-8.3.sh Install_PHP83 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   14)
-    . include/php-8.4.sh
-    Install_PHP84 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 84 include/php-8.4.sh Install_PHP84 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   15)
-    . include/php-8.5.sh
-    Install_PHP85 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 85 include/php-8.5.sh Install_PHP85 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
   16)
-    . include/php-8.6.sh
-    Install_PHP86 2>&1 | tee -a ${oneinstack_dir}/install.log
+    Install_PHP_With_Fallback 86 include/php-8.6.sh Install_PHP86 2>&1 | tee -a ${oneinstack_dir}/install.log
     ;;
 esac
 

@@ -12,6 +12,44 @@ Upgrade_PHP() {
   pushd ${oneinstack_dir}/src > /dev/null
   [ ! -e "${php_install_dir}" ] && echo "${CWARNING}PHP is not installed on your system! ${CEND}" && exit 1
   OLD_php_ver=`${php_install_dir}/bin/php-config --version`
+
+  # Handle DNF-managed PHP installations via dnf upgrade
+  if [ -f "${php_install_dir}/.install_method" ] && command -v dnf >/dev/null 2>&1; then
+    local _php_method _remi_pkg
+    _php_method=$(awk -F= '/^method=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+    _remi_pkg=$(awk -F= '/^remi_pkg=/{print $2}' "${php_install_dir}/.install_method" 2>/dev/null)
+    if [ "${_php_method}" == "dnf" ] && [ -n "${_remi_pkg}" ]; then
+      echo
+      echo "Current PHP Version: ${CMSG}${OLD_php_ver}${CEND} (DNF package: ${_remi_pkg})"
+      if [ "${php_flag}" != 'y' ]; then
+        echo "Press Ctrl+c to cancel or Press any key to upgrade via DNF..."
+        char=`get_char`
+      fi
+      type PHP_DNF_Build_Repo_Args >/dev/null 2>&1 || . "${oneinstack_dir}/include/php_dnf.sh"
+      PHP_DNF_Build_Repo_Args
+      dnf -y ${PHP_DNF_REPO_ARGS} upgrade "${_remi_pkg}-php-*"
+      # Refresh binary symlinks and prevent Remi's 10-opcache.ini from colliding with 02-opcache.ini
+      local _remi_root="/opt/remi/${_remi_pkg}/root"
+      local _remi_etc="/etc/opt/remi/${_remi_pkg}"
+      local _bin_item
+      for _bin_item in "${_remi_root}/usr/bin/"*; do
+        [ -e "${_bin_item}" ] && ln -sfn "${_bin_item}" "${php_install_dir}/bin/$(basename "${_bin_item}")"
+      done
+      [ -e "${_remi_root}/usr/sbin/php-fpm" ] && ln -sfn "${_remi_root}/usr/sbin/php-fpm" "${php_install_dir}/sbin/php-fpm"
+      if [ -f "${_remi_etc}/php.d/02-opcache.ini" ] && [ -f "${_remi_etc}/php.d/10-opcache.ini" ]; then
+        /bin/mv "${_remi_etc}/php.d/10-opcache.ini" "${_remi_etc}/php.d/10-opcache.ini.remi.bak"
+      fi
+      systemctl stop "${_remi_pkg}-php-fpm" >/dev/null 2>&1 || true
+      systemctl disable "${_remi_pkg}-php-fpm" >/dev/null 2>&1 || true
+      echo "Restarting php-fpm..."
+      systemctl restart php-fpm 2>/dev/null || service php-fpm restart
+      NEW_php_ver=`${php_install_dir}/bin/php-config --version`
+      echo "You have ${CMSG}successfully${CEND} upgrade from ${CWARNING}${OLD_php_ver}${CEND} to ${CWARNING}${NEW_php_ver}${CEND}"
+      popd > /dev/null
+      return 0
+    fi
+  fi
+
   php_branch_ver=$(echo ${OLD_php_ver%.*} | tr -d '.')
   eval default_php_ver="\${php${php_branch_ver}_ver}"
   pythonCtl=python

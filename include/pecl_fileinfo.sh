@@ -10,6 +10,10 @@
 
 Install_pecl_fileinfo() {
   if [ -e "${php_install_dir}/bin/phpize" ]; then
+    if ${php_install_dir}/bin/php -m 2>/dev/null | grep -qiw '^fileinfo$'; then
+      echo "${CSUCCESS}PHP fileinfo module is already enabled! ${CEND}"
+      return 0
+    fi
     pushd ${oneinstack_dir}/src > /dev/null
     phpExtensionDir=$(${php_install_dir}/bin/php-config --extension-dir)
     PHP_detail_ver=$(${php_install_dir}/bin/php-config --version)
@@ -36,6 +40,9 @@ Uninstall_pecl_fileinfo() {
   if [ -e "${php_install_dir}/etc/php.d/04-fileinfo.ini" ]; then
     rm -f ${php_install_dir}/etc/php.d/04-fileinfo.ini
     echo; echo "${CMSG}PHP fileinfo module uninstall completed${CEND}"
+  elif [ -f "${php_install_dir}/.install_method" ] && [ -e "${php_install_dir}/etc/php.d/20-fileinfo.ini" ]; then
+    /bin/mv "${php_install_dir}/etc/php.d/20-fileinfo.ini" "${php_install_dir}/etc/php.d/20-fileinfo.ini.disabled"
+    echo; echo "${CMSG}PHP fileinfo module disabled${CEND}"
   else
     echo; echo "${CWARNING}PHP fileinfo module does not exist! ${CEND}"
   fi
